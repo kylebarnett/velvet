@@ -33,7 +33,13 @@ const signupSchema = loginSchema
 
 type Mode = "login" | "signup";
 
-export function AuthCard({ mode }: { mode: Mode }) {
+type Props = {
+  mode: Mode;
+  inviteToken?: string;
+  companyName?: string;
+};
+
+export function AuthCard({ mode, inviteToken, companyName }: Props) {
   const [error, setError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -84,6 +90,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
           fullName: values.fullName,
           companyName: values.companyName,
           companyWebsite: values.companyWebsite,
+          inviteToken: inviteToken || undefined,
         }),
       });
       const json = await res.json().catch(() => null);
@@ -105,7 +112,9 @@ export function AuthCard({ mode }: { mode: Mode }) {
         <p className="text-sm text-white/60">
           {mode === "login"
             ? "Log in to access your dashboard."
-            : "Sign up to start collecting metrics."}
+            : inviteToken && companyName
+              ? `Join ${companyName} on Velvet.`
+              : "Sign up to start collecting metrics."}
         </p>
       </div>
 
@@ -172,7 +181,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
           )}
         </div>
 
-        {mode === "signup" && (
+        {mode === "signup" && !inviteToken && (
           <div className="grid gap-2">
             <label className="text-sm text-white/70" htmlFor="role">
               I am a
@@ -193,7 +202,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
           </div>
         )}
 
-        {mode === "signup" && watchedRole === "founder" && (
+        {mode === "signup" && !inviteToken && watchedRole === "founder" && (
           <>
             <div className="grid gap-2">
               <label className="text-sm text-white/70" htmlFor="companyName">
