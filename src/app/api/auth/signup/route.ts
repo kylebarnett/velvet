@@ -31,6 +31,11 @@ export async function POST(request: NextRequest) {
   });
   if (error) return jsonError(error.message, 400);
 
+  // Check for duplicate email (Supabase returns empty identities array for existing emails)
+  if (data.user && data.user.identities?.length === 0) {
+    return jsonError("An account with this email already exists.", 400);
+  }
+
   // Create company record for founders
   if (role === "founder" && companyName && data.user) {
     const adminClient = createSupabaseAdminClient();
