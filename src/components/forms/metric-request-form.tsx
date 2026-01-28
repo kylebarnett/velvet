@@ -16,9 +16,37 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+type Company = {
+  id: string;
+  name: string;
+};
+
 export function MetricRequestForm() {
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
+  const [companies, setCompanies] = React.useState<Company[]>([]);
+
+  React.useEffect(() => {
+    async function loadCompanies() {
+      try {
+        const res = await fetch("/api/investors/companies");
+        const json = await res.json().catch(() => null);
+        if (json?.companies) {
+          setCompanies(json.companies);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadCompanies();
+  }, []);
+
+  React.useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -73,8 +101,12 @@ export function MetricRequestForm() {
             className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
             {...form.register("companyId")}
           >
-            <option value="">Select…</option>
-            <option value="demo-company">Demo company (placeholder)</option>
+            <option value="">Select...</option>
+            {companies.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
           </select>
           <FieldError name="companyId" />
         </div>
@@ -165,10 +197,9 @@ export function MetricRequestForm() {
           disabled={form.formState.isSubmitting}
           type="submit"
         >
-          {form.formState.isSubmitting ? "Creating…" : "Create request"}
+          {form.formState.isSubmitting ? "Creating..." : "Create request"}
         </button>
       </div>
     </form>
   );
 }
-

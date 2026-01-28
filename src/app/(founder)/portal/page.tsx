@@ -1,6 +1,52 @@
 import Link from "next/link";
 
-export default function FounderPortalPage() {
+import { requireRole } from "@/lib/auth/require-role";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
+
+export default async function FounderPortalPage() {
+  const user = await requireRole("founder");
+  const supabase = await createSupabaseServerClient();
+
+  // Get founder's company
+  const { data: company } = await supabase
+    .from("companies")
+    .select("id")
+    .eq("founder_id", user.id)
+    .single();
+
+  let pendingCount = 0;
+  let submittedCount = 0;
+  let documentsCount = 0;
+
+  if (company) {
+    // Count pending metric requests (from approved investors only, via RLS)
+    const { count: pending } = await supabase
+      .from("metric_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", company.id)
+      .eq("status", "pending");
+    pendingCount = pending ?? 0;
+
+    // Count submitted metric values this month
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const { count: submitted } = await supabase
+      .from("company_metric_values")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", company.id)
+      .gte("submitted_at", monthStart);
+    submittedCount = submitted ?? 0;
+
+    // Count documents
+    const { count: docs } = await supabase
+      .from("documents")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", company.id);
+    documentsCount = docs ?? 0;
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -12,9 +58,9 @@ export default function FounderPortalPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         {[
-          { label: "Pending requests", value: "—" },
-          { label: "Submitted this month", value: "—" },
-          { label: "Documents uploaded", value: "—" },
+          { label: "Pending requests", value: String(pendingCount) },
+          { label: "Submitted this month", value: String(submittedCount) },
+          { label: "Documents uploaded", value: String(documentsCount) },
         ].map((card) => (
           <div
             key={card.label}
@@ -53,4 +99,3 @@ export default function FounderPortalPage() {
     </div>
   );
 }
-

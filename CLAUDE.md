@@ -210,3 +210,9 @@ SELECT delete_user_by_email('user@example.com');
 
 ### Race Condition Handling
 When creating users, wait for the `public.users` trigger to complete before updating related tables that reference it.
+
+## Production Checklist
+
+- [ ] **Re-enable email confirmation** in Supabase (Authentication → Providers → Email → toggle on "Confirm email"). Currently disabled for development.
+- [ ] Verify a custom domain in Resend (replace `onboarding@resend.dev`)
+- [ ] Set `NEXT_PUBLIC_APP_URL` to the production domain

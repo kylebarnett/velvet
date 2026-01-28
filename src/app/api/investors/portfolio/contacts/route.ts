@@ -125,10 +125,18 @@ export async function DELETE(req: Request) {
     .eq("company_id", invitation.company_id)
     .eq("investor_id", user.id);
 
-  // Only delete company if no founder has signed up yet
-  const company = invitation.companies as { founder_id: string | null } | null;
+  // Only delete company if no founder has signed up AND no other investors are linked
+  const companiesRaw = invitation.companies;
+  const company = (Array.isArray(companiesRaw) ? companiesRaw[0] : companiesRaw) as { founder_id: string | null } | null;
   if (!company?.founder_id) {
-    await adminClient.from("companies").delete().eq("id", invitation.company_id);
+    const { count } = await adminClient
+      .from("investor_company_relationships")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", invitation.company_id);
+
+    if (!count || count === 0) {
+      await adminClient.from("companies").delete().eq("id", invitation.company_id);
+    }
   }
 
   return NextResponse.json({ ok: true });

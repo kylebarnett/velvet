@@ -113,6 +113,20 @@ export async function POST(request: NextRequest) {
     if (inviteUpdateError) {
       console.error("Failed to update invitation status:", inviteUpdateError);
     }
+
+    // Auto-approve the inviting investor's relationship
+    const { error: approvalError } = await adminClient
+      .from("investor_company_relationships")
+      .update({
+        approval_status: "auto_approved",
+        is_inviting_investor: true,
+      })
+      .eq("company_id", invitation.company_id)
+      .eq("is_inviting_investor", true);
+
+    if (approvalError) {
+      console.error("Failed to auto-approve inviting investor:", approvalError);
+    }
   } else if (role === "founder" && companyName && data.user) {
     // Create new company record for founders without invite
     const { error: companyError } = await adminClient.from("companies").insert({

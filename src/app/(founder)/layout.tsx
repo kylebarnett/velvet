@@ -33,6 +33,8 @@ export default async function FounderLayout({
       nav={[
         { href: "/portal", label: "Portal" },
         { href: "/portal/requests", label: "Requests" },
+        { href: "/portal/metrics", label: "Metrics" },
+        { href: "/portal/investors", label: "Investors" },
         { href: "/portal/documents", label: "Documents" },
       ]}
       company={company}

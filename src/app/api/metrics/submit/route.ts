@@ -4,7 +4,11 @@ import { z } from "zod";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 
 const schema = z.object({
-  requestId: z.string().uuid().or(z.string().min(1)),
+  companyId: z.string().uuid(),
+  metricName: z.string().min(1),
+  periodType: z.enum(["monthly", "quarterly", "annual"]),
+  periodStart: z.string().min(1),
+  periodEnd: z.string().min(1),
   value: z.string().min(1),
   notes: z.string().optional(),
 });
@@ -14,54 +18,46 @@ export async function POST(req: Request) {
   if (!parsed.success) return jsonError("Invalid request body.", 400);
 
   const { supabase, user } = await getApiUser();
-  if (!user) return jsonError("Unauthorized", 401);
+  if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = (user.user_metadata?.role as string | undefined) ?? null;
-  if (role !== "founder") return jsonError("Forbidden", 403);
+  const role = user.user_metadata?.role;
+  if (role !== "founder") return jsonError("Forbidden.", 403);
 
-  const { requestId, value, notes } = parsed.data;
+  const { companyId, metricName, periodType, periodStart, periodEnd, value, notes } =
+    parsed.data;
 
-  // Verify the request belongs to a company the founder owns
-  const { data: request } = await supabase
-    .from("metric_requests")
-    .select("company_id")
-    .eq("id", requestId)
-    .single();
-
-  if (!request) {
-    return jsonError("Request not found.", 404);
-  }
-
+  // Verify the founder owns this company
   const { data: company } = await supabase
     .from("companies")
     .select("id")
-    .eq("id", request.company_id)
+    .eq("id", companyId)
     .eq("founder_id", user.id)
     .single();
 
-  if (!company) {
-    return jsonError("Not authorized to submit for this request.", 403);
-  }
+  if (!company) return jsonError("Not authorized for this company.", 403);
 
+  // Upsert into company_metric_values
   const { data: submission, error } = await supabase
-    .from("metric_submissions")
-    .insert({
-      metric_request_id: requestId,
-      value: { raw: value },
-      submitted_by: user.id,
-      notes: notes ?? null,
-    })
+    .from("company_metric_values")
+    .upsert(
+      {
+        company_id: companyId,
+        metric_name: metricName,
+        period_type: periodType,
+        period_start: periodStart,
+        period_end: periodEnd,
+        value: { raw: value },
+        submitted_by: user.id,
+        notes: notes ?? null,
+      },
+      {
+        onConflict: "company_id,metric_name,period_type,period_start,period_end",
+      },
+    )
     .select("id")
     .single();
 
   if (error) return jsonError(error.message, 400);
 
-  // Mark request as submitted (best-effort)
-  await supabase
-    .from("metric_requests")
-    .update({ status: "submitted" })
-    .eq("id", requestId);
-
-  return NextResponse.json({ id: submission.id });
+  return NextResponse.json({ id: submission.id, ok: true });
 }
-

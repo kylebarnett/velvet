@@ -40,23 +40,88 @@ export async function POST(req: Request) {
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     try {
-      // Create company
-      const { data: company, error: companyError } = await adminClient
-        .from("companies")
-        .insert({
-          name: row.company_name,
-          website: row.company_website || null,
-          founder_id: null,
-        })
-        .select("id")
-        .single();
+      const normalizedEmail = row.email.toLowerCase();
 
-      if (companyError || !company) {
-        results.errors.push({
-          row: i + 1,
-          message: `Failed to create company: ${companyError?.message ?? "Unknown error"}`,
-        });
-        continue;
+      // Check for existing company by founder_email or by founder's user email
+      let existingCompanyId: string | null = null;
+
+      // Check founder_email column
+      const { data: byFounderEmail } = await adminClient
+        .from("companies")
+        .select("id")
+        .eq("founder_email", normalizedEmail)
+        .limit(1)
+        .maybeSingle();
+
+      if (byFounderEmail) {
+        existingCompanyId = byFounderEmail.id;
+      }
+
+      // If not found, check via users table (founder already signed up)
+      if (!existingCompanyId) {
+        const { data: byUserEmail } = await adminClient
+          .from("users")
+          .select("id")
+          .eq("email", normalizedEmail)
+          .limit(1)
+          .maybeSingle();
+
+        if (byUserEmail) {
+          const { data: byFounderId } = await adminClient
+            .from("companies")
+            .select("id")
+            .eq("founder_id", byUserEmail.id)
+            .limit(1)
+            .maybeSingle();
+
+          if (byFounderId) {
+            existingCompanyId = byFounderId.id;
+          }
+        }
+      }
+
+      let companyId: string;
+
+      if (existingCompanyId) {
+        // Reuse existing company — check if this investor already has a relationship
+        const { data: existingRel } = await adminClient
+          .from("investor_company_relationships")
+          .select("id")
+          .eq("investor_id", user.id)
+          .eq("company_id", existingCompanyId)
+          .maybeSingle();
+
+        if (existingRel) {
+          results.errors.push({
+            row: i + 1,
+            message: `Company already in your portfolio (${row.company_name}).`,
+          });
+          continue;
+        }
+
+        companyId = existingCompanyId;
+      } else {
+        // Create new company with founder_email set for future dedup
+        const { data: company, error: companyError } = await adminClient
+          .from("companies")
+          .insert({
+            name: row.company_name,
+            website: row.company_website || null,
+            founder_id: null,
+            founder_email: normalizedEmail,
+          })
+          .select("id")
+          .single();
+
+        if (companyError || !company) {
+          results.errors.push({
+            row: i + 1,
+            message: `Failed to create company: ${companyError?.message ?? "Unknown error"}`,
+          });
+          continue;
+        }
+
+        companyId = company.id;
       }
 
       // Create investor-company relationship
@@ -64,12 +129,16 @@ export async function POST(req: Request) {
         .from("investor_company_relationships")
         .insert({
           investor_id: user.id,
-          company_id: company.id,
+          company_id: companyId,
+          approval_status: "pending",
+          is_inviting_investor: true,
         });
 
       if (relError) {
-        // Cleanup company if relationship fails
-        await adminClient.from("companies").delete().eq("id", company.id);
+        // Cleanup company only if we just created it (no existing company)
+        if (!existingCompanyId) {
+          await adminClient.from("companies").delete().eq("id", companyId);
+        }
         results.errors.push({
           row: i + 1,
           message: `Failed to create relationship: ${relError.message}`,
@@ -82,7 +151,7 @@ export async function POST(req: Request) {
         .from("portfolio_invitations")
         .insert({
           investor_id: user.id,
-          company_id: company.id,
+          company_id: companyId,
           email: row.email,
           first_name: row.first_name,
           last_name: row.last_name,
@@ -91,8 +160,14 @@ export async function POST(req: Request) {
 
       if (inviteError) {
         // Cleanup on failure
-        await adminClient.from("investor_company_relationships").delete().eq("company_id", company.id);
-        await adminClient.from("companies").delete().eq("id", company.id);
+        await adminClient
+          .from("investor_company_relationships")
+          .delete()
+          .eq("company_id", companyId)
+          .eq("investor_id", user.id);
+        if (!existingCompanyId) {
+          await adminClient.from("companies").delete().eq("id", companyId);
+        }
         results.errors.push({
           row: i + 1,
           message: `Failed to create invitation: ${inviteError.message}`,
