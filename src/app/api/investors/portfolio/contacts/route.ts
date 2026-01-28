@@ -102,10 +102,10 @@ export async function DELETE(req: Request) {
 
   const { id } = parsed.data;
 
-  // First get the invitation to find the company_id
+  // First get the invitation and company info
   const { data: invitation, error: fetchError } = await supabase
     .from("portfolio_invitations")
-    .select("company_id")
+    .select("company_id, companies(founder_id)")
     .eq("id", id)
     .eq("investor_id", user.id)
     .single();
@@ -117,14 +117,19 @@ export async function DELETE(req: Request) {
   // Use admin client to delete related records
   const adminClient = createSupabaseAdminClient();
 
-  // Delete in order: invitation -> relationship -> company
+  // Delete invitation and relationship
   await adminClient.from("portfolio_invitations").delete().eq("id", id);
   await adminClient
     .from("investor_company_relationships")
     .delete()
     .eq("company_id", invitation.company_id)
     .eq("investor_id", user.id);
-  await adminClient.from("companies").delete().eq("id", invitation.company_id);
+
+  // Only delete company if no founder has signed up yet
+  const company = invitation.companies as { founder_id: string | null } | null;
+  if (!company?.founder_id) {
+    await adminClient.from("companies").delete().eq("id", invitation.company_id);
+  }
 
   return NextResponse.json({ ok: true });
 }
