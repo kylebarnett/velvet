@@ -21,6 +21,28 @@ export async function POST(req: Request) {
 
   const { requestId, value, notes } = parsed.data;
 
+  // Verify the request belongs to a company the founder owns
+  const { data: request } = await supabase
+    .from("metric_requests")
+    .select("company_id")
+    .eq("id", requestId)
+    .single();
+
+  if (!request) {
+    return jsonError("Request not found.", 404);
+  }
+
+  const { data: company } = await supabase
+    .from("companies")
+    .select("id")
+    .eq("id", request.company_id)
+    .eq("founder_id", user.id)
+    .single();
+
+  if (!company) {
+    return jsonError("Not authorized to submit for this request.", 403);
+  }
+
   const { data: submission, error } = await supabase
     .from("metric_submissions")
     .insert({

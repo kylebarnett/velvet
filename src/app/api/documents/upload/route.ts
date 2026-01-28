@@ -17,11 +17,21 @@ export async function POST(req: Request) {
   const file = form.get("file");
   if (!(file instanceof File)) return jsonError("Missing file.", 400);
 
-  // NOTE: In a full implementation, company_id comes from the founder's company record.
-  // For now, we require client to include it later; using a placeholder value will fail RLS once enabled.
   const companyId = form.get("companyId");
   if (typeof companyId !== "string" || !companyId) {
     return jsonError("Missing companyId.", 400);
+  }
+
+  // Verify founder owns this company
+  const { data: company } = await supabase
+    .from("companies")
+    .select("id")
+    .eq("id", companyId)
+    .eq("founder_id", user.id)
+    .single();
+
+  if (!company) {
+    return jsonError("Not authorized to upload to this company.", 403);
   }
 
   const filePath = `${companyId}/${Date.now()}-${file.name}`;

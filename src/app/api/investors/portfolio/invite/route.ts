@@ -63,10 +63,16 @@ export async function POST(req: Request) {
     return jsonError("No invitations to send.", 400);
   }
 
-  const results: { sent: number; errors: { email: string; message: string }[] } = {
+  const results: {
+    sent: number;
+    errors: { email: string; message: string }[];
+    inviteLinks?: { email: string; url: string }[];
+  } = {
     sent: 0,
     errors: [],
   };
+
+  const isDev = process.env.NODE_ENV === "development";
 
   const apiKey = process.env.RESEND_API_KEY;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -116,8 +122,14 @@ export async function POST(req: Request) {
 </html>
     `.trim();
 
+    // In dev mode, collect invite links for manual testing
+    if (isDev) {
+      if (!results.inviteLinks) results.inviteLinks = [];
+      results.inviteLinks.push({ email: invitation.email, url: inviteUrl });
+    }
+
     if (!apiKey) {
-      // In development without API key, just update status
+      // No API key, just log and continue to update status
       console.log(`[DEV] Would send invite to ${invitation.email}: ${inviteUrl}`);
     } else {
       try {
@@ -128,7 +140,7 @@ export async function POST(req: Request) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Velvet <no-reply@velvet.local>",
+            from: "Velvet <onboarding@resend.dev>",
             to: [invitation.email],
             subject: `You've been invited to Velvet by ${investorName}`,
             html,
@@ -137,18 +149,27 @@ export async function POST(req: Request) {
 
         if (!res.ok) {
           const text = await res.text().catch(() => "");
+          // In dev, don't fail - just log the error and continue
+          if (isDev) {
+            console.log(`[DEV] Email send failed for ${invitation.email}: ${text || res.statusText}`);
+          } else {
+            results.errors.push({
+              email: invitation.email,
+              message: `Email failed: ${text || res.statusText}`,
+            });
+            continue;
+          }
+        }
+      } catch (err) {
+        if (isDev) {
+          console.log(`[DEV] Email send error for ${invitation.email}: ${err instanceof Error ? err.message : "Unknown"}`);
+        } else {
           results.errors.push({
             email: invitation.email,
-            message: `Email failed: ${text || res.statusText}`,
+            message: err instanceof Error ? err.message : "Failed to send email",
           });
           continue;
         }
-      } catch (err) {
-        results.errors.push({
-          email: invitation.email,
-          message: err instanceof Error ? err.message : "Failed to send email",
-        });
-        continue;
       }
     }
 

@@ -41,6 +41,7 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
+  const [inviteLinks, setInviteLinks] = React.useState<{ email: string; url: string }[] | null>(null);
   const [deleteModal, setDeleteModal] = React.useState<{ open: boolean; contact: Contact | null }>({
     open: false,
     contact: null,
@@ -98,6 +99,7 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setInviteLinks(null);
 
     try {
       const res = await fetch("/api/investors/portfolio/invite", {
@@ -113,6 +115,12 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
       }
 
       setSuccess(`Sent ${json.sent} invitation${json.sent === 1 ? "" : "s"}.`);
+
+      // Show invite links in dev mode for manual testing
+      if (json.inviteLinks && json.inviteLinks.length > 0) {
+        setInviteLinks(json.inviteLinks);
+      }
+
       router.refresh();
 
       // Update local state
@@ -321,6 +329,31 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
       {success && (
         <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
           {success}
+        </div>
+      )}
+      {inviteLinks && inviteLinks.length > 0 && (
+        <div className="rounded-md border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-sm">
+          <div className="font-medium text-blue-200">Dev Mode: Invite Links</div>
+          <div className="mt-2 space-y-2">
+            {inviteLinks.map((link, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="text-white/60">{link.email}:</span>
+                <input
+                  type="text"
+                  value={link.url}
+                  readOnly
+                  className="flex-1 rounded border border-white/10 bg-black/30 px-2 py-1 text-xs text-white/80"
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
+                />
+                <button
+                  onClick={() => navigator.clipboard.writeText(link.url)}
+                  className="rounded bg-white/10 px-2 py-1 text-xs hover:bg-white/20"
+                >
+                  Copy
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

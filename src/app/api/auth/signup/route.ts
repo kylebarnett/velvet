@@ -12,6 +12,7 @@ const schema = z.object({
   fullName: z.string().min(2),
   companyName: z.string().optional(),
   companyWebsite: z.string().optional(),
+  companyId: z.string().uuid().optional(),
   inviteToken: z.string().uuid().optional(),
 });
 
@@ -30,16 +31,21 @@ export async function POST(request: NextRequest) {
     id: string;
     company_id: string;
     status: string;
+    email: string;
   } | null = null;
 
   if (inviteToken) {
     const { data: inviteData } = await adminClient
       .from("portfolio_invitations")
-      .select("id, company_id, status")
+      .select("id, company_id, status, email")
       .eq("invite_token", inviteToken)
       .single();
 
+    // Verify token exists, not already accepted, AND email matches
     if (inviteData && inviteData.status !== "accepted") {
+      if (inviteData.email.toLowerCase() !== email.toLowerCase()) {
+        return jsonError("Email does not match invitation.", 400);
+      }
       invitation = inviteData;
     }
   }
@@ -58,12 +64,37 @@ export async function POST(request: NextRequest) {
     return jsonError("An account with this email already exists.", 400);
   }
 
+  // Wait for the trigger to create the public.users row
+  if (data.user) {
+    let attempts = 0;
+    while (attempts < 10) {
+      const { data: userRow } = await adminClient
+        .from("users")
+        .select("id")
+        .eq("id", data.user.id)
+        .single();
+
+      if (userRow) break;
+
+      // Wait 100ms before retrying
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      attempts++;
+    }
+  }
+
   // Handle invited founder signup
   if (invitation && data.user && role === "founder") {
-    // Link founder to existing company
+    // Link founder to existing company and optionally update website
+    const updateData: { founder_id: string; website?: string } = {
+      founder_id: data.user.id,
+    };
+    if (companyWebsite) {
+      updateData.website = companyWebsite;
+    }
+
     const { error: companyUpdateError } = await adminClient
       .from("companies")
-      .update({ founder_id: data.user.id })
+      .update(updateData)
       .eq("id", invitation.company_id);
 
     if (companyUpdateError) {

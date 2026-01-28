@@ -31,32 +31,46 @@ const signupSchema = loginSchema
     },
   );
 
+// Simplified schema for invite signups (company already exists)
+const inviteSignupSchema = loginSchema.extend({
+  fullName: z.string().min(2),
+  companyWebsite: z.string().optional(),
+});
+
 type Mode = "login" | "signup";
 
 type Props = {
   mode: Mode;
   inviteToken?: string;
   companyName?: string;
+  companyId?: string;
 };
 
-export function AuthCard({ mode, inviteToken, companyName }: Props) {
+export function AuthCard({ mode, inviteToken, companyName, companyId }: Props) {
   const [error, setError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const schema = mode === "login" ? loginSchema : signupSchema;
+  const schema = mode === "login"
+    ? loginSchema
+    : inviteToken
+      ? inviteSignupSchema
+      : signupSchema;
+
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues:
       mode === "login"
         ? { email: "", password: "" }
-        : {
-            email: "",
-            password: "",
-            role: "founder" as const,
-            fullName: "",
-            companyName: "",
-            companyWebsite: "",
-          },
+        : inviteToken
+          ? { email: "", password: "", fullName: "", companyWebsite: "" }
+          : {
+              email: "",
+              password: "",
+              role: "founder" as const,
+              fullName: "",
+              companyName: "",
+              companyWebsite: "",
+            },
   });
 
   const watchedRole = form.watch("role");
@@ -86,10 +100,11 @@ export function AuthCard({ mode, inviteToken, companyName }: Props) {
         body: JSON.stringify({
           email: values.email,
           password: values.password,
-          role: values.role,
+          role: inviteToken ? "founder" : values.role,
           fullName: values.fullName,
-          companyName: values.companyName,
-          companyWebsite: values.companyWebsite,
+          companyName: inviteToken ? undefined : values.companyName,
+          companyWebsite: values.companyWebsite || undefined,
+          companyId: inviteToken ? companyId : undefined,
           inviteToken: inviteToken || undefined,
         }),
       });
@@ -180,6 +195,31 @@ export function AuthCard({ mode, inviteToken, companyName }: Props) {
             </p>
           )}
         </div>
+
+        {mode === "signup" && inviteToken && companyName && (
+          <>
+            <div className="grid gap-2">
+              <label className="text-sm text-white/70">
+                Company
+              </label>
+              <div className="flex h-11 items-center rounded-md border border-white/10 bg-black/20 px-3 text-sm text-white/80">
+                {companyName}
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <label className="text-sm text-white/70" htmlFor="companyWebsite">
+                Company website <span className="text-white/40">(optional)</span>
+              </label>
+              <input
+                id="companyWebsite"
+                className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none ring-0 placeholder:text-white/30 focus:border-white/20"
+                placeholder="acme.com"
+                {...form.register("companyWebsite")}
+              />
+            </div>
+          </>
+        )}
 
         {mode === "signup" && !inviteToken && (
           <div className="grid gap-2">

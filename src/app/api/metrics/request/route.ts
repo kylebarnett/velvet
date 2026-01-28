@@ -25,6 +25,18 @@ export async function POST(req: Request) {
   const { companyId, metricName, periodType, periodStart, periodEnd, dueDate } =
     parsed.data;
 
+  // Verify investor has a relationship with this company
+  const { data: relationship } = await supabase
+    .from("investor_company_relationships")
+    .select("id")
+    .eq("investor_id", user.id)
+    .eq("company_id", companyId)
+    .single();
+
+  if (!relationship) {
+    return jsonError("Company not in your portfolio.", 403);
+  }
+
   // Create (or reuse) a metric definition for this investor.
   const { data: metricDef, error: defError } = await supabase
     .from("metric_definitions")

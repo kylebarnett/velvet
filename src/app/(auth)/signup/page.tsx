@@ -1,5 +1,5 @@
 import { AuthCard } from "@/components/auth/auth-card";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -11,28 +11,35 @@ export default async function SignupPage({ searchParams }: Props) {
   const params = await searchParams;
   const inviteToken = params.invite;
   let companyName: string | undefined;
+  let companyId: string | undefined;
 
   if (inviteToken) {
-    const supabase = await createSupabaseServerClient();
-    const { data: invitation } = await supabase
-      .from("portfolio_invitations")
-      .select(`
-        id,
-        status,
-        companies (
-          name
-        )
-      `)
-      .eq("invite_token", inviteToken)
-      .single();
+    try {
+      const supabase = createSupabaseAdminClient();
+      const { data: invitation } = await supabase
+        .from("portfolio_invitations")
+        .select(`
+          id,
+          status,
+          company_id,
+          companies (
+            name
+          )
+        `)
+        .eq("invite_token", inviteToken)
+        .single();
 
-    if (invitation && invitation.status !== "accepted") {
-      const companies = invitation.companies as { name: string }[] | { name: string } | null;
-      if (Array.isArray(companies)) {
-        companyName = companies[0]?.name;
-      } else {
-        companyName = companies?.name;
+      if (invitation && invitation.status !== "accepted") {
+        companyId = invitation.company_id;
+        const companies = invitation.companies as { name: string }[] | { name: string } | null;
+        if (Array.isArray(companies)) {
+          companyName = companies[0]?.name;
+        } else {
+          companyName = companies?.name;
+        }
       }
+    } catch {
+      // Ignore errors - just show normal signup page
     }
   }
 
@@ -41,6 +48,7 @@ export default async function SignupPage({ searchParams }: Props) {
       mode="signup"
       inviteToken={inviteToken}
       companyName={companyName}
+      companyId={companyId}
     />
   );
 }

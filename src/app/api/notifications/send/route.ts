@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { jsonError } from "@/lib/api/auth";
+import { getApiUser, jsonError } from "@/lib/api/auth";
 
 const schema = z.object({
   to: z.string().email(),
@@ -10,6 +10,10 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  // Authentication required
+  const { user } = await getApiUser();
+  if (!user) return jsonError("Unauthorized.", 401);
+
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return jsonError("Invalid request body.", 400);
 
@@ -26,7 +30,7 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "Velvet <no-reply@velvet.local>",
+      from: "Velvet <onboarding@resend.dev>",
       to: [to],
       subject,
       html,
