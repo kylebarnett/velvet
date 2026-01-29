@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 
-// GET - Get a single template with items
+// GET - Get a single template with items (system or owned by user)
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -15,12 +15,15 @@ export async function GET(
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
+  // Allow reading system templates or user's own templates
   const { data, error } = await supabase
     .from("metric_templates")
     .select(`
       id,
       name,
       description,
+      is_system,
+      target_industry,
       created_at,
       updated_at,
       metric_template_items (
@@ -32,17 +35,26 @@ export async function GET(
       )
     `)
     .eq("id", id)
-    .eq("investor_id", user.id)
+    .or(`is_system.eq.true,investor_id.eq.${user.id}`)
     .single();
 
   if (error || !data) return jsonError("Template not found.", 404);
 
   // Sort items
-  data.metric_template_items = (data.metric_template_items ?? []).sort(
-    (a: any, b: any) => a.sort_order - b.sort_order,
-  );
+  const template = {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    isSystem: data.is_system,
+    targetIndustry: data.target_industry,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+    metric_template_items: (data.metric_template_items ?? []).sort(
+      (a: any, b: any) => a.sort_order - b.sort_order,
+    ),
+  };
 
-  return NextResponse.json({ template: data });
+  return NextResponse.json({ template });
 }
 
 // PUT - Update template name/description and replace items
@@ -73,15 +85,16 @@ export async function PUT(
   const parsed = updateSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return jsonError("Invalid request body.", 400);
 
-  // Verify ownership
+  // Verify ownership and not a system template
   const { data: existing } = await supabase
     .from("metric_templates")
-    .select("id")
+    .select("id, is_system")
     .eq("id", id)
     .eq("investor_id", user.id)
     .single();
 
   if (!existing) return jsonError("Template not found.", 404);
+  if (existing.is_system) return jsonError("Cannot edit system templates.", 403);
 
   const { name, description, items } = parsed.data;
 
@@ -116,7 +129,7 @@ export async function PUT(
   return NextResponse.json({ ok: true });
 }
 
-// DELETE - Delete a template
+// DELETE - Delete a template (cannot delete system templates)
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -127,6 +140,17 @@ export async function DELETE(
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
+
+  // Verify it's not a system template
+  const { data: existing } = await supabase
+    .from("metric_templates")
+    .select("is_system")
+    .eq("id", id)
+    .eq("investor_id", user.id)
+    .single();
+
+  if (!existing) return jsonError("Template not found.", 404);
+  if (existing.is_system) return jsonError("Cannot delete system templates.", 403);
 
   const { error } = await supabase
     .from("metric_templates")

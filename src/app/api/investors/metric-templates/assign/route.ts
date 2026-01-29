@@ -24,11 +24,12 @@ export async function POST(req: Request) {
 
   const { templateId, companyIds, periodStart, periodEnd, dueDate } = parsed.data;
 
-  // Fetch template items
+  // Fetch template items (allow system templates or user's own)
   const { data: template } = await supabase
     .from("metric_templates")
     .select(`
       id,
+      is_system,
       metric_template_items (
         metric_name,
         period_type,
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
       )
     `)
     .eq("id", templateId)
-    .eq("investor_id", user.id)
+    .or(`is_system.eq.true,investor_id.eq.${user.id}`)
     .single();
 
   if (!template) return jsonError("Template not found.", 404);

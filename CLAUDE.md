@@ -33,7 +33,7 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `metric_definitions` - Investor-defined metrics (personal catalog, reused via upsert)
 - `metric_requests` - Requests from investors to founders (auto-fulfilled by DB trigger)
 - `metric_submissions` - Legacy founder responses (no longer written to; kept for backward compatibility)
-- `metric_templates` - Investor's saved metric sets (name, description)
+- `metric_templates` - Metric sets (name, description, is_system, target_industry). System templates have `investor_id = NULL`, user templates require `investor_id`
 - `metric_template_items` - Individual metrics in a template (metric_name, period_type, data_type, sort_order)
 - `company_metric_values` - Company-level shared submissions (unique per company+metric+period, auto-fulfills matching requests via trigger)
 - `documents` - Uploaded files from founders
@@ -234,6 +234,38 @@ When assigning a template to companies:
 - `GET/POST /api/investors/metric-templates` - List/create templates
 - `GET/PUT/DELETE /api/investors/metric-templates/[id]` - Read/update/delete
 - `POST /api/investors/metric-templates/assign` - Bulk assign to companies (requires templateId, companyIds[], periodStart, periodEnd, optional dueDate)
+- `POST /api/investors/metric-templates/clone` - Clone a template to user's personal templates
+
+## System Templates
+
+### Overview
+Pre-built, read-only metric templates organized by industry. All investors can view and assign system templates, but cannot edit or delete them. Investors can clone system templates to create customizable copies.
+
+### Industries
+- **SaaS**: MRR, ARR, Net Revenue Retention, Gross Revenue Retention, Customer Churn Rate, CAC, LTV, LTV:CAC Ratio, Burn Rate, Runway, Gross Margin, Active Users
+- **Fintech**: Total Transaction Volume, Net Revenue, Take Rate, Default Rate, Active Accounts, CAC, ARPU, Fraud Rate, Regulatory Capital Ratio, Net Interest Margin
+- **Healthcare**: Monthly Active Patients, Revenue, Cost Per Patient, Patient Retention Rate, Clinical Outcomes Score, Provider Utilization Rate, Claims Processing Time, NPS, HIPAA Compliance Score, Gross Margin
+- **E-commerce**: GMV, Net Revenue, AOV, CAC, LTV, Conversion Rate, Return Rate, Cart Abandonment Rate, Inventory Turnover, Repeat Purchase Rate
+- **EdTech**: Monthly Active Learners, Course Completion Rate, Revenue, CAC, Student Retention Rate, NPS, ARPU, Content Engagement Time, Instructor Satisfaction, Learning Outcome Improvement
+- **AI/ML**: Monthly Active Users, API Calls, Revenue, Compute Costs, Gross Margin, Model Accuracy, Inference Latency, Customer Churn Rate, Usage Growth Rate, Data Processing Volume
+- **General**: Revenue, Gross Margin, Operating Expenses, Burn Rate, Runway, Headcount, Customer Count, CAC
+
+### Data Model
+- `is_system` boolean: `true` for system templates, `false` for user templates
+- `target_industry` text: Industry category (saas, fintech, healthcare, ecommerce, edtech, ai_ml, other)
+- `investor_id`: `NULL` for system templates, required for user templates
+- Constraint ensures `(is_system = true AND investor_id IS NULL) OR (is_system = false AND investor_id IS NOT NULL)`
+
+### RLS Policies
+- All investors can SELECT system templates (`is_system = true`)
+- Investors can only CRUD their own templates (`investor_id = auth.uid()`)
+- System templates cannot be edited or deleted (enforced at API level)
+
+### Clone Flow
+1. Investor clicks "Clone" on a system template
+2. API creates new template with `is_system = false`, `investor_id = user.id`
+3. All template items are copied to the new template
+4. User is redirected to edit page for the new template
 
 ## Investor Onboarding
 
@@ -400,6 +432,7 @@ Migration files in `supabase/migrations/`:
 - `0001_init.sql` - Core schema: users, companies, relationships, metric_definitions, metric_requests, metric_submissions, documents, RLS policies
 - `0002_portfolio_invitations.sql` - Portfolio invitations table, investor company insert/update policies
 - `0003_metric_system.sql` - Multi-investor support (approval_status, founder_email dedup), company tags, metric_templates, company_metric_values, auto-fulfill trigger, updated RLS policies
+- `0004_system_templates.sql` - System templates (is_system, target_industry columns), seeds 7 industry templates with metrics, updated RLS policies for shared read access
 
 Migrations must be run manually in the Supabase SQL Editor (Dashboard > SQL Editor > paste and run).
 

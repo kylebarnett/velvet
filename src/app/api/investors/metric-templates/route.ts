@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 
-// GET - List all templates for investor
+// GET - List all templates for investor (system + user templates)
 export async function GET() {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
@@ -11,12 +11,16 @@ export async function GET() {
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
+  // Fetch both system templates and user's own templates
   const { data, error } = await supabase
     .from("metric_templates")
     .select(`
       id,
       name,
       description,
+      is_system,
+      target_industry,
+      investor_id,
       created_at,
       updated_at,
       metric_template_items (
@@ -27,14 +31,21 @@ export async function GET() {
         sort_order
       )
     `)
-    .eq("investor_id", user.id)
+    .or(`is_system.eq.true,investor_id.eq.${user.id}`)
+    .order("is_system", { ascending: false })
     .order("created_at", { ascending: false });
 
   if (error) return jsonError(error.message, 500);
 
-  // Sort items within each template
+  // Sort items within each template and add isSystem flag
   const templates = (data ?? []).map((t) => ({
-    ...t,
+    id: t.id,
+    name: t.name,
+    description: t.description,
+    isSystem: t.is_system,
+    targetIndustry: t.target_industry,
+    created_at: t.created_at,
+    updated_at: t.updated_at,
     metric_template_items: (t.metric_template_items ?? []).sort(
       (a: any, b: any) => a.sort_order - b.sort_order,
     ),
