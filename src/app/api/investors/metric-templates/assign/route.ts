@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 
 const schema = z.object({
-  templateId: z.string().uuid(),
+  templateId: z.string().min(1),
   companyIds: z.array(z.string().uuid()).min(1),
   periodStart: z.string().min(1),
   periodEnd: z.string().min(1),

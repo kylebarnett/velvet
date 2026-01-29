@@ -83,12 +83,15 @@ export function TemplateForm({
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Failed to save.");
 
+      console.log("Save response:", json);
+
       if (mode === "create" && json.id) {
         router.push(`/templates/${json.id}`);
       } else {
+        // Force refresh before navigating
+        router.refresh();
         router.push("/templates");
       }
-      router.refresh();
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong.");
     } finally {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 // GET - Get a single template with items (system or owned by user)
 export async function GET(
@@ -82,51 +83,83 @@ export async function PUT(
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
-  const parsed = updateSchema.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) return jsonError("Invalid request body.", 400);
+  const body = await req.json().catch(() => null);
+  console.log("PUT request body:", JSON.stringify(body, null, 2));
 
-  // Verify ownership and not a system template
-  const { data: existing } = await supabase
+  const parsed = updateSchema.safeParse(body);
+  if (!parsed.success) {
+    console.log("Validation error:", parsed.error);
+    return jsonError("Invalid request body.", 400);
+  }
+
+  // Verify ownership and not a system template (use admin to bypass RLS)
+  const adminClient = createSupabaseAdminClient();
+  const { data: existing, error: existingError } = await adminClient
     .from("metric_templates")
-    .select("id, is_system")
+    .select("id, is_system, investor_id")
     .eq("id", id)
-    .eq("investor_id", user.id)
     .single();
+
+  console.log("Existing template:", existing, "Error:", existingError);
 
   if (!existing) return jsonError("Template not found.", 404);
   if (existing.is_system) return jsonError("Cannot edit system templates.", 403);
+  if (existing.investor_id !== user.id) return jsonError("Not authorized.", 403);
 
   const { name, description, items } = parsed.data;
 
+  console.log("Updating template:", id, "with items:", items.length);
+
   // Update template
-  const { error: updateError } = await supabase
+  const { error: updateError } = await adminClient
     .from("metric_templates")
     .update({ name, description: description ?? null })
     .eq("id", id);
 
-  if (updateError) return jsonError(updateError.message, 500);
+  if (updateError) {
+    console.error("Update template error:", updateError);
+    return jsonError(updateError.message, 500);
+  }
+  console.log("Template metadata updated");
 
-  // Delete existing items and replace
-  await supabase
+  // Delete existing items
+  const { data: deletedItems, error: deleteError } = await adminClient
     .from("metric_template_items")
     .delete()
-    .eq("template_id", id);
+    .eq("template_id", id)
+    .select();
 
-  const { error: itemsError } = await supabase
+  console.log("Deleted items:", deletedItems?.length ?? 0, "Error:", deleteError);
+
+  if (deleteError) {
+    console.error("Delete items error:", deleteError);
+    return jsonError(deleteError.message, 500);
+  }
+
+  // Insert new items
+  const newItems = items.map((item, i) => ({
+    template_id: id,
+    metric_name: item.metric_name,
+    period_type: item.period_type,
+    data_type: item.data_type,
+    sort_order: item.sort_order ?? i,
+  }));
+
+  console.log("Inserting items:", JSON.stringify(newItems, null, 2));
+
+  const { data: insertedItems, error: itemsError } = await adminClient
     .from("metric_template_items")
-    .insert(
-      items.map((item, i) => ({
-        template_id: id,
-        metric_name: item.metric_name,
-        period_type: item.period_type,
-        data_type: item.data_type,
-        sort_order: item.sort_order ?? i,
-      })),
-    );
+    .insert(newItems)
+    .select();
 
-  if (itemsError) return jsonError(itemsError.message, 500);
+  console.log("Inserted items:", insertedItems?.length ?? 0, "Error:", itemsError);
 
-  return NextResponse.json({ ok: true });
+  if (itemsError) {
+    console.error("Insert items error:", itemsError);
+    return jsonError(itemsError.message, 500);
+  }
+
+  return NextResponse.json({ ok: true, itemsInserted: insertedItems?.length ?? 0 });
 }
 
 // DELETE - Delete a template (cannot delete system templates)

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 
 const cloneSchema = z.object({
-  sourceTemplateId: z.string().uuid(),
+  sourceTemplateId: z.string().min(1),
   newName: z.string().min(1).optional(),
 });
 
