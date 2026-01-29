@@ -65,7 +65,7 @@ export default async function PortfolioPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <div>
+        <div data-onboarding="portfolio-title">
           <h1 className="text-2xl font-semibold">Portfolio</h1>
           <p className="text-sm text-white/60">
             Manage your portfolio companies and founder contacts.
@@ -75,12 +75,14 @@ export default async function PortfolioPage() {
           <Link
             href="/portfolio/add"
             className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10"
+            data-onboarding="add-contact"
           >
             Add Contact
           </Link>
           <Link
             href="/portfolio/import"
             className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
+            data-onboarding="import-csv"
           >
             Import CSV
           </Link>

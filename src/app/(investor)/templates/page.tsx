@@ -73,7 +73,7 @@ export default function TemplatesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
+        <div className="space-y-1" data-onboarding="templates-title">
           <h1 className="text-xl font-semibold tracking-tight">Metric templates</h1>
           <p className="text-sm text-white/60">
             Create reusable metric sets and assign them to portfolio companies.
@@ -82,6 +82,7 @@ export default function TemplatesPage() {
         <Link
           href="/templates/new"
           className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
+          data-onboarding="new-template"
         >
           New template
         </Link>

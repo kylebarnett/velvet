@@ -39,7 +39,7 @@ export default async function RequestsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
+        <div className="space-y-1" data-onboarding="requests-title">
           <h1 className="text-xl font-semibold tracking-tight">Requests</h1>
           <p className="text-sm text-white/60">
             Create and track metric requests across your portfolio.
@@ -48,6 +48,7 @@ export default async function RequestsPage() {
         <Link
           className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
           href="/requests/new"
+          data-onboarding="new-request"
         >
           New request
         </Link>

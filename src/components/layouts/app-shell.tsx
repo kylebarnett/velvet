@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { HelpCircle, LogOut } from "lucide-react";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils/cn";
@@ -25,11 +25,15 @@ export function AppShell({
   nav,
   company,
   children,
+  showTakeTour,
+  onTakeTour,
 }: {
   title: string;
   nav: NavItem[];
   company?: CompanyInfo;
   children: React.ReactNode;
+  showTakeTour?: boolean;
+  onTakeTour?: () => void;
 }) {
   const [logoError, setLogoError] = React.useState(false);
   const pathname = usePathname();
@@ -93,6 +97,16 @@ export function AppShell({
                 </Link>
               );
             })}
+            {showTakeTour && onTakeTour && (
+              <button
+                onClick={onTakeTour}
+                className="mt-4 flex h-10 w-full items-center gap-2 rounded-md px-3 text-sm text-white/50 hover:bg-white/5 hover:text-white/70"
+                type="button"
+              >
+                <HelpCircle className="h-4 w-4" />
+                Take tour
+              </button>
+            )}
           </nav>
         </aside>
 
