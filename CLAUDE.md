@@ -276,21 +276,28 @@ Add `data-onboarding` attributes to elements you want to highlight:
 - `GET /api/user/onboarding` - Get current onboarding state
 - `PUT /api/user/onboarding` - Update step or mark complete
 
-## CSV Import
+## CSV Import/Export
 
-### Flexible Column Names
+### Import - Flexible Column Names
 The CSV parser normalizes column names to handle variations:
 - `Company Name`, `company_name`, `companyName` → all work
 - `First Name`, `first_name`, `firstName` → all work
 
-### Required Columns
+### Import - Required Columns
 - Company Name
 - First Name
 - Last Name
 - Email
 
-### Optional Columns
+### Import - Optional Columns
 - Company Website
+
+### Export
+Investors can download their existing portfolio contacts as CSV via the "Export CSV" button on the import page.
+
+### API Routes
+- `POST /api/investors/portfolio/import` - Import contacts from CSV data
+- `GET /api/investors/portfolio/export` - Download contacts as CSV file
 
 ## Security Requirements
 
