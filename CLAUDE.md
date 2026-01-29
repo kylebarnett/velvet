@@ -13,30 +13,40 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - **Founders** - Submit metrics, upload documents, respond to requests
 
 ### Route Structure
-- Investors: `/dashboard`, `/portfolio`, `/requests`
-- Founders: `/portal`, `/portal/requests`, `/portal/documents`
+- Investors: `/dashboard`, `/dashboard/[companyId]`, `/dashboard/[companyId]/metrics`, `/portfolio`, `/requests`, `/requests/new`, `/templates`, `/templates/new`, `/templates/[id]`
+- Founders: `/portal`, `/portal/requests`, `/portal/metrics`, `/portal/investors`, `/portal/documents`
 - Auth: `/login`, `/signup`, `/app` (redirects based on role)
 
-### Key Principle
-**Every account is standalone.** Investors and founders have completely separate dashboards. Even if multiple founders sign up, each has their own isolated account and data.
+### Key Principles
+- **Every account is standalone.** Investors and founders have completely separate dashboards. Each founder has their own isolated account and data.
+- **Multi-investor support.** Multiple investors can be linked to the same company. Companies are deduplicated by `founder_email` at import time.
+- **Founder-controlled access.** Founders approve or deny each investor. The inviting investor is auto-approved on founder signup; others start as pending.
+- **Company-level submissions.** Founders submit metrics once to `company_metric_values`. All approved investors see the same data. A DB trigger auto-fulfills matching `metric_requests`.
 
 ## Database
 
 ### Tables
 - `users` - Linked to Supabase auth.users via trigger
-- `companies` - Portfolio companies (founder_id nullable for investor imports)
-- `investor_company_relationships` - Maps investors to portfolio companies
+- `companies` - Portfolio companies (founder_id nullable for investor imports, founder_email for dedup, stage/industry/business_model tags)
+- `investor_company_relationships` - Maps investors to portfolio companies (approval_status: auto_approved/pending/approved/denied, is_inviting_investor flag)
 - `portfolio_invitations` - Founder contacts with invitation status
-- `metric_definitions` - Investor-defined metrics
-- `metric_requests` - Requests from investors to founders
-- `metric_submissions` - Founder responses to requests
+- `metric_definitions` - Investor-defined metrics (personal catalog, reused via upsert)
+- `metric_requests` - Requests from investors to founders (auto-fulfilled by DB trigger)
+- `metric_submissions` - Legacy founder responses (no longer written to; kept for backward compatibility)
+- `metric_templates` - Investor's saved metric sets (name, description)
+- `metric_template_items` - Individual metrics in a template (metric_name, period_type, data_type, sort_order)
+- `company_metric_values` - Company-level shared submissions (unique per company+metric+period, auto-fulfills matching requests via trigger)
 - `documents` - Uploaded files from founders
 
 ### RLS Policies
 - All tables have Row Level Security enabled
-- Role-based access using `auth.uid()` and user metadata
+- Role-based access using `auth.uid()` and `current_user_role()` helper
 - Investors can only access their own portfolio data
 - Founders can only access their own company data
+- `company_metric_values`: founders INSERT/UPDATE own company; approved investors SELECT only
+- `metric_requests` SELECT: founders only see requests from approved investors
+- `investor_company_relationships` UPDATE: founders can approve/deny for their company
+- `metric_templates` + `metric_template_items`: investor CRUD own
 
 ## Styling
 
@@ -131,6 +141,100 @@ if (!company) return jsonError("Not authorized.", 403);
 ### Email Matching
 Invite token signup requires the signup email to match the invitation email. This prevents account hijacking if someone intercepts the invite token.
 
+### Auto-Approval on Signup
+When a founder signs up via an invite link, the inviting investor's relationship is set to `auto_approved`. Other investors who later import the same founder email will get `pending` status and must be approved by the founder.
+
+## Multi-Investor Company Dedup
+
+### Import Logic
+When an investor imports contacts via CSV:
+1. Normalize email to lowercase
+2. Check `companies.founder_email` for a match
+3. If no match, check `users.email` → `companies.founder_id` for a signed-up founder
+4. If match found: reuse existing company, add new relationship (approval_status = 'pending')
+5. If no match: create new company with `founder_email` set
+
+### Contact Deletion
+When deleting a contact, the company is only deleted if:
+- No founder has signed up (`founder_id` is null), AND
+- No other investors are linked to it
+
+## Founder Approval Model
+
+### Approval Statuses
+- `auto_approved` - The investor who invited the founder (set automatically on signup)
+- `pending` - Other investors who imported the same founder email
+- `approved` - Founder explicitly approved this investor
+- `denied` - Founder explicitly denied this investor
+
+### What Approval Controls
+- Approved/auto-approved investors can see `company_metric_values` via RLS
+- Founders only see `metric_requests` from approved investors
+- The auto-fulfill trigger only marks requests from approved investors as "submitted"
+
+### API Routes
+- `GET /api/founder/investors` - List investors with approval status
+- `PUT /api/founder/investors/[relationshipId]/approval` - Approve or deny (cannot change auto_approved)
+
+## Metric Submission Model
+
+### Company-Level Submissions
+Founders submit to `company_metric_values` (not per-request). This means:
+- One submission per metric + period + company
+- All approved investors see the same value
+- Upsert on conflict (company_id, metric_name, period_type, period_start, period_end)
+
+### Auto-Fulfill Trigger
+A DB trigger (`trg_auto_fulfill_metric_requests`) fires on INSERT/UPDATE to `company_metric_values` and:
+- Matches by `lower(metric_name)` + `period_type` + `period_start` + `period_end`
+- Only fulfills requests from investors with `approval_status IN ('auto_approved', 'approved')`
+- Sets matching `metric_requests.status = 'submitted'`
+
+### Founder Request View
+The `GET /api/founder/metric-requests` endpoint returns a deduplicated view:
+- Groups requests by metric_name + period
+- Shows investor count per group (e.g., "2 investors want MRR for Jan 2025")
+- Indicates whether a submission already exists
+
+### API Routes
+- `POST /api/metrics/submit` - Submit a metric value (founder, writes to company_metric_values)
+- `GET /api/founder/metric-requests` - Deduplicated requests view
+- `GET /api/founder/company-metrics` - Submission history
+
+## Company Tags
+
+### Tag Types
+- **Stage**: seed, series_a, series_b, series_c, growth
+- **Industry**: saas, fintech, healthcare, ecommerce, edtech, ai_ml, other
+- **Business Model**: b2b, b2c, b2b2c, marketplace, other
+
+### Usage
+Tags are used for filtering portfolio companies and selecting companies for template assignment. Investors can edit tags via the portfolio page.
+
+### API Routes
+- `GET /api/investors/companies` - List companies with tags
+- `PUT /api/investors/companies/[id]/tags` - Update company tags
+
+## Metric Templates
+
+### Overview
+Investors create reusable metric templates (e.g., "SaaS Metrics" with MRR, ARR, Burn Rate) and bulk-assign them to portfolio companies.
+
+### Template Structure
+- `metric_templates` - Name + description, owned by investor
+- `metric_template_items` - Ordered list of metrics (name, period_type, data_type)
+
+### Bulk Assignment
+When assigning a template to companies:
+1. For each company x template item: create a `metric_definition` and `metric_request`
+2. Skip if a matching request already exists (same investor + company + metric + period)
+3. Returns count of created vs skipped requests
+
+### API Routes
+- `GET/POST /api/investors/metric-templates` - List/create templates
+- `GET/PUT/DELETE /api/investors/metric-templates/[id]` - Read/update/delete
+- `POST /api/investors/metric-templates/assign` - Bulk assign to companies (requires templateId, companyIds[], periodStart, periodEnd, optional dueDate)
+
 ## CSV Import
 
 ### Flexible Column Names
@@ -160,7 +264,8 @@ The CSV parser normalizes column names to handle variations:
 - Cross-user data access must be prevented at both RLS and application level
 
 ### Data Ownership
-- **Contact deletion**: Deleting a portfolio contact removes the invitation and relationship, but preserves the company if a founder has already signed up (`founder_id` is set). This prevents investors from accidentally deleting a founder's data.
+- **Contact deletion**: Deleting a portfolio contact removes the invitation and relationship, but preserves the company if a founder has already signed up (`founder_id` is set) OR if other investors are linked to it.
+- **Multi-investor isolation**: Each investor's metric definitions and requests are their own. Company metric values are shared across approved investors but only the founder can write them.
 
 ## UI Patterns
 
@@ -208,8 +313,47 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 SELECT delete_user_by_email('user@example.com');
 ```
 
+### Next.js 15 Params Pattern
+Route handler and page component params are `Promise`-wrapped in Next.js 15:
+```typescript
+// API route handler
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  // ...
+}
+
+// Page component
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ companyId: string }>;
+}) {
+  const { companyId } = await params;
+  // ...
+}
+```
+
+### Supabase Join Type Handling
+Supabase `.select()` with joins may return arrays. Always handle both:
+```typescript
+const defRaw = row.metric_definitions;
+const def = (Array.isArray(defRaw) ? defRaw[0] : defRaw) as { name: string } | null;
+```
+
 ### Race Condition Handling
 When creating users, wait for the `public.users` trigger to complete before updating related tables that reference it.
+
+## Database Migrations
+
+Migration files in `supabase/migrations/`:
+- `0001_init.sql` - Core schema: users, companies, relationships, metric_definitions, metric_requests, metric_submissions, documents, RLS policies
+- `0002_portfolio_invitations.sql` - Portfolio invitations table, investor company insert/update policies
+- `0003_metric_system.sql` - Multi-investor support (approval_status, founder_email dedup), company tags, metric_templates, company_metric_values, auto-fulfill trigger, updated RLS policies
+
+Migrations must be run manually in the Supabase SQL Editor (Dashboard > SQL Editor > paste and run).
 
 ## Production Checklist
 
