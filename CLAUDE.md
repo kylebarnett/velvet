@@ -235,6 +235,47 @@ When assigning a template to companies:
 - `GET/PUT/DELETE /api/investors/metric-templates/[id]` - Read/update/delete
 - `POST /api/investors/metric-templates/assign` - Bulk assign to companies (requires templateId, companyIds[], periodStart, periodEnd, optional dueDate)
 
+## Investor Onboarding
+
+### Overview
+A guided 7-step tour for new investors using a spotlight/tooltip pattern. Walks through: Portfolio (import or add contacts) → Templates (create metric templates) → Requests (send metric requests).
+
+### Behavior
+- **Auto-start**: Tour automatically starts for new investors on first login
+- **Persistence**: Progress saved to `user_metadata.onboarding_step` and `user_metadata.onboarding_complete`
+- **Skippable**: Users can skip at any step; won't auto-start again after skip/completion
+- **Restartable**: "Take tour" button in sidebar allows restarting anytime
+
+### Components
+- `src/lib/onboarding/steps.ts` - Step definitions (id, page, target selector, title, message)
+- `src/contexts/onboarding-context.tsx` - React context for state management
+- `src/components/onboarding/spotlight-overlay.tsx` - SVG mask cutout overlay
+- `src/components/onboarding/onboarding-tooltip.tsx` - Positioned tooltip with auto-positioning
+- `src/components/onboarding/onboarding-provider.tsx` - Renders overlay when tour active
+- `src/components/onboarding/completion-modal.tsx` - Celebration modal on tour completion
+
+### Adding Target Elements
+Add `data-onboarding` attributes to elements you want to highlight:
+```tsx
+<div data-onboarding="portfolio-title">...</div>
+<button data-onboarding="import-csv">Import CSV</button>
+```
+
+### Step Definition
+```typescript
+{
+  id: "import-csv",
+  page: "/portfolio",
+  target: '[data-onboarding="import-csv"]',
+  title: "Import CSV",
+  message: "You can bulk import companies from a CSV file.",
+}
+```
+
+### API Routes
+- `GET /api/user/onboarding` - Get current onboarding state
+- `PUT /api/user/onboarding` - Update step or mark complete
+
 ## CSV Import
 
 ### Flexible Column Names
