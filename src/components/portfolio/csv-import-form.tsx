@@ -215,10 +215,10 @@ export function CsvImportForm() {
   const canImport = parsedData && parsedData.rows.length > 0 && !hasValidationErrors && !importing;
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="space-y-6">
       {/* Drop zone */}
       <div
-        className={`relative rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+        className={`relative rounded-xl border-2 border-dashed p-12 text-center transition-colors ${
           dragActive
             ? "border-white/40 bg-white/5"
             : "border-white/10 hover:border-white/20"
