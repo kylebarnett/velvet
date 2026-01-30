@@ -16,6 +16,7 @@ export async function GET() {
       id,
       approval_status,
       is_inviting_investor,
+      logo_url,
       companies (
         id,
         name,
@@ -36,6 +37,7 @@ export async function GET() {
     relationshipId: r.id,
     approvalStatus: r.approval_status,
     isInvitingInvestor: r.is_inviting_investor,
+    logoUrl: r.logo_url,
     ...(r.companies as any),
   }));
 

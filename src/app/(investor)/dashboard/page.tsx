@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { DashboardCompanyList } from "@/components/investor/dashboard-company-list";
 
 export const dynamic = "force-dynamic";
 
@@ -15,9 +16,11 @@ export default async function InvestorDashboardPage() {
     .select(`
       id,
       approval_status,
+      logo_url,
       companies (
         id,
         name,
+        website,
         founder_id,
         stage,
         industry
@@ -29,6 +32,7 @@ export default async function InvestorDashboardPage() {
   const companies = (relationships ?? []).map((r) => ({
     ...(r.companies as any),
     approvalStatus: r.approval_status,
+    logoUrl: r.logo_url,
   }));
 
   // Count pending requests
@@ -84,42 +88,7 @@ export default async function InvestorDashboardPage() {
             to get started.
           </div>
         ) : (
-          <div className="mt-3 space-y-2">
-            {companies.map((company: any) => (
-              <Link
-                key={company.id}
-                href={`/dashboard/${company.id}`}
-                className="flex items-center justify-between rounded-lg border border-white/5 px-3 py-2 hover:bg-white/5"
-              >
-                <div>
-                  <span className="text-sm font-medium">{company.name}</span>
-                  {company.stage && (
-                    <span className="ml-2 rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
-                      {company.stage.replace(/_/g, " ")}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {company.founder_id ? (
-                    <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
-                      Active
-                    </span>
-                  ) : (
-                    <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200">
-                      Pending
-                    </span>
-                  )}
-                  <span className="text-xs text-white/40">
-                    {company.approvalStatus === "auto_approved" || company.approvalStatus === "approved"
-                      ? "Approved"
-                      : company.approvalStatus === "denied"
-                        ? "Denied"
-                        : "Awaiting approval"}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <DashboardCompanyList companies={companies} />
         )}
       </div>
     </div>

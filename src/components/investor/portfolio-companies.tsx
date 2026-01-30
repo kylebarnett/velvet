@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { CompanyTagEditor, TagBadge } from "@/components/investor/company-tag-editor";
+import { CompanyLogo } from "@/components/investor/company-logo";
 
 type Company = {
   id: string;
@@ -13,6 +14,7 @@ type Company = {
   founder_id: string | null;
   relationshipId: string;
   approvalStatus: string;
+  logoUrl: string | null;
 };
 
 export function PortfolioCompanies({ companies: initialCompanies }: { companies: Company[] }) {
@@ -94,22 +96,38 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
         {filtered.map((company) => (
           <div key={company.id} className="rounded-xl border border-white/10 bg-white/5 p-4">
             <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{company.name}</span>
-                  {company.founder_id && (
-                    <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
-                      Founder joined
-                    </span>
-                  )}
-                </div>
-                <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  <TagBadge label="Stage" value={company.stage} />
-                  <TagBadge label="Industry" value={company.industry} />
-                  <TagBadge label="Model" value={company.business_model} />
-                  {!company.stage && !company.industry && !company.business_model && (
-                    <span className="text-xs text-white/40">No tags</span>
-                  )}
+              <div className="flex items-start gap-3">
+                <CompanyLogo
+                  companyId={company.id}
+                  companyName={company.name}
+                  logoUrl={company.logoUrl}
+                  editable
+                  size="lg"
+                  onLogoChange={(newLogoUrl) => {
+                    setCompanies((prev) =>
+                      prev.map((c) =>
+                        c.id === company.id ? { ...c, logoUrl: newLogoUrl } : c
+                      )
+                    );
+                  }}
+                />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{company.name}</span>
+                    {company.founder_id && (
+                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
+                        Founder joined
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    <TagBadge label="Stage" value={company.stage} />
+                    <TagBadge label="Industry" value={company.industry} />
+                    <TagBadge label="Model" value={company.business_model} />
+                    {!company.stage && !company.industry && !company.business_model && (
+                      <span className="text-xs text-white/40">No tags</span>
+                    )}
+                  </div>
                 </div>
               </div>
               <button

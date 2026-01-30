@@ -1,7 +1,6 @@
 import { AppShell, type CompanyInfo } from "@/components/layouts/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getLogoUrl } from "@/lib/utils/logo";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +22,7 @@ export default async function FounderLayout({
     company = {
       name: companyData.name,
       website: companyData.website,
-      logoUrl: getLogoUrl(companyData.website),
+      logoUrl: null,
     };
   }
 

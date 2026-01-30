@@ -28,7 +28,7 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 ### Tables
 - `users` - Linked to Supabase auth.users via trigger
 - `companies` - Portfolio companies (founder_id nullable for investor imports, founder_email for dedup, stage/industry/business_model tags)
-- `investor_company_relationships` - Maps investors to portfolio companies (approval_status: auto_approved/pending/approved/denied, is_inviting_investor flag)
+- `investor_company_relationships` - Maps investors to portfolio companies (approval_status: auto_approved/pending/approved/denied, is_inviting_investor flag, logo_url for per-investor logos)
 - `portfolio_invitations` - Founder contacts with invitation status
 - `metric_definitions` - Investor-defined metrics (personal catalog, reused via upsert)
 - `metric_requests` - Requests from investors to founders (auto-fulfilled by DB trigger)
@@ -212,8 +212,46 @@ The `GET /api/founder/metric-requests` endpoint returns a deduplicated view:
 Tags are used for filtering portfolio companies and selecting companies for template assignment. Investors can edit tags via the portfolio page.
 
 ### API Routes
-- `GET /api/investors/companies` - List companies with tags
+- `GET /api/investors/companies` - List companies with tags and logos
 - `PUT /api/investors/companies/[id]/tags` - Update company tags
+- `POST /api/investors/companies/[id]/logo` - Upload company logo (multipart/form-data)
+- `DELETE /api/investors/companies/[id]/logo` - Remove custom logo
+
+## Company Logos
+
+### Overview
+Investors can upload custom logos for portfolio companies. Logos are per-investor (not shared across investors viewing the same company). Upload is only available on the Portfolio page; Dashboard displays logos read-only.
+
+### Fallback
+- Custom uploaded logo (stored in Supabase Storage)
+- Company initial letter (UI fallback if no logo uploaded)
+
+### Storage
+- Bucket: `company-logos`
+- Path: `{investor_id}/{company_id}.{ext}`
+- Allowed types: PNG, JPG, WebP, SVG
+- Max size: 2MB
+
+### Components
+- `src/components/investor/company-logo.tsx` - Reusable logo component with upload functionality (editable on Portfolio)
+- `src/components/investor/dashboard-company-list.tsx` - Dashboard company list with logos (read-only)
+- `src/lib/utils/logo.ts` - Logo URL utility `getCompanyLogoUrl()`
+
+### UI Behavior (Portfolio page)
+- Click logo placeholder to upload
+- Hover shows camera icon overlay
+- Click existing logo to show change/remove menu
+- Loading spinner during upload
+- Error tooltip auto-dismisses after 3s
+
+### Setup
+1. Run migration `0005_company_logos.sql` (adds `logo_url` column and RLS policy)
+2. Create `company-logos` Supabase Storage bucket with public read access
+3. Add storage policies (see migration file for SQL)
+
+### Technical Notes
+- Cache-busting: Logo URLs include `?v={timestamp}` to ensure updates display immediately
+- RLS: Investors can only update their own relationships (including logo_url)
 
 ## Metric Templates
 
@@ -452,6 +490,7 @@ Migration files in `supabase/migrations/`:
 - `0002_portfolio_invitations.sql` - Portfolio invitations table, investor company insert/update policies
 - `0003_metric_system.sql` - Multi-investor support (approval_status, founder_email dedup), company tags, metric_templates, company_metric_values, auto-fulfill trigger, updated RLS policies
 - `0004_system_templates.sql` - System templates (is_system, target_industry columns), seeds 7 industry templates with metrics, updated RLS policies for shared read access
+- `0005_company_logos.sql` - Adds logo_url column to investor_company_relationships for per-investor logos
 
 Migrations must be run manually in the Supabase SQL Editor (Dashboard > SQL Editor > paste and run).
 

@@ -43,6 +43,7 @@ export default async function PortfolioPage() {
     .select(`
       id,
       approval_status,
+      logo_url,
       companies (
         id,
         name,
@@ -59,6 +60,7 @@ export default async function PortfolioPage() {
   const companies = (relationships ?? []).map((r) => ({
     relationshipId: r.id,
     approvalStatus: r.approval_status,
+    logoUrl: r.logo_url,
     ...(r.companies as any),
   }));
 
