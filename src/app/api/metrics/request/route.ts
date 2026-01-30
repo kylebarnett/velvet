@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 
 const schema = z.object({
-  companyId: z.string().uuid().or(z.string().min(1)),
+  companyId: z.string().uuid(),
   metricName: z.string().min(2),
   periodType: z.enum(["monthly", "quarterly", "annual"]),
   periodStart: z.string().min(1),

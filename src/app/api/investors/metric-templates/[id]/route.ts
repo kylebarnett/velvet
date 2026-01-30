@@ -84,31 +84,24 @@ export async function PUT(
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   const body = await req.json().catch(() => null);
-  console.log("PUT request body:", JSON.stringify(body, null, 2));
-
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) {
-    console.log("Validation error:", parsed.error);
     return jsonError("Invalid request body.", 400);
   }
 
   // Verify ownership and not a system template (use admin to bypass RLS)
   const adminClient = createSupabaseAdminClient();
-  const { data: existing, error: existingError } = await adminClient
+  const { data: existing } = await adminClient
     .from("metric_templates")
     .select("id, is_system, investor_id")
     .eq("id", id)
     .single();
-
-  console.log("Existing template:", existing, "Error:", existingError);
 
   if (!existing) return jsonError("Template not found.", 404);
   if (existing.is_system) return jsonError("Cannot edit system templates.", 403);
   if (existing.investor_id !== user.id) return jsonError("Not authorized.", 403);
 
   const { name, description, items } = parsed.data;
-
-  console.log("Updating template:", id, "with items:", items.length);
 
   // Update template
   const { error: updateError } = await adminClient
@@ -117,22 +110,16 @@ export async function PUT(
     .eq("id", id);
 
   if (updateError) {
-    console.error("Update template error:", updateError);
     return jsonError(updateError.message, 500);
   }
-  console.log("Template metadata updated");
 
   // Delete existing items
-  const { data: deletedItems, error: deleteError } = await adminClient
+  const { error: deleteError } = await adminClient
     .from("metric_template_items")
     .delete()
-    .eq("template_id", id)
-    .select();
-
-  console.log("Deleted items:", deletedItems?.length ?? 0, "Error:", deleteError);
+    .eq("template_id", id);
 
   if (deleteError) {
-    console.error("Delete items error:", deleteError);
     return jsonError(deleteError.message, 500);
   }
 
@@ -145,17 +132,12 @@ export async function PUT(
     sort_order: item.sort_order ?? i,
   }));
 
-  console.log("Inserting items:", JSON.stringify(newItems, null, 2));
-
   const { data: insertedItems, error: itemsError } = await adminClient
     .from("metric_template_items")
     .insert(newItems)
     .select();
 
-  console.log("Inserted items:", insertedItems?.length ?? 0, "Error:", itemsError);
-
   if (itemsError) {
-    console.error("Insert items error:", itemsError);
     return jsonError(itemsError.message, 500);
   }
 

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { escapeHtml } from "@/lib/utils/html";
 
 const schema = z.union([
   z.object({ invitationIds: z.array(z.string().uuid()).min(1) }),
@@ -101,9 +102,9 @@ export async function POST(req: Request) {
 </head>
 <body>
   <div class="container">
-    <p>Hi ${invitation.first_name},</p>
+    <p>Hi ${escapeHtml(invitation.first_name)},</p>
 
-    <p><strong>${investorName}</strong> has added your company <strong>${companyName}</strong> to their portfolio on Velvet.</p>
+    <p><strong>${escapeHtml(investorName)}</strong> has added your company <strong>${escapeHtml(companyName)}</strong> to their portfolio on Velvet.</p>
 
     <p>Velvet is a platform that helps founders share metrics with their investors efficiently.</p>
 

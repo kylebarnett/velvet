@@ -34,7 +34,9 @@ export async function POST(req: Request) {
     return jsonError("Not authorized to upload to this company.", 403);
   }
 
-  const filePath = `${companyId}/${Date.now()}-${file.name}`;
+  // Sanitize filename to prevent path traversal attacks
+  const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const filePath = `${companyId}/${Date.now()}-${sanitizedName}`;
 
   const { error: uploadError } = await supabase.storage
     .from("documents")
@@ -47,7 +49,7 @@ export async function POST(req: Request) {
     .insert({
       company_id: companyId,
       uploaded_by: user.id,
-      file_name: file.name,
+      file_name: sanitizedName,
       file_path: filePath,
       file_type: file.type || null,
       file_size: file.size,

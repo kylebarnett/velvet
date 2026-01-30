@@ -18,6 +18,12 @@ export async function POST(
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
+  // Pre-check content-length header before reading into memory
+  const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
+  if (contentLength > MAX_SIZE) {
+    return jsonError("File too large. Maximum size: 2MB.", 413);
+  }
+
   // Verify investor owns this company relationship
   const { data: relationship, error: relError } = await supabase
     .from("investor_company_relationships")
