@@ -34,7 +34,7 @@ export function DocumentUploadForm() {
       className="max-w-2xl rounded-xl border border-white/10 bg-white/5 p-5"
       onSubmit={onSubmit}
     >
-      <div className="grid gap-3">
+      <div className="grid gap-4">
         <div className="grid gap-2">
           <label className="text-sm font-medium" htmlFor="companyId">
             Company
@@ -53,22 +53,59 @@ export function DocumentUploadForm() {
           </p>
         </div>
 
-        <label className="text-sm font-medium" htmlFor="file">
-          Deal materials
-        </label>
-        <div className="rounded-xl border border-dashed border-white/15 bg-black/20 p-6">
-          <input
-            id="file"
-            name="file"
-            type="file"
-            className="block w-full text-sm text-white/70 file:mr-4 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium file:text-black hover:file:bg-white/90"
-            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt"
+        <div className="grid gap-2">
+          <label className="text-sm font-medium" htmlFor="documentType">
+            Document type
+          </label>
+          <select
+            id="documentType"
+            name="documentType"
+            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
             required
+          >
+            <option value="">Select type…</option>
+            <option value="income_statement">Income Statement</option>
+            <option value="balance_sheet">Balance Sheet</option>
+            <option value="cash_flow_statement">Cash Flow Statement</option>
+            <option value="consolidated_financial_statements">Consolidated Financial Statements</option>
+            <option value="409a_valuation">409A Valuation</option>
+            <option value="investor_update">Investor Update</option>
+            <option value="board_deck">Board Deck</option>
+            <option value="cap_table">Cap Table</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div className="grid gap-2">
+          <label className="text-sm font-medium" htmlFor="description">
+            Description <span className="font-normal text-white/50">(optional)</span>
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            rows={2}
+            placeholder="Add context about this document…"
+            className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
           />
-          <p className="mt-3 text-sm text-white/60">
-            Upload PDFs, decks, spreadsheets, or text. We’ll store them in
-            Supabase Storage and queue ingestion later.
-          </p>
+        </div>
+
+        <div className="grid gap-2">
+          <label className="text-sm font-medium" htmlFor="file">
+            File
+          </label>
+          <div className="rounded-xl border border-dashed border-white/15 bg-black/20 p-6">
+            <input
+              id="file"
+              name="file"
+              type="file"
+              className="block w-full text-sm text-white/70 file:mr-4 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium file:text-black hover:file:bg-white/90"
+              accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt"
+              required
+            />
+            <p className="mt-3 text-sm text-white/60">
+              Upload PDFs, decks, spreadsheets, or text files.
+            </p>
+          </div>
         </div>
       </div>
 

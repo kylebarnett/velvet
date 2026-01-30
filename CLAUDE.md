@@ -13,7 +13,7 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - **Founders** - Submit metrics, upload documents, respond to requests
 
 ### Route Structure
-- Investors: `/dashboard`, `/dashboard/[companyId]`, `/dashboard/[companyId]/metrics`, `/portfolio`, `/requests`, `/requests/new`, `/templates`, `/templates/new`, `/templates/[id]`
+- Investors: `/dashboard`, `/dashboard/[companyId]`, `/dashboard/[companyId]/metrics`, `/portfolio`, `/requests`, `/requests/new`, `/templates`, `/templates/new`, `/templates/[id]`, `/documents`
 - Founders: `/portal`, `/portal/requests`, `/portal/metrics`, `/portal/investors`, `/portal/documents`
 - Auth: `/login`, `/signup`, `/app` (redirects based on role)
 
@@ -36,7 +36,7 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `metric_templates` - Metric sets (name, description, is_system, target_industry). System templates have `investor_id = NULL`, user templates require `investor_id`
 - `metric_template_items` - Individual metrics in a template (metric_name, period_type, data_type, sort_order)
 - `company_metric_values` - Company-level shared submissions (unique per company+metric+period, auto-fulfills matching requests via trigger)
-- `documents` - Uploaded files from founders
+- `documents` - Uploaded files from founders (document_type enum, description)
 
 ### RLS Policies
 - All tables have Row Level Security enabled
@@ -47,6 +47,7 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `metric_requests` SELECT: founders only see requests from approved investors
 - `investor_company_relationships` UPDATE: founders can approve/deny for their company
 - `metric_templates` + `metric_template_items`: investor CRUD own
+- `documents`: founders INSERT/UPDATE own company; approved investors SELECT only
 
 ## Styling
 
@@ -252,6 +253,49 @@ Investors can upload custom logos for portfolio companies. Logos are per-investo
 ### Technical Notes
 - Cache-busting: Logo URLs include `?v={timestamp}` to ensure updates display immediately
 - RLS: Investors can only update their own relationships (including logo_url)
+
+## Investor Documents
+
+### Overview
+Investors can view, search, filter, and bulk download documents uploaded by founders across their portfolio companies. Only documents from companies with approved relationships are visible.
+
+### Document Types
+| Type | Display Name | Description |
+|------|--------------|-------------|
+| `income_statement` | Income Statement | P&L / profit and loss statements |
+| `balance_sheet` | Balance Sheet | Assets, liabilities, equity snapshots |
+| `cash_flow_statement` | Cash Flow Statement | Operating, investing, financing cash flows |
+| `consolidated_financial_statements` | Consolidated Financial Statements | Combined financial statements |
+| `409a_valuation` | 409A Valuation | Fair market value assessments |
+| `investor_update` | Investor Update | Monthly/quarterly investor communications |
+| `board_deck` | Board Deck | Board meeting presentations |
+| `cap_table` | Cap Table | Capitalization table documents |
+| `other` | Other | Miscellaneous documents |
+
+### Features
+- **Search** - Filter by filename (case-insensitive substring)
+- **Company Filter** - Dropdown of approved portfolio companies
+- **Type Filter** - Dropdown of document types
+- **Bulk Selection** - Checkboxes with select all
+- **Bulk Download** - Download selected documents as ZIP
+- **Individual Download** - Download icon per row
+- **Company Download** - "Download all" button when company filter is active
+
+### API Routes
+- `GET /api/investors/documents` - List documents across portfolio (supports `companyId`, `type`, `search` query params)
+- `GET /api/investors/documents/download` - Bulk download as ZIP (supports `ids`, `companyId`, `type` query params)
+
+### Founder Upload
+Founders select a document type when uploading files. The upload form includes:
+- Document type selector (required)
+- Description field (optional)
+
+### Dependencies
+- `archiver` package for ZIP file creation
+
+### Setup
+1. Run migration `0006_document_types.sql`
+2. Install archiver: `npm install archiver @types/archiver`
 
 ## Metric Templates
 
@@ -491,11 +535,41 @@ Migration files in `supabase/migrations/`:
 - `0003_metric_system.sql` - Multi-investor support (approval_status, founder_email dedup), company tags, metric_templates, company_metric_values, auto-fulfill trigger, updated RLS policies
 - `0004_system_templates.sql` - System templates (is_system, target_industry columns), seeds 7 industry templates with metrics, updated RLS policies for shared read access
 - `0005_company_logos.sql` - Adds logo_url column to investor_company_relationships for per-investor logos
+- `0006_document_types.sql` - Adds document_type enum and description column to documents table, RLS policy for investor read access
 
 Migrations must be run manually in the Supabase SQL Editor (Dashboard > SQL Editor > paste and run).
+
+## Email Configuration
+
+### Current Limitation
+The app uses Resend for sending founder invitation emails. Currently configured with `onboarding@resend.dev` (Resend's test domain), which **only delivers to the Resend account owner's email**. To send invitations to any recipient, a verified sending domain is required.
+
+### Setup Steps (When Ready)
+1. **Register a domain** (~$10-15/year)
+   - Namecheap, Cloudflare Registrar, or Squarespace (formerly Google Domains)
+   - Example: `tryvelvet.com`, `velvetmetrics.com`, `getvelvet.io`
+
+2. **Add domain in Resend Dashboard**
+   - Go to https://resend.com/domains
+   - Click "Add Domain" and enter your domain
+   - Add the DNS records Resend provides (DKIM, SPF, Return-Path)
+   - Click "Verify" (usually takes a few minutes)
+
+3. **Update code**
+   - File: `src/app/api/investors/portfolio/invite/route.ts` line 144
+   - Change: `from: "Velvet <onboarding@resend.dev>"`
+   - To: ``from: `Velvet <invites@${process.env.RESEND_FROM_DOMAIN}>` ``
+   - Add `RESEND_FROM_DOMAIN=yourdomain.com` to `.env`
+
+### Pricing
+- Resend: 3,000 free emails/month, then ~$20/month for 50k
+- Expected volume: 1,000-10,000 emails/month
+
+### Multi-Investor Behavior
+All invitation emails are sent from the Velvet domain (e.g., `invites@velvet.com`), regardless of which investor sends them. The investor's name appears in the email body, not the from address.
 
 ## Production Checklist
 
 - [ ] **Re-enable email confirmation** in Supabase (Authentication → Providers → Email → toggle on "Confirm email"). Currently disabled for development.
-- [ ] Verify a custom domain in Resend (replace `onboarding@resend.dev`)
+- [ ] **Configure email sending domain** (see Email Configuration section above)
 - [ ] Set `NEXT_PUBLIC_APP_URL` to the production domain

@@ -34,9 +34,15 @@ export default async function InvestorLayout({
         title="Investor"
         nav={[
           { href: "/dashboard", label: "Dashboards" },
-          { href: "/portfolio", label: "Portfolio" },
-          { href: "/requests", label: "Requests" },
-          { href: "/templates", label: "Templates" },
+          {
+            href: "/portfolio",
+            label: "Portfolio",
+            children: [
+              { href: "/requests", label: "Requests" },
+              { href: "/templates", label: "Templates" },
+              { href: "/documents", label: "Documents" },
+            ],
+          },
         ]}
       >
         {children}

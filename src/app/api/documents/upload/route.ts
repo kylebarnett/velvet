@@ -22,6 +22,35 @@ export async function POST(req: Request) {
     return jsonError("Missing companyId.", 400);
   }
 
+  // Get document type (required)
+  const documentType = form.get("documentType");
+  if (typeof documentType !== "string" || !documentType) {
+    return jsonError("Missing documentType.", 400);
+  }
+
+  // Validate document type is a valid enum value
+  const validTypes = [
+    "income_statement",
+    "balance_sheet",
+    "cash_flow_statement",
+    "consolidated_financial_statements",
+    "409a_valuation",
+    "investor_update",
+    "board_deck",
+    "cap_table",
+    "other",
+  ];
+  if (!validTypes.includes(documentType)) {
+    return jsonError("Invalid documentType.", 400);
+  }
+
+  // Get optional description
+  const descriptionRaw = form.get("description");
+  const description =
+    typeof descriptionRaw === "string" && descriptionRaw.trim()
+      ? descriptionRaw.trim()
+      : null;
+
   // Verify founder owns this company
   const { data: company } = await supabase
     .from("companies")
@@ -53,6 +82,8 @@ export async function POST(req: Request) {
       file_path: filePath,
       file_type: file.type || null,
       file_size: file.size,
+      document_type: documentType,
+      description: description,
       ingestion_status: "pending",
     })
     .select("id")

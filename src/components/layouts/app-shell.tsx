@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HelpCircle, LogOut } from "lucide-react";
+import { ChevronDown, HelpCircle, LogOut } from "lucide-react";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils/cn";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils/cn";
 export type NavItem = {
   href: string;
   label: string;
+  children?: NavItem[];
 };
 
 export type CompanyInfo = {
@@ -36,7 +37,34 @@ export function AppShell({
   onTakeTour?: () => void;
 }) {
   const [logoError, setLogoError] = React.useState(false);
+  const [expandedSections, setExpandedSections] = React.useState<Set<string>>(new Set());
   const pathname = usePathname();
+
+  // Auto-expand sections when a child route is active
+  React.useEffect(() => {
+    nav.forEach((item) => {
+      if (item.children) {
+        const isChildActive = item.children.some(
+          (child) => pathname === child.href || pathname?.startsWith(child.href + "/")
+        );
+        if (isChildActive) {
+          setExpandedSections((prev) => new Set([...prev, item.href]));
+        }
+      }
+    });
+  }, [pathname, nav]);
+
+  function toggleSection(href: string) {
+    setExpandedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(href)) {
+        next.delete(href);
+      } else {
+        next.add(href);
+      }
+      return next;
+    });
+  }
 
   async function onLogout() {
     const supabase = createSupabaseBrowserClient();
@@ -82,8 +110,66 @@ export function AppShell({
           </div>
           <nav className="px-2 py-3">
             {nav.map((item) => {
+              const hasChildren = item.children && item.children.length > 0;
+              const isExpanded = expandedSections.has(item.href);
               const active =
                 pathname === item.href || pathname?.startsWith(item.href + "/");
+              const isChildActive = hasChildren && item.children?.some(
+                (child) => pathname === child.href || pathname?.startsWith(child.href + "/")
+              );
+
+              if (hasChildren) {
+                return (
+                  <div key={item.href}>
+                    <button
+                      onClick={() => toggleSection(item.href)}
+                      className={cn(
+                        "flex h-10 w-full items-center justify-between rounded-md px-3 text-sm text-white/70 hover:bg-white/5 hover:text-white",
+                        (active || isChildActive) && "text-white",
+                      )}
+                      type="button"
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 transition-transform",
+                          isExpanded && "rotate-180"
+                        )}
+                      />
+                    </button>
+                    {isExpanded && (
+                      <div className="ml-3 border-l border-white/10 pl-2">
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "flex h-9 items-center rounded-md px-3 text-sm text-white/60 hover:bg-white/5 hover:text-white",
+                            active && !isChildActive && "bg-white/10 text-white",
+                          )}
+                        >
+                          Overview
+                        </Link>
+                        {item.children?.map((child) => {
+                          const childActive =
+                            pathname === child.href || pathname?.startsWith(child.href + "/");
+                          return (
+                            <Link
+                              key={child.href}
+                              className={cn(
+                                "flex h-9 items-center rounded-md px-3 text-sm text-white/60 hover:bg-white/5 hover:text-white",
+                                childActive && "bg-white/10 text-white",
+                              )}
+                              href={child.href}
+                            >
+                              {child.label}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
