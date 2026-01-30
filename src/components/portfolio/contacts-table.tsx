@@ -243,6 +243,7 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
 
       setContacts((prev) => prev.filter((c) => c.id !== id));
       setSuccess("Contact deleted.");
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {

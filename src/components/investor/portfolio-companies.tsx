@@ -20,6 +20,11 @@ type Company = {
 export function PortfolioCompanies({ companies: initialCompanies }: { companies: Company[] }) {
   const [companies, setCompanies] = React.useState(initialCompanies);
   const [editingId, setEditingId] = React.useState<string | null>(null);
+
+  // Sync state when server data changes (e.g., after router.refresh())
+  React.useEffect(() => {
+    setCompanies(initialCompanies);
+  }, [initialCompanies]);
   const [filterStage, setFilterStage] = React.useState("");
   const [filterIndustry, setFilterIndustry] = React.useState("");
   const [filterModel, setFilterModel] = React.useState("");
