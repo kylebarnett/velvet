@@ -275,6 +275,11 @@ Investors can hide system templates they don't want to see:
 - Hidden templates shown in a collapsible section with "Restore" button
 - Hiding is per-investor (doesn't affect other users)
 
+### Template Card UI
+- **Expandable metrics**: Cards show first 6 metrics by default, click "Show all X metrics" to expand
+- **Metric tooltips**: Hover over any metric to see its definition and calculation formula
+- **Metric definitions**: Stored in `src/lib/metric-definitions.ts` with descriptions and formulas for 50+ metrics
+
 ### API Routes
 - `GET /api/user/hidden-templates` - Get list of hidden template IDs
 - `PUT /api/user/hidden-templates` - Hide or restore a template (`{ templateId, action: "hide" | "show" }`)
