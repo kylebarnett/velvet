@@ -146,7 +146,7 @@ export function AppShell({
                             active && !isChildActive && "bg-white/10 text-white",
                           )}
                         >
-                          Overview
+                          Companies & Contacts
                         </Link>
                         {item.children?.map((child) => {
                           const childActive =

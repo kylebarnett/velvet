@@ -151,14 +151,21 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
                   stage={company.stage}
                   industry={company.industry}
                   businessModel={company.business_model}
-                  onSaved={() => {
-                    // Refresh companies from API
-                    fetch("/api/investors/companies")
-                      .then((r) => r.json())
-                      .then((json) => {
-                        if (json.companies) setCompanies(json.companies);
-                      })
-                      .catch(() => {});
+                  onSaved={(newTags) => {
+                    // Update local state with new tags
+                    setCompanies((prev) =>
+                      prev.map((c) =>
+                        c.id === company.id
+                          ? {
+                              ...c,
+                              stage: newTags.stage,
+                              industry: newTags.industry,
+                              business_model: newTags.businessModel,
+                            }
+                          : c
+                      )
+                    );
+                    setEditingId(null);
                   }}
                 />
               </div>

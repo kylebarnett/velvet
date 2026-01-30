@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { CompanyTagEditorWrapper } from "@/components/investor/company-tag-editor-wrapper";
 
 export const dynamic = "force-dynamic";
 
@@ -87,38 +88,39 @@ export default async function CompanyDashboardPage({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold tracking-tight">{company.name}</h1>
-          {company.founder_id ? (
-            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
-              Founder joined
-            </span>
-          ) : (
-            <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200">
-              Pending signup
-            </span>
-          )}
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-semibold tracking-tight">{company.name}</h1>
+            {company.founder_id ? (
+              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
+                Founder joined
+              </span>
+            ) : (
+              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200">
+                Pending signup
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2 text-sm text-white/60">
+            {company.website && <span>{company.website}</span>}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2 text-sm text-white/60">
-          {company.website && <span>{company.website}</span>}
-          {formatLabel(company.stage) && (
-            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
-              {formatLabel(company.stage)}
-            </span>
-          )}
-          {formatLabel(company.industry) && (
-            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
-              {formatLabel(company.industry)}
-            </span>
-          )}
-          {formatLabel(company.business_model) && (
-            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
-              {formatLabel(company.business_model)}
-            </span>
-          )}
-        </div>
+        <Link
+          href="/dashboard"
+          className="text-sm text-white/50 hover:text-white"
+        >
+          Back to dashboard
+        </Link>
       </div>
+
+      {/* Company Tags */}
+      <CompanyTagEditorWrapper
+        companyId={company.id}
+        stage={company.stage}
+        industry={company.industry}
+        businessModel={company.business_model}
+      />
 
       {!isApproved && (
         <div className="rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">

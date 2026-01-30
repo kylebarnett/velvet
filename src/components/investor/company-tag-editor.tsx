@@ -11,6 +11,12 @@ const formatLabel = (s: string) =>
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
+type SavedTags = {
+  stage: string | null;
+  industry: string | null;
+  businessModel: string | null;
+};
+
 export function CompanyTagEditor({
   companyId,
   stage,
@@ -22,7 +28,7 @@ export function CompanyTagEditor({
   stage: string | null;
   industry: string | null;
   businessModel: string | null;
-  onSaved?: () => void;
+  onSaved?: (tags: SavedTags) => void;
 }) {
   const [currentStage, setCurrentStage] = React.useState(stage ?? "");
   const [currentIndustry, setCurrentIndustry] = React.useState(industry ?? "");
@@ -54,7 +60,11 @@ export function CompanyTagEditor({
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Failed to save.");
       setSaved(true);
-      onSaved?.();
+      onSaved?.({
+        stage: currentStage || null,
+        industry: currentIndustry || null,
+        businessModel: currentModel || null,
+      });
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong.");
     } finally {

@@ -3,17 +3,12 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ContactsTable } from "@/components/portfolio/contacts-table";
-import { PortfolioCompanies } from "@/components/investor/portfolio-companies";
 
 export const dynamic = "force-dynamic";
 
 export default async function PortfolioPage() {
-  await requireRole("investor");
+  const user = await requireRole("investor");
   const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   const { data: contacts } = await supabase
     .from("portfolio_invitations")
@@ -34,38 +29,47 @@ export default async function PortfolioPage() {
         founder_id
       )
     `)
-    .eq("investor_id", user?.id)
+    .eq("investor_id", user.id)
     .order("created_at", { ascending: false });
 
-  // Fetch companies with tags for the tag management section
+  // Count pending invitations (not yet accepted)
+  const pendingInvitations = (contacts ?? []).filter(
+    (c) => c.status === "pending" || c.status === "sent"
+  ).length;
+
+  // Count pending requests
+  const { count: pendingRequests } = await supabase
+    .from("metric_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("investor_id", user.id)
+    .eq("status", "pending");
+
+  // Count new documents this week
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const { count: newDocuments } = await supabase
+    .from("documents")
+    .select("id", { count: "exact", head: true })
+    .gte("created_at", weekAgo.toISOString());
+
+  // Get companies needing attention (pending approval or no founder signup)
   const { data: relationships } = await supabase
     .from("investor_company_relationships")
-    .select(`
-      id,
-      approval_status,
-      logo_url,
-      companies (
-        id,
-        name,
-        website,
-        stage,
-        industry,
-        business_model,
-        founder_id
-      )
-    `)
-    .eq("investor_id", user?.id)
-    .order("created_at", { ascending: false });
+    .select("approval_status, companies (founder_id)")
+    .eq("investor_id", user.id);
 
-  const companies = (relationships ?? []).map((r) => ({
-    relationshipId: r.id,
-    approvalStatus: r.approval_status,
-    logoUrl: r.logo_url,
-    ...(r.companies as any),
-  }));
+  const needsAttention = (relationships ?? []).filter((r) => {
+    const companyRaw = r.companies;
+    const company = (Array.isArray(companyRaw) ? companyRaw[0] : companyRaw) as { founder_id: string | null } | null;
+    return (
+      r.approval_status === "pending" ||
+      r.approval_status === "denied" ||
+      !company?.founder_id
+    );
+  }).length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div data-onboarding="portfolio-title">
           <h1 className="text-2xl font-semibold">Portfolio</h1>
@@ -91,20 +95,33 @@ export default async function PortfolioPage() {
         </div>
       </div>
 
-      <ContactsTable contacts={contacts ?? []} />
-
-      {companies.length > 0 && (
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-lg font-semibold">Company tags</h2>
-            <p className="text-sm text-white/60">
-              Tag companies by stage, industry, and business model for filtering
-              and template assignment.
-            </p>
-          </div>
-          <PortfolioCompanies companies={companies} />
+      {/* Portfolio Insights */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div className="text-sm text-white/60">Pending Invitations</div>
+          <div className="mt-1 text-2xl font-semibold">{pendingInvitations}</div>
         </div>
-      )}
+        <Link
+          href="/requests"
+          className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors"
+        >
+          <div className="text-sm text-white/60">Pending Requests</div>
+          <div className="mt-1 text-2xl font-semibold">{pendingRequests ?? 0}</div>
+        </Link>
+        <Link
+          href="/documents"
+          className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors"
+        >
+          <div className="text-sm text-white/60">New Documents (7d)</div>
+          <div className="mt-1 text-2xl font-semibold">{newDocuments ?? 0}</div>
+        </Link>
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div className="text-sm text-white/60">Needs Attention</div>
+          <div className="mt-1 text-2xl font-semibold">{needsAttention}</div>
+        </div>
+      </div>
+
+      <ContactsTable contacts={contacts ?? []} />
     </div>
   );
 }

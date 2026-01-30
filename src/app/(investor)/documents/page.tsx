@@ -63,6 +63,7 @@ export default function DocumentsPage() {
   const [search, setSearch] = React.useState("");
   const [companyFilter, setCompanyFilter] = React.useState("");
   const [typeFilter, setTypeFilter] = React.useState("");
+  const [dateFilter, setDateFilter] = React.useState<"all" | "7" | "30" | "90">("all");
 
   // Selection
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
@@ -118,7 +119,21 @@ export default function DocumentsPage() {
   // Clear selection when filters change
   React.useEffect(() => {
     setSelectedIds(new Set());
-  }, [companyFilter, typeFilter, search]);
+  }, [companyFilter, typeFilter, search, dateFilter]);
+
+  // Filter documents by date (client-side)
+  const filteredDocuments = React.useMemo(() => {
+    if (dateFilter === "all") return documents;
+
+    const days = parseInt(dateFilter, 10);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+
+    return documents.filter((doc) => {
+      const docDate = new Date(doc.uploaded_at);
+      return docDate >= cutoff;
+    });
+  }, [documents, dateFilter]);
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
@@ -133,10 +148,10 @@ export default function DocumentsPage() {
   }
 
   function toggleSelectAll() {
-    if (selectedIds.size === documents.length) {
+    if (selectedIds.size === filteredDocuments.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(documents.map((d) => d.id)));
+      setSelectedIds(new Set(filteredDocuments.map((d) => d.id)));
     }
   }
 
@@ -225,7 +240,7 @@ export default function DocumentsPage() {
     }
   }
 
-  const allSelected = documents.length > 0 && selectedIds.size === documents.length;
+  const allSelected = filteredDocuments.length > 0 && selectedIds.size === filteredDocuments.length;
   const someSelected = selectedIds.size > 0;
 
   return (
@@ -288,9 +303,32 @@ export default function DocumentsPage() {
           ))}
         </select>
 
+        {/* Date filter */}
+        <div className="flex rounded-md border border-white/10 overflow-hidden">
+          {[
+            { value: "all" as const, label: "All time" },
+            { value: "7" as const, label: "7 days" },
+            { value: "30" as const, label: "30 days" },
+            { value: "90" as const, label: "90 days" },
+          ].map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setDateFilter(option.value)}
+              className={`px-3 py-2 text-sm ${
+                dateFilter === option.value
+                  ? "bg-white/10 text-white"
+                  : "bg-black/30 text-white/60 hover:bg-white/5"
+              }`}
+              type="button"
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
         {/* Bulk actions */}
         <div className="ml-auto flex items-center gap-2">
-          {companyFilter && documents.length > 0 && (
+          {companyFilter && filteredDocuments.length > 0 && (
             <button
               onClick={downloadAllForCompany}
               disabled={downloading}
@@ -345,19 +383,19 @@ export default function DocumentsPage() {
       )}
 
       {/* Documents table */}
-      {!loading && documents.length === 0 && (
+      {!loading && filteredDocuments.length === 0 && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
           <FileText className="mx-auto h-8 w-8 text-white/30" />
           <p className="mt-2 text-sm text-white/60">No documents found.</p>
           <p className="mt-1 text-xs text-white/40">
-            {search || companyFilter || typeFilter
+            {search || companyFilter || typeFilter || dateFilter !== "all"
               ? "Try adjusting your filters."
               : "Documents uploaded by founders will appear here."}
           </p>
         </div>
       )}
 
-      {!loading && documents.length > 0 && (
+      {!loading && filteredDocuments.length > 0 && (
         <div className="rounded-xl border border-white/10 bg-white/5">
           {/* Table header */}
           <div className="flex items-center gap-4 border-b border-white/10 px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">
@@ -379,7 +417,7 @@ export default function DocumentsPage() {
 
           {/* Table rows */}
           <div className="divide-y divide-white/5">
-            {documents.map((doc) => (
+            {filteredDocuments.map((doc) => (
               <div
                 key={doc.id}
                 className="flex items-center gap-4 px-4 py-3 hover:bg-white/5"
