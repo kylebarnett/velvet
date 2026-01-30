@@ -32,10 +32,11 @@ export default async function PortfolioPage() {
     .eq("investor_id", user.id)
     .order("created_at", { ascending: false });
 
-  // Count pending invitations (not yet accepted)
-  const pendingInvitations = (contacts ?? []).filter(
-    (c) => c.status === "pending" || c.status === "sent"
-  ).length;
+  // Count companies
+  const { count: companyCount } = await supabase
+    .from("investor_company_relationships")
+    .select("id", { count: "exact", head: true })
+    .eq("investor_id", user.id);
 
   // Count pending requests
   const { count: pendingRequests } = await supabase
@@ -51,22 +52,6 @@ export default async function PortfolioPage() {
     .from("documents")
     .select("id", { count: "exact", head: true })
     .gte("created_at", weekAgo.toISOString());
-
-  // Get companies needing attention (pending approval or no founder signup)
-  const { data: relationships } = await supabase
-    .from("investor_company_relationships")
-    .select("approval_status, companies (founder_id)")
-    .eq("investor_id", user.id);
-
-  const needsAttention = (relationships ?? []).filter((r) => {
-    const companyRaw = r.companies;
-    const company = (Array.isArray(companyRaw) ? companyRaw[0] : companyRaw) as { founder_id: string | null } | null;
-    return (
-      r.approval_status === "pending" ||
-      r.approval_status === "denied" ||
-      !company?.founder_id
-    );
-  }).length;
 
   return (
     <div className="space-y-6">
@@ -96,11 +81,14 @@ export default async function PortfolioPage() {
       </div>
 
       {/* Portfolio Insights */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="text-sm text-white/60">Pending Invitations</div>
-          <div className="mt-1 text-2xl font-semibold">{pendingInvitations}</div>
-        </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Link
+          href="/dashboard"
+          className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors"
+        >
+          <div className="text-sm text-white/60">Companies</div>
+          <div className="mt-1 text-2xl font-semibold">{companyCount ?? 0}</div>
+        </Link>
         <Link
           href="/requests"
           className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors"
@@ -115,10 +103,6 @@ export default async function PortfolioPage() {
           <div className="text-sm text-white/60">New Documents (7d)</div>
           <div className="mt-1 text-2xl font-semibold">{newDocuments ?? 0}</div>
         </Link>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="text-sm text-white/60">Needs Attention</div>
-          <div className="mt-1 text-2xl font-semibold">{needsAttention}</div>
-        </div>
       </div>
 
       <ContactsTable contacts={contacts ?? []} />
