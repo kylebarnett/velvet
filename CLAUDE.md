@@ -221,8 +221,8 @@ Tags are used for filtering portfolio companies and selecting companies for temp
 Investors create reusable metric templates (e.g., "SaaS Metrics" with MRR, ARR, Burn Rate) and bulk-assign them to portfolio companies.
 
 ### Template Structure
-- `metric_templates` - Name + description, owned by investor
-- `metric_template_items` - Ordered list of metrics (name, period_type, data_type)
+- `metric_templates` - Name, description, is_system, target_industry. System templates have `investor_id = NULL`, user templates require `investor_id`
+- `metric_template_items` - Ordered list of metrics (metric_name, period_type, data_type, sort_order)
 
 ### Bulk Assignment
 When assigning a template to companies:
@@ -260,12 +260,24 @@ Pre-built, read-only metric templates organized by industry. All investors can v
 - All investors can SELECT system templates (`is_system = true`)
 - Investors can only CRUD their own templates (`investor_id = auth.uid()`)
 - System templates cannot be edited or deleted (enforced at API level)
+- Template item updates use admin client to bypass RLS after ownership verification
 
 ### Clone Flow
 1. Investor clicks "Clone" on a system template
 2. API creates new template with `is_system = false`, `investor_id = user.id`
 3. All template items are copied to the new template
-4. User is redirected to edit page for the new template
+4. Page refreshes and scrolls to "My Templates" section to show the clone
+5. User can then edit the cloned template from "My Templates"
+
+### Hide/Restore
+Investors can hide system templates they don't want to see:
+- Hidden template IDs stored in `user_metadata.hidden_templates` array
+- Hidden templates shown in a collapsible section with "Restore" button
+- Hiding is per-investor (doesn't affect other users)
+
+### API Routes
+- `GET /api/user/hidden-templates` - Get list of hidden template IDs
+- `PUT /api/user/hidden-templates` - Hide or restore a template (`{ templateId, action: "hide" | "show" }`)
 
 ## Investor Onboarding
 
