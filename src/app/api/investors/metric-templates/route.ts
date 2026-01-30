@@ -51,7 +51,15 @@ export async function GET() {
     ),
   }));
 
-  return NextResponse.json({ templates });
+  // Cache for 60 seconds, revalidate in background
+  return NextResponse.json(
+    { templates },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=60, stale-while-revalidate=120",
+      },
+    }
+  );
 }
 
 // POST - Create a new template

@@ -427,7 +427,49 @@ export default function TemplatesPage() {
       </div>
 
       {loading && (
-        <div className="text-sm text-white/60">Loading templates...</div>
+        <div className="space-y-6">
+          {/* Skeleton for Industry Templates */}
+          <div className="space-y-3">
+            <div className="h-5 w-40 animate-pulse rounded bg-white/10" />
+            <div className="grid gap-3 md:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-white/10 bg-white/5 p-4"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="h-5 w-16 animate-pulse rounded-full bg-violet-500/20" />
+                        <div className="h-4 w-32 animate-pulse rounded bg-white/10" />
+                      </div>
+                      <div className="h-3 w-48 animate-pulse rounded bg-white/10" />
+                      <div className="flex flex-wrap gap-1.5">
+                        {[1, 2, 3, 4].map((j) => (
+                          <div
+                            key={j}
+                            className="h-5 w-16 animate-pulse rounded-full bg-white/10"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex gap-1.5">
+                      <div className="h-8 w-16 animate-pulse rounded-md bg-white/20" />
+                      <div className="h-8 w-16 animate-pulse rounded-md bg-white/10" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Skeleton for My Templates */}
+          <div className="space-y-3">
+            <div className="h-5 w-28 animate-pulse rounded bg-white/10" />
+            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <div className="h-4 w-40 animate-pulse rounded bg-white/10" />
+            </div>
+          </div>
+        </div>
       )}
 
       {error && (
