@@ -59,11 +59,11 @@ export function DashboardCompanyList({ companies }: { companies: Company[] }) {
           <div className="flex items-center gap-2">
             {company.founder_id ? (
               <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
-                Active
+                Founder joined
               </span>
             ) : (
               <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200">
-                Pending
+                Awaiting signup
               </span>
             )}
             <span className="text-xs text-white/40">
