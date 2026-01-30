@@ -279,6 +279,8 @@ Investors can hide system templates they don't want to see:
 - **Expandable metrics**: Cards show first 6 metrics by default, click "Show all X metrics" to expand
 - **Metric tooltips**: Hover over any metric to see its definition and calculation formula
 - **Metric definitions**: Stored in `src/lib/metric-definitions.ts` with descriptions and formulas for 50+ metrics
+- **Skeleton loading**: Animated placeholder cards shown while data loads for better perceived performance
+- **API caching**: Templates API uses `Cache-Control: private, max-age=60, stale-while-revalidate=120`
 
 ### API Routes
 - `GET /api/user/hidden-templates` - Get list of hidden template IDs
