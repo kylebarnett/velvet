@@ -7,6 +7,7 @@ import { Copy, Trash2, Sparkles, EyeOff, Eye, ChevronDown, ChevronUp } from "luc
 
 import { TemplateAssignModal } from "@/components/investor/template-assign-modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { getMetricDefinition } from "@/lib/metric-definitions";
 
 type TemplateItem = {
   id: string;
@@ -36,15 +37,58 @@ const INDUSTRY_LABELS: Record<string, string> = {
   other: "General",
 };
 
+// Metric chip with tooltip
+function MetricChip({ name }: { name: string }) {
+  const [showTooltip, setShowTooltip] = React.useState(false);
+  const metricInfo = getMetricDefinition(name);
+
+  return (
+    <div className="relative inline-block">
+      <span
+        className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70 cursor-default"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        {name}
+      </span>
+      {showTooltip && metricInfo && (
+        <div className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-lg border border-white/10 bg-zinc-900 p-3 shadow-xl">
+          <p className="text-xs font-medium text-white">{name}</p>
+          <p className="mt-1 text-xs text-white/60">{metricInfo.description}</p>
+          {metricInfo.formula && (
+            <div className="mt-2 rounded bg-white/5 px-2 py-1.5">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-white/40">Formula</p>
+              <p className="mt-0.5 text-xs text-emerald-400">{metricInfo.formula}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TemplatesPage() {
   const router = useRouter();
   const myTemplatesRef = React.useRef<HTMLDivElement>(null);
   const [templates, setTemplates] = React.useState<Template[]>([]);
   const [hiddenTemplateIds, setHiddenTemplateIds] = React.useState<string[]>([]);
+  const [expandedTemplates, setExpandedTemplates] = React.useState<Set<string>>(new Set());
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [editingSystem, setEditingSystem] = React.useState<string | null>(null);
   const [showHidden, setShowHidden] = React.useState(false);
+
+  function toggleExpanded(templateId: string) {
+    setExpandedTemplates((prev) => {
+      const next = new Set(prev);
+      if (next.has(templateId)) {
+        next.delete(templateId);
+      } else {
+        next.add(templateId);
+      }
+      return next;
+    });
+  }
   const [assignModal, setAssignModal] = React.useState<{
     open: boolean;
     template: Template | null;
@@ -191,6 +235,12 @@ export default function TemplatesPage() {
   }
 
   function renderSystemTemplateCard(tmpl: Template, isHidden = false) {
+    const isExpanded = expandedTemplates.has(tmpl.id);
+    const hasMoreMetrics = tmpl.metric_template_items.length > 6;
+    const displayedMetrics = isExpanded
+      ? tmpl.metric_template_items
+      : tmpl.metric_template_items.slice(0, 6);
+
     return (
       <div
         key={tmpl.id}
@@ -209,20 +259,29 @@ export default function TemplatesPage() {
               <p className="mt-1 text-xs text-white/50">{tmpl.description}</p>
             )}
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {tmpl.metric_template_items.slice(0, 6).map((item) => (
-                <span
-                  key={item.id}
-                  className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70"
-                >
-                  {item.metric_name}
-                </span>
+              {displayedMetrics.map((item) => (
+                <MetricChip key={item.id} name={item.metric_name} />
               ))}
-              {tmpl.metric_template_items.length > 6 && (
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
-                  +{tmpl.metric_template_items.length - 6} more
-                </span>
-              )}
             </div>
+            {hasMoreMetrics && (
+              <button
+                onClick={() => toggleExpanded(tmpl.id)}
+                className="mt-2 inline-flex items-center gap-1 text-xs text-white/50 hover:text-white/70"
+                type="button"
+              >
+                {isExpanded ? (
+                  <>
+                    <ChevronUp className="h-3 w-3" />
+                    Show less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-3 w-3" />
+                    Show all {tmpl.metric_template_items.length} metrics
+                  </>
+                )}
+              </button>
+            )}
           </div>
           <div className="flex shrink-0 gap-1.5">
             {isHidden ? (
@@ -270,6 +329,12 @@ export default function TemplatesPage() {
   }
 
   function renderUserTemplateCard(tmpl: Template) {
+    const isExpanded = expandedTemplates.has(tmpl.id);
+    const hasMoreMetrics = tmpl.metric_template_items.length > 6;
+    const displayedMetrics = isExpanded
+      ? tmpl.metric_template_items
+      : tmpl.metric_template_items.slice(0, 6);
+
     return (
       <div
         key={tmpl.id}
@@ -289,20 +354,29 @@ export default function TemplatesPage() {
               <p className="mt-1 text-xs text-white/50">{tmpl.description}</p>
             )}
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {tmpl.metric_template_items.slice(0, 6).map((item) => (
-                <span
-                  key={item.id}
-                  className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70"
-                >
-                  {item.metric_name}
-                </span>
+              {displayedMetrics.map((item) => (
+                <MetricChip key={item.id} name={item.metric_name} />
               ))}
-              {tmpl.metric_template_items.length > 6 && (
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
-                  +{tmpl.metric_template_items.length - 6} more
-                </span>
-              )}
             </div>
+            {hasMoreMetrics && (
+              <button
+                onClick={() => toggleExpanded(tmpl.id)}
+                className="mt-2 inline-flex items-center gap-1 text-xs text-white/50 hover:text-white/70"
+                type="button"
+              >
+                {isExpanded ? (
+                  <>
+                    <ChevronUp className="h-3 w-3" />
+                    Show less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-3 w-3" />
+                    Show all {tmpl.metric_template_items.length} metrics
+                  </>
+                )}
+              </button>
+            )}
           </div>
           <div className="flex shrink-0 gap-1.5">
             <button
