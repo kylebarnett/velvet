@@ -13,7 +13,7 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - **Founders** - Submit metrics, upload documents, respond to requests
 
 ### Route Structure
-- Investors: `/dashboard`, `/dashboard/[companyId]`, `/dashboard/[companyId]/metrics`, `/portfolio`, `/requests`, `/requests/new`, `/templates`, `/templates/new`, `/templates/[id]`, `/documents`
+- Investors: `/dashboard`, `/dashboard/[companyId]`, `/dashboard/[companyId]/edit`, `/dashboard/[companyId]/metrics`, `/portfolio`, `/requests`, `/requests/new`, `/templates`, `/templates/new`, `/templates/[id]`, `/documents`
 - Founders: `/portal`, `/portal/requests`, `/portal/metrics`, `/portal/investors`, `/portal/documents`
 - Auth: `/login`, `/signup`, `/app` (redirects based on role)
 
@@ -37,6 +37,8 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `metric_template_items` - Individual metrics in a template (metric_name, period_type, data_type, sort_order)
 - `company_metric_values` - Company-level shared submissions (unique per company+metric+period, auto-fulfills matching requests via trigger)
 - `documents` - Uploaded files from founders (document_type enum, description)
+- `dashboard_views` - Saved dashboard layouts per investor per company (name, is_default, layout JSON)
+- `dashboard_templates` - System-wide dashboard presets (name, description, target_industry, layout JSON)
 
 ### RLS Policies
 - All tables have Row Level Security enabled
@@ -48,6 +50,8 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `investor_company_relationships` UPDATE: founders can approve/deny for their company
 - `metric_templates` + `metric_template_items`: investor CRUD own
 - `documents`: founders INSERT/UPDATE own company; approved investors SELECT only
+- `dashboard_views`: investors CRUD own views
+- `dashboard_templates`: all authenticated users can SELECT system templates
 
 ## Styling
 
@@ -409,6 +413,70 @@ Add `data-onboarding` attributes to elements you want to highlight:
 - `GET /api/user/onboarding` - Get current onboarding state
 - `PUT /api/user/onboarding` - Update step or mark complete
 
+## Company Dashboard Builder
+
+### Overview
+Investors can visualize historical metrics from portfolio companies with customizable dashboards. Features include drag-drop dashboard builder, multiple chart types, saved views, and CSV export.
+
+### Dashboard Routes
+- `/dashboard` - Company search/browse with metric snapshots
+- `/dashboard/[companyId]` - Company metrics dashboard view
+- `/dashboard/[companyId]/edit` - Dashboard builder/editor mode
+
+### Widget Types
+- **Metric Card** - Single metric with trend indicator
+- **Line Chart** - Time series visualization
+- **Bar Chart** - Categorical comparisons
+- **Area Chart** - Cumulative trends
+- **Pie Chart** - Proportional breakdowns
+- **Table** - Tabular metric display
+
+### Dashboard Layout JSON Schema
+```typescript
+type Widget = {
+  id: string;
+  type: 'chart' | 'metric-card' | 'table';
+  x: number;      // Grid column (0-11)
+  y: number;      // Grid row
+  w: number;      // Width in columns (1-12)
+  h: number;      // Height in rows (1-4)
+  config: ChartConfig | MetricCardConfig | TableConfig;
+};
+```
+
+### Dashboard Templates
+Pre-built layouts by industry:
+- SaaS Overview (MRR, ARR, Burn Rate, Runway)
+- Fintech Overview (TPV, Net Revenue, Take Rate)
+- Healthcare Overview (Patients, Revenue, Retention)
+- E-commerce Overview (GMV, AOV, Conversion Rate)
+- EdTech Overview (Learners, Completion Rate)
+- AI/ML Overview (API Calls, Compute Costs)
+- Financial Overview (General, any industry)
+
+### Components
+- `src/components/charts/` - Recharts-based chart components (LineChart, BarChart, AreaChart, PieChart)
+- `src/components/dashboard/` - Dashboard UI components (DashboardWidget, DashboardCanvas, WidgetLibrary, WidgetConfig, MetricCard, MetricsTable, PeriodSelector, ViewSelector, ExportButton)
+- `src/components/investor/company-card.tsx` - Company card with metric snapshot
+- `src/components/investor/company-search.tsx` - Search input component
+
+### API Routes
+- `GET /api/investors/companies/[id]/metrics` - Get all metric values for a company
+- `GET /api/investors/companies/[id]/metrics/export` - Export metrics as CSV
+- `GET /api/investors/dashboard-views?companyId=` - List saved views for a company
+- `POST /api/investors/dashboard-views` - Create new view
+- `GET/PUT/DELETE /api/investors/dashboard-views/[id]` - Read/update/delete view
+- `GET /api/investors/dashboard-templates` - List system dashboard templates
+
+### Dependencies
+- `recharts` - React charting library
+- `react-grid-layout` - Drag-drop grid with resize
+- `@dnd-kit/core`, `@dnd-kit/sortable` - Modern drag-drop
+
+### Setup
+1. Run migration `0007_dashboard_views.sql`
+2. Install dependencies: `npm install recharts react-grid-layout @dnd-kit/core @dnd-kit/sortable`
+
 ## CSV Import/Export
 
 ### Import - Flexible Column Names
@@ -536,6 +604,7 @@ Migration files in `supabase/migrations/`:
 - `0004_system_templates.sql` - System templates (is_system, target_industry columns), seeds 7 industry templates with metrics, updated RLS policies for shared read access
 - `0005_company_logos.sql` - Adds logo_url column to investor_company_relationships for per-investor logos
 - `0006_document_types.sql` - Adds document_type enum and description column to documents table, RLS policy for investor read access
+- `0007_dashboard_views.sql` - Dashboard views and templates tables with RLS policies, seeds industry-specific dashboard templates
 
 Migrations must be run manually in the Supabase SQL Editor (Dashboard > SQL Editor > paste and run).
 

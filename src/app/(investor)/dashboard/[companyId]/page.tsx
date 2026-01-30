@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { ArrowLeft, Settings } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CompanyTagEditorWrapper } from "@/components/investor/company-tag-editor-wrapper";
+import { CompanyDashboardClient } from "./company-dashboard-client";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +21,7 @@ export default async function CompanyDashboardPage({
   // Verify relationship
   const { data: relationship } = await supabase
     .from("investor_company_relationships")
-    .select("id, approval_status")
+    .select("id, approval_status, logo_url")
     .eq("investor_id", user.id)
     .eq("company_id", companyId)
     .single();
@@ -51,45 +53,44 @@ export default async function CompanyDashboardPage({
     relationship.approval_status === "auto_approved" ||
     relationship.approval_status === "approved";
 
-  // Get requests for this company
-  const { data: requests } = await supabase
-    .from("metric_requests")
-    .select(`
-      id,
-      period_start,
-      period_end,
-      status,
-      due_date,
-      created_at,
-      metric_definitions (
-        name,
-        period_type
-      )
-    `)
-    .eq("investor_id", user.id)
-    .eq("company_id", companyId)
-    .order("created_at", { ascending: false })
-    .limit(20);
-
   // Get metric values if approved
   let metricValues: any[] = [];
   if (isApproved) {
     const { data } = await supabase
       .from("company_metric_values")
-      .select("id, metric_name, period_type, period_start, period_end, value, submitted_at")
+      .select("id, metric_name, period_type, period_start, period_end, value, notes, submitted_at, updated_at")
       .eq("company_id", companyId)
-      .order("submitted_at", { ascending: false })
-      .limit(20);
+      .order("period_start", { ascending: false });
     metricValues = data ?? [];
   }
 
-  const formatLabel = (s: string | null) =>
-    s ? s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : null;
+  // Get dashboard views for this company
+  const { data: views } = await supabase
+    .from("dashboard_views")
+    .select("id, name, is_default, layout")
+    .eq("investor_id", user.id)
+    .eq("company_id", companyId)
+    .order("created_at", { ascending: true });
+
+  // Get dashboard templates
+  const { data: templates } = await supabase
+    .from("dashboard_templates")
+    .select("id, name, description, target_industry, layout, is_system")
+    .order("name", { ascending: true });
 
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1 text-sm text-white/50 hover:text-white"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Link>
+          </div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold tracking-tight">{company.name}</h1>
             {company.founder_id ? (
@@ -102,15 +103,16 @@ export default async function CompanyDashboardPage({
               </span>
             )}
           </div>
-          <div className="flex flex-wrap gap-2 text-sm text-white/60">
-            {company.website && <span>{company.website}</span>}
-          </div>
+          {company.website && (
+            <div className="text-sm text-white/50">{company.website}</div>
+          )}
         </div>
         <Link
-          href="/dashboard"
-          className="text-sm text-white/50 hover:text-white"
+          href={`/dashboard/${companyId}/edit`}
+          className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
         >
-          Back to dashboard
+          <Settings className="h-3.5 w-3.5" />
+          Edit Dashboard
         </Link>
       </div>
 
@@ -128,90 +130,22 @@ export default async function CompanyDashboardPage({
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Requests */}
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium">Metric requests</div>
-            <Link
-              href="/requests/new"
-              className="text-xs text-white/50 hover:text-white"
-            >
-              New request
-            </Link>
-          </div>
-          {(requests ?? []).length === 0 ? (
-            <div className="mt-3 text-sm text-white/60">No requests yet.</div>
-          ) : (
-            <div className="mt-3 space-y-2">
-              {(requests ?? []).map((req) => {
-                const defRaw = req.metric_definitions;
-                const def = (Array.isArray(defRaw) ? defRaw[0] : defRaw) as { name: string; period_type: string } | null;
-                const statusStyle: Record<string, string> = {
-                  pending: "bg-amber-500/20 text-amber-200",
-                  submitted: "bg-emerald-500/20 text-emerald-200",
-                  overdue: "bg-red-500/20 text-red-200",
-                };
-                const statusClass = statusStyle[req.status] ?? "bg-white/10 text-white/60";
+      {isApproved && (
+        <CompanyDashboardClient
+          companyId={companyId}
+          companyName={company.name}
+          companyIndustry={company.industry}
+          metrics={metricValues}
+          views={views ?? []}
+          templates={templates ?? []}
+        />
+      )}
 
-                return (
-                  <div
-                    key={req.id}
-                    className="flex items-center justify-between rounded-lg border border-white/5 px-3 py-2"
-                  >
-                    <div>
-                      <span className="text-sm">{def?.name ?? "Unknown"}</span>
-                      <span className="ml-2 text-xs text-white/40">
-                        {req.period_start} to {req.period_end}
-                      </span>
-                    </div>
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${statusClass}`}>
-                      {req.status}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+      {!isApproved && (
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
+          <p className="text-white/60">Metrics will appear here once your access is approved.</p>
         </div>
-
-        {/* Submitted values */}
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium">Submitted metrics</div>
-            <Link
-              href={`/dashboard/${companyId}/metrics`}
-              className="text-xs text-white/50 hover:text-white"
-            >
-              View all
-            </Link>
-          </div>
-          {!isApproved ? (
-            <div className="mt-3 text-sm text-white/60">
-              Approval required to view metrics.
-            </div>
-          ) : metricValues.length === 0 ? (
-            <div className="mt-3 text-sm text-white/60">No submissions yet.</div>
-          ) : (
-            <div className="mt-3 space-y-2">
-              {metricValues.map((mv: any) => (
-                <div
-                  key={mv.id}
-                  className="flex items-center justify-between rounded-lg border border-white/5 px-3 py-2"
-                >
-                  <div>
-                    <span className="text-sm">{mv.metric_name}</span>
-                    <span className="ml-2 text-xs text-white/40">
-                      {mv.period_start} to {mv.period_end}
-                    </span>
-                  </div>
-                  <span className="font-mono text-sm">{mv.value?.raw ?? "—"}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

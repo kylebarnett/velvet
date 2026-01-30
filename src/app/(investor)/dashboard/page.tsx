@@ -2,9 +2,41 @@ import Link from "next/link";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { DashboardCompanyList } from "@/components/investor/dashboard-company-list";
+import { DashboardContent } from "./dashboard-content";
 
 export const dynamic = "force-dynamic";
+
+type MetricValue = {
+  metric_name: string;
+  value: unknown;
+  period_start: string;
+  company_id: string;
+};
+
+// Priority metrics to show as snapshot (first match wins)
+const PRIORITY_METRICS = [
+  "mrr",
+  "arr",
+  "revenue",
+  "net revenue",
+  "gmv",
+  "total transaction volume",
+  "monthly active users",
+  "monthly active learners",
+  "monthly active patients",
+];
+
+function getNumericValue(value: unknown): number | null {
+  if (value == null) return null;
+  if (typeof value === "number") return value;
+  if (typeof value === "object" && value !== null) {
+    const v = (value as Record<string, unknown>).value;
+    if (typeof v === "number") return v;
+    if (typeof v === "string") return parseFloat(v) || null;
+  }
+  if (typeof value === "string") return parseFloat(value) || null;
+  return null;
+}
 
 export default async function InvestorDashboardPage() {
   const user = await requireRole("investor");
@@ -29,11 +61,116 @@ export default async function InvestorDashboardPage() {
     .eq("investor_id", user.id)
     .order("created_at", { ascending: false });
 
-  const companies = (relationships ?? []).map((r) => ({
-    ...(r.companies as any),
-    approvalStatus: r.approval_status,
-    logoUrl: r.logo_url,
-  }));
+  type CompanyData = {
+    id: string;
+    name: string;
+    website: string | null;
+    founder_id: string | null;
+    stage: string | null;
+    industry: string | null;
+  };
+  const companies = (relationships ?? []).map((r) => {
+    // Handle both single object and array from Supabase join
+    const companyRaw = r.companies;
+    const company: CompanyData | null = Array.isArray(companyRaw)
+      ? (companyRaw[0] as CompanyData | undefined) ?? null
+      : (companyRaw as CompanyData | null);
+    return {
+      id: company?.id ?? "",
+      name: company?.name ?? "",
+      website: company?.website ?? null,
+      founder_id: company?.founder_id ?? null,
+      stage: company?.stage ?? null,
+      industry: company?.industry ?? null,
+      approvalStatus: r.approval_status,
+      logoUrl: r.logo_url,
+    };
+  }).filter((c) => c.id);
+
+  // Get company IDs that are approved
+  const approvedCompanyIds = companies
+    .filter((c) => ["auto_approved", "approved"].includes(c.approvalStatus))
+    .map((c) => c.id);
+
+  // Fetch latest metrics for approved companies
+  let latestMetrics: Record<
+    string,
+    { name: string; value: number | null; previousValue: number | null; percentChange: number | null }
+  > = {};
+
+  if (approvedCompanyIds.length > 0) {
+    // Get recent metric values
+    const { data: metricValues } = await supabase
+      .from("company_metric_values")
+      .select("company_id, metric_name, value, period_start")
+      .in("company_id", approvedCompanyIds)
+      .order("period_start", { ascending: false });
+
+    if (metricValues) {
+      // Group by company, find best metric per company
+      const byCompany = new Map<string, MetricValue[]>();
+      for (const mv of metricValues as MetricValue[]) {
+        if (!byCompany.has(mv.company_id)) {
+          byCompany.set(mv.company_id, []);
+        }
+        byCompany.get(mv.company_id)!.push(mv);
+      }
+
+      for (const [companyId, values] of byCompany) {
+        // Sort by period_start desc
+        values.sort(
+          (a, b) =>
+            new Date(b.period_start).getTime() - new Date(a.period_start).getTime()
+        );
+
+        // Find priority metric
+        let selectedMetric: MetricValue | null = null;
+        let previousMetric: MetricValue | null = null;
+
+        for (const priorityName of PRIORITY_METRICS) {
+          const matches = values.filter(
+            (v) => v.metric_name.toLowerCase() === priorityName
+          );
+          if (matches.length > 0) {
+            selectedMetric = matches[0];
+            if (matches.length > 1) {
+              previousMetric = matches[1];
+            }
+            break;
+          }
+        }
+
+        // Fallback to most recent metric if no priority match
+        if (!selectedMetric && values.length > 0) {
+          selectedMetric = values[0];
+          const sameMetricValues = values.filter(
+            (v) => v.metric_name === values[0].metric_name
+          );
+          if (sameMetricValues.length > 1) {
+            previousMetric = sameMetricValues[1];
+          }
+        }
+
+        if (selectedMetric) {
+          const currentValue = getNumericValue(selectedMetric.value);
+          const prevValue = previousMetric
+            ? getNumericValue(previousMetric.value)
+            : null;
+          const percentChange =
+            currentValue != null && prevValue != null && prevValue !== 0
+              ? ((currentValue - prevValue) / Math.abs(prevValue)) * 100
+              : null;
+
+          latestMetrics[companyId] = {
+            name: selectedMetric.metric_name,
+            value: currentValue,
+            previousValue: prevValue,
+            percentChange,
+          };
+        }
+      }
+    }
+  }
 
   // Count pending requests
   const { count: pendingRequests } = await supabase
@@ -77,20 +214,19 @@ export default async function InvestorDashboardPage() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-        <div className="text-sm font-medium">Portfolio companies</div>
-        {companies.length === 0 ? (
-          <div className="mt-3 text-sm text-white/60">
-            No companies in your portfolio yet.{" "}
-            <Link href="/portfolio/import" className="underline underline-offset-4 hover:text-white">
-              Import contacts
-            </Link>{" "}
-            to get started.
-          </div>
-        ) : (
-          <DashboardCompanyList companies={companies} />
-        )}
-      </div>
+      {companies.length === 0 ? (
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
+          <p className="text-white/60">No companies in your portfolio yet.</p>
+          <Link
+            href="/portfolio/import"
+            className="mt-2 inline-block text-sm underline underline-offset-4 hover:text-white"
+          >
+            Import contacts to get started
+          </Link>
+        </div>
+      ) : (
+        <DashboardContent companies={companies} latestMetrics={latestMetrics} />
+      )}
     </div>
   );
 }

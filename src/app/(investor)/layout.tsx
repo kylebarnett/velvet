@@ -33,7 +33,7 @@ export default async function InvestorLayout({
       <InvestorAppShell
         title="Investor"
         nav={[
-          { href: "/dashboard", label: "Dashboards" },
+          { href: "/dashboard", label: "Dashboard" },
           {
             href: "/portfolio",
             label: "Portfolio",
