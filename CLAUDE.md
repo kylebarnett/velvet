@@ -13,7 +13,7 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - **Founders** - Submit metrics, upload documents, respond to requests
 
 ### Route Structure
-- Investors: `/dashboard`, `/dashboard/[companyId]`, `/dashboard/[companyId]/edit`, `/dashboard/[companyId]/metrics`, `/portfolio`, `/requests`, `/requests/new`, `/templates`, `/templates/new`, `/templates/[id]`, `/documents`
+- Investors: `/dashboard`, `/dashboard/[companyId]`, `/dashboard/[companyId]/edit`, `/dashboard/[companyId]/metrics`, `/portfolio`, `/reports`, `/reports/compare`, `/reports/trends`, `/requests`, `/requests/new`, `/templates`, `/templates/new`, `/templates/[id]`, `/documents`
 - Founders: `/portal`, `/portal/requests`, `/portal/metrics`, `/portal/investors`, `/portal/documents`
 - Auth: `/login`, `/signup`, `/app` (redirects based on role)
 
@@ -39,6 +39,7 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `documents` - Uploaded files from founders (document_type enum, description)
 - `dashboard_views` - Saved dashboard layouts per investor per company (name, is_default, layout JSON)
 - `dashboard_templates` - System-wide dashboard presets (name, description, target_industry, layout JSON)
+- `portfolio_reports` - Saved report configurations per investor (name, report_type, filters, company_ids, normalize, config, is_default)
 
 ### RLS Policies
 - All tables have Row Level Security enabled
@@ -52,6 +53,7 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `documents`: founders INSERT/UPDATE own company; approved investors SELECT only
 - `dashboard_views`: investors CRUD own views
 - `dashboard_templates`: all authenticated users can SELECT system templates
+- `portfolio_reports`: investors CRUD own reports
 
 ## Styling
 
@@ -500,6 +502,49 @@ Investors can download their existing portfolio contacts as CSV via the "Export 
 - `POST /api/investors/portfolio/import` - Import contacts from CSV data
 - `GET /api/investors/portfolio/export` - Download contacts as CSV file
 
+## Portfolio Reports
+
+### Overview
+Investors can view aggregated metrics across their entire portfolio, compare companies side-by-side, and save custom report configurations.
+
+### Report Types
+- **Summary** (`/reports`) - KPI cards, distribution charts by industry/stage, portfolio trend chart, top performers by growth
+- **Comparison** (`/reports/compare`) - Multi-select 2-8 companies, side-by-side charts/tables, normalization options (absolute/indexed/percent change)
+- **Trends** (`/reports/trends`) - Coming soon: growth distribution, YoY comparison, outlier detection
+
+### Aggregation Logic
+| Metric Type | Can Sum? | Aggregation Method |
+|-------------|----------|-------------------|
+| Revenue, ARR, MRR, Burn Rate, Headcount | Yes | Sum for portfolio total, Average for comparison |
+| Gross Margin, NRR, Churn Rate | No | Average (weighted by revenue for accuracy) |
+| Runway, CAC, LTV | No | Average or Median only |
+
+### Saved Reports
+- Investors can save report configurations with filters, selected companies, and display settings
+- Reports can be marked as default for their type
+- Saved reports store: name, description, report_type, filters (JSON), company_ids, normalize setting, config (JSON)
+
+### Components
+- `src/components/reports/` - Report components directory
+  - `report-tabs.tsx` - Tab navigation between Summary/Compare/Trends
+  - `report-filters.tsx` - Filter bar (industry, stage, period, date range)
+  - `report-header.tsx` - Save/load report controls
+  - `saved-reports-dropdown.tsx` - Dropdown to load saved reports
+  - `save-report-modal.tsx` - Modal to save current report
+  - `portfolio-summary/` - Summary view components (KPICards, DistributionCharts, TopPerformers, AggregateTrend)
+  - `company-comparison/` - Comparison view components (CompanyMultiSelect, ComparisonChart, ComparisonTable, NormalizationToggle)
+- `src/lib/reports/aggregation.ts` - Aggregation utilities and metric type classifications
+
+### API Routes
+- `GET /api/investors/portfolio/metrics` - Aggregated metrics across portfolio (supports filters)
+- `GET /api/investors/portfolio/distribution` - Portfolio breakdown by industry/stage/business model
+- `GET /api/investors/portfolio/compare` - Side-by-side comparison for selected companies
+- `GET/POST /api/investors/portfolio/reports` - List/create saved reports
+- `GET/PUT/DELETE /api/investors/portfolio/reports/[id]` - Read/update/delete saved report
+
+### Setup
+1. Run migration `0008_portfolio_reports.sql`
+
 ## Security Requirements
 
 ### Authentication
@@ -605,6 +650,7 @@ Migration files in `supabase/migrations/`:
 - `0005_company_logos.sql` - Adds logo_url column to investor_company_relationships for per-investor logos
 - `0006_document_types.sql` - Adds document_type enum and description column to documents table, RLS policy for investor read access
 - `0007_dashboard_views.sql` - Dashboard views and templates tables with RLS policies, seeds industry-specific dashboard templates
+- `0008_portfolio_reports.sql` - Portfolio reports table for saved report configurations with RLS policies
 
 Migrations must be run manually in the Supabase SQL Editor (Dashboard > SQL Editor > paste and run).
 
