@@ -1,27 +1,18 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
-import {
-  KPICards,
-  DistributionCharts,
-  TopPerformers,
-  AggregateTrend,
-} from "@/components/reports";
+import { ReportsClient } from "./reports-client";
 import {
   extractNumericValue,
   aggregateMetricValues,
   canSumMetric,
-  formatPeriodKey,
-  formatPeriodLabel,
   calculateGrowthRate,
   REVENUE_PRIORITY,
 } from "@/lib/reports/aggregation";
+import type { CompanyMetricBreakdown } from "@/components/reports/metric-drilldown-panel";
 
 type SummaryContentProps = {
   industries?: string;
   stages?: string;
-  periodType?: string;
-  startDate?: string;
-  endDate?: string;
 };
 
 type MetricValue = {
@@ -39,7 +30,7 @@ type CompanyInfo = {
   name: string;
   industry: string | null;
   stage: string | null;
-  business_model: string | null;
+  logoUrl: string | null;
 };
 
 const INDUSTRY_LABELS: Record<string, string> = {
@@ -60,20 +51,12 @@ const STAGE_LABELS: Record<string, string> = {
   growth: "Growth",
 };
 
-const BUSINESS_MODEL_LABELS: Record<string, string> = {
-  b2b: "B2B",
-  b2c: "B2C",
-  b2b2c: "B2B2C",
-  marketplace: "Marketplace",
-  other: "Other",
-};
+// Priority KPIs that can be drilled down
+const DRILLDOWN_METRICS = ["revenue", "mrr", "arr", "burn rate", "headcount", "gross margin"];
 
 export async function SummaryContent({
   industries,
   stages,
-  periodType = "monthly",
-  startDate,
-  endDate,
 }: SummaryContentProps) {
   const user = await requireRole("investor");
   const supabase = await createSupabaseServerClient();
@@ -87,12 +70,12 @@ export async function SummaryContent({
     .select(`
       company_id,
       approval_status,
+      logo_url,
       companies (
         id,
         name,
         industry,
-        stage,
-        business_model
+        stage
       )
     `)
     .eq("investor_id", user.id)
@@ -113,38 +96,40 @@ export async function SummaryContent({
   // Count distributions
   const industryCounts = new Map<string, number>();
   const stageCounts = new Map<string, number>();
-  const businessModelCounts = new Map<string, number>();
 
   for (const rel of relationships ?? []) {
     const companyRaw = rel.companies;
-    const company = Array.isArray(companyRaw)
-      ? (companyRaw[0] as CompanyInfo | undefined)
-      : (companyRaw as CompanyInfo | null);
+    const companyData = Array.isArray(companyRaw)
+      ? (companyRaw[0] as { id: string; name: string; industry: string | null; stage: string | null } | undefined)
+      : (companyRaw as { id: string; name: string; industry: string | null; stage: string | null } | null);
 
-    if (!company) continue;
+    if (!companyData) continue;
 
     // Apply industry filter
-    if (industryFilters.length > 0 && !industryFilters.includes(company.industry ?? "")) {
+    if (industryFilters.length > 0 && !industryFilters.includes(companyData.industry ?? "")) {
       continue;
     }
 
     // Apply stage filter
-    if (stageFilters.length > 0 && !stageFilters.includes(company.stage ?? "")) {
+    if (stageFilters.length > 0 && !stageFilters.includes(companyData.stage ?? "")) {
       continue;
     }
 
-    companies.push(company);
-    companyIds.push(company.id);
+    companies.push({
+      id: companyData.id,
+      name: companyData.name,
+      industry: companyData.industry,
+      stage: companyData.stage,
+      logoUrl: rel.logo_url,
+    });
+    companyIds.push(companyData.id);
 
     // Count distributions
-    const industry = company.industry ?? "unspecified";
+    const industry = companyData.industry ?? "unspecified";
     industryCounts.set(industry, (industryCounts.get(industry) ?? 0) + 1);
 
-    const stage = company.stage ?? "unspecified";
+    const stage = companyData.stage ?? "unspecified";
     stageCounts.set(stage, (stageCounts.get(stage) ?? 0) + 1);
-
-    const businessModel = company.business_model ?? "unspecified";
-    businessModelCounts.set(businessModel, (businessModelCounts.get(businessModel) ?? 0) + 1);
   }
 
   if (companyIds.length === 0) {
@@ -162,20 +147,10 @@ export async function SummaryContent({
   }
 
   // Fetch metric values for these companies
-  let query = supabase
+  const { data: metricValues, error: mvError } = await supabase
     .from("company_metric_values")
     .select("id, company_id, metric_name, period_type, period_start, period_end, value")
-    .in("company_id", companyIds)
-    .eq("period_type", periodType);
-
-  if (startDate) {
-    query = query.gte("period_start", startDate);
-  }
-  if (endDate) {
-    query = query.lte("period_start", endDate);
-  }
-
-  const { data: metricValues, error: mvError } = await query;
+    .in("company_id", companyIds);
 
   if (mvError) {
     return (
@@ -191,9 +166,6 @@ export async function SummaryContent({
   const metricGroups = new Map<string, number[]>();
   const companiesWithMetrics = new Set<string>();
 
-  // Group by period for time series
-  const periodGroups = new Map<string, Map<string, number[]>>();
-
   for (const mv of values) {
     const numValue = extractNumericValue(mv.value);
     if (numValue === null) continue;
@@ -206,16 +178,6 @@ export async function SummaryContent({
       metricGroups.set(metricName, []);
     }
     metricGroups.get(metricName)!.push(numValue);
-
-    // Aggregate by period
-    const periodKey = formatPeriodKey(mv.period_start, periodType);
-    if (!periodGroups.has(periodKey)) {
-      periodGroups.set(periodKey, new Map());
-    }
-    if (!periodGroups.get(periodKey)!.has(metricName)) {
-      periodGroups.get(periodKey)!.set(metricName, []);
-    }
-    periodGroups.get(periodKey)!.get(metricName)!.push(numValue);
   }
 
   // Calculate overall aggregates
@@ -246,35 +208,84 @@ export async function SummaryContent({
     };
   }
 
-  // Calculate time series by period
-  const byPeriod: Array<{
-    period: string;
-    periodStart: string;
-    label: string;
-    aggregates: Record<string, { sum: number | null; average: number; count: number }>;
-  }> = [];
+  // Build drilldown data for each tracked metric
+  // Group values by company and metric, keeping only the latest value per company per metric
+  const drilldownData: Record<string, CompanyMetricBreakdown[]> = {};
 
-  const sortedPeriods = [...periodGroups.keys()].sort();
-  for (const periodKey of sortedPeriods) {
-    const periodMetrics = periodGroups.get(periodKey)!;
-    const periodAggregates: Record<string, { sum: number | null; average: number; count: number }> = {};
+  for (const metric of DRILLDOWN_METRICS) {
+    // Group by company, get latest value for this metric
+    const companyLatestValues = new Map<
+      string,
+      { value: number; previous: number | null; periodStart: string }
+    >();
 
-    for (const [metricName, vals] of periodMetrics) {
-      const agg = aggregateMetricValues(vals);
-      const isSummable = canSumMetric(metricName);
-      periodAggregates[metricName] = {
-        sum: isSummable ? agg.sum : null,
-        average: agg.average,
-        count: agg.count,
-      };
+    for (const mv of values) {
+      const metricName = mv.metric_name.toLowerCase().trim();
+      if (metricName !== metric) continue;
+
+      const numValue = extractNumericValue(mv.value);
+      if (numValue === null) continue;
+
+      const existing = companyLatestValues.get(mv.company_id);
+      if (!existing) {
+        companyLatestValues.set(mv.company_id, {
+          value: numValue,
+          previous: null,
+          periodStart: mv.period_start,
+        });
+      } else {
+        // Compare dates to determine latest/previous
+        const existingDate = new Date(existing.periodStart).getTime();
+        const currentDate = new Date(mv.period_start).getTime();
+
+        if (currentDate > existingDate) {
+          // Current is newer, existing becomes previous
+          existing.previous = existing.value;
+          existing.value = numValue;
+          existing.periodStart = mv.period_start;
+        } else if (currentDate < existingDate && existing.previous === null) {
+          // Current is older, use as previous
+          existing.previous = numValue;
+        }
+      }
     }
 
-    byPeriod.push({
-      period: periodKey,
-      periodStart: periodKey,
-      label: formatPeriodLabel(periodKey, periodType),
-      aggregates: periodAggregates,
-    });
+    // Calculate total for percentage
+    const total = Array.from(companyLatestValues.values()).reduce(
+      (sum, data) => sum + data.value,
+      0
+    );
+
+    // Build breakdown array
+    const breakdown: CompanyMetricBreakdown[] = [];
+
+    for (const company of companies) {
+      const data = companyLatestValues.get(company.id);
+      if (!data) continue;
+
+      const growth =
+        data.previous !== null
+          ? calculateGrowthRate(data.value, data.previous)
+          : null;
+
+      breakdown.push({
+        companyId: company.id,
+        companyName: company.name,
+        logoUrl: company.logoUrl,
+        industry: company.industry,
+        stage: company.stage,
+        value: data.value,
+        percentOfTotal: total > 0 ? (data.value / total) * 100 : 0,
+        growth,
+      });
+    }
+
+    // Sort by value descending
+    breakdown.sort((a, b) => b.value - a.value);
+
+    if (breakdown.length > 0) {
+      drilldownData[metric] = breakdown;
+    }
   }
 
   // Calculate company breakdown with growth rates
@@ -363,35 +374,15 @@ export async function SummaryContent({
       return stageOrder.indexOf(a.key) - stageOrder.indexOf(b.key);
     });
 
-  const byBusinessModel = [...businessModelCounts.entries()]
-    .map(([key, value]) => ({
-      name: BUSINESS_MODEL_LABELS[key] ?? key.charAt(0).toUpperCase() + key.slice(1),
-      value,
-      key,
-    }))
-    .sort((a, b) => b.value - a.value);
-
   return (
-    <div className="space-y-6">
-      {/* KPI Cards */}
-      <KPICards
-        aggregates={aggregates}
-        totalCompanies={companies.length}
-        companiesWithData={companiesWithMetrics.size}
-      />
-
-      {/* Distribution Charts */}
-      <DistributionCharts
-        byIndustry={byIndustry}
-        byStage={byStage}
-        byBusinessModel={byBusinessModel}
-      />
-
-      {/* Trend Chart and Top Performers */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <AggregateTrend byPeriod={byPeriod} />
-        <TopPerformers companies={byCompany} />
-      </div>
-    </div>
+    <ReportsClient
+      aggregates={aggregates}
+      totalCompanies={companies.length}
+      companiesWithData={companiesWithMetrics.size}
+      byIndustry={byIndustry}
+      byStage={byStage}
+      byCompany={byCompany}
+      drilldownData={drilldownData}
+    />
   );
 }

@@ -15,6 +15,7 @@ type KPICardsProps = {
   >;
   totalCompanies: number;
   companiesWithData: number;
+  onMetricClick?: (metricName: string) => void;
 };
 
 // Priority KPIs with icons and accent colors
@@ -129,14 +130,28 @@ const DEFAULT_CARDS = [
   }
 ];
 
-export function KPICards({ aggregates, totalCompanies, companiesWithData }: KPICardsProps) {
+type KPIDisplay = {
+  metric: string | null;
+  label: string;
+  value: string;
+  count: number;
+  coverage: number;
+  icon: React.ReactNode;
+  gradient: string;
+  accent: string;
+  ring: string;
+  clickable: boolean;
+};
+
+export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetricClick }: KPICardsProps) {
   // Find KPIs that have data
-  const kpis = PRIORITY_KPIS.filter((kpi) => aggregates[kpi.metric])
+  const kpis: KPIDisplay[] = PRIORITY_KPIS.filter((kpi) => aggregates[kpi.metric])
     .slice(0, 4)
     .map((kpi) => {
       const data = aggregates[kpi.metric];
       const value = kpi.useSum && data.canSum ? data.sum : data.average;
       return {
+        metric: kpi.metric,
         label: kpi.label,
         value: formatValue(value, kpi.metric),
         count: data.count,
@@ -145,12 +160,14 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData }: KPIC
         gradient: kpi.gradient,
         accent: kpi.accent,
         ring: kpi.ring,
+        clickable: true,
       };
     });
 
   // Add summary cards if we don't have enough KPIs
   if (kpis.length < 4) {
     kpis.unshift({
+      metric: null,
       label: DEFAULT_CARDS[0].label,
       value: String(totalCompanies),
       count: totalCompanies,
@@ -159,11 +176,13 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData }: KPIC
       gradient: DEFAULT_CARDS[0].gradient,
       accent: DEFAULT_CARDS[0].accent,
       ring: DEFAULT_CARDS[0].ring,
+      clickable: false,
     });
   }
 
   if (kpis.length < 4 && companiesWithData !== totalCompanies) {
     kpis.push({
+      metric: null,
       label: DEFAULT_CARDS[1].label,
       value: String(companiesWithData),
       count: companiesWithData,
@@ -172,6 +191,7 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData }: KPIC
       gradient: DEFAULT_CARDS[1].gradient,
       accent: DEFAULT_CARDS[1].accent,
       ring: DEFAULT_CARDS[1].ring,
+      clickable: false,
     });
   }
 
@@ -199,7 +219,18 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData }: KPIC
       {kpis.slice(0, 4).map((kpi, index) => (
         <div
           key={kpi.label}
-          className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent p-5 transition-all duration-300 hover:border-white/[0.15] hover:shadow-lg hover:shadow-black/20"
+          role={kpi.clickable && onMetricClick ? "button" : undefined}
+          tabIndex={kpi.clickable && onMetricClick ? 0 : undefined}
+          onClick={() => kpi.clickable && kpi.metric && onMetricClick?.(kpi.metric)}
+          onKeyDown={(e) => {
+            if (kpi.clickable && kpi.metric && onMetricClick && (e.key === "Enter" || e.key === " ")) {
+              e.preventDefault();
+              onMetricClick(kpi.metric);
+            }
+          }}
+          className={`group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent p-5 transition-all duration-300 hover:border-white/[0.15] hover:shadow-lg hover:shadow-black/20 ${
+            kpi.clickable && onMetricClick ? "cursor-pointer hover:scale-[1.02]" : ""
+          }`}
           style={{ animationDelay: `${index * 50}ms` }}
         >
           {/* Gradient overlay */}

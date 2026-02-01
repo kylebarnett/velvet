@@ -4,6 +4,7 @@ import { ArrowLeft, Settings } from "lucide-react";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CompanyTagEditorWrapper } from "@/components/investor/company-tag-editor-wrapper";
+import { CompanySwitcher } from "@/components/investor/company-switcher";
 import { CompanyDashboardClient } from "./company-dashboard-client";
 
 export const dynamic = "force-dynamic";
@@ -78,21 +79,59 @@ export default async function CompanyDashboardPage({
     .select("id, name, description, target_industry, layout, is_system")
     .order("name", { ascending: true });
 
+  // Get all portfolio companies for the switcher
+  const { data: allRelationships } = await supabase
+    .from("investor_company_relationships")
+    .select(`
+      id,
+      logo_url,
+      companies (
+        id,
+        name,
+        industry,
+        stage
+      )
+    `)
+    .eq("investor_id", user.id)
+    .in("approval_status", ["auto_approved", "approved"]);
+
+  const portfolioCompanies = (allRelationships ?? [])
+    .map((r) => {
+      const companyRaw = r.companies;
+      const companyData = Array.isArray(companyRaw)
+        ? (companyRaw[0] as { id: string; name: string; industry: string | null; stage: string | null } | undefined)
+        : (companyRaw as { id: string; name: string; industry: string | null; stage: string | null } | null);
+      if (!companyData) return null;
+      return {
+        id: companyData.id,
+        name: companyData.name,
+        logoUrl: r.logo_url,
+        industry: companyData.industry,
+        stage: companyData.stage,
+      };
+    })
+    .filter((c): c is NonNullable<typeof c> => c !== null)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
+        <div className="space-y-2">
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
               className="flex items-center gap-1 text-sm text-white/50 hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back
+              All Companies
             </Link>
           </div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold tracking-tight">{company.name}</h1>
+            <CompanySwitcher
+              currentCompanyId={companyId}
+              currentCompanyName={company.name}
+              companies={portfolioCompanies}
+            />
             {company.founder_id ? (
               <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
                 Founder joined
