@@ -1,6 +1,13 @@
 "use client";
 
 import * as React from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const STAGE_OPTIONS = ["seed", "series_a", "series_b", "series_c", "growth"];
 const INDUSTRY_OPTIONS = ["saas", "fintech", "healthcare", "ecommerce", "edtech", "ai_ml", "other"];
@@ -77,48 +84,60 @@ export function CompanyTagEditor({
       <div className="grid gap-3 md:grid-cols-3">
         <div className="grid gap-1.5">
           <label className="text-xs text-white/60">Stage</label>
-          <select
-            className="h-9 rounded-md border border-white/10 bg-black/30 px-2 text-sm outline-none focus:border-white/20"
-            value={currentStage}
-            onChange={(e) => setCurrentStage(e.target.value)}
+          <Select
+            value={currentStage || "__none__"}
+            onValueChange={(v) => setCurrentStage(v === "__none__" ? "" : v)}
           >
-            <option value="">None</option>
-            {STAGE_OPTIONS.map((o) => (
-              <option key={o} value={o}>
-                {formatLabel(o)}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger size="sm">
+              <SelectValue placeholder="None" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">None</SelectItem>
+              {STAGE_OPTIONS.map((o) => (
+                <SelectItem key={o} value={o}>
+                  {formatLabel(o)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="grid gap-1.5">
           <label className="text-xs text-white/60">Industry</label>
-          <select
-            className="h-9 rounded-md border border-white/10 bg-black/30 px-2 text-sm outline-none focus:border-white/20"
-            value={currentIndustry}
-            onChange={(e) => setCurrentIndustry(e.target.value)}
+          <Select
+            value={currentIndustry || "__none__"}
+            onValueChange={(v) => setCurrentIndustry(v === "__none__" ? "" : v)}
           >
-            <option value="">None</option>
-            {INDUSTRY_OPTIONS.map((o) => (
-              <option key={o} value={o}>
-                {formatLabel(o)}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger size="sm">
+              <SelectValue placeholder="None" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">None</SelectItem>
+              {INDUSTRY_OPTIONS.map((o) => (
+                <SelectItem key={o} value={o}>
+                  {formatLabel(o)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="grid gap-1.5">
           <label className="text-xs text-white/60">Business model</label>
-          <select
-            className="h-9 rounded-md border border-white/10 bg-black/30 px-2 text-sm outline-none focus:border-white/20"
-            value={currentModel}
-            onChange={(e) => setCurrentModel(e.target.value)}
+          <Select
+            value={currentModel || "__none__"}
+            onValueChange={(v) => setCurrentModel(v === "__none__" ? "" : v)}
           >
-            <option value="">None</option>
-            {BUSINESS_MODEL_OPTIONS.map((o) => (
-              <option key={o} value={o}>
-                {formatLabel(o)}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger size="sm">
+              <SelectValue placeholder="None" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">None</SelectItem>
+              {BUSINESS_MODEL_OPTIONS.map((o) => (
+                <SelectItem key={o} value={o}>
+                  {formatLabel(o)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

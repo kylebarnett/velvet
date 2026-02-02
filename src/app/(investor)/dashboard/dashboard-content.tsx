@@ -28,6 +28,7 @@ type MetricSnapshot = {
 type DashboardContentProps = {
   companies: Company[];
   latestMetrics: Record<string, MetricSnapshot>;
+  secondaryMetrics?: Record<string, MetricSnapshot>;
 };
 
 type ViewMode = "grid" | "list";
@@ -134,9 +135,11 @@ function TrendBadge({ percentChange }: { percentChange: number | null }) {
 function CompanyListRow({
   company,
   latestMetric,
+  secondaryMetric,
 }: {
   company: Company;
   latestMetric: MetricSnapshot | null;
+  secondaryMetric: MetricSnapshot | null;
 }) {
   const isApproved = ["auto_approved", "approved"].includes(company.approvalStatus);
   const hasFounder = !!company.founder_id;
@@ -180,6 +183,19 @@ function CompanyListRow({
             <div className="w-16">
               <TrendBadge percentChange={latestMetric.percentChange} />
             </div>
+            {secondaryMetric && secondaryMetric.value != null && (
+              <>
+                <div className="text-right border-l border-white/10 pl-6">
+                  <div className="text-xs text-white/40">{secondaryMetric.name}</div>
+                  <div className="text-sm font-medium text-white/80">
+                    {formatValue(secondaryMetric.value, secondaryMetric.name)}
+                  </div>
+                </div>
+                <div className="w-16">
+                  <TrendBadge percentChange={secondaryMetric.percentChange} />
+                </div>
+              </>
+            )}
           </>
         ) : !hasFounder ? (
           <span className="text-xs text-amber-200/60">Awaiting founder signup</span>
@@ -191,7 +207,7 @@ function CompanyListRow({
   );
 }
 
-export function DashboardContent({ companies, latestMetrics }: DashboardContentProps) {
+export function DashboardContent({ companies, latestMetrics, secondaryMetrics = {} }: DashboardContentProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [viewMode, setViewMode] = React.useState<ViewMode>("grid");
 
@@ -263,6 +279,7 @@ export function DashboardContent({ companies, latestMetrics }: DashboardContentP
               founderId={company.founder_id}
               approvalStatus={company.approvalStatus}
               latestMetric={latestMetrics[company.id] ?? null}
+              secondaryMetric={secondaryMetrics[company.id] ?? null}
             />
           ))}
         </div>
@@ -273,6 +290,7 @@ export function DashboardContent({ companies, latestMetrics }: DashboardContentP
               key={company.id}
               company={company}
               latestMetric={latestMetrics[company.id] ?? null}
+              secondaryMetric={secondaryMetrics[company.id] ?? null}
             />
           ))}
         </div>

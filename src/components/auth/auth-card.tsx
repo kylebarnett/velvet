@@ -3,8 +3,15 @@
 import * as React from "react";
 import Link from "next/link";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -235,14 +242,21 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
             <label className="text-sm text-white/70" htmlFor="role">
               I am a
             </label>
-            <select
-              id="role"
-              className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none ring-0 focus:border-white/20"
-              {...form.register("role")}
-            >
-              <option value="founder">Founder</option>
-              <option value="investor">Investor</option>
-            </select>
+            <Controller
+              name="role"
+              control={form.control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="founder">Founder</SelectItem>
+                    <SelectItem value="investor">Investor</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {form.formState.errors.role?.message && (
               <p className="text-xs text-red-300">
                 {String(form.formState.errors.role.message)}

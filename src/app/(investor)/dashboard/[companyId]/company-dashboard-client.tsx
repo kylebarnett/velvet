@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   DashboardWidget,
   ViewSelector,
@@ -228,14 +229,37 @@ export function CompanyDashboardClient({
   companyName,
   companyIndustry,
   metrics,
-  views,
+  views: initialViews,
   templates,
 }: CompanyDashboardClientProps) {
+  const router = useRouter();
+  const [views, setViews] = React.useState(initialViews);
   const [selectedViewId, setSelectedViewId] = React.useState<string | null>(
-    views.find((v) => v.is_default)?.id ?? views[0]?.id ?? null
+    initialViews.find((v) => v.is_default)?.id ?? initialViews[0]?.id ?? null
   );
   const [periodType, setPeriodType] = React.useState<PeriodType>("quarterly");
   const [dateRange, setDateRange] = React.useState<DateRange>("1y");
+
+  async function handleDeleteView(viewId: string) {
+    try {
+      const res = await fetch(`/api/investors/dashboard-views/${viewId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to delete view");
+      }
+      // Remove from local state
+      setViews((prev) => prev.filter((v) => v.id !== viewId));
+      // If we deleted the selected view, switch to another
+      if (viewId === selectedViewId) {
+        const remaining = views.filter((v) => v.id !== viewId);
+        setSelectedViewId(remaining[0]?.id ?? null);
+      }
+      router.refresh();
+    } catch (err) {
+      console.error("Failed to delete view:", err);
+    }
+  }
 
   // Get the current layout
   const currentView = views.find((v) => v.id === selectedViewId);
@@ -284,6 +308,7 @@ export function CompanyDashboardClient({
             }))}
             selectedViewId={selectedViewId}
             onChange={setSelectedViewId}
+            onDelete={handleDeleteView}
           />
           <PeriodSelector value={periodType} onChange={setPeriodType} />
           <DateRangeSelector value={dateRange} onChange={setDateRange} />

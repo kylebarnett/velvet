@@ -3,6 +3,13 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Plus } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type TemplateItem = {
   metric_name: string;
@@ -150,15 +157,19 @@ export function TemplateForm({
                   onChange={(e) => updateItem(index, "metric_name", e.target.value)}
                   required
                 />
-                <select
-                  className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+                <Select
                   value={item.period_type}
-                  onChange={(e) => updateItem(index, "period_type", e.target.value)}
+                  onValueChange={(v) => updateItem(index, "period_type", v)}
                 >
-                  <option value="monthly">Monthly</option>
-                  <option value="quarterly">Quarterly</option>
-                  <option value="annual">Annual</option>
-                </select>
+                  <SelectTrigger size="sm" className="h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="quarterly">Quarterly</SelectItem>
+                    <SelectItem value="annual">Annual</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <button
                 type="button"

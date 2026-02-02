@@ -42,13 +42,15 @@ export default async function InvestorDashboardPage() {
   const user = await requireRole("investor");
   const supabase = await createSupabaseServerClient();
 
-  // Get portfolio companies
+  // Get portfolio companies with tile metric preferences
   const { data: relationships } = await supabase
     .from("investor_company_relationships")
     .select(`
       id,
       approval_status,
       logo_url,
+      tile_primary_metric,
+      tile_secondary_metric,
       companies (
         id,
         name,
@@ -84,6 +86,8 @@ export default async function InvestorDashboardPage() {
       industry: company?.industry ?? null,
       approvalStatus: r.approval_status,
       logoUrl: r.logo_url,
+      tilePrimaryMetric: r.tile_primary_metric,
+      tileSecondaryMetric: r.tile_secondary_metric,
     };
   }).filter((c) => c.id).sort((a, b) => a.name.localeCompare(b.name));
 
@@ -92,8 +96,21 @@ export default async function InvestorDashboardPage() {
     .filter((c) => ["auto_approved", "approved"].includes(c.approvalStatus))
     .map((c) => c.id);
 
+  // Build a map of configured metrics per company
+  const configuredMetrics = new Map<string, { primary: string | null; secondary: string | null }>();
+  for (const c of companies) {
+    configuredMetrics.set(c.id, {
+      primary: c.tilePrimaryMetric,
+      secondary: c.tileSecondaryMetric,
+    });
+  }
+
   // Fetch latest metrics for approved companies
-  let latestMetrics: Record<
+  const latestMetrics: Record<
+    string,
+    { name: string; value: number | null; previousValue: number | null; percentChange: number | null }
+  > = {};
+  const secondaryMetrics: Record<
     string,
     { name: string; value: number | null; previousValue: number | null; percentChange: number | null }
   > = {};
@@ -116,6 +133,33 @@ export default async function InvestorDashboardPage() {
         byCompany.get(mv.company_id)!.push(mv);
       }
 
+      // Helper to find metric by name and calculate values
+      function findMetricByName(values: MetricValue[], metricName: string): {
+        name: string;
+        value: number | null;
+        previousValue: number | null;
+        percentChange: number | null;
+      } | null {
+        const matches = values.filter(
+          (v) => v.metric_name.toLowerCase() === metricName.toLowerCase()
+        );
+        if (matches.length === 0) return null;
+
+        const currentValue = getNumericValue(matches[0].value);
+        const prevValue = matches.length > 1 ? getNumericValue(matches[1].value) : null;
+        const percentChange =
+          currentValue != null && prevValue != null && prevValue !== 0
+            ? ((currentValue - prevValue) / Math.abs(prevValue)) * 100
+            : null;
+
+        return {
+          name: matches[0].metric_name,
+          value: currentValue,
+          previousValue: prevValue,
+          percentChange,
+        };
+      }
+
       for (const [companyId, values] of byCompany) {
         // Sort by period_start desc
         values.sort(
@@ -123,7 +167,26 @@ export default async function InvestorDashboardPage() {
             new Date(b.period_start).getTime() - new Date(a.period_start).getTime()
         );
 
-        // Find priority metric
+        const config = configuredMetrics.get(companyId);
+
+        // If configured primary metric exists, use it
+        if (config?.primary) {
+          const configuredPrimary = findMetricByName(values, config.primary);
+          if (configuredPrimary) {
+            latestMetrics[companyId] = configuredPrimary;
+          }
+          // If secondary is configured, find it too
+          if (config.secondary) {
+            const configuredSecondary = findMetricByName(values, config.secondary);
+            if (configuredSecondary) {
+              secondaryMetrics[companyId] = configuredSecondary;
+            }
+          }
+          // Skip fallback if configured (even if no data found - will show "No metrics")
+          if (configuredPrimary) continue;
+        }
+
+        // Fallback: Find priority metric (existing behavior)
         let selectedMetric: MetricValue | null = null;
         let previousMetric: MetricValue | null = null;
 
@@ -225,7 +288,7 @@ export default async function InvestorDashboardPage() {
           </Link>
         </div>
       ) : (
-        <DashboardContent companies={companies} latestMetrics={latestMetrics} />
+        <DashboardContent companies={companies} latestMetrics={latestMetrics} secondaryMetrics={secondaryMetrics} />
       )}
     </div>
   );

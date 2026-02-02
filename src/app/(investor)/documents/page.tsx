@@ -2,6 +2,13 @@
 
 import * as React from "react";
 import { Download, FileText, Search, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const DOCUMENT_TYPES = [
   { value: "income_statement", label: "Income Statement" },
@@ -278,32 +285,40 @@ export default function DocumentsPage() {
         {/* Dropdowns row */}
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Company filter */}
-          <select
-            value={companyFilter}
-            onChange={(e) => setCompanyFilter(e.target.value)}
-            className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+          <Select
+            value={companyFilter || "__all__"}
+            onValueChange={(v) => setCompanyFilter(v === "__all__" ? "" : v)}
           >
-            <option value="">All companies</option>
-            {companies.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full sm:w-[200px]" size="sm">
+              <SelectValue placeholder="All companies" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">All companies</SelectItem>
+              {companies.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* Type filter */}
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+          <Select
+            value={typeFilter || "__all__"}
+            onValueChange={(v) => setTypeFilter(v === "__all__" ? "" : v)}
           >
-            <option value="">All types</option>
-            {DOCUMENT_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full sm:w-[200px]" size="sm">
+              <SelectValue placeholder="All types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">All types</SelectItem>
+              {DOCUMENT_TYPES.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* Date filter */}
           <div className="flex rounded-md border border-white/10 overflow-hidden">

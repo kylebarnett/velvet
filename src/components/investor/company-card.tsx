@@ -21,6 +21,7 @@ type CompanyCardProps = {
   founderId: string | null;
   approvalStatus: string;
   latestMetric?: MetricSnapshot | null;
+  secondaryMetric?: MetricSnapshot | null;
 };
 
 function formatValue(value: number | null, metricName?: string): string {
@@ -134,9 +135,11 @@ export function CompanyCard({
   founderId,
   approvalStatus,
   latestMetric,
+  secondaryMetric,
 }: CompanyCardProps) {
   const isApproved = ["auto_approved", "approved"].includes(approvalStatus);
   const hasFounder = !!founderId;
+  const hasAnyMetric = latestMetric && latestMetric.value != null;
 
   return (
     <Link
@@ -161,19 +164,35 @@ export function CompanyCard({
         </div>
       </div>
 
-      {latestMetric && latestMetric.value != null && (
-        <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
-          <div>
-            <div className="text-xs text-white/50">{latestMetric.name}</div>
-            <div className="mt-0.5 text-lg font-semibold">
-              {formatValue(latestMetric.value, latestMetric.name)}
+      {hasAnyMetric && (
+        <div className="mt-4 space-y-2 border-t border-white/10 pt-3">
+          {/* Primary metric */}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs text-white/50">{latestMetric.name}</div>
+              <div className="mt-0.5 text-lg font-semibold">
+                {formatValue(latestMetric.value, latestMetric.name)}
+              </div>
             </div>
+            <TrendIndicator percentChange={latestMetric.percentChange} />
           </div>
-          <TrendIndicator percentChange={latestMetric.percentChange} />
+
+          {/* Secondary metric (smaller) */}
+          {secondaryMetric && secondaryMetric.value != null && (
+            <div className="flex items-center justify-between border-t border-white/5 pt-2">
+              <div>
+                <div className="text-xs text-white/40">{secondaryMetric.name}</div>
+                <div className="mt-0.5 text-sm font-medium text-white/80">
+                  {formatValue(secondaryMetric.value, secondaryMetric.name)}
+                </div>
+              </div>
+              <TrendIndicator percentChange={secondaryMetric.percentChange} />
+            </div>
+          )}
         </div>
       )}
 
-      {!latestMetric && hasFounder && isApproved && (
+      {!hasAnyMetric && hasFounder && isApproved && (
         <div className="mt-4 flex items-center border-t border-white/10 pt-3">
           <span className="text-xs text-white/40">No metrics submitted yet</span>
         </div>
