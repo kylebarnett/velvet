@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { Settings2 } from "lucide-react";
 
 type Request = {
   id: string;
@@ -56,13 +57,22 @@ export function RequestsPageClient({
             Create and track metric requests across your portfolio.
           </p>
         </div>
-        <Link
-          className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
-          href="/requests/new"
-          data-onboarding="new-request"
-        >
-          New request
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white/70 hover:bg-white/10 hover:text-white"
+            href="/templates"
+          >
+            <Settings2 className="h-4 w-4" />
+            Manage Templates
+          </Link>
+          <Link
+            className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
+            href="/requests/new"
+            data-onboarding="new-request"
+          >
+            New request
+          </Link>
+        </div>
       </div>
 
       {/* Summary cards */}

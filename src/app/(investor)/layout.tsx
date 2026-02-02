@@ -40,7 +40,6 @@ export default async function InvestorLayout({
               { href: "/dashboard", label: "Companies" },
               { href: "/portfolio", label: "Contacts" },
               { href: "/requests", label: "Requests" },
-              { href: "/templates", label: "Templates" },
             ],
           },
           { href: "/reports", label: "Reports" },

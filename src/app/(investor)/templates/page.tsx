@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Copy, Trash2, Sparkles, EyeOff, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Copy, Trash2, Sparkles, EyeOff, Eye, ChevronDown, ChevronUp } from "lucide-react";
 
 import { TemplateAssignModal } from "@/components/investor/template-assign-modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -409,13 +409,21 @@ export default function TemplatesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1" data-onboarding="templates-title">
-          <h1 className="text-xl font-semibold tracking-tight">
-            Metric templates
-          </h1>
-          <p className="text-sm text-white/60">
-            Use industry templates or create your own custom metric sets.
-          </p>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/requests"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <div className="space-y-1" data-onboarding="templates-title">
+            <h1 className="text-xl font-semibold tracking-tight">
+              Metric templates
+            </h1>
+            <p className="text-sm text-white/60">
+              Use industry templates or create your own custom metric sets.
+            </p>
+          </div>
         </div>
         <Link
           href="/templates/new"

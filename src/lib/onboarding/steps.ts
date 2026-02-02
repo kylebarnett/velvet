@@ -37,27 +37,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     action: "click",
   },
 
-  // Page 2: Templates
-  {
-    id: "templates-intro",
-    page: "/templates",
-    target: '[data-onboarding="templates-title"]',
-    title: "Metric Templates",
-    message:
-      "Templates let you define reusable sets of metrics. Create once, assign to multiple companies.",
-  },
-  {
-    id: "create-template",
-    page: "/templates",
-    target: '[data-onboarding="new-template"]',
-    title: "Create Template",
-    message:
-      "Create a template with the metrics you want to track (MRR, ARR, Burn Rate, etc.).",
-    action: "navigate",
-    navigateTo: "/templates/new",
-  },
-
-  // Page 3: Requests
+  // Page 2: Requests
   {
     id: "requests-intro",
     page: "/requests",
@@ -70,9 +50,9 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     id: "create-request",
     page: "/requests",
     target: '[data-onboarding="new-request"]',
-    title: "You're All Set!",
+    title: "Send Your First Request",
     message:
-      "Once you've added companies and created templates, you can send metric requests here.",
+      "Click here to create a metric request. You can choose from industry templates or define custom metrics.",
     action: "click",
   },
 ];
