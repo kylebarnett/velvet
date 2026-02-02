@@ -39,8 +39,77 @@ type CompanyDashboardClientProps = {
   templates: DashboardTemplate[];
 };
 
+// Reorder widgets: 3 metric cards at top, then table, then other widgets
+function reorderWidgetsWithCardsFirst(widgets: Widget[]): Widget[] {
+  const metricCards = widgets.filter((w) => w.type === "metric-card");
+  const tableWidgets = widgets.filter((w) => w.type === "table");
+  const otherWidgets = widgets.filter((w) => w.type !== "table" && w.type !== "metric-card");
+
+  // Ensure we have 3 metric cards at the top (4 columns each = 12 total)
+  const topCards = metricCards.slice(0, 3).map((card, index) => ({
+    ...card,
+    x: index * 4,
+    y: 0,
+    w: 4,
+    h: 1,
+  }));
+
+  // If we don't have 3 cards, that's fine - use what we have
+
+  // Position table below cards (row 1)
+  const cardRowHeight = topCards.length > 0 ? 1 : 0;
+
+  // If no table exists, create one
+  if (tableWidgets.length === 0) {
+    tableWidgets.push({
+      id: "table-all",
+      type: "table",
+      x: 0,
+      y: cardRowHeight,
+      w: 12,
+      h: 3,
+      config: {
+        metrics: [],
+        periodType: "quarterly",
+        title: "All Metrics",
+        showAllMetrics: true,
+      },
+    });
+  } else {
+    // Position existing table below cards
+    tableWidgets.forEach((t) => {
+      t.y = cardRowHeight;
+      t.h = 3;
+      if (t.config && typeof t.config === "object") {
+        (t.config as Record<string, unknown>).showAllMetrics = true;
+        (t.config as Record<string, unknown>).title = "All Metrics";
+      }
+    });
+  }
+
+  // Reposition other widgets below the table
+  const tableEndRow = cardRowHeight + 3;
+  const repositionedOthers = otherWidgets.map((w) => ({
+    ...w,
+    y: w.y < tableEndRow ? tableEndRow : w.y,
+  }));
+
+  // Any remaining metric cards go after the table
+  const remainingCards = metricCards.slice(3).map((card, index) => ({
+    ...card,
+    y: tableEndRow + Math.floor(index / 3),
+    x: (index % 3) * 4,
+    w: 4,
+    h: 1,
+  }));
+
+  return [...topCards, ...tableWidgets, ...repositionedOthers, ...remainingCards];
+}
+
 // Default layout when no views exist
 function getDefaultLayout(industry: string | null, templates: DashboardTemplate[]): Widget[] {
+  let widgets: Widget[] = [];
+
   // Try to find a matching template for the industry
   const matchingTemplate = templates.find(
     (t) => t.target_industry === industry && t.is_system
@@ -49,95 +118,87 @@ function getDefaultLayout(industry: string | null, templates: DashboardTemplate[
   if (matchingTemplate?.layout) {
     const layout = matchingTemplate.layout as DashboardLayout | Widget[];
     if (Array.isArray(layout)) {
-      return layout;
-    }
-    if (layout.widgets) {
-      return layout.widgets;
+      widgets = layout;
+    } else if (layout.widgets) {
+      widgets = layout.widgets;
     }
   }
 
   // Fall back to general financial template
-  const generalTemplate = templates.find(
-    (t) => t.target_industry === null && t.is_system
-  );
+  if (widgets.length === 0) {
+    const generalTemplate = templates.find(
+      (t) => t.target_industry === null && t.is_system
+    );
 
-  if (generalTemplate?.layout) {
-    const layout = generalTemplate.layout as DashboardLayout | Widget[];
-    if (Array.isArray(layout)) {
-      return layout;
-    }
-    if (layout.widgets) {
-      return layout.widgets;
+    if (generalTemplate?.layout) {
+      const layout = generalTemplate.layout as DashboardLayout | Widget[];
+      if (Array.isArray(layout)) {
+        widgets = layout;
+      } else if (layout.widgets) {
+        widgets = layout.widgets;
+      }
     }
   }
 
-  // Hardcoded fallback
-  return [
-    {
-      id: "card-1",
-      type: "metric-card",
-      x: 0,
-      y: 0,
-      w: 3,
-      h: 1,
-      config: { metric: "Revenue", showTrend: true, title: "Revenue" },
-    },
-    {
-      id: "card-2",
-      type: "metric-card",
-      x: 3,
-      y: 0,
-      w: 3,
-      h: 1,
-      config: { metric: "Gross Margin", showTrend: true, title: "Gross Margin" },
-    },
-    {
-      id: "card-3",
-      type: "metric-card",
-      x: 6,
-      y: 0,
-      w: 3,
-      h: 1,
-      config: { metric: "Burn Rate", showTrend: true, title: "Burn Rate" },
-    },
-    {
-      id: "card-4",
-      type: "metric-card",
-      x: 9,
-      y: 0,
-      w: 3,
-      h: 1,
-      config: { metric: "Runway", showTrend: true, title: "Runway" },
-    },
-    {
-      id: "chart-1",
-      type: "chart",
-      x: 0,
-      y: 1,
-      w: 12,
-      h: 2,
-      config: {
-        chartType: "area",
-        metrics: ["Revenue"],
-        periodType: "quarterly",
-        showLegend: true,
-        title: "Revenue Over Time",
+  // Hardcoded fallback if no templates found
+  if (widgets.length === 0) {
+    widgets = [
+      {
+        id: "card-1",
+        type: "metric-card",
+        x: 0,
+        y: 0,
+        w: 3,
+        h: 1,
+        config: { metric: "Revenue", showTrend: true, title: "Revenue" },
       },
-    },
-    {
-      id: "table-1",
-      type: "table",
-      x: 0,
-      y: 3,
-      w: 12,
-      h: 2,
-      config: {
-        metrics: ["Revenue", "Gross Margin", "Burn Rate", "Runway"],
-        periodType: "quarterly",
-        title: "Key Metrics",
+      {
+        id: "card-2",
+        type: "metric-card",
+        x: 3,
+        y: 0,
+        w: 3,
+        h: 1,
+        config: { metric: "Gross Margin", showTrend: true, title: "Gross Margin" },
       },
-    },
-  ] as Widget[];
+      {
+        id: "card-3",
+        type: "metric-card",
+        x: 6,
+        y: 0,
+        w: 3,
+        h: 1,
+        config: { metric: "Burn Rate", showTrend: true, title: "Burn Rate" },
+      },
+      {
+        id: "card-4",
+        type: "metric-card",
+        x: 9,
+        y: 0,
+        w: 3,
+        h: 1,
+        config: { metric: "Runway", showTrend: true, title: "Runway" },
+      },
+      {
+        id: "chart-1",
+        type: "chart",
+        x: 0,
+        y: 1,
+        w: 12,
+        h: 2,
+        config: {
+          chartType: "area",
+          metrics: ["Revenue"],
+          periodType: "quarterly",
+          showLegend: true,
+          title: "Revenue Over Time",
+        },
+      },
+    ] as Widget[];
+  }
+
+  // Always reorder to put table first with all metrics
+  return reorderWidgetsWithCardsFirst(widgets);
 }
 
 function filterMetricsByDateRange(
@@ -183,9 +244,9 @@ export function CompanyDashboardClient({
   if (currentView?.layout) {
     const layout = currentView.layout as DashboardLayout | Widget[];
     if (Array.isArray(layout)) {
-      widgets = layout;
+      widgets = reorderWidgetsWithCardsFirst(layout);
     } else if (layout.widgets) {
-      widgets = layout.widgets;
+      widgets = reorderWidgetsWithCardsFirst(layout.widgets);
     } else {
       widgets = getDefaultLayout(companyIndustry, templates);
     }

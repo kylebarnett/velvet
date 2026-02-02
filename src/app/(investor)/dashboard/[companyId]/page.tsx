@@ -3,8 +3,8 @@ import { ArrowLeft, Settings } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { CompanyTagEditorWrapper } from "@/components/investor/company-tag-editor-wrapper";
 import { CompanySwitcher } from "@/components/investor/company-switcher";
+import { InlineTags } from "@/components/investor/inline-tag";
 import { CompanyDashboardClient } from "./company-dashboard-client";
 
 export const dynamic = "force-dynamic";
@@ -142,8 +142,21 @@ export default async function CompanyDashboardPage({
               </span>
             )}
           </div>
+          <InlineTags
+            companyId={company.id}
+            stage={company.stage}
+            industry={company.industry}
+            businessModel={company.business_model}
+          />
           {company.website && (
-            <div className="text-sm text-white/50">{company.website}</div>
+            <a
+              href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-white/50 hover:text-white hover:underline"
+            >
+              {company.website}
+            </a>
           )}
         </div>
         <Link
@@ -154,14 +167,6 @@ export default async function CompanyDashboardPage({
           Edit Dashboard
         </Link>
       </div>
-
-      {/* Company Tags */}
-      <CompanyTagEditorWrapper
-        companyId={company.id}
-        stage={company.stage}
-        industry={company.industry}
-        businessModel={company.business_model}
-      />
 
       {!isApproved && (
         <div className="rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
