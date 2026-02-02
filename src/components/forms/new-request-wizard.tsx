@@ -6,6 +6,12 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 
 import { getMetricDefinition } from "@/lib/metric-definitions";
+import {
+  getAvailableQuarters,
+  getAvailableYears,
+  getPeriodLabel,
+  type PeriodType,
+} from "@/lib/utils/period";
 
 type TemplateItem = {
   id: string;
@@ -81,17 +87,26 @@ export function NewRequestWizard() {
   const [hiddenTemplateIds, setHiddenTemplateIds] = React.useState<string[]>([]);
   const [expandedTemplates, setExpandedTemplates] = React.useState<Set<string>>(new Set());
 
+  // Period options
+  const availableQuarters = React.useMemo(() => getAvailableQuarters(), []);
+  const availableYears = React.useMemo(() => getAvailableYears(), []);
+
   // Selections
   const [selectedTemplateId, setSelectedTemplateId] = React.useState<string | null>(null);
   const [selectedCompanyIds, setSelectedCompanyIds] = React.useState<Set<string>>(new Set());
-  const [periodStart, setPeriodStart] = React.useState("");
-  const [periodEnd, setPeriodEnd] = React.useState("");
+  const [periodType, setPeriodType] = React.useState<PeriodType>("quarterly");
+  const [selectedYear, setSelectedYear] = React.useState<number>(
+    availableQuarters[0]?.year ?? new Date().getFullYear()
+  );
+  const [selectedQuarter, setSelectedQuarter] = React.useState<1 | 2 | 3 | 4>(
+    availableQuarters[0]?.quarter ?? 1
+  );
   const [dueDate, setDueDate] = React.useState("");
 
   // Custom metric (when not using template)
   const [useCustomMetric, setUseCustomMetric] = React.useState(false);
   const [customMetricName, setCustomMetricName] = React.useState("");
-  const [customPeriodType, setCustomPeriodType] = React.useState<"monthly" | "quarterly" | "annual">("monthly");
+  const [customPeriodType, setCustomPeriodType] = React.useState<PeriodType>("quarterly");
 
   // UI state
   const [loading, setLoading] = React.useState(true);
@@ -104,6 +119,12 @@ export function NewRequestWizard() {
   // Filter templates
   const systemTemplates = templates.filter((t) => t.isSystem && !hiddenTemplateIds.includes(t.id));
   const userTemplates = templates.filter((t) => !t.isSystem);
+
+  // Sort companies alphabetically
+  const sortedCompanies = React.useMemo(
+    () => [...companies].sort((a, b) => a.name.localeCompare(b.name)),
+    [companies]
+  );
 
   function toggleExpanded(templateId: string) {
     setExpandedTemplates((prev) => {
@@ -172,10 +193,17 @@ export function NewRequestWizard() {
   }
 
   async function handleSubmit() {
-    if (selectedCompanyIds.size === 0 || !periodStart || !periodEnd) return;
+    if (selectedCompanyIds.size === 0) return;
 
     setSubmitting(true);
     setError(null);
+
+    // Determine which period type to use (custom metric may have different type)
+    const effectivePeriodType = useCustomMetric ? customPeriodType : periodType;
+    const effectiveYear =
+      effectivePeriodType === "annual" && availableYears[0]
+        ? availableYears[0].year
+        : selectedYear;
 
     try {
       if (useCustomMetric) {
@@ -188,8 +216,9 @@ export function NewRequestWizard() {
               companyId,
               metricName: customMetricName,
               periodType: customPeriodType,
-              periodStart,
-              periodEnd,
+              year: customPeriodType === "annual" ? effectiveYear : selectedYear,
+              quarter:
+                customPeriodType === "quarterly" ? selectedQuarter : undefined,
               dueDate: dueDate || undefined,
             }),
           })
@@ -211,8 +240,9 @@ export function NewRequestWizard() {
           body: JSON.stringify({
             templateId: selectedTemplateId,
             companyIds: Array.from(selectedCompanyIds),
-            periodStart,
-            periodEnd,
+            periodType,
+            year: periodType === "annual" ? effectiveYear : selectedYear,
+            quarter: periodType === "quarterly" ? selectedQuarter : undefined,
             dueDate: dueDate || undefined,
           }),
         });
@@ -355,11 +385,13 @@ export function NewRequestWizard() {
                 setStep(1);
                 setSelectedTemplateId(null);
                 setSelectedCompanyIds(new Set());
-                setPeriodStart("");
-                setPeriodEnd("");
+                setPeriodType("quarterly");
+                setSelectedYear(availableQuarters[0]?.year ?? new Date().getFullYear());
+                setSelectedQuarter(availableQuarters[0]?.quarter ?? 1);
                 setDueDate("");
                 setUseCustomMetric(false);
                 setCustomMetricName("");
+                setCustomPeriodType("quarterly");
               }}
               className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10"
               type="button"
@@ -509,9 +541,8 @@ export function NewRequestWizard() {
                     id="customPeriodType"
                     className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
                     value={customPeriodType}
-                    onChange={(e) => setCustomPeriodType(e.target.value as typeof customPeriodType)}
+                    onChange={(e) => setCustomPeriodType(e.target.value as PeriodType)}
                   >
-                    <option value="monthly">Monthly</option>
                     <option value="quarterly">Quarterly</option>
                     <option value="annual">Annual</option>
                   </select>
@@ -535,7 +566,7 @@ export function NewRequestWizard() {
               </button>
             </div>
 
-            {companies.length === 0 ? (
+            {sortedCompanies.length === 0 ? (
               <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
                 <p className="text-sm text-white/60">No companies in your portfolio.</p>
                 <Link
@@ -547,7 +578,7 @@ export function NewRequestWizard() {
               </div>
             ) : (
               <div className="max-h-80 space-y-1 overflow-y-auto rounded-xl border border-white/10 bg-white/5 p-2">
-                {companies.map((c) => (
+                {sortedCompanies.map((c) => (
                   <label
                     key={c.id}
                     className="flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"
@@ -614,34 +645,75 @@ export function NewRequestWizard() {
           </div>
 
           <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-5">
-            <div className="grid gap-3 sm:gap-4 sm:grid-cols-3">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Period type selector */}
               <div className="grid gap-1.5 sm:gap-2">
-                <label className="text-sm text-white/70" htmlFor="periodStart">
-                  Period start
+                <label className="text-sm text-white/70" htmlFor="periodType">
+                  Period type
                 </label>
-                <input
-                  id="periodStart"
-                  type="date"
+                <select
+                  id="periodType"
                   className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-                  value={periodStart}
-                  onChange={(e) => setPeriodStart(e.target.value)}
-                  required
-                />
+                  value={periodType}
+                  onChange={(e) => {
+                    const newType = e.target.value as PeriodType;
+                    setPeriodType(newType);
+                    // Reset year when switching to annual (use first available year)
+                    if (newType === "annual" && availableYears[0]) {
+                      setSelectedYear(availableYears[0].year);
+                    }
+                  }}
+                >
+                  <option value="quarterly">Quarterly</option>
+                  <option value="annual">Annual</option>
+                </select>
               </div>
+
+              {/* Period selector - shows different UI based on period type */}
+              {periodType === "quarterly" ? (
+                <div className="grid gap-1.5 sm:gap-2">
+                  <label className="text-sm text-white/70" htmlFor="quarter">
+                    Quarter
+                  </label>
+                  <select
+                    id="quarter"
+                    className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+                    value={`${selectedYear}-${selectedQuarter}`}
+                    onChange={(e) => {
+                      const [year, quarter] = e.target.value.split("-").map(Number);
+                      setSelectedYear(year);
+                      setSelectedQuarter(quarter as 1 | 2 | 3 | 4);
+                    }}
+                  >
+                    {availableQuarters.map((q) => (
+                      <option key={`${q.year}-${q.quarter}`} value={`${q.year}-${q.quarter}`}>
+                        {q.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="grid gap-1.5 sm:gap-2">
+                  <label className="text-sm text-white/70" htmlFor="year">
+                    Year
+                  </label>
+                  <select
+                    id="year"
+                    className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  >
+                    {availableYears.map((y) => (
+                      <option key={y.year} value={y.year}>
+                        {y.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Due date */}
               <div className="grid gap-1.5 sm:gap-2">
-                <label className="text-sm text-white/70" htmlFor="periodEnd">
-                  Period end
-                </label>
-                <input
-                  id="periodEnd"
-                  type="date"
-                  className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-                  value={periodEnd}
-                  onChange={(e) => setPeriodEnd(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
                 <label className="text-sm text-white/70" htmlFor="dueDate">
                   Due date (optional)
                 </label>
@@ -666,6 +738,14 @@ export function NewRequestWizard() {
                 <p>
                   <span className="text-white/40">Companies:</span>{" "}
                   {selectedCompanyIds.size} selected
+                </p>
+                <p>
+                  <span className="text-white/40">Period:</span>{" "}
+                  {getPeriodLabel(
+                    periodType === "quarterly"
+                      ? { type: "quarterly", year: selectedYear, quarter: selectedQuarter }
+                      : { type: "annual", year: selectedYear }
+                  )}
                 </p>
                 {!useCustomMetric && selectedTemplate && (
                   <p>
@@ -693,7 +773,7 @@ export function NewRequestWizard() {
             </button>
             <button
               onClick={handleSubmit}
-              disabled={submitting || !periodStart || !periodEnd}
+              disabled={submitting}
               className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
               type="button"
             >

@@ -2,14 +2,32 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import {
+  calculatePeriodDates,
+  isValidQuarter,
+  isValidYear,
+  type PeriodInput,
+} from "@/lib/utils/period";
 
-const schema = z.object({
-  templateId: z.string().min(1),
-  companyIds: z.array(z.string().uuid()).min(1),
-  periodStart: z.string().min(1),
-  periodEnd: z.string().min(1),
-  dueDate: z.string().optional(),
-});
+const schema = z
+  .object({
+    templateId: z.string().min(1),
+    companyIds: z.array(z.string().uuid()).min(1),
+    periodType: z.enum(["quarterly", "annual"]),
+    year: z.number().int(),
+    quarter: z.number().int().min(1).max(4).optional(),
+    dueDate: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      // Quarter is required for quarterly period type
+      if (data.periodType === "quarterly" && data.quarter === undefined) {
+        return false;
+      }
+      return true;
+    },
+    { message: "Quarter is required for quarterly period type." }
+  );
 
 // POST - Bulk assign a template to multiple companies
 export async function POST(req: Request) {
@@ -22,7 +40,25 @@ export async function POST(req: Request) {
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return jsonError("Invalid request body.", 400);
 
-  const { templateId, companyIds, periodStart, periodEnd, dueDate } = parsed.data;
+  const { templateId, companyIds, periodType, year, quarter, dueDate } =
+    parsed.data;
+
+  // Validate year
+  if (!isValidYear(year)) {
+    return jsonError("Invalid year.", 400);
+  }
+
+  // Validate quarter if quarterly
+  if (periodType === "quarterly" && !isValidQuarter(quarter!)) {
+    return jsonError("Invalid quarter.", 400);
+  }
+
+  // Calculate period dates
+  const periodInput: PeriodInput =
+    periodType === "quarterly"
+      ? { type: "quarterly", year, quarter: quarter as 1 | 2 | 3 | 4 }
+      : { type: "annual", year };
+  const { periodStart, periodEnd } = calculatePeriodDates(periodInput);
 
   // Fetch template items (allow system templates or user's own)
   const { data: template } = await supabase

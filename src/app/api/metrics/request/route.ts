@@ -2,15 +2,32 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import {
+  calculatePeriodDates,
+  isValidQuarter,
+  isValidYear,
+  type PeriodInput,
+} from "@/lib/utils/period";
 
-const schema = z.object({
-  companyId: z.string().uuid(),
-  metricName: z.string().min(2),
-  periodType: z.enum(["monthly", "quarterly", "annual"]),
-  periodStart: z.string().min(1),
-  periodEnd: z.string().min(1),
-  dueDate: z.string().optional(),
-});
+const schema = z
+  .object({
+    companyId: z.string().uuid(),
+    metricName: z.string().min(2),
+    periodType: z.enum(["quarterly", "annual"]),
+    year: z.number().int(),
+    quarter: z.number().int().min(1).max(4).optional(),
+    dueDate: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      // Quarter is required for quarterly period type
+      if (data.periodType === "quarterly" && data.quarter === undefined) {
+        return false;
+      }
+      return true;
+    },
+    { message: "Quarter is required for quarterly period type." }
+  );
 
 export async function POST(req: Request) {
   const parsed = schema.safeParse(await req.json().catch(() => null));
@@ -22,8 +39,25 @@ export async function POST(req: Request) {
   const role = (user.user_metadata?.role as string | undefined) ?? null;
   if (role !== "investor") return jsonError("Forbidden", 403);
 
-  const { companyId, metricName, periodType, periodStart, periodEnd, dueDate } =
+  const { companyId, metricName, periodType, year, quarter, dueDate } =
     parsed.data;
+
+  // Validate year
+  if (!isValidYear(year)) {
+    return jsonError("Invalid year.", 400);
+  }
+
+  // Validate quarter if quarterly
+  if (periodType === "quarterly" && !isValidQuarter(quarter!)) {
+    return jsonError("Invalid quarter.", 400);
+  }
+
+  // Calculate period dates
+  const periodInput: PeriodInput =
+    periodType === "quarterly"
+      ? { type: "quarterly", year, quarter: quarter as 1 | 2 | 3 | 4 }
+      : { type: "annual", year };
+  const { periodStart, periodEnd } = calculatePeriodDates(periodInput);
 
   // Verify investor has a relationship with this company
   const { data: relationship } = await supabase
