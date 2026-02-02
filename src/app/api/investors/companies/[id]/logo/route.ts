@@ -3,7 +3,8 @@ import { revalidatePath } from "next/cache";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 
-const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+// Note: SVG intentionally excluded - can contain embedded JavaScript (XSS risk)
+const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"];
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 
 // POST - Upload logo for a company
@@ -45,7 +46,7 @@ export async function POST(
   }
 
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return jsonError("Invalid file type. Allowed: PNG, JPG, WebP, SVG.", 400);
+    return jsonError("Invalid file type. Allowed: PNG, JPG, WebP.", 400);
   }
 
   if (file.size > MAX_SIZE) {
@@ -57,7 +58,6 @@ export async function POST(
     "image/png": "png",
     "image/jpeg": "jpg",
     "image/webp": "webp",
-    "image/svg+xml": "svg",
   };
   const ext = extMap[file.type] || "png";
   const filePath = `${user.id}/${companyId}.${ext}`;

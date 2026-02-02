@@ -56,6 +56,10 @@ export async function GET() {
 }
 
 function escapeCsvField(value: string): string {
+  // Prevent formula injection - prefix with single quote if starts with dangerous chars
+  if (/^[=+\-@\t\r]/.test(value)) {
+    value = "'" + value;
+  }
   // If the value contains commas, quotes, or newlines, wrap in quotes and escape internal quotes
   if (value.includes(",") || value.includes('"') || value.includes("\n")) {
     return `"${value.replace(/"/g, '""')}"`;

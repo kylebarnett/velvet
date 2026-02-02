@@ -84,10 +84,14 @@ export async function GET(
       }
     }
 
-    // Escape fields for CSV
+    // Escape fields for CSV (includes formula injection prevention)
     const escapeCsvField = (field: string | null): string => {
       if (field == null) return "";
-      const str = String(field);
+      let str = String(field);
+      // Prevent formula injection - prefix with single quote if starts with dangerous chars
+      if (/^[=+\-@\t\r]/.test(str)) {
+        str = "'" + str;
+      }
       // Escape quotes and wrap in quotes if contains comma, quote, or newline
       if (str.includes(",") || str.includes('"') || str.includes("\n")) {
         return `"${str.replace(/"/g, '""')}"`;

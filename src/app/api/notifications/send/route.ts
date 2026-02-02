@@ -14,6 +14,12 @@ export async function POST(req: Request) {
   const { user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
+  // Role verification - only investors and founders can send notifications
+  const role = user.user_metadata?.role;
+  if (role !== "investor" && role !== "founder") {
+    return jsonError("Forbidden.", 403);
+  }
+
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return jsonError("Invalid request body.", 400);
 
