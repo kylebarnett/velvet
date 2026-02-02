@@ -236,7 +236,7 @@ Investors can upload custom logos for portfolio companies. Logos are per-investo
 ### Storage
 - Bucket: `company-logos`
 - Path: `{investor_id}/{company_id}.{ext}`
-- Allowed types: PNG, JPG, WebP, SVG
+- Allowed types: PNG, JPG, WebP (SVG excluded for security - can contain XSS)
 - Max size: 2MB
 
 ### Components
@@ -547,10 +547,71 @@ Investors can view aggregated metrics across their entire portfolio, compare com
 
 ## Security Requirements
 
-### Authentication
-- All API endpoints must verify authentication
+> **IMPORTANT**: This is a production application used by thousands of users. Always build with security as a first-class concern. When in doubt, be more restrictive.
+
+### Authentication & Authorization
+- All API endpoints must verify authentication using `getApiUser()`
+- **Always verify role** after authentication: `user.user_metadata?.role`
 - Never trust client-provided IDs without ownership verification
 - Validate redirect URLs to prevent open redirects
+- Use `jsonError("Unauthorized.", 401)` for missing auth, `jsonError("Forbidden.", 403)` for wrong role/ownership
+
+### Authorization Pattern (Required for all API routes)
+```typescript
+// 1. Authenticate
+const { supabase, user } = await getApiUser();
+if (!user) return jsonError("Unauthorized.", 401);
+
+// 2. Verify role
+const role = user.user_metadata?.role;
+if (role !== "investor") return jsonError("Forbidden.", 403);
+
+// 3. Verify ownership BEFORE any data operations
+const { data: relationship } = await supabase
+  .from("investor_company_relationships")
+  .select("id")
+  .eq("investor_id", user.id)
+  .eq("company_id", companyId)
+  .single();
+if (!relationship) return jsonError("Company not in portfolio.", 403);
+
+// 4. THEN perform the operation (optionally with admin client)
+```
+
+### Input Validation
+- **Always use Zod** for request body validation
+- Validate query parameters before use (especially dates, IDs, enums)
+- Sanitize search inputs - be wary of SQL wildcards in LIKE queries
+- Validate file uploads: check MIME type, file size, and ideally file signatures
+
+### File Upload Security
+- **Never allow SVG uploads** - they can contain embedded JavaScript (XSS)
+- Allowed image types: PNG, JPG, WebP only
+- Enforce file size limits (check both header and actual file size)
+- Sanitize filenames: `filename.replace(/[^a-zA-Z0-9._-]/g, "_")`
+- Store files with generated paths, not user-provided names
+
+### CSV Export Security
+- **Prevent formula injection** - escape fields starting with `=`, `+`, `-`, `@`, tab, CR:
+```typescript
+function escapeCsvField(value: string): string {
+  if (/^[=+\-@\t\r]/.test(value)) {
+    value = "'" + value;  // Prefix with single quote
+  }
+  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+```
+
+### Supabase & RLS
+- All tables must have RLS enabled
+- RLS policies should be as restrictive as possible
+- When using `createSupabaseAdminClient()` (bypasses RLS):
+  - **Always verify ownership BEFORE** using admin client
+  - Document why admin client is needed
+- Avoid `using (true)` in RLS policies - be explicit about access rules
 
 ### Data Access
 - Investors can only see/modify their own portfolio
@@ -560,6 +621,29 @@ Investors can view aggregated metrics across their entire portfolio, compare com
 ### Data Ownership
 - **Contact deletion**: Deleting a portfolio contact removes the invitation and relationship, but preserves the company if a founder has already signed up (`founder_id` is set) OR if other investors are linked to it.
 - **Multi-investor isolation**: Each investor's metric definitions and requests are their own. Company metric values are shared across approved investors but only the founder can write them.
+
+### Common Vulnerabilities to Avoid
+| Vulnerability | Prevention |
+|--------------|------------|
+| Missing auth/role check | Always check both `user` and `role` |
+| SQL injection | Use Supabase query builder, never raw SQL with user input |
+| XSS | Never use `dangerouslySetInnerHTML`, escape HTML in emails |
+| CSV formula injection | Prefix dangerous chars with `'` |
+| SVG XSS | Don't allow SVG uploads |
+| Open redirects | Only redirect to hardcoded paths |
+| IDOR (insecure direct object reference) | Always verify ownership before operations |
+| Enumeration attacks | Use consistent error messages, verify ownership before fetch |
+
+### Security Checklist for New Features
+- [ ] Authentication required (`getApiUser()`)
+- [ ] Role verified (`user.user_metadata?.role`)
+- [ ] Ownership verified before data access
+- [ ] Input validated with Zod
+- [ ] File uploads restricted (no SVG, size limits)
+- [ ] CSV exports escape formula chars
+- [ ] RLS policies reviewed
+- [ ] No sensitive data in client-side code
+- [ ] Error messages don't leak system info
 
 ## UI Patterns
 
