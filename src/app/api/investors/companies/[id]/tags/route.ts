@@ -8,6 +8,7 @@ const schema = z.object({
   stage: z.string().nullable().optional(),
   industry: z.string().nullable().optional(),
   business_model: z.string().nullable().optional(),
+  website: z.string().nullable().optional(),
 });
 
 export async function PUT(
@@ -43,6 +44,7 @@ export async function PUT(
   if (parsed.data.industry !== undefined) updateData.industry = parsed.data.industry ?? null;
   if (parsed.data.business_model !== undefined)
     updateData.business_model = parsed.data.business_model ?? null;
+  if (parsed.data.website !== undefined) updateData.website = parsed.data.website ?? null;
 
   if (Object.keys(updateData).length === 0) {
     return jsonError("No fields to update.", 400);

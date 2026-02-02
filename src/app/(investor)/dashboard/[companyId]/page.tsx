@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CompanySwitcher } from "@/components/investor/company-switcher";
 import { InlineTags } from "@/components/investor/inline-tag";
+import { InlineWebsite } from "@/components/investor/inline-website";
 import { CompanyDashboardClient } from "./company-dashboard-client";
 
 export const dynamic = "force-dynamic";
@@ -148,16 +149,7 @@ export default async function CompanyDashboardPage({
             industry={company.industry}
             businessModel={company.business_model}
           />
-          {company.website && (
-            <a
-              href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-white/50 hover:text-white hover:underline"
-            >
-              {company.website}
-            </a>
-          )}
+          <InlineWebsite companyId={company.id} website={company.website} />
         </div>
         <Link
           href={`/dashboard/${companyId}/edit`}
