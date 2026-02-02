@@ -13,7 +13,7 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - **Founders** - Submit metrics, upload documents, respond to requests
 
 ### Route Structure
-- Investors: `/dashboard`, `/dashboard/[companyId]`, `/dashboard/[companyId]/edit`, `/dashboard/[companyId]/metrics`, `/portfolio`, `/reports`, `/reports/compare`, `/reports/trends`, `/requests`, `/requests/new`, `/templates`, `/templates/new`, `/templates/[id]`, `/documents`
+- Investors: `/dashboard`, `/dashboard/[companyId]`, `/dashboard/[companyId]/edit`, `/dashboard/[companyId]/metrics`, `/portfolio`, `/reports`, `/reports/compare`, `/reports/trends`, `/requests`, `/requests/new`, `/requests/schedules`, `/requests/schedules/new`, `/requests/schedules/[id]`, `/templates`, `/templates/new`, `/templates/[id]`, `/documents`
 - Founders: `/portal`, `/portal/requests`, `/portal/metrics`, `/portal/investors`, `/portal/documents`
 - Auth: `/login`, `/signup`, `/app` (redirects based on role)
 
@@ -40,6 +40,9 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `dashboard_views` - Saved dashboard layouts per investor per company (name, is_default, layout JSON)
 - `dashboard_templates` - System-wide dashboard presets (name, description, target_industry, layout JSON)
 - `portfolio_reports` - Saved report configurations per investor (name, report_type, filters, company_ids, normalize, config, is_default)
+- `metric_request_schedules` - Recurring metric request configurations (cadence, day_of_month, company_ids, reminder settings)
+- `scheduled_request_runs` - Audit log of schedule executions (requests_created, emails_sent, errors, status)
+- `metric_request_reminders` - Pending reminder emails (scheduled_for, status, auto-cancelled on submission)
 
 ### RLS Policies
 - All tables have Row Level Security enabled
@@ -54,6 +57,9 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `dashboard_views`: investors CRUD own views
 - `dashboard_templates`: all authenticated users can SELECT system templates
 - `portfolio_reports`: investors CRUD own reports
+- `metric_request_schedules`: investors CRUD own schedules
+- `scheduled_request_runs`: investors SELECT runs for their schedules
+- `metric_request_reminders`: investors SELECT reminders for their requests; founders SELECT reminders for requests to their company
 
 ## Styling
 
@@ -545,6 +551,68 @@ Investors can view aggregated metrics across their entire portfolio, compare com
 ### Setup
 1. Run migration `0008_portfolio_reports.sql`
 
+## Scheduled Metric Requests
+
+### Overview
+Investors can schedule recurring metric requests that automatically go out to founders on a cadence (monthly, quarterly, annual). Founders receive email notifications, submit via portal, and reminders are automatically cancelled upon completion.
+
+### Cadence Options
+- **Monthly** - Request metrics every month for the previous month
+- **Quarterly** - Request metrics every quarter for the previous quarter
+- **Annual** - Request metrics every year for the previous year
+
+### Schedule Configuration
+- `cadence` - monthly/quarterly/annual
+- `day_of_month` - Day (1-28) when requests are created
+- `company_ids` - Specific companies or null for all portfolio
+- `include_future_companies` - Auto-include new portfolio companies
+- `due_days_offset` - Days until due date (default 7)
+- `reminder_enabled` - Enable email reminders
+- `reminder_days_before_due` - Array of days before due to send reminders (e.g., [3, 1])
+
+### How It Works
+1. Investor creates a schedule with a template, companies, and cadence
+2. Cron job runs daily at 6 AM UTC to process due schedules
+3. For each due schedule:
+   - Calculate reporting period (previous month/quarter/year)
+   - Create metric requests for each company × template metric
+   - Send notification emails to founders
+   - Create reminder records
+4. Reminder cron runs hourly, sending due reminders
+5. When founder submits a metric, the auto-fulfill trigger updates request status
+6. A trigger cancels pending reminders when status changes to 'submitted'
+
+### Components
+- `src/components/investor/schedule-list.tsx` - List of schedules with actions
+- `src/components/investor/schedule-card.tsx` - Individual schedule card
+- `src/components/investor/schedule-wizard.tsx` - 4-step creation wizard
+- `src/components/investor/cadence-selector.tsx` - Cadence picker
+- `src/components/investor/schedule-run-history.tsx` - Run history display
+- `src/lib/schedules/period.ts` - Period calculation utilities
+- `src/lib/schedules/next-run.ts` - Next run date calculations
+
+### API Routes
+- `GET/POST /api/investors/schedules` - List/create schedules
+- `GET/PUT/DELETE /api/investors/schedules/[id]` - Read/update/delete
+- `POST /api/investors/schedules/[id]/pause` - Pause schedule
+- `POST /api/investors/schedules/[id]/resume` - Resume schedule
+- `POST /api/investors/schedules/[id]/run-now` - Manual trigger
+- `POST /api/cron/process-schedules` - Cron: process due schedules
+- `POST /api/cron/send-reminders` - Cron: send due reminders
+
+### Cron Jobs (Vercel Cron)
+Configured in `vercel.json`:
+- `/api/cron/process-schedules` - Daily at 6 AM UTC
+- `/api/cron/send-reminders` - Hourly
+
+### Environment Variables
+- `CRON_SECRET` - Secret for authenticating cron requests (optional, recommended for production)
+
+### Setup
+1. Run migration `0010_metric_request_schedules.sql`
+2. Add `CRON_SECRET` to environment variables (optional)
+3. Deploy to Vercel (cron jobs auto-configured from vercel.json)
+
 ## Security Requirements
 
 > **IMPORTANT**: This is a production application used by thousands of users. Always build with security as a first-class concern. When in doubt, be more restrictive.
@@ -735,6 +803,8 @@ Migration files in `supabase/migrations/`:
 - `0006_document_types.sql` - Adds document_type enum and description column to documents table, RLS policy for investor read access
 - `0007_dashboard_views.sql` - Dashboard views and templates tables with RLS policies, seeds industry-specific dashboard templates
 - `0008_portfolio_reports.sql` - Portfolio reports table for saved report configurations with RLS policies
+- `0009_pagination_indexes.sql` - Performance indexes for pagination
+- `0010_metric_request_schedules.sql` - Scheduled metric requests: metric_request_schedules, scheduled_request_runs, metric_request_reminders tables, RLS policies, auto-cancel reminders trigger, period calculation functions
 
 Migrations must be run manually in the Supabase SQL Editor (Dashboard > SQL Editor > paste and run).
 
