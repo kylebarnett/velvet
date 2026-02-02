@@ -85,7 +85,7 @@ export default async function InvestorDashboardPage() {
       approvalStatus: r.approval_status,
       logoUrl: r.logo_url,
     };
-  }).filter((c) => c.id);
+  }).filter((c) => c.id).sort((a, b) => a.name.localeCompare(b.name));
 
   // Get company IDs that are approved
   const approvedCompanyIds = companies

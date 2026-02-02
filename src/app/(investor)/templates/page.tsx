@@ -407,27 +407,27 @@ export default function TemplatesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-center gap-3 sm:gap-4">
           <Link
             href="/requests"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-white/10"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
-          <div className="space-y-1" data-onboarding="templates-title">
-            <h1 className="text-xl font-semibold tracking-tight">
+          <div className="space-y-1 min-w-0" data-onboarding="templates-title">
+            <h1 className="text-lg sm:text-xl font-semibold tracking-tight">
               Metric templates
             </h1>
-            <p className="text-sm text-white/60">
+            <p className="text-sm text-white/60 hidden sm:block">
               Use industry templates or create your own custom metric sets.
             </p>
           </div>
         </div>
         <Link
           href="/templates/new"
-          className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
+          className="inline-flex h-10 sm:h-9 items-center justify-center rounded-md bg-white px-4 sm:px-3 text-sm font-medium text-black hover:bg-white/90"
           data-onboarding="new-template"
         >
           New template

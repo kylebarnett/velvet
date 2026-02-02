@@ -7,12 +7,12 @@ export default function AuthLayout({
 }>) {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 sm:py-6">
         <Link className="text-sm font-semibold tracking-tight" href="/">
           Velvet
         </Link>
-        <div className="flex items-center gap-3 text-sm text-white/70">
-          <Link className="hover:text-white" href="/signup">
+        <div className="flex items-center gap-2 sm:gap-3 text-sm text-white/70">
+          <Link className="hidden sm:block hover:text-white" href="/signup">
             Sign up for free
           </Link>
           <Link
@@ -23,7 +23,7 @@ export default function AuthLayout({
           </Link>
         </div>
       </header>
-      <main className="mx-auto flex max-w-6xl px-6 py-10">
+      <main className="mx-auto flex max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
         <div className="w-full">{children}</div>
       </main>
     </div>

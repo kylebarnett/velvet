@@ -373,19 +373,19 @@ export function NewRequestWizard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Progress indicator */}
-      <div className="flex items-center gap-2 text-sm">
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
         <span className={step === 1 ? "text-white" : "text-white/40"}>
-          1. Select template
+          1. Template
         </span>
         <span className="text-white/20">/</span>
         <span className={step === 2 ? "text-white" : "text-white/40"}>
-          2. Select companies
+          2. Companies
         </span>
         <span className="text-white/20">/</span>
         <span className={step === 3 ? "text-white" : "text-white/40"}>
-          3. Set period
+          3. Period
         </span>
       </div>
 
@@ -550,25 +550,29 @@ export function NewRequestWizard() {
                 {companies.map((c) => (
                   <label
                     key={c.id}
-                    className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/5"
+                    className="flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"
                   >
                     <input
                       type="checkbox"
                       checked={selectedCompanyIds.has(c.id)}
                       onChange={() => toggleCompany(c.id)}
-                      className="rounded border-white/20"
+                      className="mt-0.5 rounded border-white/20"
                     />
-                    <span className="font-medium">{c.name}</span>
-                    {c.stage && (
-                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
-                        {c.stage.replace(/_/g, " ")}
-                      </span>
-                    )}
-                    {c.industry && (
-                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
-                        {INDUSTRY_LABELS[c.industry] ?? c.industry}
-                      </span>
-                    )}
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium">{c.name}</span>
+                      <div className="mt-1 flex flex-wrap gap-1.5">
+                        {c.stage && (
+                          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
+                            {c.stage.replace(/_/g, " ")}
+                          </span>
+                        )}
+                        {c.industry && (
+                          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
+                            {INDUSTRY_LABELS[c.industry] ?? c.industry}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </label>
                 ))}
               </div>
@@ -609,9 +613,9 @@ export function NewRequestWizard() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/5 p-5">
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="grid gap-2">
+          <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-5">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-3">
+              <div className="grid gap-1.5 sm:gap-2">
                 <label className="text-sm text-white/70" htmlFor="periodStart">
                   Period start
                 </label>
@@ -624,7 +628,7 @@ export function NewRequestWizard() {
                   required
                 />
               </div>
-              <div className="grid gap-2">
+              <div className="grid gap-1.5 sm:gap-2">
                 <label className="text-sm text-white/70" htmlFor="periodEnd">
                   Period end
                 </label>

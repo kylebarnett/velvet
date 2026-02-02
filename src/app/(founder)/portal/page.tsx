@@ -73,7 +73,7 @@ export default async function FounderPortalPage() {
       </div>
 
       <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="text-sm font-medium">Next actions</div>
             <div className="mt-2 text-sm text-white/60">
@@ -82,13 +82,13 @@ export default async function FounderPortalPage() {
           </div>
           <div className="flex gap-2">
             <Link
-              className="inline-flex h-9 items-center justify-center rounded-md border border-white/15 px-3 text-sm text-white hover:bg-white/5"
+              className="inline-flex h-10 sm:h-9 flex-1 sm:flex-none items-center justify-center rounded-md border border-white/15 px-3 text-sm text-white hover:bg-white/5"
               href="/portal/requests"
             >
               Requests
             </Link>
             <Link
-              className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
+              className="inline-flex h-10 sm:h-9 flex-1 sm:flex-none items-center justify-center rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
               href="/portal/documents/upload"
             >
               Upload

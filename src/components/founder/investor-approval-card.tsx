@@ -58,9 +58,9 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
 
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium">{displayName}</span>
             {investor.is_inviting_investor && (
               <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs text-blue-200">
@@ -81,7 +81,7 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
         {status === "pending" && (
           <div className="flex shrink-0 gap-2">
             <button
-              className="inline-flex h-8 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-60"
+              className="inline-flex h-9 sm:h-8 flex-1 sm:flex-none items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-60"
               onClick={() => handleApproval("approved")}
               disabled={loading}
               type="button"
@@ -89,7 +89,7 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
               Approve
             </button>
             <button
-              className="inline-flex h-8 items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10 disabled:opacity-60"
+              className="inline-flex h-9 sm:h-8 flex-1 sm:flex-none items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10 disabled:opacity-60"
               onClick={() => handleApproval("denied")}
               disabled={loading}
               type="button"
@@ -101,7 +101,7 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
 
         {status === "approved" && (
           <button
-            className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10 disabled:opacity-60"
+            className="inline-flex h-9 sm:h-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10 disabled:opacity-60"
             onClick={() => handleApproval("denied")}
             disabled={loading}
             type="button"
@@ -112,7 +112,7 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
 
         {status === "denied" && (
           <button
-            className="inline-flex h-8 shrink-0 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-60"
+            className="inline-flex h-9 sm:h-8 shrink-0 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-60"
             onClick={() => handleApproval("approved")}
             disabled={loading}
             type="button"

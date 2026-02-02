@@ -116,7 +116,7 @@ export default async function CompanyDashboardPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
             <Link
@@ -124,10 +124,11 @@ export default async function CompanyDashboardPage({
               className="flex items-center gap-1 text-sm text-white/50 hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
-              All Companies
+              <span className="hidden sm:inline">All Companies</span>
+              <span className="sm:hidden">Back</span>
             </Link>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <CompanySwitcher
               currentCompanyId={companyId}
               currentCompanyName={company.name}
@@ -153,7 +154,7 @@ export default async function CompanyDashboardPage({
         </div>
         <Link
           href={`/dashboard/${companyId}/edit`}
-          className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
+          className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2 sm:py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
         >
           <Settings className="h-3.5 w-3.5" />
           Edit Dashboard

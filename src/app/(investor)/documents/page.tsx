@@ -246,15 +246,15 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Documents</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold">Documents</h1>
         <p className="text-sm text-white/60">
           View and download documents from your portfolio companies.
         </p>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Search */}
+      <div className="space-y-3">
+        {/* Search - full width on mobile */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
           <input
@@ -262,7 +262,7 @@ export default function DocumentsPage() {
             placeholder="Search by filename..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-10 w-64 rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
+            className="h-10 w-full sm:w-64 rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
           />
           {search && (
             <button
@@ -275,59 +275,63 @@ export default function DocumentsPage() {
           )}
         </div>
 
-        {/* Company filter */}
-        <select
-          value={companyFilter}
-          onChange={(e) => setCompanyFilter(e.target.value)}
-          className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-        >
-          <option value="">All companies</option>
-          {companies.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        {/* Dropdowns row */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Company filter */}
+          <select
+            value={companyFilter}
+            onChange={(e) => setCompanyFilter(e.target.value)}
+            className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+          >
+            <option value="">All companies</option>
+            {companies.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
 
-        {/* Type filter */}
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-        >
-          <option value="">All types</option>
-          {DOCUMENT_TYPES.map((t) => (
-            <option key={t.value} value={t.value}>
-              {t.label}
-            </option>
-          ))}
-        </select>
+          {/* Type filter */}
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+          >
+            <option value="">All types</option>
+            {DOCUMENT_TYPES.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
+          </select>
 
-        {/* Date filter */}
-        <div className="flex rounded-md border border-white/10 overflow-hidden">
-          {[
-            { value: "all" as const, label: "All time" },
-            { value: "7" as const, label: "7 days" },
-            { value: "30" as const, label: "30 days" },
-            { value: "90" as const, label: "90 days" },
-          ].map((option) => (
-            <button
-              key={option.value}
-              onClick={() => setDateFilter(option.value)}
-              className={`px-3 py-2 text-sm ${
-                dateFilter === option.value
-                  ? "bg-white/10 text-white"
-                  : "bg-black/30 text-white/60 hover:bg-white/5"
-              }`}
-              type="button"
-            >
-              {option.label}
-            </button>
-          ))}
+          {/* Date filter */}
+          <div className="flex rounded-md border border-white/10 overflow-hidden">
+            {[
+              { value: "all" as const, label: "All" },
+              { value: "7" as const, label: "7d" },
+              { value: "30" as const, label: "30d" },
+              { value: "90" as const, label: "90d" },
+            ].map((option) => (
+              <button
+                key={option.value}
+                onClick={() => setDateFilter(option.value)}
+                className={`flex-1 sm:flex-none px-3 py-2 text-sm ${
+                  dateFilter === option.value
+                    ? "bg-white/10 text-white"
+                    : "bg-black/30 text-white/60 hover:bg-white/5"
+                }`}
+                type="button"
+              >
+                <span className="sm:hidden">{option.label}</span>
+                <span className="hidden sm:inline">{option.value === "all" ? "All time" : `${option.value} days`}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Bulk actions */}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {companyFilter && filteredDocuments.length > 0 && (
             <button
               onClick={downloadAllForCompany}
@@ -336,7 +340,8 @@ export default function DocumentsPage() {
               type="button"
             >
               <Download className="h-4 w-4" />
-              Download all
+              <span className="hidden sm:inline">Download all</span>
+              <span className="sm:hidden">All</span>
             </button>
           )}
           {someSelected && (
@@ -348,8 +353,8 @@ export default function DocumentsPage() {
             >
               <Download className="h-4 w-4" />
               {downloading
-                ? "Downloading..."
-                : `Download ${selectedIds.size} selected`}
+                ? "..."
+                : `${selectedIds.size} selected`}
             </button>
           )}
         </div>
@@ -396,64 +401,55 @@ export default function DocumentsPage() {
       )}
 
       {!loading && filteredDocuments.length > 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5">
-          {/* Table header */}
-          <div className="flex items-center gap-4 border-b border-white/10 px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">
-            <div className="w-6">
+        <>
+          {/* Mobile Card View */}
+          <div className="space-y-3 sm:hidden">
+            {/* Select all on mobile */}
+            <div className="flex items-center gap-3 px-1">
               <input
                 type="checkbox"
                 checked={allSelected}
                 onChange={toggleSelectAll}
                 className="h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
               />
+              <span className="text-xs text-white/50">Select all</span>
             </div>
-            <div className="flex-1 min-w-0">Name</div>
-            <div className="w-32">Company</div>
-            <div className="w-28">Type</div>
-            <div className="w-20">Size</div>
-            <div className="w-24">Date</div>
-            <div className="w-10"></div>
-          </div>
 
-          {/* Table rows */}
-          <div className="divide-y divide-white/5">
             {filteredDocuments.map((doc) => (
               <div
                 key={doc.id}
-                className="flex items-center gap-4 px-4 py-3 hover:bg-white/5"
+                className="rounded-xl border border-white/10 bg-white/5 p-4"
               >
-                <div className="w-6">
+                <div className="flex items-start gap-3">
                   <input
                     type="checkbox"
                     checked={selectedIds.has(doc.id)}
                     onChange={() => toggleSelect(doc.id)}
-                    className="h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
+                    className="mt-1 h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
                   />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="truncate text-sm font-medium">{doc.file_name}</p>
-                  {doc.description && (
-                    <p className="truncate text-xs text-white/50">{doc.description}</p>
-                  )}
-                </div>
-                <div className="w-32 truncate text-sm text-white/70">
-                  {doc.company?.name ?? "Unknown"}
-                </div>
-                <div className="w-28">
-                  <span className="inline-flex rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70">
-                    {TYPE_LABELS[doc.document_type] ?? doc.document_type}
-                  </span>
-                </div>
-                <div className="w-20 text-sm text-white/50">
-                  {formatFileSize(doc.file_size)}
-                </div>
-                <div className="w-24 text-sm text-white/50">
-                  {formatDate(doc.uploaded_at)}
-                </div>
-                <div className="w-10">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start gap-2">
+                      <FileText className="h-4 w-4 shrink-0 text-white/40 mt-0.5" />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium truncate">{doc.file_name}</p>
+                        {doc.description && (
+                          <p className="text-xs text-white/50 line-clamp-2 mt-0.5">{doc.description}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
+                        {TYPE_LABELS[doc.document_type] ?? doc.document_type}
+                      </span>
+                      <span className="text-xs text-white/50">{formatFileSize(doc.file_size)}</span>
+                    </div>
+                    <div className="mt-1 text-xs text-white/40">
+                      {doc.company?.name ?? "Unknown"} · {formatDate(doc.uploaded_at)}
+                    </div>
+                  </div>
                   <button
                     onClick={() => downloadSingle(doc)}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10"
                     type="button"
                     title="Download"
                   >
@@ -463,7 +459,77 @@ export default function DocumentsPage() {
               </div>
             ))}
           </div>
-        </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden sm:block rounded-xl border border-white/10 bg-white/5">
+            {/* Table header */}
+            <div className="flex items-center gap-4 border-b border-white/10 px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">
+              <div className="w-6">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleSelectAll}
+                  className="h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
+                />
+              </div>
+              <div className="flex-1 min-w-0">Name</div>
+              <div className="w-32">Company</div>
+              <div className="w-28">Type</div>
+              <div className="w-20">Size</div>
+              <div className="w-24">Date</div>
+              <div className="w-10"></div>
+            </div>
+
+            {/* Table rows */}
+            <div className="divide-y divide-white/5">
+              {filteredDocuments.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center gap-4 px-4 py-3 hover:bg-white/5"
+                >
+                  <div className="w-6">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(doc.id)}
+                      onChange={() => toggleSelect(doc.id)}
+                      className="h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="truncate text-sm font-medium">{doc.file_name}</p>
+                    {doc.description && (
+                      <p className="truncate text-xs text-white/50">{doc.description}</p>
+                    )}
+                  </div>
+                  <div className="w-32 truncate text-sm text-white/70">
+                    {doc.company?.name ?? "Unknown"}
+                  </div>
+                  <div className="w-28">
+                    <span className="inline-flex rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70">
+                      {TYPE_LABELS[doc.document_type] ?? doc.document_type}
+                    </span>
+                  </div>
+                  <div className="w-20 text-sm text-white/50">
+                    {formatFileSize(doc.file_size)}
+                  </div>
+                  <div className="w-24 text-sm text-white/50">
+                    {formatDate(doc.uploaded_at)}
+                  </div>
+                  <div className="w-10">
+                    <button
+                      onClick={() => downloadSingle(doc)}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+                      type="button"
+                      title="Download"
+                    >
+                      <Download className="h-4 w-4 text-white/50" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

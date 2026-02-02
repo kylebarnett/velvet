@@ -274,8 +274,8 @@ export function CompanyDashboardClient({
   return (
     <div className="space-y-4">
       {/* Controls bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <ViewSelector
             views={views.map((v) => ({
               id: v.id,
@@ -295,24 +295,32 @@ export function CompanyDashboardClient({
         />
       </div>
 
-      {/* Dashboard grid */}
-      <div className="grid grid-cols-12 gap-4">
-        {widgets.map((widget) => (
-          <div
-            key={widget.id}
-            className="rounded-xl border border-white/10 bg-white/5 p-4"
-            style={{
-              gridColumn: `span ${widget.w}`,
-              minHeight: `${widget.h * 100}px`,
-            }}
-          >
-            <DashboardWidget
-              widget={widget}
-              metrics={filteredMetrics}
-              periodTypeOverride={periodType}
-            />
-          </div>
-        ))}
+      {/* Dashboard grid - stacked on mobile, grid on desktop */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-12">
+        {widgets.map((widget) => {
+          // Calculate responsive column span
+          const colSpanClass = widget.w <= 4
+            ? "sm:col-span-4 md:col-span-4 lg:col-span-4"
+            : widget.w <= 6
+              ? "sm:col-span-6 md:col-span-6 lg:col-span-6"
+              : "sm:col-span-12";
+
+          return (
+            <div
+              key={widget.id}
+              className={`rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 ${colSpanClass}`}
+              style={{
+                minHeight: `${widget.h * 80}px`,
+              }}
+            >
+              <DashboardWidget
+                widget={widget}
+                metrics={filteredMetrics}
+                periodTypeOverride={periodType}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {widgets.length === 0 && (

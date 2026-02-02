@@ -73,10 +73,11 @@ export default async function PortfolioPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div data-onboarding="portfolio-title">
-          <h1 className="text-2xl font-semibold">Portfolio</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold">Portfolio</h1>
           <p className="text-sm text-white/60">
             Manage your portfolio companies and founder contacts.
           </p>
@@ -84,14 +85,14 @@ export default async function PortfolioPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/portfolio/add"
-            className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10"
+            className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10"
             data-onboarding="add-contact"
           >
             Add Contact
           </Link>
           <Link
             href="/portfolio/import"
-            className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
+            className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
             data-onboarding="import-csv"
           >
             Import CSV
@@ -100,27 +101,27 @@ export default async function PortfolioPage() {
       </div>
 
       {/* Portfolio Insights */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <Link
           href="/dashboard"
-          className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors"
+          className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 hover:bg-white/10 transition-colors"
         >
-          <div className="text-sm text-white/60">Companies</div>
-          <div className="mt-1 text-2xl font-semibold">{companyCount ?? 0}</div>
+          <div className="text-xs sm:text-sm text-white/60">Companies</div>
+          <div className="mt-1 text-lg sm:text-2xl font-semibold">{companyCount ?? 0}</div>
         </Link>
         <Link
           href="/requests"
-          className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors"
+          className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 hover:bg-white/10 transition-colors"
         >
-          <div className="text-sm text-white/60">Pending Requests</div>
-          <div className="mt-1 text-2xl font-semibold">{pendingRequests ?? 0}</div>
+          <div className="text-xs sm:text-sm text-white/60">Pending</div>
+          <div className="mt-1 text-lg sm:text-2xl font-semibold">{pendingRequests ?? 0}</div>
         </Link>
         <Link
           href="/documents"
-          className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors"
+          className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 hover:bg-white/10 transition-colors"
         >
-          <div className="text-sm text-white/60">New Documents (7d)</div>
-          <div className="mt-1 text-2xl font-semibold">{newDocuments ?? 0}</div>
+          <div className="text-xs sm:text-sm text-white/60">New Docs</div>
+          <div className="mt-1 text-lg sm:text-2xl font-semibold">{newDocuments ?? 0}</div>
         </Link>
       </div>
 

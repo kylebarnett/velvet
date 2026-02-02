@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useDebounce } from "@/lib/hooks/use-debounce";
@@ -353,8 +353,8 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
   return (
     <div className="space-y-4">
       {/* Filters and actions */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
           <input
             type="text"
@@ -368,58 +368,75 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
             className="h-10 w-full rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
           />
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            // Reset to page 1 when changing filter
-            setPagination((prev) => ({ ...prev, page: 1 }));
-          }}
-          className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-        >
-          <option value="all">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="sent">Sent</option>
-          <option value="accepted">Accepted</option>
-        </select>
-        {pendingCount > 0 && (
-          <button
-            onClick={sendAllPending}
-            disabled={loading}
-            className="inline-flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+        <div className="flex gap-2">
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              // Reset to page 1 when changing filter
+              setPagination((prev) => ({ ...prev, page: 1 }));
+            }}
+            className="h-10 flex-1 sm:flex-none rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
           >
-            <Send className="h-4 w-4" />
-            Send All Pending ({pendingCount})
-          </button>
-        )}
+            <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="sent">Sent</option>
+            <option value="accepted">Accepted</option>
+          </select>
+          {pendingCount > 0 && (
+            <button
+              onClick={sendAllPending}
+              disabled={loading}
+              className="hidden sm:inline-flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+            >
+              <Send className="h-4 w-4" />
+              Send All ({pendingCount})
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Mobile send all button */}
+      {pendingCount > 0 && (
+        <button
+          onClick={sendAllPending}
+          disabled={loading}
+          className="flex sm:hidden w-full h-10 items-center justify-center gap-2 rounded-md bg-white text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+        >
+          <Send className="h-4 w-4" />
+          Send All Pending ({pendingCount})
+        </button>
+      )}
 
       {/* Bulk actions */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-2">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2">
           <span className="text-sm text-white/60">{selectedIds.size} selected</span>
-          <button
-            onClick={() => sendInvite(Array.from(selectedIds))}
-            disabled={loading}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-white/10 px-3 text-sm hover:bg-white/20 disabled:opacity-60"
-          >
-            <Mail className="h-3.5 w-3.5" />
-            Send Invitations
-          </button>
-          <button
-            onClick={bulkDelete}
-            disabled={loading}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-red-500/20 px-3 text-sm text-red-200 hover:bg-red-500/30 disabled:opacity-60"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            Delete Selected
-          </button>
-          <button
-            onClick={() => setSelectedIds(new Set())}
-            className="text-sm text-white/40 hover:text-white/60"
-          >
-            Clear
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => sendInvite(Array.from(selectedIds))}
+              disabled={loading}
+              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-white/10 px-3 text-sm hover:bg-white/20 disabled:opacity-60"
+            >
+              <Mail className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Send Invitations</span>
+              <span className="sm:hidden">Send</span>
+            </button>
+            <button
+              onClick={bulkDelete}
+              disabled={loading}
+              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-red-500/20 px-3 text-sm text-red-200 hover:bg-red-500/30 disabled:opacity-60"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Delete</span>
+            </button>
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="text-sm text-white/40 hover:text-white/60"
+            >
+              Clear
+            </button>
+          </div>
         </div>
       )}
 
@@ -439,28 +456,30 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
           <div className="font-medium text-blue-200">Dev Mode: Invite Links</div>
           <div className="mt-2 space-y-2">
             {inviteLinks.map((link, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="text-white/60">{link.email}:</span>
-                <input
-                  type="text"
-                  value={link.url}
-                  readOnly
-                  className="flex-1 rounded border border-white/10 bg-black/30 px-2 py-1 text-xs text-white/80"
-                  onClick={(e) => (e.target as HTMLInputElement).select()}
-                />
-                <button
-                  onClick={() => navigator.clipboard.writeText(link.url)}
-                  className="rounded bg-white/10 px-2 py-1 text-xs hover:bg-white/20"
-                >
-                  Copy
-                </button>
+              <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <span className="text-white/60 text-xs sm:text-sm truncate">{link.email}:</span>
+                <div className="flex flex-1 items-center gap-2">
+                  <input
+                    type="text"
+                    value={link.url}
+                    readOnly
+                    className="flex-1 min-w-0 rounded border border-white/10 bg-black/30 px-2 py-1 text-xs text-white/80"
+                    onClick={(e) => (e.target as HTMLInputElement).select()}
+                  />
+                  <button
+                    onClick={() => navigator.clipboard.writeText(link.url)}
+                    className="shrink-0 rounded bg-white/10 px-2 py-1 text-xs hover:bg-white/20"
+                  >
+                    Copy
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Table */}
+      {/* Empty state */}
       {contacts.length === 0 && !fetching ? (
         <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
           <p className="text-white/60">No contacts found.</p>
@@ -471,137 +490,247 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
           )}
         </div>
       ) : (
-        <div className={`overflow-x-auto rounded-xl border border-white/10 bg-white/5 ${fetching ? "opacity-60" : ""}`}>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10 text-left text-white/60">
-                <th className="p-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.size === contacts.length && contacts.length > 0}
-                    onChange={toggleSelectAll}
-                    className="rounded border-white/20"
-                  />
-                </th>
-                <th className="p-3 font-medium">Company</th>
-                <th className="p-3 font-medium">Contact</th>
-                <th className="p-3 font-medium">Email</th>
-                <th className="p-3 font-medium">Status</th>
-                <th className="p-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {contacts.map((contact) => (
-                <tr key={contact.id} className="border-b border-white/5 hover:bg-white/5">
-                  <td className="p-3">
+        <>
+          {/* Mobile Card View */}
+          <div className={`space-y-3 sm:hidden ${fetching ? "opacity-60" : ""}`}>
+            {contacts.map((contact) => (
+              <div
+                key={contact.id}
+                className="rounded-xl border border-white/10 bg-white/5 p-4"
+              >
+                {editingId === contact.id ? (
+                  /* Mobile Edit Form */
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        value={editForm.first_name}
+                        onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
+                        className="h-10 rounded border border-white/10 bg-black/30 px-3 text-sm"
+                        placeholder="First name"
+                      />
+                      <input
+                        value={editForm.last_name}
+                        onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+                        className="h-10 rounded border border-white/10 bg-black/30 px-3 text-sm"
+                        placeholder="Last name"
+                      />
+                    </div>
+                    <input
+                      type="email"
+                      value={editForm.email}
+                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                      className="h-10 w-full rounded border border-white/10 bg-black/30 px-3 text-sm"
+                      placeholder="Email"
+                    />
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-md border border-white/10 px-3 text-sm text-white/60"
+                      >
+                        <X className="h-4 w-4" />
+                        Cancel
+                      </button>
+                      <button
+                        onClick={saveEdit}
+                        disabled={loading}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium text-black disabled:opacity-60"
+                      >
+                        <Check className="h-4 w-4" />
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Mobile Contact Card */
+                  <>
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(contact.id)}
+                        onChange={() => toggleSelect(contact.id)}
+                        className="mt-1 rounded border-white/20"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">
+                              {contact.first_name} {contact.last_name}
+                            </div>
+                            <div className="text-sm text-white/60 truncate">{contact.email}</div>
+                          </div>
+                          {statusBadge(contact.status)}
+                        </div>
+                        <div className="mt-2 text-sm text-white/50 truncate">
+                          {getCompanyName(contact)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center justify-end gap-1 border-t border-white/5 pt-3">
+                      {contact.status !== "accepted" && (
+                        <button
+                          onClick={() => sendInvite([contact.id])}
+                          disabled={loading}
+                          className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm hover:bg-white/10 disabled:opacity-60"
+                          title={contact.status === "sent" ? "Resend" : "Send"}
+                        >
+                          <Mail className="h-4 w-4 text-white/60" />
+                          <span className="text-white/60">{contact.status === "sent" ? "Resend" : "Send"}</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => startEdit(contact)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10"
+                        title="Edit"
+                      >
+                        <Pencil className="h-4 w-4 text-white/60" />
+                      </button>
+                      <button
+                        onClick={() => openDeleteModal(contact)}
+                        disabled={loading}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-400/60" />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className={`hidden sm:block overflow-x-auto rounded-xl border border-white/10 bg-white/5 ${fetching ? "opacity-60" : ""}`}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-left text-white/60">
+                  <th className="p-3">
                     <input
                       type="checkbox"
-                      checked={selectedIds.has(contact.id)}
-                      onChange={() => toggleSelect(contact.id)}
+                      checked={selectedIds.size === contacts.length && contacts.length > 0}
+                      onChange={toggleSelectAll}
                       className="rounded border-white/20"
                     />
-                  </td>
-                  <td className="p-3 font-medium">{getCompanyName(contact)}</td>
-                  <td className="p-3">
-                    {editingId === contact.id ? (
-                      <div className="flex gap-2">
-                        <input
-                          value={editForm.first_name}
-                          onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
-                          className="h-8 w-24 rounded border border-white/10 bg-black/30 px-2 text-sm"
-                          placeholder="First"
-                        />
-                        <input
-                          value={editForm.last_name}
-                          onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
-                          className="h-8 w-24 rounded border border-white/10 bg-black/30 px-2 text-sm"
-                          placeholder="Last"
-                        />
-                      </div>
-                    ) : (
-                      `${contact.first_name} ${contact.last_name}`
-                    )}
-                  </td>
-                  <td className="p-3 text-white/60">
-                    {editingId === contact.id ? (
+                  </th>
+                  <th className="p-3 font-medium">Company</th>
+                  <th className="p-3 font-medium">Contact</th>
+                  <th className="p-3 font-medium">Email</th>
+                  <th className="p-3 font-medium">Status</th>
+                  <th className="p-3 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {contacts.map((contact) => (
+                  <tr key={contact.id} className="border-b border-white/5 hover:bg-white/5">
+                    <td className="p-3">
                       <input
-                        type="email"
-                        value={editForm.email}
-                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                        className="h-8 w-48 rounded border border-white/10 bg-black/30 px-2 text-sm"
-                        placeholder="Email"
+                        type="checkbox"
+                        checked={selectedIds.has(contact.id)}
+                        onChange={() => toggleSelect(contact.id)}
+                        className="rounded border-white/20"
                       />
-                    ) : (
-                      contact.email
-                    )}
-                  </td>
-                  <td className="p-3">{statusBadge(contact.status)}</td>
-                  <td className="p-3">
-                    {editingId === contact.id ? (
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={saveEdit}
-                          disabled={loading}
-                          className="text-sm text-emerald-400 hover:text-emerald-300"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="text-sm text-white/40 hover:text-white/60"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1">
-                        {contact.status !== "accepted" && (
+                    </td>
+                    <td className="p-3 font-medium">{getCompanyName(contact)}</td>
+                    <td className="p-3">
+                      {editingId === contact.id ? (
+                        <div className="flex gap-2">
+                          <input
+                            value={editForm.first_name}
+                            onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
+                            className="h-8 w-24 rounded border border-white/10 bg-black/30 px-2 text-sm"
+                            placeholder="First"
+                          />
+                          <input
+                            value={editForm.last_name}
+                            onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+                            className="h-8 w-24 rounded border border-white/10 bg-black/30 px-2 text-sm"
+                            placeholder="Last"
+                          />
+                        </div>
+                      ) : (
+                        `${contact.first_name} ${contact.last_name}`
+                      )}
+                    </td>
+                    <td className="p-3 text-white/60">
+                      {editingId === contact.id ? (
+                        <input
+                          type="email"
+                          value={editForm.email}
+                          onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                          className="h-8 w-48 rounded border border-white/10 bg-black/30 px-2 text-sm"
+                          placeholder="Email"
+                        />
+                      ) : (
+                        contact.email
+                      )}
+                    </td>
+                    <td className="p-3">{statusBadge(contact.status)}</td>
+                    <td className="p-3">
+                      {editingId === contact.id ? (
+                        <div className="flex items-center gap-2">
                           <button
-                            onClick={() => sendInvite([contact.id])}
+                            onClick={saveEdit}
+                            disabled={loading}
+                            className="text-sm text-emerald-400 hover:text-emerald-300"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="text-sm text-white/40 hover:text-white/60"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          {contact.status !== "accepted" && (
+                            <button
+                              onClick={() => sendInvite([contact.id])}
+                              disabled={loading}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
+                              title={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
+                            >
+                              <Mail className="h-4 w-4 text-white/60" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => startEdit(contact)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+                            title="Edit contact"
+                          >
+                            <Pencil className="h-4 w-4 text-white/60" />
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(contact)}
                             disabled={loading}
                             className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
-                            title={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
+                            title="Delete contact"
                           >
-                            <Mail className="h-4 w-4 text-white/60" />
+                            <Trash2 className="h-4 w-4 text-red-400/60" />
                           </button>
-                        )}
-                        <button
-                          onClick={() => startEdit(contact)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
-                          title="Edit contact"
-                        >
-                          <Pencil className="h-4 w-4 text-white/60" />
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(contact)}
-                          disabled={loading}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
-                          title="Delete contact"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-400/60" />
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-white/60">
-            Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
-            {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} contacts
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-sm text-white/60 text-center sm:text-left">
+            {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => goToPage(pagination.page - 1)}
               disabled={pagination.page === 1 || fetching}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -622,7 +751,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                     key={pageNum}
                     onClick={() => goToPage(pageNum)}
                     disabled={fetching}
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-sm ${
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-md text-sm ${
                       pageNum === pagination.page
                         ? "bg-white text-black"
                         : "border border-white/10 bg-white/5 hover:bg-white/10"
@@ -636,7 +765,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
             <button
               onClick={() => goToPage(pagination.page + 1)}
               disabled={pagination.page === pagination.totalPages || fetching}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <ChevronRight className="h-4 w-4" />
             </button>

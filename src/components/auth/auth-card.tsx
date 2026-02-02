@@ -120,7 +120,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
   }
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-6 shadow-sm">
+    <div className="mx-auto w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 shadow-sm">
       <div className="space-y-2">
         <h1 className="text-lg font-semibold tracking-tight">
           {mode === "login" ? "Welcome back" : "Create your account"}

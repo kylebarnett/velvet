@@ -145,7 +145,7 @@ export function FounderDocumentList() {
   return (
     <div className="space-y-4">
       {/* Filter */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
         <div className="flex items-center gap-2 text-sm text-white/60">
           <Filter className="h-4 w-4" />
           <span>Filter by type:</span>
@@ -153,7 +153,7 @@ export function FounderDocumentList() {
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="h-9 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+          className="h-10 sm:h-9 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
         >
           <option value="all">All types</option>
           {Object.entries(documentTypeLabels).map(([value, label]) => (
@@ -178,7 +178,7 @@ export function FounderDocumentList() {
 
       {/* Document list */}
       {documents.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8 text-center">
           <FileText className="mx-auto h-10 w-10 text-white/40" />
           <p className="mt-3 text-white/60">No documents found.</p>
           <p className="mt-1 text-sm text-white/40">
@@ -186,62 +186,109 @@ export function FounderDocumentList() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10 text-left text-white/60">
-                <th className="p-3 font-medium">Name</th>
-                <th className="p-3 font-medium">Type</th>
-                <th className="p-3 font-medium">Size</th>
-                <th className="p-3 font-medium">Uploaded</th>
-                <th className="p-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {documents.map((doc) => (
-                <tr key={doc.id} className="border-b border-white/5 hover:bg-white/5">
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-white/40" />
-                      <div>
-                        <div className="font-medium">{doc.file_name}</div>
-                        {doc.description && (
-                          <div className="text-xs text-white/50">{doc.description}</div>
-                        )}
-                      </div>
+        <>
+          {/* Mobile Card View */}
+          <div className="space-y-3 sm:hidden">
+            {documents.map((doc) => (
+              <div
+                key={doc.id}
+                className="rounded-xl border border-white/10 bg-white/5 p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <FileText className="h-5 w-5 shrink-0 text-white/40 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium truncate">{doc.file_name}</div>
+                    {doc.description && (
+                      <div className="text-xs text-white/50 mt-0.5 line-clamp-2">{doc.description}</div>
+                    )}
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
+                        {documentTypeLabels[doc.document_type] ?? doc.document_type}
+                      </span>
+                      <span className="text-xs text-white/50">{formatFileSize(doc.file_size)}</span>
+                      <span className="text-xs text-white/50">{formatDate(doc.uploaded_at)}</span>
                     </div>
-                  </td>
-                  <td className="p-3">
-                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
-                      {documentTypeLabels[doc.document_type] ?? doc.document_type}
-                    </span>
-                  </td>
-                  <td className="p-3 text-white/60">{formatFileSize(doc.file_size)}</td>
-                  <td className="p-3 text-white/60">{formatDate(doc.uploaded_at)}</td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => downloadDocument(doc)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
-                        title="Download"
-                      >
-                        <Download className="h-4 w-4 text-white/60" />
-                      </button>
-                      <button
-                        onClick={() => openDeleteModal(doc)}
-                        disabled={deleting}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-400/60" />
-                      </button>
-                    </div>
-                  </td>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-end gap-1 border-t border-white/5 pt-3">
+                  <button
+                    onClick={() => downloadDocument(doc)}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm hover:bg-white/10"
+                  >
+                    <Download className="h-4 w-4 text-white/60" />
+                    <span className="text-white/60">Download</span>
+                  </button>
+                  <button
+                    onClick={() => openDeleteModal(doc)}
+                    disabled={deleting}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
+                    title="Delete"
+                  >
+                    <Trash2 className="h-4 w-4 text-red-400/60" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden sm:block overflow-hidden rounded-xl border border-white/10 bg-white/5">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-left text-white/60">
+                  <th className="p-3 font-medium">Name</th>
+                  <th className="p-3 font-medium">Type</th>
+                  <th className="p-3 font-medium">Size</th>
+                  <th className="p-3 font-medium">Uploaded</th>
+                  <th className="p-3 font-medium">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {documents.map((doc) => (
+                  <tr key={doc.id} className="border-b border-white/5 hover:bg-white/5">
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-white/40" />
+                        <div>
+                          <div className="font-medium">{doc.file_name}</div>
+                          {doc.description && (
+                            <div className="text-xs text-white/50">{doc.description}</div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
+                        {documentTypeLabels[doc.document_type] ?? doc.document_type}
+                      </span>
+                    </td>
+                    <td className="p-3 text-white/60">{formatFileSize(doc.file_size)}</td>
+                    <td className="p-3 text-white/60">{formatDate(doc.uploaded_at)}</td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => downloadDocument(doc)}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+                          title="Download"
+                        >
+                          <Download className="h-4 w-4 text-white/60" />
+                        </button>
+                        <button
+                          onClick={() => openDeleteModal(doc)}
+                          disabled={deleting}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-400/60" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {/* Delete confirmation modal */}

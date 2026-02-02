@@ -205,15 +205,15 @@ export function DashboardContent({ companies, latestMetrics }: DashboardContentP
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex-1 max-w-md">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex-1 sm:max-w-md">
           <CompanySearch
             value={searchQuery}
             onChange={setSearchQuery}
             placeholder="Search companies..."
           />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3 sm:justify-end">
           <div className="text-sm text-white/50">
             {filteredCompanies.length} of {companies.length}
           </div>

@@ -79,7 +79,12 @@ export function DashboardWidget({
 
   if (isTableConfig(config)) {
     const periodType = periodTypeOverride ?? config.periodType;
-    const tableData = prepareTableData(metrics, config.metrics, periodType);
+    const tableData = prepareTableData(
+      metrics,
+      config.metrics,
+      periodType,
+      config.showAllMetrics
+    );
     return <MetricsTable data={tableData} title={config.title} />;
   }
 
@@ -170,14 +175,19 @@ function preparePieData(
 function prepareTableData(
   metrics: MetricValue[],
   metricNames: string[],
-  periodType: PeriodType
+  periodType: PeriodType,
+  showAllMetrics?: boolean
 ) {
   // Filter to requested metrics and period type
-  const filtered = metrics.filter(
-    (m) =>
-      metricNames.some((name) => name.toLowerCase() === m.metric_name.toLowerCase()) &&
-      m.period_type === periodType
-  );
+  // If showAllMetrics is true or metricNames is empty, show all metrics
+  const shouldShowAll = showAllMetrics || metricNames.length === 0;
+  const filtered = metrics.filter((m) => {
+    if (m.period_type !== periodType) return false;
+    if (shouldShowAll) return true;
+    return metricNames.some(
+      (name) => name.toLowerCase() === m.metric_name.toLowerCase()
+    );
+  });
 
   // Group by metric name
   const byMetric = new Map<string, MetricValue[]>();

@@ -20,6 +20,7 @@ export type TableConfig = {
   metrics: string[];
   periodType: PeriodType;
   title?: string;
+  showAllMetrics?: boolean;
 };
 
 export type Widget = {
