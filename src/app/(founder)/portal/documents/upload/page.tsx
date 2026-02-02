@@ -1,6 +1,27 @@
+import { redirect } from "next/navigation";
+
+import { requireRole } from "@/lib/auth/require-role";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DocumentUploadForm } from "@/components/forms/document-upload-form";
 
-export default function DocumentUploadPage() {
+export const dynamic = "force-dynamic";
+
+export default async function DocumentUploadPage() {
+  const user = await requireRole("founder");
+  const supabase = await createSupabaseServerClient();
+
+  // Get the founder's company
+  const { data: company } = await supabase
+    .from("companies")
+    .select("id, name")
+    .eq("founder_id", user.id)
+    .single();
+
+  if (!company) {
+    // Founder has no company - redirect back to documents
+    redirect("/portal/documents");
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -11,8 +32,7 @@ export default function DocumentUploadPage() {
         </p>
       </div>
 
-      <DocumentUploadForm />
+      <DocumentUploadForm company={company} />
     </div>
   );
 }
-

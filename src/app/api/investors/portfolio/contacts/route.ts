@@ -4,15 +4,32 @@ import { z } from "zod";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-// GET - List all contacts for investor
-export async function GET() {
+// GET - List contacts for investor with pagination and search
+export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
-  const { data, error } = await supabase
+  // Parse query params
+  const url = new URL(req.url);
+  const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10));
+  const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") ?? "50", 10)));
+  const search = url.searchParams.get("search")?.trim() ?? "";
+  const status = url.searchParams.get("status") ?? "";
+
+  // Calculate offset
+  const offset = (page - 1) * limit;
+
+  // Build base query for counting
+  let countQuery = supabase
+    .from("portfolio_invitations")
+    .select("id", { count: "exact", head: true })
+    .eq("investor_id", user.id);
+
+  // Build data query
+  let dataQuery = supabase
     .from("portfolio_invitations")
     .select(`
       id,
@@ -31,14 +48,64 @@ export async function GET() {
         founder_id
       )
     `)
-    .eq("investor_id", user.id)
-    .order("created_at", { ascending: false });
+    .eq("investor_id", user.id);
+
+  // Apply status filter
+  const validStatuses = ["pending", "sent", "accepted"];
+  if (status && validStatuses.includes(status)) {
+    countQuery = countQuery.eq("status", status);
+    dataQuery = dataQuery.eq("status", status);
+  }
+
+  // Apply search filter (server-side ILIKE search)
+  if (search) {
+    // Escape special characters for ILIKE pattern and PostgREST filter syntax
+    // First escape ILIKE wildcards, then escape characters that break PostgREST filter parsing
+    const escapedSearch = search
+      .replace(/[%_]/g, "\\$&")  // Escape ILIKE wildcards
+      .replace(/[(),."'\\]/g, ""); // Remove chars that could break PostgREST syntax
+
+    // Only search if there's something left after sanitization
+    if (escapedSearch.trim()) {
+      const searchPattern = `%${escapedSearch.trim()}%`;
+
+      // Search across first_name, last_name, and email
+      countQuery = countQuery.or(
+        `first_name.ilike.${searchPattern},last_name.ilike.${searchPattern},email.ilike.${searchPattern}`
+      );
+      dataQuery = dataQuery.or(
+        `first_name.ilike.${searchPattern},last_name.ilike.${searchPattern},email.ilike.${searchPattern}`
+      );
+    }
+  }
+
+  // Get total count
+  const { count: totalCount, error: countError } = await countQuery;
+  if (countError) {
+    return jsonError(countError.message, 500);
+  }
+
+  // Get paginated data
+  const { data, error } = await dataQuery
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) {
     return jsonError(error.message, 500);
   }
 
-  return NextResponse.json({ contacts: data });
+  const total = totalCount ?? 0;
+  const totalPages = Math.ceil(total / limit);
+
+  return NextResponse.json({
+    contacts: data ?? [],
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+    },
+  });
 }
 
 // PUT - Update contact info

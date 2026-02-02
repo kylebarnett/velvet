@@ -25,14 +25,14 @@ export async function GET(req: Request) {
       file_size,
       document_type,
       description,
-      created_at,
+      uploaded_at,
       company_id,
       companies!inner (
         id,
         name
       )
     `)
-    .order("created_at", { ascending: false });
+    .order("uploaded_at", { ascending: false });
 
   // Filter by companies in investor's approved portfolio
   // The RLS policy handles this, but we need to ensure only approved relationships
@@ -83,7 +83,7 @@ export async function GET(req: Request) {
       file_size: doc.file_size,
       document_type: doc.document_type,
       description: doc.description,
-      uploaded_at: doc.created_at,
+      uploaded_at: doc.uploaded_at,
       company: company
         ? {
             id: company.id,

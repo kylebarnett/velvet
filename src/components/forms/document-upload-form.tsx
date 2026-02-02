@@ -1,11 +1,31 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 
-export function DocumentUploadForm() {
+type Props = {
+  company: {
+    id: string;
+    name: string;
+  };
+};
+
+export function DocumentUploadForm({ company }: Props) {
+  const router = useRouter();
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
   const [isUploading, setIsUploading] = React.useState(false);
+
+  // Auto-dismiss success message after 4 seconds
+  React.useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+        router.push("/portal/documents");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, router]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -20,7 +40,7 @@ export function DocumentUploadForm() {
       });
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Upload failed.");
-      setSuccess("Uploaded.");
+      setSuccess("Document uploaded successfully.");
       e.currentTarget.reset();
     } catch (err: any) {
       setError(err?.message ?? "Something went wrong.");
@@ -36,21 +56,13 @@ export function DocumentUploadForm() {
     >
       <div className="grid gap-4">
         <div className="grid gap-2">
-          <label className="text-sm font-medium" htmlFor="companyId">
+          <label className="text-sm font-medium">
             Company
           </label>
-          <select
-            id="companyId"
-            name="companyId"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-            required
-          >
-            <option value="">Select…</option>
-            <option value="demo-company">Demo company (placeholder)</option>
-          </select>
-          <p className="text-xs text-white/50">
-            This will be auto-selected once companies are wired up.
-          </p>
+          <div className="flex h-11 items-center rounded-md border border-white/10 bg-black/20 px-3 text-sm text-white/80">
+            {company.name}
+          </div>
+          <input type="hidden" name="companyId" value={company.id} />
         </div>
 
         <div className="grid gap-2">
@@ -63,7 +75,7 @@ export function DocumentUploadForm() {
             className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
             required
           >
-            <option value="">Select type…</option>
+            <option value="">Select type...</option>
             <option value="income_statement">Income Statement</option>
             <option value="balance_sheet">Balance Sheet</option>
             <option value="cash_flow_statement">Cash Flow Statement</option>
@@ -84,7 +96,7 @@ export function DocumentUploadForm() {
             id="description"
             name="description"
             rows={2}
-            placeholder="Add context about this document…"
+            placeholder="Add context about this document..."
             className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
           />
         </div>
@@ -126,10 +138,9 @@ export function DocumentUploadForm() {
           disabled={isUploading}
           type="submit"
         >
-          {isUploading ? "Uploading…" : "Upload"}
+          {isUploading ? "Uploading..." : "Upload"}
         </button>
       </div>
     </form>
   );
 }
-

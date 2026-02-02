@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import { Mail, Pencil, Trash2, Send, Search } from "lucide-react";
+import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { useDebounce } from "@/lib/hooks/use-debounce";
 
 type Company = {
   id: string;
@@ -26,19 +26,28 @@ type Contact = {
   companies: Company | Company[] | null;
 };
 
-type Props = {
-  contacts: Contact[];
+type Pagination = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 };
 
-export function ContactsTable({ contacts: initialContacts }: Props) {
-  const router = useRouter();
+type Props = {
+  initialContacts: Contact[];
+  initialPagination: Pagination;
+};
+
+export function ContactsTable({ initialContacts, initialPagination }: Props) {
   const [contacts, setContacts] = React.useState(initialContacts);
+  const [pagination, setPagination] = React.useState(initialPagination);
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editForm, setEditForm] = React.useState({ first_name: "", last_name: "", email: "" });
   const [loading, setLoading] = React.useState(false);
+  const [fetching, setFetching] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
   const [inviteLinks, setInviteLinks] = React.useState<{ email: string; url: string }[] | null>(null);
@@ -46,6 +55,12 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
     open: false,
     contact: null,
   });
+
+  // Debounce search for server-side filtering
+  const debouncedSearch = useDebounce(search, 300);
+
+  // Track if this is the initial render to avoid unnecessary fetch
+  const isInitialMount = React.useRef(true);
 
   // Auto-dismiss success message after 4 seconds
   React.useEffect(() => {
@@ -55,6 +70,44 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
     }
   }, [success]);
 
+  // Fetch contacts when pagination, search, or status changes
+  React.useEffect(() => {
+    // Skip fetch on initial mount - we already have server-rendered data
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    async function fetchContacts() {
+      setFetching(true);
+      try {
+        const params = new URLSearchParams({
+          page: pagination.page.toString(),
+          limit: pagination.limit.toString(),
+        });
+        if (debouncedSearch) params.set("search", debouncedSearch);
+        if (statusFilter !== "all") params.set("status", statusFilter);
+
+        const res = await fetch(`/api/investors/portfolio/contacts?${params}`);
+        const json = await res.json();
+
+        if (!res.ok) {
+          throw new Error(json?.error ?? "Failed to load contacts.");
+        }
+
+        setContacts(json.contacts);
+        setPagination(json.pagination);
+        setSelectedIds(new Set()); // Clear selection on page change
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong.");
+      } finally {
+        setFetching(false);
+      }
+    }
+
+    fetchContacts();
+  }, [pagination.page, pagination.limit, debouncedSearch, statusFilter]);
+
   const getCompanyName = (contact: Contact): string => {
     if (!contact.companies) return "";
     if (Array.isArray(contact.companies)) {
@@ -62,18 +115,6 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
     }
     return contact.companies.name ?? "";
   };
-
-  const filteredContacts = contacts.filter((c) => {
-    const companyName = getCompanyName(c);
-    const matchesSearch =
-      search === "" ||
-      c.first_name.toLowerCase().includes(search.toLowerCase()) ||
-      c.last_name.toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase()) ||
-      companyName.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "all" || c.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
 
   const pendingCount = contacts.filter((c) => c.status === "pending").length;
 
@@ -88,11 +129,16 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
   }
 
   function toggleSelectAll() {
-    if (selectedIds.size === filteredContacts.length) {
+    if (selectedIds.size === contacts.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredContacts.map((c) => c.id)));
+      setSelectedIds(new Set(contacts.map((c) => c.id)));
     }
+  }
+
+  function goToPage(page: number) {
+    if (page < 1 || page > pagination.totalPages) return;
+    setPagination((prev) => ({ ...prev, page }));
   }
 
   async function sendInvite(ids: string[]) {
@@ -120,8 +166,6 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
       if (json.inviteLinks && json.inviteLinks.length > 0) {
         setInviteLinks(json.inviteLinks);
       }
-
-      router.refresh();
 
       // Update local state
       setContacts((prev) =>
@@ -156,7 +200,6 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
       }
 
       setSuccess(`Sent ${json.sent} invitation${json.sent === 1 ? "" : "s"}.`);
-      router.refresh();
 
       // Update local state
       setContacts((prev) =>
@@ -242,13 +285,56 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
       }
 
       setContacts((prev) => prev.filter((c) => c.id !== id));
+      setPagination((prev) => ({ ...prev, total: prev.total - 1 }));
       setSuccess("Contact deleted.");
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
+  }
+
+  async function bulkDelete() {
+    if (selectedIds.size === 0) return;
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    const ids = Array.from(selectedIds);
+    let deleted = 0;
+    const errors: string[] = [];
+
+    for (const id of ids) {
+      try {
+        const res = await fetch("/api/investors/portfolio/contacts", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+
+        if (!res.ok) {
+          const json = await res.json().catch(() => null);
+          errors.push(json?.error ?? "Failed to delete contact.");
+        } else {
+          deleted++;
+        }
+      } catch {
+        errors.push("Network error.");
+      }
+    }
+
+    if (deleted > 0) {
+      setContacts((prev) => prev.filter((c) => !selectedIds.has(c.id)));
+      setPagination((prev) => ({ ...prev, total: prev.total - deleted }));
+      setSuccess(`Deleted ${deleted} contact${deleted === 1 ? "" : "s"}.`);
+    }
+    if (errors.length > 0) {
+      setError(`${errors.length} deletion${errors.length === 1 ? "" : "s"} failed.`);
+    }
+
+    setSelectedIds(new Set());
+    setLoading(false);
   }
 
   const statusBadge = (status: string) => {
@@ -274,13 +360,21 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
             type="text"
             placeholder="Search contacts..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              // Reset to page 1 when searching
+              setPagination((prev) => ({ ...prev, page: 1 }));
+            }}
             className="h-10 w-full rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
           />
         </div>
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            // Reset to page 1 when changing filter
+            setPagination((prev) => ({ ...prev, page: 1 }));
+          }}
           className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
         >
           <option value="all">All statuses</option>
@@ -311,6 +405,14 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
           >
             <Mail className="h-3.5 w-3.5" />
             Send Invitations
+          </button>
+          <button
+            onClick={bulkDelete}
+            disabled={loading}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-red-500/20 px-3 text-sm text-red-200 hover:bg-red-500/30 disabled:opacity-60"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete Selected
           </button>
           <button
             onClick={() => setSelectedIds(new Set())}
@@ -359,24 +461,24 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
       )}
 
       {/* Table */}
-      {filteredContacts.length === 0 ? (
+      {contacts.length === 0 && !fetching ? (
         <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
           <p className="text-white/60">No contacts found.</p>
-          {contacts.length === 0 && (
+          {pagination.total === 0 && (
             <p className="mt-1 text-sm text-white/40">
               Import a CSV to add portfolio companies.
             </p>
           )}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/5">
+        <div className={`overflow-x-auto rounded-xl border border-white/10 bg-white/5 ${fetching ? "opacity-60" : ""}`}>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 text-left text-white/60">
                 <th className="p-3">
                   <input
                     type="checkbox"
-                    checked={selectedIds.size === filteredContacts.length && filteredContacts.length > 0}
+                    checked={selectedIds.size === contacts.length && contacts.length > 0}
                     onChange={toggleSelectAll}
                     className="rounded border-white/20"
                   />
@@ -389,7 +491,7 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
               </tr>
             </thead>
             <tbody>
-              {filteredContacts.map((contact) => (
+              {contacts.map((contact) => (
                 <tr key={contact.id} className="border-b border-white/5 hover:bg-white/5">
                   <td className="p-3">
                     <input
@@ -485,6 +587,60 @@ export function ContactsTable({ contacts: initialContacts }: Props) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-white/60">
+            Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+            {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} contacts
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => goToPage(pagination.page - 1)}
+              disabled={pagination.page === 1 || fetching}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                let pageNum: number;
+                if (pagination.totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (pagination.page <= 3) {
+                  pageNum = i + 1;
+                } else if (pagination.page >= pagination.totalPages - 2) {
+                  pageNum = pagination.totalPages - 4 + i;
+                } else {
+                  pageNum = pagination.page - 2 + i;
+                }
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => goToPage(pageNum)}
+                    disabled={fetching}
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-sm ${
+                      pageNum === pagination.page
+                        ? "bg-white text-black"
+                        : "border border-white/10 bg-white/5 hover:bg-white/10"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => goToPage(pagination.page + 1)}
+              disabled={pagination.page === pagination.totalPages || fetching}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       )}
 

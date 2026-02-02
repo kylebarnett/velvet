@@ -6,10 +6,21 @@ import { ContactsTable } from "@/components/portfolio/contacts-table";
 
 export const dynamic = "force-dynamic";
 
+const PAGE_LIMIT = 50;
+
 export default async function PortfolioPage() {
   const user = await requireRole("investor");
   const supabase = await createSupabaseServerClient();
 
+  // Get total count
+  const { count: totalCount } = await supabase
+    .from("portfolio_invitations")
+    .select("id", { count: "exact", head: true })
+    .eq("investor_id", user.id);
+
+  const total = totalCount ?? 0;
+
+  // Get first page of contacts
   const { data: contacts } = await supabase
     .from("portfolio_invitations")
     .select(`
@@ -30,7 +41,8 @@ export default async function PortfolioPage() {
       )
     `)
     .eq("investor_id", user.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(0, PAGE_LIMIT - 1);
 
   // Count companies
   const { count: companyCount } = await supabase
@@ -51,7 +63,14 @@ export default async function PortfolioPage() {
   const { count: newDocuments } = await supabase
     .from("documents")
     .select("id", { count: "exact", head: true })
-    .gte("created_at", weekAgo.toISOString());
+    .gte("uploaded_at", weekAgo.toISOString());
+
+  const initialPagination = {
+    page: 1,
+    limit: PAGE_LIMIT,
+    total,
+    totalPages: Math.ceil(total / PAGE_LIMIT),
+  };
 
   return (
     <div className="space-y-6">
@@ -105,7 +124,10 @@ export default async function PortfolioPage() {
         </Link>
       </div>
 
-      <ContactsTable contacts={contacts ?? []} />
+      <ContactsTable
+        initialContacts={contacts ?? []}
+        initialPagination={initialPagination}
+      />
     </div>
   );
 }

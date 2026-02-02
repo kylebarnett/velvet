@@ -12,6 +12,7 @@ export default async function SignupPage({ searchParams }: Props) {
   const inviteToken = params.invite;
   let companyName: string | undefined;
   let companyId: string | undefined;
+  let inviteEmail: string | undefined;
 
   if (inviteToken) {
     try {
@@ -22,6 +23,7 @@ export default async function SignupPage({ searchParams }: Props) {
           id,
           status,
           company_id,
+          email,
           companies (
             name
           )
@@ -31,6 +33,7 @@ export default async function SignupPage({ searchParams }: Props) {
 
       if (invitation && invitation.status !== "accepted") {
         companyId = invitation.company_id;
+        inviteEmail = invitation.email;
         const companies = invitation.companies as { name: string }[] | { name: string } | null;
         if (Array.isArray(companies)) {
           companyName = companies[0]?.name;
@@ -49,6 +52,7 @@ export default async function SignupPage({ searchParams }: Props) {
       inviteToken={inviteToken}
       companyName={companyName}
       companyId={companyId}
+      inviteEmail={inviteEmail}
     />
   );
 }

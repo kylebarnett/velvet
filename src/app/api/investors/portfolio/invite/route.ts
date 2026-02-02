@@ -10,6 +10,8 @@ const schema = z.union([
   z.object({ all: z.literal(true) }),
 ]);
 
+const BATCH_SIZE = 100; // Resend batch API limit
+
 export async function POST(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
@@ -74,9 +76,18 @@ export async function POST(req: Request) {
   };
 
   const isDev = process.env.NODE_ENV === "development";
-
   const apiKey = process.env.RESEND_API_KEY;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+  // Prepare email data for all invitations
+  type EmailData = {
+    id: string;
+    email: string;
+    inviteUrl: string;
+    html: string;
+  };
+
+  const emailsToSend: EmailData[] = [];
 
   for (const invitation of invitations) {
     const companies = invitation.companies as { name: string }[] | { name: string } | null;
@@ -123,75 +134,128 @@ export async function POST(req: Request) {
 </html>
     `.trim();
 
+    emailsToSend.push({
+      id: invitation.id,
+      email: invitation.email,
+      inviteUrl,
+      html,
+    });
+
     // In dev mode, collect invite links for manual testing
     if (isDev) {
       if (!results.inviteLinks) results.inviteLinks = [];
       results.inviteLinks.push({ email: invitation.email, url: inviteUrl });
     }
+  }
 
-    if (!apiKey) {
-      // No API key, just log and continue to update status
-      console.log(`[DEV] Would send invite to ${invitation.email}: ${inviteUrl}`);
-    } else {
+  // Send emails in batches
+  const successfulIds: string[] = [];
+
+  if (!apiKey) {
+    // No API key, just log and mark all as sent
+    for (const email of emailsToSend) {
+      console.log(`[DEV] Would send invite to ${email.email}: ${email.inviteUrl}`);
+      successfulIds.push(email.id);
+    }
+  } else {
+    // Process in batches of BATCH_SIZE
+    for (let i = 0; i < emailsToSend.length; i += BATCH_SIZE) {
+      const batch = emailsToSend.slice(i, i + BATCH_SIZE);
+
+      // Prepare batch request
+      const batchPayload = batch.map((email) => ({
+        from: "Velvet <onboarding@resend.dev>",
+        to: [email.email],
+        subject: `You've been invited to Velvet by ${investorName}`,
+        html: email.html,
+      }));
+
       try {
-        const res = await fetch("https://api.resend.com/emails", {
+        const res = await fetch("https://api.resend.com/emails/batch", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${apiKey}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            from: "Velvet <onboarding@resend.dev>",
-            to: [invitation.email],
-            subject: `You've been invited to Velvet by ${investorName}`,
-            html,
-          }),
+          body: JSON.stringify(batchPayload),
         });
 
         if (!res.ok) {
           const text = await res.text().catch(() => "");
-          // In dev, don't fail - just log the error and continue
           if (isDev) {
-            console.log(`[DEV] Email send failed for ${invitation.email}: ${text || res.statusText}`);
+            // In dev, don't fail - just log and continue
+            console.log(`[DEV] Batch email send failed: ${text || res.statusText}`);
+            // Mark all as successful anyway in dev
+            for (const email of batch) {
+              successfulIds.push(email.id);
+            }
           } else {
-            results.errors.push({
-              email: invitation.email,
-              message: `Email failed: ${text || res.statusText}`,
-            });
-            continue;
+            // In production, mark these as errors
+            for (const email of batch) {
+              results.errors.push({
+                email: email.email,
+                message: `Batch send failed: ${text || res.statusText}`,
+              });
+            }
+          }
+        } else {
+          // Batch succeeded
+          const json = await res.json().catch(() => null);
+          // Resend returns { data: [{ id: "..." }, ...] } for successful batch
+          if (json?.data && Array.isArray(json.data)) {
+            for (let j = 0; j < batch.length; j++) {
+              if (json.data[j]?.id) {
+                successfulIds.push(batch[j].id);
+              } else {
+                // Individual email in batch failed
+                results.errors.push({
+                  email: batch[j].email,
+                  message: "Email not sent (no ID returned)",
+                });
+              }
+            }
+          } else {
+            // Assume all succeeded if we got a 200 but unexpected response format
+            for (const email of batch) {
+              successfulIds.push(email.id);
+            }
           }
         }
       } catch (err) {
         if (isDev) {
-          console.log(`[DEV] Email send error for ${invitation.email}: ${err instanceof Error ? err.message : "Unknown"}`);
+          console.log(`[DEV] Batch email send error: ${err instanceof Error ? err.message : "Unknown"}`);
+          // Mark all as successful anyway in dev
+          for (const email of batch) {
+            successfulIds.push(email.id);
+          }
         } else {
-          results.errors.push({
-            email: invitation.email,
-            message: err instanceof Error ? err.message : "Failed to send email",
-          });
-          continue;
+          for (const email of batch) {
+            results.errors.push({
+              email: email.email,
+              message: err instanceof Error ? err.message : "Failed to send email",
+            });
+          }
         }
       }
     }
+  }
 
-    // Update invitation status
+  // Batch update invitation statuses
+  if (successfulIds.length > 0) {
     const { error: updateError } = await adminClient
       .from("portfolio_invitations")
       .update({
         status: "sent",
         sent_at: new Date().toISOString(),
       })
-      .eq("id", invitation.id);
+      .in("id", successfulIds);
 
     if (updateError) {
-      results.errors.push({
-        email: invitation.email,
-        message: `Status update failed: ${updateError.message}`,
-      });
-      continue;
+      // Log error but don't fail the request
+      console.error("Failed to update invitation statuses:", updateError);
     }
 
-    results.sent++;
+    results.sent = successfulIds.length;
   }
 
   return NextResponse.json(results);

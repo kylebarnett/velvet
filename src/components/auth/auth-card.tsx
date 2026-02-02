@@ -44,9 +44,10 @@ type Props = {
   inviteToken?: string;
   companyName?: string;
   companyId?: string;
+  inviteEmail?: string;
 };
 
-export function AuthCard({ mode, inviteToken, companyName, companyId }: Props) {
+export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmail }: Props) {
   const [error, setError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -62,7 +63,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId }: Props) {
       mode === "login"
         ? { email: "", password: "" }
         : inviteToken
-          ? { email: "", password: "", fullName: "", companyWebsite: "" }
+          ? { email: inviteEmail ?? "", password: "", fullName: "", companyWebsite: "" }
           : {
               email: "",
               password: "",
@@ -162,12 +163,20 @@ export function AuthCard({ mode, inviteToken, companyName, companyId }: Props) {
           </label>
           <input
             id="email"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none ring-0 placeholder:text-white/30 focus:border-white/20"
+            className={`h-11 rounded-md border border-white/10 px-3 text-sm outline-none ring-0 placeholder:text-white/30 focus:border-white/20 ${
+              inviteEmail ? "bg-black/20 text-white/80 cursor-not-allowed" : "bg-black/30"
+            }`}
             placeholder="you@company.com"
             type="email"
             autoComplete="email"
+            readOnly={!!inviteEmail}
             {...form.register("email")}
           />
+          {inviteEmail && (
+            <p className="text-xs text-white/50">
+              Email is pre-filled from your invitation link.
+            </p>
+          )}
           {form.formState.errors.email?.message && (
             <p className="text-xs text-red-300">
               {String(form.formState.errors.email.message)}

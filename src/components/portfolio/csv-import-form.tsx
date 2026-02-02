@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Upload, AlertCircle, CheckCircle } from "lucide-react";
+import { Upload, AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
 
 type ParsedRow = {
   company_name: string;
@@ -69,10 +69,14 @@ function mapColumnName(name: string): string {
   return normalizeColumnName(name);
 }
 
-function parseCSV(text: string): { rows: ParsedRow[]; errors: ValidationError[] } {
+function parseCSV(text: string): { rows: ParsedRow[]; errors: ValidationError[]; duplicates: Set<string> } {
   const lines = text.trim().split("\n");
   if (lines.length < 2) {
-    return { rows: [], errors: [{ row: 0, field: "file", message: "CSV must have a header row and at least one data row." }] };
+    return {
+      rows: [],
+      errors: [{ row: 0, field: "file", message: "CSV must have a header row and at least one data row." }],
+      duplicates: new Set(),
+    };
   }
 
   const rawHeader = lines[0].split(",").map((h) => h.trim());
@@ -92,11 +96,14 @@ function parseCSV(text: string): { rows: ParsedRow[]; errors: ValidationError[] 
     return {
       rows: [],
       errors: [{ row: 0, field: "header", message: `Missing required columns: ${missing}` }],
+      duplicates: new Set(),
     };
   }
 
   const rows: ParsedRow[] = [];
   const errors: ValidationError[] = [];
+  const seenEmails = new Map<string, number>(); // email -> first row number
+  const duplicates = new Set<string>();
 
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -123,6 +130,19 @@ function parseCSV(text: string): { rows: ParsedRow[]; errors: ValidationError[] 
       errors.push({ row: i + 1, field: "email", message: "Email is required." });
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.email)) {
       errors.push({ row: i + 1, field: "email", message: "Invalid email format." });
+    } else {
+      // Check for duplicates
+      const normalizedEmail = row.email.toLowerCase();
+      if (seenEmails.has(normalizedEmail)) {
+        duplicates.add(normalizedEmail);
+        errors.push({
+          row: i + 1,
+          field: "email",
+          message: `Duplicate email (also on row ${seenEmails.get(normalizedEmail)}).`,
+        });
+      } else {
+        seenEmails.set(normalizedEmail, i + 1);
+      }
     }
 
     rows.push({
@@ -135,14 +155,19 @@ function parseCSV(text: string): { rows: ParsedRow[]; errors: ValidationError[] 
     });
   }
 
-  return { rows, errors };
+  return { rows, errors, duplicates };
 }
 
 export function CsvImportForm() {
   const router = useRouter();
   const [dragActive, setDragActive] = React.useState(false);
   const [file, setFile] = React.useState<File | null>(null);
-  const [parsedData, setParsedData] = React.useState<{ rows: ParsedRow[]; errors: ValidationError[] } | null>(null);
+  const [parsedData, setParsedData] = React.useState<{
+    rows: ParsedRow[];
+    errors: ValidationError[];
+    duplicates: Set<string>;
+  } | null>(null);
+  const [showAll, setShowAll] = React.useState(false);
   const [importing, setImporting] = React.useState(false);
   const [importResult, setImportResult] = React.useState<{ imported: number; errors: { row: number; message: string }[] } | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -153,6 +178,7 @@ export function CsvImportForm() {
     setFile(file);
     setError(null);
     setImportResult(null);
+    setShowAll(false);
 
     const text = await file.text();
     const parsed = parseCSV(text);
@@ -212,7 +238,15 @@ export function CsvImportForm() {
   }
 
   const hasValidationErrors = parsedData && parsedData.errors.length > 0;
+  const hasDuplicates = parsedData && parsedData.duplicates.size > 0;
   const canImport = parsedData && parsedData.rows.length > 0 && !hasValidationErrors && !importing;
+
+  const PREVIEW_LIMIT = 10;
+  const displayRows = parsedData
+    ? showAll
+      ? parsedData.rows
+      : parsedData.rows.slice(0, PREVIEW_LIMIT)
+    : [];
 
   return (
     <div className="space-y-6">
@@ -249,19 +283,49 @@ export function CsvImportForm() {
         </p>
       </div>
 
+      {/* Duplicate warning */}
+      {hasDuplicates && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
+          <div className="flex items-center gap-2 text-amber-200">
+            <AlertTriangle className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              Duplicate Emails Detected ({parsedData.duplicates.size})
+            </span>
+          </div>
+          <p className="mt-1 text-sm text-amber-200/80">
+            The following emails appear multiple times in your CSV:
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {[...parsedData.duplicates].map((email) => (
+              <span
+                key={email}
+                className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200"
+              >
+                {email}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Validation errors */}
-      {hasValidationErrors && (
+      {hasValidationErrors && !hasDuplicates && (
         <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4">
           <div className="flex items-center gap-2 text-red-200">
             <AlertCircle className="h-4 w-4" />
             <span className="text-sm font-medium">Validation Errors</span>
           </div>
           <ul className="mt-2 space-y-1 text-sm text-red-200/80">
-            {parsedData.errors.map((err, i) => (
+            {parsedData.errors.slice(0, 10).map((err, i) => (
               <li key={i}>
                 Row {err.row}: {err.message}
               </li>
             ))}
+            {parsedData.errors.length > 10 && (
+              <li className="text-red-200/60">
+                ...and {parsedData.errors.length - 10} more errors
+              </li>
+            )}
           </ul>
         </div>
       )}
@@ -269,33 +333,56 @@ export function CsvImportForm() {
       {/* Preview table */}
       {parsedData && parsedData.rows.length > 0 && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <h3 className="mb-4 text-sm font-medium">
-            Preview ({parsedData.rows.length} {parsedData.rows.length === 1 ? "company" : "companies"})
-          </h3>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-medium">
+              Preview ({parsedData.rows.length} {parsedData.rows.length === 1 ? "company" : "companies"})
+            </h3>
+            {parsedData.rows.length > PREVIEW_LIMIT && (
+              <button
+                onClick={() => setShowAll(!showAll)}
+                className="text-sm text-white/60 hover:text-white/80"
+              >
+                {showAll ? "Show less" : `Show all ${parsedData.rows.length}`}
+              </button>
+            )}
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10 text-left text-white/60">
+                  <th className="pb-2 pr-4">#</th>
                   <th className="pb-2 pr-4">Company</th>
                   <th className="pb-2 pr-4">Contact</th>
                   <th className="pb-2">Email</th>
                 </tr>
               </thead>
               <tbody>
-                {parsedData.rows.slice(0, 10).map((row, i) => (
-                  <tr key={i} className="border-b border-white/5">
-                    <td className="py-2 pr-4">{row.company_name}</td>
-                    <td className="py-2 pr-4">
-                      {row.first_name} {row.last_name}
-                    </td>
-                    <td className="py-2 text-white/60">{row.email}</td>
-                  </tr>
-                ))}
+                {displayRows.map((row, i) => {
+                  const isDuplicate = parsedData.duplicates.has(row.email.toLowerCase());
+                  return (
+                    <tr
+                      key={i}
+                      className={`border-b border-white/5 ${isDuplicate ? "bg-amber-500/10" : ""}`}
+                    >
+                      <td className="py-2 pr-4 text-white/40">{i + 1}</td>
+                      <td className="py-2 pr-4">{row.company_name}</td>
+                      <td className="py-2 pr-4">
+                        {row.first_name} {row.last_name}
+                      </td>
+                      <td className={`py-2 ${isDuplicate ? "text-amber-200" : "text-white/60"}`}>
+                        {row.email}
+                        {isDuplicate && (
+                          <span className="ml-2 text-xs text-amber-200/60">(duplicate)</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-            {parsedData.rows.length > 10 && (
+            {!showAll && parsedData.rows.length > PREVIEW_LIMIT && (
               <p className="mt-2 text-xs text-white/40">
-                ...and {parsedData.rows.length - 10} more
+                ...and {parsedData.rows.length - PREVIEW_LIMIT} more
               </p>
             )}
           </div>
