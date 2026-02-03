@@ -20,8 +20,8 @@ export default async function PortfolioPage() {
 
   const total = totalCount ?? 0;
 
-  // Get first page of contacts
-  const { data: contacts } = await supabase
+  // Get all contacts for proper alphabetical sorting by company name
+  const { data: allContacts } = await supabase
     .from("portfolio_invitations")
     .select(`
       id,
@@ -40,9 +40,18 @@ export default async function PortfolioPage() {
         founder_id
       )
     `)
-    .eq("investor_id", user.id)
-    .order("created_at", { ascending: false })
-    .range(0, PAGE_LIMIT - 1);
+    .eq("investor_id", user.id);
+
+  // Sort A-Z by company name, then last name
+  const sorted = (allContacts ?? []).sort((a: any, b: any) => {
+    const companyA = (Array.isArray(a.companies) ? a.companies[0]?.name : a.companies?.name) ?? "";
+    const companyB = (Array.isArray(b.companies) ? b.companies[0]?.name : b.companies?.name) ?? "";
+    const cmp = companyA.localeCompare(companyB, undefined, { sensitivity: "base" });
+    if (cmp !== 0) return cmp;
+    return (a.last_name ?? "").localeCompare(b.last_name ?? "", undefined, { sensitivity: "base" });
+  });
+
+  const contacts = sorted.slice(0, PAGE_LIMIT);
 
   // Count companies
   const { count: companyCount } = await supabase

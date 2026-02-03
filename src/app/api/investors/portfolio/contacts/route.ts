@@ -85,20 +85,30 @@ export async function GET(req: Request) {
     return jsonError(countError.message, 500);
   }
 
-  // Get paginated data
-  const { data, error } = await dataQuery
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1);
+  // Get all matching data for proper alphabetical sorting
+  const { data, error } = await dataQuery;
 
   if (error) {
     return jsonError(error.message, 500);
   }
 
+  // Sort A-Z by company name, then last name
+  const sorted = (data ?? []).sort((a: any, b: any) => {
+    const companyA = (Array.isArray(a.companies) ? a.companies[0]?.name : a.companies?.name) ?? "";
+    const companyB = (Array.isArray(b.companies) ? b.companies[0]?.name : b.companies?.name) ?? "";
+    const cmp = companyA.localeCompare(companyB, undefined, { sensitivity: "base" });
+    if (cmp !== 0) return cmp;
+    return (a.last_name ?? "").localeCompare(b.last_name ?? "", undefined, { sensitivity: "base" });
+  });
+
   const total = totalCount ?? 0;
   const totalPages = Math.ceil(total / limit);
 
+  // Apply pagination after sorting
+  const paginated = sorted.slice(offset, offset + limit);
+
   return NextResponse.json({
-    contacts: data ?? [],
+    contacts: paginated,
     pagination: {
       page,
       limit,

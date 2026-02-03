@@ -360,19 +360,18 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
   return (
     <div className="space-y-4">
       {/* Filters and actions */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-[260px]">
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40" />
           <input
             type="text"
             placeholder="Search contacts..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              // Reset to page 1 when searching
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
-            className="h-10 w-full rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+            className="h-9 w-full rounded-md border border-white/10 bg-black/30 pl-8 pr-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
           />
         </div>
         <div className="flex gap-2">
@@ -397,7 +396,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
             <button
               onClick={sendAllPending}
               disabled={loading}
-              className="hidden sm:inline-flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+              className="hidden sm:inline-flex h-9 items-center gap-2 rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
             >
               <Send className="h-4 w-4" />
               Send All ({pendingCount})
