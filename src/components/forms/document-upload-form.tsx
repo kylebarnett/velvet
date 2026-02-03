@@ -2,6 +2,13 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Props = {
   company: {
@@ -15,6 +22,7 @@ export function DocumentUploadForm({ company }: Props) {
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
   const [isUploading, setIsUploading] = React.useState(false);
+  const [documentType, setDocumentType] = React.useState("");
 
   // Auto-dismiss success message after 4 seconds
   React.useEffect(() => {
@@ -41,6 +49,7 @@ export function DocumentUploadForm({ company }: Props) {
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Upload failed.");
       setSuccess("Document uploaded successfully.");
+      setDocumentType("");
       e.currentTarget.reset();
     } catch (err: any) {
       setError(err?.message ?? "Something went wrong.");
@@ -66,26 +75,26 @@ export function DocumentUploadForm({ company }: Props) {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm font-medium" htmlFor="documentType">
+          <label className="text-sm font-medium">
             Document type
           </label>
-          <select
-            id="documentType"
-            name="documentType"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-            required
-          >
-            <option value="">Select type...</option>
-            <option value="income_statement">Income Statement</option>
-            <option value="balance_sheet">Balance Sheet</option>
-            <option value="cash_flow_statement">Cash Flow Statement</option>
-            <option value="consolidated_financial_statements">Consolidated Financial Statements</option>
-            <option value="409a_valuation">409A Valuation</option>
-            <option value="investor_update">Investor Update</option>
-            <option value="board_deck">Board Deck</option>
-            <option value="cap_table">Cap Table</option>
-            <option value="other">Other</option>
-          </select>
+          <input type="hidden" name="documentType" value={documentType} />
+          <Select value={documentType || "__none__"} onValueChange={(v) => setDocumentType(v === "__none__" ? "" : v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select type..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="income_statement">Income Statement</SelectItem>
+              <SelectItem value="balance_sheet">Balance Sheet</SelectItem>
+              <SelectItem value="cash_flow_statement">Cash Flow Statement</SelectItem>
+              <SelectItem value="consolidated_financial_statements">Consolidated Financial Statements</SelectItem>
+              <SelectItem value="409a_valuation">409A Valuation</SelectItem>
+              <SelectItem value="investor_update">Investor Update</SelectItem>
+              <SelectItem value="board_deck">Board Deck</SelectItem>
+              <SelectItem value="cap_table">Cap Table</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="grid gap-2">
@@ -135,7 +144,7 @@ export function DocumentUploadForm({ company }: Props) {
       <div className="mt-4 flex justify-end">
         <button
           className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
-          disabled={isUploading}
+          disabled={isUploading || !documentType}
           type="submit"
         >
           {isUploading ? "Uploading..." : "Upload"}

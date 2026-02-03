@@ -4,6 +4,13 @@ import * as React from "react";
 import { FileText, Trash2, Download, Filter } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Document = {
   id: string;
@@ -150,18 +157,19 @@ export function FounderDocumentList() {
           <Filter className="h-4 w-4" />
           <span>Filter by type:</span>
         </div>
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="h-10 sm:h-9 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-        >
-          <option value="all">All types</option>
-          {Object.entries(documentTypeLabels).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger size="sm" className="w-auto min-w-[150px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All types</SelectItem>
+            {Object.entries(documentTypeLabels).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Messages */}

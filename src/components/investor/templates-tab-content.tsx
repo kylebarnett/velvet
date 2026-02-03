@@ -1,11 +1,10 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Copy, Trash2, Sparkles, EyeOff, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import { Copy, Trash2, Sparkles, EyeOff, Eye, ChevronDown, ChevronUp, Plus, Pencil } from "lucide-react";
 
 import { TemplateAssignModal } from "@/components/investor/template-assign-modal";
+import { TemplateFormModal } from "@/components/investor/template-form-modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { getMetricDefinition } from "@/lib/metric-definitions";
 
@@ -37,7 +36,6 @@ const INDUSTRY_LABELS: Record<string, string> = {
   other: "General",
 };
 
-// Metric chip with tooltip
 function MetricChip({ name }: { name: string }) {
   const [showTooltip, setShowTooltip] = React.useState(false);
   const metricInfo = getMetricDefinition(name);
@@ -67,8 +65,7 @@ function MetricChip({ name }: { name: string }) {
   );
 }
 
-export default function TemplatesPage() {
-  const router = useRouter();
+export function TemplatesTabContent() {
   const myTemplatesRef = React.useRef<HTMLDivElement>(null);
   const [templates, setTemplates] = React.useState<Template[]>([]);
   const [hiddenTemplateIds, setHiddenTemplateIds] = React.useState<string[]>([]);
@@ -89,29 +86,28 @@ export default function TemplatesPage() {
       return next;
     });
   }
+
   const [assignModal, setAssignModal] = React.useState<{
     open: boolean;
     template: Template | null;
-  }>({
-    open: false,
-    template: null,
-  });
+  }>({ open: false, template: null });
+
   const [deleteModal, setDeleteModal] = React.useState<{
     open: boolean;
     template: Template | null;
-  }>({
-    open: false,
-    template: null,
-  });
+  }>({ open: false, template: null });
+
   const [hideModal, setHideModal] = React.useState<{
     open: boolean;
     template: Template | null;
-  }>({
-    open: false,
-    template: null,
-  });
+  }>({ open: false, template: null });
 
-  // Filter templates
+  const [formModal, setFormModal] = React.useState<{
+    open: boolean;
+    mode: "create" | "edit";
+    template: Template | null;
+  }>({ open: false, mode: "create", template: null });
+
   const systemTemplates = templates.filter((t) => t.isSystem);
   const visibleSystemTemplates = systemTemplates.filter(
     (t) => !hiddenTemplateIds.includes(t.id)
@@ -123,10 +119,9 @@ export default function TemplatesPage() {
 
   async function loadData() {
     try {
-      // Fetch templates and hidden preferences in parallel
       const [templatesRes, hiddenRes] = await Promise.all([
-        fetch("/api/investors/metric-templates"),
-        fetch("/api/user/hidden-templates"),
+        fetch("/api/investors/metric-templates", { cache: "no-store" }),
+        fetch("/api/user/hidden-templates", { cache: "no-store" }),
       ]);
 
       const templatesJson = await templatesRes.json().catch(() => null);
@@ -147,7 +142,6 @@ export default function TemplatesPage() {
     loadData();
   }, []);
 
-  // Clone a system template to My Templates
   async function handleClone(template: Template) {
     setEditingSystem(template.id);
     try {
@@ -159,11 +153,9 @@ export default function TemplatesPage() {
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Failed to clone template.");
 
-      // Refresh the page to show the new template in My Templates
       setEditingSystem(null);
       await loadData();
 
-      // Scroll to My Templates section
       setTimeout(() => {
         myTemplatesRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
@@ -173,7 +165,6 @@ export default function TemplatesPage() {
     }
   }
 
-  // Hide a system template
   async function handleHide() {
     const tmpl = hideModal.template;
     if (!tmpl) return;
@@ -191,12 +182,10 @@ export default function TemplatesPage() {
       }
       setHiddenTemplateIds((prev) => [...prev, tmpl.id]);
     } catch (e: any) {
-      console.error("Hide error:", e);
       setError(e?.message ?? "Something went wrong.");
     }
   }
 
-  // Restore a hidden template
   async function handleRestore(templateId: string) {
     try {
       const res = await fetch("/api/user/hidden-templates", {
@@ -214,7 +203,6 @@ export default function TemplatesPage() {
     }
   }
 
-  // Delete a user template
   async function handleDelete() {
     const tmpl = deleteModal.template;
     if (!tmpl) return;
@@ -343,12 +331,13 @@ export default function TemplatesPage() {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <Link
-                href={`/templates/${tmpl.id}`}
+              <button
+                type="button"
+                onClick={() => setFormModal({ open: true, mode: "edit", template: tmpl })}
                 className="text-sm font-medium hover:underline"
               >
                 {tmpl.name}
-              </Link>
+              </button>
             </div>
             {tmpl.description && (
               <p className="mt-1 text-xs text-white/50">{tmpl.description}</p>
@@ -386,12 +375,14 @@ export default function TemplatesPage() {
             >
               Assign
             </button>
-            <Link
-              href={`/templates/${tmpl.id}`}
+            <button
+              type="button"
+              onClick={() => setFormModal({ open: true, mode: "edit", template: tmpl })}
               className="inline-flex h-8 items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10"
             >
-              Edit
-            </Link>
+              <Pencil className="h-3.5 w-3.5 sm:mr-1.5" />
+              <span className="hidden sm:inline">Edit</span>
+            </button>
             <button
               onClick={() => setDeleteModal({ open: true, template: tmpl })}
               className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
@@ -408,35 +399,24 @@ export default function TemplatesPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <Link
-            href="/requests"
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-white/10"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-          <div className="space-y-1 min-w-0" data-onboarding="templates-title">
-            <h1 className="text-lg sm:text-xl font-semibold tracking-tight">
-              Metric templates
-            </h1>
-            <p className="text-sm text-white/60 hidden sm:block">
-              Use industry templates or create your own custom metric sets.
-            </p>
-          </div>
-        </div>
-        <Link
-          href="/templates/new"
-          className="inline-flex h-10 sm:h-9 items-center justify-center rounded-md bg-white px-4 sm:px-3 text-sm font-medium text-black hover:bg-white/90"
+      {/* Header with new template button */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-white/60">
+          Use industry templates or create your own custom metric sets.
+        </p>
+        <button
+          type="button"
+          onClick={() => setFormModal({ open: true, mode: "create", template: null })}
+          className="inline-flex h-9 items-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
           data-onboarding="new-template"
         >
+          <Plus className="h-4 w-4" />
           New template
-        </Link>
+        </button>
       </div>
 
       {loading && (
         <div className="space-y-6">
-          {/* Skeleton for Industry Templates */}
           <div className="space-y-3">
             <div className="h-5 w-40 animate-pulse rounded bg-white/10" />
             <div className="grid gap-3 md:grid-cols-2">
@@ -470,7 +450,6 @@ export default function TemplatesPage() {
               ))}
             </div>
           </div>
-          {/* Skeleton for My Templates */}
           <div className="space-y-3">
             <div className="h-5 w-28 animate-pulse rounded bg-white/10" />
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -488,7 +467,6 @@ export default function TemplatesPage() {
 
       {!loading && !error && (
         <>
-          {/* Industry Templates Section */}
           {visibleSystemTemplates.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
@@ -505,7 +483,6 @@ export default function TemplatesPage() {
             </div>
           )}
 
-          {/* Hidden Templates Section */}
           {hiddenSystemTemplates.length > 0 && (
             <div className="space-y-3">
               <button
@@ -531,7 +508,6 @@ export default function TemplatesPage() {
             </div>
           )}
 
-          {/* User Templates Section */}
           <div ref={myTemplatesRef} className="space-y-3">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-medium text-white/80">
@@ -550,13 +526,14 @@ export default function TemplatesPage() {
                   No custom templates yet.
                 </div>
                 <div className="mt-2 text-xs text-white/40">
-                  Edit an industry template above or{" "}
-                  <Link
-                    href="/templates/new"
+                  Clone an industry template above or{" "}
+                  <button
+                    type="button"
+                    onClick={() => setFormModal({ open: true, mode: "create", template: null })}
                     className="text-white underline underline-offset-4 hover:text-white/80"
                   >
                     create your own
-                  </Link>
+                  </button>
                 </div>
               </div>
             ) : (
@@ -578,6 +555,28 @@ export default function TemplatesPage() {
           onAssigned={() => {}}
         />
       )}
+
+      {/* Template form modal */}
+      <TemplateFormModal
+        open={formModal.open}
+        mode={formModal.mode}
+        templateId={formModal.template?.id}
+        initialName={formModal.template?.name}
+        initialDescription={formModal.template?.description ?? ""}
+        initialItems={
+          formModal.template?.metric_template_items.map((item) => ({
+            metric_name: item.metric_name,
+            period_type: item.period_type as "monthly" | "quarterly" | "annual",
+            data_type: item.data_type,
+            sort_order: item.sort_order,
+          }))
+        }
+        onClose={() => setFormModal({ open: false, mode: "create", template: null })}
+        onSaved={() => {
+          setFormModal({ open: false, mode: "create", template: null });
+          loadData();
+        }}
+      />
 
       {/* Delete confirmation */}
       <ConfirmModal

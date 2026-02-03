@@ -1,6 +1,5 @@
-import { NewRequestWizard } from "@/components/forms/new-request-wizard";
+import { UnifiedRequestWizard } from "@/components/forms/unified-request-wizard";
 
 export default function NewRequestPage() {
-  return <NewRequestWizard />;
+  return <UnifiedRequestWizard />;
 }
-

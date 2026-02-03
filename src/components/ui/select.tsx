@@ -3,10 +3,7 @@
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown } from "lucide-react";
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
-}
+import { cn } from "@/lib/utils/cn";
 
 const Select = SelectPrimitive.Root;
 
@@ -17,7 +14,7 @@ const SelectValue = SelectPrimitive.Value;
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
-    size?: "sm" | "default";
+    size?: "sm" | "md" | "default";
   }
 >(({ className, children, size = "default", ...props }, ref) => (
   <SelectPrimitive.Trigger
@@ -27,7 +24,7 @@ const SelectTrigger = React.forwardRef<
       "hover:border-white/20 focus:border-white/20",
       "disabled:cursor-not-allowed disabled:opacity-50",
       "data-[placeholder]:text-white/50",
-      size === "sm" ? "h-9" : "h-11",
+      size === "sm" ? "h-9" : size === "md" ? "h-10" : "h-11",
       className
     )}
     {...props}
@@ -42,9 +39,11 @@ SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
->(({ className, children, position = "popper", ...props }, ref) => (
-  <SelectPrimitive.Portal>
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> & {
+    portal?: boolean;
+  }
+>(({ className, children, position = "popper", portal = true, ...props }, ref) => {
+  const content = (
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
@@ -71,8 +70,12 @@ const SelectContent = React.forwardRef<
         {children}
       </SelectPrimitive.Viewport>
     </SelectPrimitive.Content>
-  </SelectPrimitive.Portal>
-));
+  );
+
+  if (!portal) return content;
+
+  return <SelectPrimitive.Portal>{content}</SelectPrimitive.Portal>;
+});
 SelectContent.displayName = SelectPrimitive.Content.displayName;
 
 const SelectLabel = React.forwardRef<

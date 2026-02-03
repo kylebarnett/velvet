@@ -131,7 +131,7 @@ export default async function ScheduleDetailPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <Link
-            href="/requests/schedules"
+            href="/requests?tab=schedules"
             className="mt-1 flex h-8 w-8 items-center justify-center rounded-md border border-white/10 hover:bg-white/5"
           >
             <ArrowLeft className="h-4 w-4 text-white/50" />

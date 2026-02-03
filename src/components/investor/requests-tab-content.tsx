@@ -2,7 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Settings2, Plus, CalendarClock } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Request = {
   id: string;
@@ -21,7 +27,7 @@ type Company = {
   name: string;
 };
 
-export function RequestsPageClient({
+export function RequestsTabContent({
   requests,
   companies,
 }: {
@@ -31,14 +37,12 @@ export function RequestsPageClient({
   const [statusFilter, setStatusFilter] = React.useState("");
   const [companyFilter, setCompanyFilter] = React.useState("");
 
-  // Filter requests
   const filteredRequests = requests.filter((req) => {
     if (statusFilter && req.status !== statusFilter) return false;
     if (companyFilter && req.company_id !== companyFilter) return false;
     return true;
   });
 
-  // Calculate counts from ALL requests (not filtered)
   const pendingCount = requests.filter((r) => r.status === "pending").length;
   const submittedCount = requests.filter((r) => r.status === "submitted").length;
 
@@ -50,59 +54,6 @@ export function RequestsPageClient({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1" data-onboarding="requests-title">
-          <h1 className="text-xl font-semibold tracking-tight">Requests</h1>
-          <p className="text-sm text-white/60">
-            Create and track metric requests across your portfolio.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white/70 hover:bg-white/10 hover:text-white"
-            href="/requests/schedules"
-          >
-            <CalendarClock className="h-4 w-4" />
-            Schedules
-          </Link>
-          <Link
-            className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white/70 hover:bg-white/10 hover:text-white"
-            href="/templates"
-          >
-            <Settings2 className="h-4 w-4" />
-            Templates
-          </Link>
-          <Link
-            className="inline-flex h-9 flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
-            href="/requests/new"
-            data-onboarding="new-request"
-          >
-            <Plus className="h-4 w-4 sm:hidden" />
-            <span className="sm:hidden">New</span>
-            <span className="hidden sm:inline">New request</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Mobile-only links */}
-      <div className="flex sm:hidden gap-2">
-        <Link
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-white/10 bg-white/5 py-2.5 text-sm text-white/70"
-          href="/requests/schedules"
-        >
-          <CalendarClock className="h-4 w-4" />
-          Schedules
-        </Link>
-        <Link
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-white/10 bg-white/5 py-2.5 text-sm text-white/70"
-          href="/templates"
-        >
-          <Settings2 className="h-4 w-4" />
-          Templates
-        </Link>
-      </div>
-
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <button
@@ -140,29 +91,31 @@ export function RequestsPageClient({
       {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
         <div className="flex gap-2">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 flex-1 sm:flex-none rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-          >
-            <option value="">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="submitted">Submitted</option>
-            <option value="overdue">Overdue</option>
-          </select>
+          <Select value={statusFilter || "__all__"} onValueChange={(v) => setStatusFilter(v === "__all__" ? "" : v)}>
+            <SelectTrigger size="sm" className="w-auto min-w-[130px] flex-1 sm:flex-none">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">All statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="submitted">Submitted</SelectItem>
+              <SelectItem value="overdue">Overdue</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <select
-            value={companyFilter}
-            onChange={(e) => setCompanyFilter(e.target.value)}
-            className="h-10 flex-1 sm:flex-none rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-          >
-            <option value="">All companies</option>
-            {companies.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <Select value={companyFilter || "__all__"} onValueChange={(v) => setCompanyFilter(v === "__all__" ? "" : v)}>
+            <SelectTrigger size="sm" className="w-auto min-w-[130px] flex-1 sm:flex-none">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">All companies</SelectItem>
+              {companies.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex items-center justify-between sm:justify-start gap-3">

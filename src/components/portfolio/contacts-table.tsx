@@ -4,6 +4,13 @@ import * as React from "react";
 import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useDebounce } from "@/lib/hooks/use-debounce";
 
 type Company = {
@@ -369,20 +376,23 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
           />
         </div>
         <div className="flex gap-2">
-          <select
+          <Select
             value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              // Reset to page 1 when changing filter
+            onValueChange={(v) => {
+              setStatusFilter(v);
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
-            className="h-10 flex-1 sm:flex-none rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
           >
-            <option value="all">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="sent">Sent</option>
-            <option value="accepted">Accepted</option>
-          </select>
+            <SelectTrigger size="sm" className="w-auto min-w-[130px] flex-1 sm:flex-none">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="sent">Sent</SelectItem>
+              <SelectItem value="accepted">Accepted</SelectItem>
+            </SelectContent>
+          </Select>
           {pendingCount > 0 && (
             <button
               onClick={sendAllPending}

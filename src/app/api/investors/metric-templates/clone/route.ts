@@ -73,7 +73,7 @@ export async function POST(req: Request) {
         items.map((item: any) => ({
           template_id: newTemplate.id,
           metric_name: item.metric_name,
-          period_type: item.period_type,
+          period_type: "quarterly",
           data_type: item.data_type,
           sort_order: item.sort_order,
         })),

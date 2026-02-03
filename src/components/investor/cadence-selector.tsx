@@ -2,6 +2,13 @@
 
 import * as React from "react";
 import { Calendar, CalendarDays, CalendarClock } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Cadence = "monthly" | "quarterly" | "annual";
 
@@ -123,23 +130,24 @@ export function CadenceSelector({
               : "year"}
         </p>
         <div className="mt-3">
-          <select
-            value={dayOfMonth}
-            onChange={(e) => onDayOfMonthChange(Number(e.target.value))}
-            className="h-11 w-full max-w-[200px] rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-          >
-            {DAYS.map((day) => (
-              <option key={day} value={day}>
-                {day}
-                {getOrdinalSuffix(day)} of each{" "}
-                {value === "monthly"
-                  ? "month"
-                  : value === "quarterly"
-                    ? "quarter"
-                    : "year"}
-              </option>
-            ))}
-          </select>
+          <Select value={String(dayOfMonth)} onValueChange={(v) => onDayOfMonthChange(Number(v))}>
+            <SelectTrigger className="max-w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DAYS.map((day) => (
+                <SelectItem key={day} value={String(day)}>
+                  {day}
+                  {getOrdinalSuffix(day)} of each{" "}
+                  {value === "monthly"
+                    ? "month"
+                    : value === "quarterly"
+                      ? "quarter"
+                      : "year"}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <p className="mt-2 text-xs text-white/40">
           Tip: Choose a day between 1-7 to give founders time at the beginning

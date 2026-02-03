@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { RequestsPageClient } from "@/components/investor/requests-page-client";
+import { RequestsTabs } from "@/components/investor/requests-tabs";
 
 export const dynamic = "force-dynamic";
 
@@ -46,9 +47,11 @@ export default async function RequestsPage() {
     .filter((c): c is { id: string; name: string } => c !== null);
 
   return (
-    <RequestsPageClient
-      requests={requests ?? []}
-      companies={companies}
-    />
+    <Suspense>
+      <RequestsTabs
+        requests={requests ?? []}
+        companies={companies}
+      />
+    </Suspense>
   );
 }

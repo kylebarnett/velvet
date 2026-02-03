@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
 
 import { CadenceSelector } from "./cadence-selector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Template = {
   id: string;
@@ -136,7 +143,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to create schedule");
 
-      router.push("/requests/schedules");
+      router.push("/requests?tab=schedules");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create schedule");
@@ -423,18 +430,19 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                 How many days founders have to submit their metrics after the
                 request is created
               </p>
-              <select
-                value={dueDaysOffset}
-                onChange={(e) => setDueDaysOffset(Number(e.target.value))}
-                className="mt-3 h-11 w-full max-w-[200px] rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-              >
-                <option value={3}>3 days</option>
-                <option value={5}>5 days</option>
-                <option value={7}>7 days (recommended)</option>
-                <option value={14}>14 days</option>
-                <option value={21}>21 days</option>
-                <option value={30}>30 days</option>
-              </select>
+              <Select value={String(dueDaysOffset)} onValueChange={(v) => setDueDaysOffset(Number(v))}>
+                <SelectTrigger className="mt-3 max-w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 days</SelectItem>
+                  <SelectItem value="5">5 days</SelectItem>
+                  <SelectItem value="7">7 days (recommended)</SelectItem>
+                  <SelectItem value="14">14 days</SelectItem>
+                  <SelectItem value="21">21 days</SelectItem>
+                  <SelectItem value="30">30 days</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         )}

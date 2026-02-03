@@ -24,6 +24,8 @@ type Props = {
   initialName?: string;
   initialDescription?: string;
   initialItems?: TemplateItem[];
+  onSaved?: () => void;
+  onCancel?: () => void;
 };
 
 export function TemplateForm({
@@ -31,7 +33,9 @@ export function TemplateForm({
   templateId,
   initialName = "",
   initialDescription = "",
-  initialItems = [{ metric_name: "", period_type: "monthly", data_type: "number", sort_order: 0 }],
+  initialItems = [{ metric_name: "", period_type: "quarterly", data_type: "number", sort_order: 0 }],
+  onSaved,
+  onCancel,
 }: Props) {
   const router = useRouter();
   const [name, setName] = React.useState(initialName);
@@ -43,7 +47,7 @@ export function TemplateForm({
   function addItem() {
     setItems([
       ...items,
-      { metric_name: "", period_type: "monthly", data_type: "number", sort_order: items.length },
+      { metric_name: "", period_type: "quarterly", data_type: "number", sort_order: items.length },
     ]);
   }
 
@@ -90,8 +94,11 @@ export function TemplateForm({
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Failed to save.");
 
-      // Always go back to templates list after save
-      router.push("/templates");
+      if (onSaved) {
+        onSaved();
+      } else {
+        router.push("/requests?tab=templates");
+      }
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong.");
     } finally {
@@ -157,14 +164,11 @@ export function TemplateForm({
                   onChange={(e) => updateItem(index, "metric_name", e.target.value)}
                   required
                 />
-                <Select
-                  value={item.period_type}
-                  onValueChange={(v) => updateItem(index, "period_type", v)}
-                >
-                  <SelectTrigger size="sm" className="h-10">
+                <Select value={item.period_type} onValueChange={(v) => updateItem(index, "period_type", v)}>
+                  <SelectTrigger size="md">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent portal={false}>
                     <SelectItem value="monthly">Monthly</SelectItem>
                     <SelectItem value="quarterly">Quarterly</SelectItem>
                     <SelectItem value="annual">Annual</SelectItem>
@@ -205,7 +209,7 @@ export function TemplateForm({
         </button>
         <button
           type="button"
-          onClick={() => router.push("/templates")}
+          onClick={() => onCancel ? onCancel() : router.push("/requests?tab=templates")}
           className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10"
         >
           Cancel

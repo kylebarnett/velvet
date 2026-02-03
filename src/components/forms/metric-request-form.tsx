@@ -2,8 +2,15 @@
 
 import * as React from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const schema = z.object({
   companyId: z.string().min(1, "Select a company."),
@@ -93,21 +100,27 @@ export function MetricRequestForm() {
     >
       <div className="grid gap-4 md:grid-cols-2">
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="companyId">
+          <label className="text-sm text-white/70">
             Portfolio company
           </label>
-          <select
-            id="companyId"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-            {...form.register("companyId")}
-          >
-            <option value="">Select...</option>
-            {companies.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <Controller
+            name="companyId"
+            control={form.control}
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
           <FieldError name="companyId" />
         </div>
 
@@ -125,18 +138,25 @@ export function MetricRequestForm() {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="periodType">
+          <label className="text-sm text-white/70">
             Period type
           </label>
-          <select
-            id="periodType"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
-            {...form.register("periodType")}
-          >
-            <option value="monthly">Monthly</option>
-            <option value="quarterly">Quarterly</option>
-            <option value="annual">Annual</option>
-          </select>
+          <Controller
+            name="periodType"
+            control={form.control}
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="annual">Annual</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
           <FieldError name="periodType" />
         </div>
 

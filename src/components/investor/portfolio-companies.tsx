@@ -3,6 +3,13 @@
 import * as React from "react";
 import { CompanyTagEditor, TagBadge } from "@/components/investor/company-tag-editor";
 import { CompanyLogo } from "@/components/investor/company-logo";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Company = {
   id: string;
@@ -49,40 +56,43 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
       {(uniqueStages.length > 0 || uniqueIndustries.length > 0 || uniqueModels.length > 0) && (
         <div className="flex flex-wrap gap-2">
           {uniqueStages.length > 0 && (
-            <select
-              className="h-9 rounded-md border border-white/10 bg-black/30 px-2 text-xs outline-none focus:border-white/20"
-              value={filterStage}
-              onChange={(e) => setFilterStage(e.target.value)}
-            >
-              <option value="">All stages</option>
-              {uniqueStages.map((s) => (
-                <option key={s} value={s!}>{formatLabel(s!)}</option>
-              ))}
-            </select>
+            <Select value={filterStage || "__all__"} onValueChange={(v) => setFilterStage(v === "__all__" ? "" : v)}>
+              <SelectTrigger size="sm" className="w-auto">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All stages</SelectItem>
+                {uniqueStages.map((s) => (
+                  <SelectItem key={s} value={s!}>{formatLabel(s!)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
           {uniqueIndustries.length > 0 && (
-            <select
-              className="h-9 rounded-md border border-white/10 bg-black/30 px-2 text-xs outline-none focus:border-white/20"
-              value={filterIndustry}
-              onChange={(e) => setFilterIndustry(e.target.value)}
-            >
-              <option value="">All industries</option>
-              {uniqueIndustries.map((s) => (
-                <option key={s} value={s!}>{formatLabel(s!)}</option>
-              ))}
-            </select>
+            <Select value={filterIndustry || "__all__"} onValueChange={(v) => setFilterIndustry(v === "__all__" ? "" : v)}>
+              <SelectTrigger size="sm" className="w-auto">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All industries</SelectItem>
+                {uniqueIndustries.map((s) => (
+                  <SelectItem key={s} value={s!}>{formatLabel(s!)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
           {uniqueModels.length > 0 && (
-            <select
-              className="h-9 rounded-md border border-white/10 bg-black/30 px-2 text-xs outline-none focus:border-white/20"
-              value={filterModel}
-              onChange={(e) => setFilterModel(e.target.value)}
-            >
-              <option value="">All models</option>
-              {uniqueModels.map((s) => (
-                <option key={s} value={s!}>{formatLabel(s!)}</option>
-              ))}
-            </select>
+            <Select value={filterModel || "__all__"} onValueChange={(v) => setFilterModel(v === "__all__" ? "" : v)}>
+              <SelectTrigger size="sm" className="w-auto">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All models</SelectItem>
+                {uniqueModels.map((s) => (
+                  <SelectItem key={s} value={s!}>{formatLabel(s!)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
           {(filterStage || filterIndustry || filterModel) && (
             <button

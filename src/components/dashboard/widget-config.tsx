@@ -3,6 +3,13 @@
 import * as React from "react";
 import { X, Trash2 } from "lucide-react";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Widget,
   ChartConfig,
   MetricCardConfig,
@@ -75,18 +82,17 @@ export function WidgetConfig({
           <>
             <div>
               <label className="block text-xs text-white/50 mb-1">Chart Type</label>
-              <select
-                value={config.chartType}
-                onChange={(e) =>
-                  updateConfig({ chartType: e.target.value as ChartConfig["chartType"] })
-                }
-                className="h-9 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
-              >
-                <option value="line">Line</option>
-                <option value="bar">Bar</option>
-                <option value="area">Area</option>
-                <option value="pie">Pie</option>
-              </select>
+              <Select value={config.chartType} onValueChange={(v) => updateConfig({ chartType: v as ChartConfig["chartType"] })}>
+                <SelectTrigger size="sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="line">Line</SelectItem>
+                  <SelectItem value="bar">Bar</SelectItem>
+                  <SelectItem value="area">Area</SelectItem>
+                  <SelectItem value="pie">Pie</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -123,17 +129,16 @@ export function WidgetConfig({
 
             <div>
               <label className="block text-xs text-white/50 mb-1">Period</label>
-              <select
-                value={config.periodType}
-                onChange={(e) =>
-                  updateConfig({ periodType: e.target.value as ChartConfig["periodType"] })
-                }
-                className="h-9 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
-              >
-                <option value="monthly">Monthly</option>
-                <option value="quarterly">Quarterly</option>
-                <option value="yearly">Yearly</option>
-              </select>
+              <Select value={config.periodType} onValueChange={(v) => updateConfig({ periodType: v as ChartConfig["periodType"] })}>
+                <SelectTrigger size="sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="yearly">Yearly</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <label className="flex items-center gap-2 text-sm text-white/70 cursor-pointer">
@@ -153,18 +158,19 @@ export function WidgetConfig({
           <>
             <div>
               <label className="block text-xs text-white/50 mb-1">Metric</label>
-              <select
-                value={config.metric}
-                onChange={(e) => updateConfig({ metric: e.target.value })}
-                className="h-9 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
-              >
-                <option value="">Select a metric...</option>
-                {availableMetrics.map((metric) => (
-                  <option key={metric} value={metric}>
-                    {metric}
-                  </option>
-                ))}
-              </select>
+              <Select value={config.metric || "__none__"} onValueChange={(v) => updateConfig({ metric: v === "__none__" ? "" : v })}>
+                <SelectTrigger size="sm">
+                  <SelectValue placeholder="Select a metric..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Select a metric...</SelectItem>
+                  {availableMetrics.map((metric) => (
+                    <SelectItem key={metric} value={metric}>
+                      {metric}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <label className="flex items-center gap-2 text-sm text-white/70 cursor-pointer">
@@ -216,17 +222,16 @@ export function WidgetConfig({
 
             <div>
               <label className="block text-xs text-white/50 mb-1">Period</label>
-              <select
-                value={config.periodType}
-                onChange={(e) =>
-                  updateConfig({ periodType: e.target.value as TableConfig["periodType"] })
-                }
-                className="h-9 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
-              >
-                <option value="monthly">Monthly</option>
-                <option value="quarterly">Quarterly</option>
-                <option value="yearly">Yearly</option>
-              </select>
+              <Select value={config.periodType} onValueChange={(v) => updateConfig({ periodType: v as TableConfig["periodType"] })}>
+                <SelectTrigger size="sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="yearly">Yearly</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </>
         )}
