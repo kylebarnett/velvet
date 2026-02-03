@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check } from "lucide-react";
+import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import {
@@ -40,6 +40,9 @@ type Pagination = {
   totalPages: number;
 };
 
+type SortField = "company" | "contact" | "email" | "status";
+type SortDir = "asc" | "desc";
+
 type Props = {
   initialContacts: Contact[];
   initialPagination: Pagination;
@@ -50,6 +53,8 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
   const [pagination, setPagination] = React.useState(initialPagination);
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
+  const [sortField, setSortField] = React.useState<SortField>("company");
+  const [sortDir, setSortDir] = React.useState<SortDir>("asc");
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editForm, setEditForm] = React.useState({ first_name: "", last_name: "", email: "" });
@@ -91,6 +96,8 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
         const params = new URLSearchParams({
           page: pagination.page.toString(),
           limit: pagination.limit.toString(),
+          sortField,
+          sortDir,
         });
         if (debouncedSearch) params.set("search", debouncedSearch);
         if (statusFilter !== "all") params.set("status", statusFilter);
@@ -113,6 +120,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
     }
 
     fetchContacts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination.page, pagination.limit, debouncedSearch, statusFilter]);
 
   const getCompanyName = (contact: Contact): string => {
@@ -122,6 +130,45 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
     }
     return contact.companies.name ?? "";
   };
+
+  function toggleSort(field: SortField) {
+    if (sortField === field) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir("asc");
+    }
+  }
+
+  function sortIcon(field: SortField) {
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 text-white/30" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="h-3 w-3 text-white/60" />
+      : <ArrowDown className="h-3 w-3 text-white/60" />;
+  }
+
+  const sortedContacts = React.useMemo(() => {
+    const arr = [...contacts];
+    arr.sort((a, b) => {
+      let cmp = 0;
+      switch (sortField) {
+        case "company":
+          cmp = getCompanyName(a).localeCompare(getCompanyName(b), undefined, { sensitivity: "base" });
+          break;
+        case "contact":
+          cmp = `${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`, undefined, { sensitivity: "base" });
+          break;
+        case "email":
+          cmp = a.email.localeCompare(b.email, undefined, { sensitivity: "base" });
+          break;
+        case "status":
+          cmp = a.status.localeCompare(b.status, undefined, { sensitivity: "base" });
+          break;
+      }
+      return sortDir === "desc" ? -cmp : cmp;
+    });
+    return arr;
+  }, [contacts, sortField, sortDir]);
 
   const pendingCount = contacts.filter((c) => c.status === "pending").length;
 
@@ -502,7 +549,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
         <>
           {/* Mobile Card View */}
           <div className={`space-y-3 sm:hidden ${fetching ? "opacity-60" : ""}`}>
-            {contacts.map((contact) => (
+            {sortedContacts.map((contact) => (
               <div
                 key={contact.id}
                 className="rounded-xl border border-white/10 bg-white/5 p-4"
@@ -621,15 +668,28 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                       className="rounded border-white/20"
                     />
                   </th>
-                  <th className="p-3 font-medium">Company</th>
-                  <th className="p-3 font-medium">Contact</th>
-                  <th className="p-3 font-medium">Email</th>
-                  <th className="p-3 font-medium">Status</th>
+                  {([
+                    ["company", "Company"],
+                    ["contact", "Contact"],
+                    ["email", "Email"],
+                    ["status", "Status"],
+                  ] as const).map(([field, label]) => (
+                    <th key={field} className="p-3 font-medium">
+                      <button
+                        type="button"
+                        onClick={() => toggleSort(field)}
+                        className="inline-flex items-center gap-1.5 hover:text-white transition-colors"
+                      >
+                        {label}
+                        {sortIcon(field)}
+                      </button>
+                    </th>
+                  ))}
                   <th className="p-3 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {contacts.map((contact) => (
+                {sortedContacts.map((contact) => (
                   <tr key={contact.id} className="border-b border-white/5 hover:bg-white/5">
                     <td className="p-3">
                       <input

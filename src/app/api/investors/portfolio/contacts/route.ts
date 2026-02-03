@@ -18,6 +18,8 @@ export async function GET(req: Request) {
   const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") ?? "50", 10)));
   const search = url.searchParams.get("search")?.trim() ?? "";
   const status = url.searchParams.get("status") ?? "";
+  const sortField = url.searchParams.get("sortField") ?? "company";
+  const sortDir = url.searchParams.get("sortDir") ?? "asc";
 
   // Calculate offset
   const offset = (page - 1) * limit;
@@ -92,13 +94,34 @@ export async function GET(req: Request) {
     return jsonError(error.message, 500);
   }
 
-  // Sort A-Z by company name, then last name
+  // Sort by requested field
   const sorted = (data ?? []).sort((a: any, b: any) => {
-    const companyA = (Array.isArray(a.companies) ? a.companies[0]?.name : a.companies?.name) ?? "";
-    const companyB = (Array.isArray(b.companies) ? b.companies[0]?.name : b.companies?.name) ?? "";
-    const cmp = companyA.localeCompare(companyB, undefined, { sensitivity: "base" });
-    if (cmp !== 0) return cmp;
-    return (a.last_name ?? "").localeCompare(b.last_name ?? "", undefined, { sensitivity: "base" });
+    let cmp = 0;
+    switch (sortField) {
+      case "company": {
+        const ca = (Array.isArray(a.companies) ? a.companies[0]?.name : a.companies?.name) ?? "";
+        const cb = (Array.isArray(b.companies) ? b.companies[0]?.name : b.companies?.name) ?? "";
+        cmp = ca.localeCompare(cb, undefined, { sensitivity: "base" });
+        break;
+      }
+      case "contact":
+        cmp = `${a.last_name ?? ""} ${a.first_name ?? ""}`.localeCompare(
+          `${b.last_name ?? ""} ${b.first_name ?? ""}`, undefined, { sensitivity: "base" }
+        );
+        break;
+      case "email":
+        cmp = (a.email ?? "").localeCompare(b.email ?? "", undefined, { sensitivity: "base" });
+        break;
+      case "status":
+        cmp = (a.status ?? "").localeCompare(b.status ?? "", undefined, { sensitivity: "base" });
+        break;
+      default: {
+        const da = (Array.isArray(a.companies) ? a.companies[0]?.name : a.companies?.name) ?? "";
+        const db = (Array.isArray(b.companies) ? b.companies[0]?.name : b.companies?.name) ?? "";
+        cmp = da.localeCompare(db, undefined, { sensitivity: "base" });
+      }
+    }
+    return sortDir === "desc" ? -cmp : cmp;
   });
 
   const total = totalCount ?? 0;
