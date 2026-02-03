@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Copy, Trash2, Sparkles, EyeOff, Eye, ChevronDown, ChevronUp, Plus, Pencil } from "lucide-react";
+import { Copy, Trash2, Sparkles, EyeOff, Eye, ChevronDown, ChevronUp, Plus, Pencil, CheckSquare, Square, XSquare } from "lucide-react";
 
 import { TemplateAssignModal } from "@/components/investor/template-assign-modal";
 import { TemplateFormModal } from "@/components/investor/template-form-modal";
@@ -87,6 +87,29 @@ export function TemplatesTabContent() {
     });
   }
 
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = React.useState(false);
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function selectAll() {
+    setSelectedIds(new Set(userTemplates.map((t) => t.id)));
+  }
+
+  function selectNone() {
+    setSelectedIds(new Set());
+  }
+
   const [assignModal, setAssignModal] = React.useState<{
     open: boolean;
     template: Template | null;
@@ -94,8 +117,9 @@ export function TemplatesTabContent() {
 
   const [deleteModal, setDeleteModal] = React.useState<{
     open: boolean;
-    template: Template | null;
-  }>({ open: false, template: null });
+    templateIds: string[];
+    label: string;
+  }>({ open: false, templateIds: [], label: "" });
 
   const [hideModal, setHideModal] = React.useState<{
     open: boolean;
@@ -204,21 +228,34 @@ export function TemplatesTabContent() {
   }
 
   async function handleDelete() {
-    const tmpl = deleteModal.template;
-    if (!tmpl) return;
-    setDeleteModal({ open: false, template: null });
+    const ids = deleteModal.templateIds;
+    if (ids.length === 0) return;
+    setDeleteModal({ open: false, templateIds: [], label: "" });
+    setBulkDeleting(true);
 
     try {
-      const res = await fetch(`/api/investors/metric-templates/${tmpl.id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        const json = await res.json().catch(() => null);
-        throw new Error(json?.error ?? "Failed to delete.");
+      const results = await Promise.all(
+        ids.map((id) =>
+          fetch(`/api/investors/metric-templates/${id}`, { method: "DELETE" })
+        )
+      );
+      const failedCount = results.filter((r) => !r.ok).length;
+      if (failedCount > 0) {
+        setError(`Failed to delete ${failedCount} template${failedCount > 1 ? "s" : ""}.`);
       }
-      setTemplates((prev) => prev.filter((t) => t.id !== tmpl.id));
+      const deletedIds = new Set(
+        ids.filter((_, i) => results[i].ok)
+      );
+      setTemplates((prev) => prev.filter((t) => !deletedIds.has(t.id)));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        deletedIds.forEach((id) => next.delete(id));
+        return next;
+      });
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong.");
+    } finally {
+      setBulkDeleting(false);
     }
   }
 
@@ -322,15 +359,32 @@ export function TemplatesTabContent() {
     const displayedMetrics = isExpanded
       ? tmpl.metric_template_items
       : tmpl.metric_template_items.slice(0, 6);
+    const isSelected = selectedIds.has(tmpl.id);
 
     return (
       <div
         key={tmpl.id}
-        className="rounded-xl border border-white/10 bg-white/5 p-4"
+        className={`rounded-xl border p-4 transition-colors ${
+          isSelected
+            ? "border-white/20 bg-white/[0.08]"
+            : "border-white/10 bg-white/5"
+        }`}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => toggleSelected(tmpl.id)}
+                className="shrink-0 text-white/40 hover:text-white/70"
+                title={isSelected ? "Deselect" : "Select"}
+              >
+                {isSelected ? (
+                  <CheckSquare className="h-4 w-4 text-white/70" />
+                ) : (
+                  <Square className="h-4 w-4" />
+                )}
+              </button>
               <button
                 type="button"
                 onClick={() => setFormModal({ open: true, mode: "edit", template: tmpl })}
@@ -384,7 +438,13 @@ export function TemplatesTabContent() {
               <span className="hidden sm:inline">Edit</span>
             </button>
             <button
-              onClick={() => setDeleteModal({ open: true, template: tmpl })}
+              onClick={() =>
+                setDeleteModal({
+                  open: true,
+                  templateIds: [tmpl.id],
+                  label: `"${tmpl.name}"`,
+                })
+              }
               className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
               type="button"
               title="Delete template"
@@ -509,15 +569,61 @@ export function TemplatesTabContent() {
           )}
 
           <div ref={myTemplatesRef} className="space-y-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-medium text-white/80">
-                My Templates
-              </h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-medium text-white/80">
+                  My Templates
+                </h2>
+                {userTemplates.length > 0 && (
+                  <span className="text-xs text-white/40">
+                    {userTemplates.length}{" "}
+                    {userTemplates.length === 1 ? "template" : "templates"}
+                  </span>
+                )}
+              </div>
               {userTemplates.length > 0 && (
-                <span className="text-xs text-white/40">
-                  {userTemplates.length}{" "}
-                  {userTemplates.length === 1 ? "template" : "templates"}
-                </span>
+                <div className="flex items-center gap-2">
+                  {selectedIds.size > 0 ? (
+                    <>
+                      <span className="text-xs text-white/50">
+                        {selectedIds.size} selected
+                      </span>
+                      <button
+                        type="button"
+                        onClick={selectNone}
+                        className="inline-flex h-7 items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-white/60 hover:bg-white/10"
+                        title="Clear selection"
+                      >
+                        <XSquare className="h-3.5 w-3.5" />
+                        Clear
+                      </button>
+                      <button
+                        type="button"
+                        disabled={bulkDeleting}
+                        onClick={() =>
+                          setDeleteModal({
+                            open: true,
+                            templateIds: Array.from(selectedIds),
+                            label: `${selectedIds.size} template${selectedIds.size > 1 ? "s" : ""}`,
+                          })
+                        }
+                        className="inline-flex h-7 items-center gap-1 rounded-md border border-red-500/20 bg-red-500/10 px-2 text-xs text-red-200 hover:bg-red-500/20 disabled:opacity-60"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        {bulkDeleting ? "Deleting..." : "Delete selected"}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={selectAll}
+                      className="inline-flex h-7 items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-white/50 hover:bg-white/10 hover:text-white/70"
+                    >
+                      <CheckSquare className="h-3.5 w-3.5" />
+                      Select all
+                    </button>
+                  )}
+                </div>
               )}
             </div>
             {userTemplates.length === 0 ? (
@@ -581,17 +687,17 @@ export function TemplatesTabContent() {
       {/* Delete confirmation */}
       <ConfirmModal
         open={deleteModal.open}
-        title="Delete Template"
+        title={deleteModal.templateIds.length > 1 ? "Delete Templates" : "Delete Template"}
         message={
-          deleteModal.template
-            ? `Are you sure you want to delete "${deleteModal.template.name}"? This action cannot be undone.`
+          deleteModal.templateIds.length > 0
+            ? `Are you sure you want to delete ${deleteModal.label}? This action cannot be undone.`
             : ""
         }
         confirmLabel="Delete"
         cancelLabel="Cancel"
         variant="danger"
         onConfirm={handleDelete}
-        onCancel={() => setDeleteModal({ open: false, template: null })}
+        onCancel={() => setDeleteModal({ open: false, templateIds: [], label: "" })}
       />
 
       {/* Hide confirmation */}
