@@ -1,10 +1,33 @@
-import Link from "next/link";
+"use client";
 
+import * as React from "react";
 import { FounderDocumentList } from "@/components/founder/document-list";
-
-export const dynamic = "force-dynamic";
+import { DocumentUploadModal } from "@/components/founder/document-upload-modal";
 
 export default function DocumentsPage() {
+  const [showUpload, setShowUpload] = React.useState(false);
+  const [refreshKey, setRefreshKey] = React.useState(0);
+  const [companyId, setCompanyId] = React.useState<string | null>(null);
+
+  // Fetch companyId once on mount
+  React.useEffect(() => {
+    async function loadCompanyId() {
+      try {
+        const res = await fetch("/api/founder/company-metrics");
+        const json = await res.json().catch(() => null);
+        if (json?.companyId) setCompanyId(json.companyId);
+      } catch {
+        // ignore
+      }
+    }
+    loadCompanyId();
+  }, []);
+
+  function handleUploadSuccess() {
+    setShowUpload(false);
+    setRefreshKey((k) => k + 1);
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -14,15 +37,24 @@ export default function DocumentsPage() {
             Upload decks, financials, and other supporting material.
           </p>
         </div>
-        <Link
+        <button
+          type="button"
+          onClick={() => setShowUpload(true)}
           className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
-          href="/portal/documents/upload"
         >
           Upload
-        </Link>
+        </button>
       </div>
 
-      <FounderDocumentList />
+      <FounderDocumentList key={refreshKey} />
+
+      {showUpload && companyId && (
+        <DocumentUploadModal
+          companyId={companyId}
+          onClose={() => setShowUpload(false)}
+          onSuccess={handleUploadSuccess}
+        />
+      )}
     </div>
   );
 }

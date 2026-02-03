@@ -13,7 +13,7 @@ export default async function FounderLayout({
   // Fetch the founder's company
   const { data: companyData } = await supabase
     .from("companies")
-    .select("name, website")
+    .select("id, name, website")
     .eq("founder_id", user.id)
     .single();
 
@@ -26,15 +26,26 @@ export default async function FounderLayout({
     };
   }
 
+  // Count pending metric requests for badge
+  let pendingCount = 0;
+  if (companyData) {
+    const { count } = await supabase
+      .from("metric_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", companyData.id)
+      .eq("status", "pending");
+    pendingCount = count ?? 0;
+  }
+
   return (
     <AppShell
       title="Founder"
       nav={[
-        { href: "/portal", label: "Portal" },
-        { href: "/portal/requests", label: "Requests" },
-        { href: "/portal/metrics", label: "Metrics" },
-        { href: "/portal/investors", label: "Investors" },
+        { href: "/portal", label: "Dashboard" },
+        { href: "/portal/requests", label: "Requests", badge: pendingCount },
         { href: "/portal/documents", label: "Documents" },
+        { href: "/portal/tear-sheets", label: "Tear Sheets" },
+        { href: "/portal/investors", label: "Investors" },
       ]}
       company={company}
     >
@@ -42,4 +53,3 @@ export default async function FounderLayout({
     </AppShell>
   );
 }
-

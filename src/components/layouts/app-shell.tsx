@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils/cn";
 export type NavItem = {
   href: string;
   label: string;
+  badge?: number;
   children?: NavItem[];
 };
 
@@ -165,13 +166,18 @@ export function AppShell({
           <Link
             key={item.href}
             className={cn(
-              "flex h-12 md:h-10 items-center rounded-md px-3 text-sm text-white/70 hover:bg-white/5 hover:text-white",
+              "flex h-12 md:h-10 items-center justify-between rounded-md px-3 text-sm text-white/70 hover:bg-white/5 hover:text-white",
               active && "bg-white/10 text-white",
             )}
             href={item.href}
             onClick={mobile ? () => setMobileMenuOpen(false) : undefined}
           >
-            {item.label}
+            <span>{item.label}</span>
+            {item.badge != null && item.badge > 0 && (
+              <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-white/15 px-1.5 text-[10px] font-medium text-white">
+                {item.badge > 99 ? "99+" : item.badge}
+              </span>
+            )}
           </Link>
         );
       })}

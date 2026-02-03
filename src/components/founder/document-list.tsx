@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { FileText, Trash2, Download, Filter } from "lucide-react";
+import { FileText, Trash2, Download, Filter, Search } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import {
@@ -50,11 +50,44 @@ function formatDate(dateString: string): string {
   });
 }
 
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="h-9 w-48 animate-pulse rounded-md bg-white/10" />
+      <div className="hidden sm:block overflow-hidden rounded-xl border border-white/10 bg-white/5">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-white/10 text-left text-white/60">
+              <th className="p-3 font-medium">Name</th>
+              <th className="p-3 font-medium">Type</th>
+              <th className="p-3 font-medium">Size</th>
+              <th className="p-3 font-medium">Uploaded</th>
+              <th className="p-3 font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[0, 1, 2, 3].map((i) => (
+              <tr key={i} className="border-b border-white/5">
+                <td className="p-3"><div className="h-4 w-40 animate-pulse rounded bg-white/10" /></td>
+                <td className="p-3"><div className="h-5 w-24 animate-pulse rounded-full bg-white/10" /></td>
+                <td className="p-3"><div className="h-4 w-16 animate-pulse rounded bg-white/10" /></td>
+                <td className="p-3"><div className="h-4 w-24 animate-pulse rounded bg-white/10" /></td>
+                <td className="p-3"><div className="h-8 w-16 animate-pulse rounded bg-white/10" /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export function FounderDocumentList() {
   const [documents, setDocuments] = React.useState<Document[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [typeFilter, setTypeFilter] = React.useState<string>("all");
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [deleteModal, setDeleteModal] = React.useState<{ open: boolean; document: Document | null }>({
     open: false,
     document: null,
@@ -92,6 +125,15 @@ export function FounderDocumentList() {
     fetchDocuments();
   }, [typeFilter]);
 
+  // Client-side search filter
+  const filteredDocuments = React.useMemo(() => {
+    if (!searchQuery.trim()) return documents;
+    const q = searchQuery.toLowerCase();
+    return documents.filter((doc) =>
+      doc.file_name.toLowerCase().includes(q),
+    );
+  }, [documents, searchQuery]);
+
   function openDeleteModal(doc: Document) {
     setDeleteModal({ open: true, document: doc });
   }
@@ -125,32 +167,48 @@ export function FounderDocumentList() {
 
   async function downloadDocument(doc: Document) {
     try {
-      // Get a signed URL for the document
       const res = await fetch(`/api/documents/download?path=${encodeURIComponent(doc.file_path)}`);
       if (!res.ok) {
         const json = await res.json().catch(() => null);
         throw new Error(json?.error ?? "Failed to download.");
       }
       const json = await res.json();
-      // Open download URL
-      window.open(json.url, "_blank");
+
+      // Blob download pattern
+      const blobRes = await fetch(json.url);
+      if (!blobRes.ok) throw new Error("Download failed.");
+      const blob = await blobRes.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = doc.file_name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Download failed.");
     }
   }
 
   if (loading) {
-    return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-8">
-        <div className="flex items-center justify-center text-white/60">
-          Loading documents...
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   return (
     <div className="space-y-4">
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search documents..."
+          className="h-9 w-full rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm outline-none placeholder:text-white/40 focus:border-white/20 sm:w-64"
+        />
+      </div>
+
       {/* Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
         <div className="flex items-center gap-2 text-sm text-white/60">
@@ -185,19 +243,23 @@ export function FounderDocumentList() {
       )}
 
       {/* Document list */}
-      {documents.length === 0 ? (
+      {filteredDocuments.length === 0 ? (
         <div className="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8 text-center">
           <FileText className="mx-auto h-10 w-10 text-white/40" />
-          <p className="mt-3 text-white/60">No documents found.</p>
-          <p className="mt-1 text-sm text-white/40">
-            Upload your first document to get started.
+          <p className="mt-3 text-white/60">
+            {searchQuery ? "No documents match your search." : "No documents found."}
           </p>
+          {!searchQuery && (
+            <p className="mt-1 text-sm text-white/40">
+              Upload your first document to get started.
+            </p>
+          )}
         </div>
       ) : (
         <>
           {/* Mobile Card View */}
           <div className="space-y-3 sm:hidden">
-            {documents.map((doc) => (
+            {filteredDocuments.map((doc) => (
               <div
                 key={doc.id}
                 className="rounded-xl border border-white/10 bg-white/5 p-4"
@@ -252,7 +314,7 @@ export function FounderDocumentList() {
                 </tr>
               </thead>
               <tbody>
-                {documents.map((doc) => (
+                {filteredDocuments.map((doc) => (
                   <tr key={doc.id} className="border-b border-white/5 hover:bg-white/5">
                     <td className="p-3">
                       <div className="flex items-center gap-2">

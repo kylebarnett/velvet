@@ -15,6 +15,14 @@ type Investor = {
   } | null;
 };
 
+function formatConnectionDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export function InvestorApprovalCard({ investor }: { investor: Investor }) {
   const [status, setStatus] = React.useState(investor.approval_status);
   const [loading, setLoading] = React.useState(false);
@@ -35,8 +43,10 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Failed to update.");
       setStatus(newStatus);
-    } catch (e: any) {
-      setError(e?.message ?? "Something went wrong.");
+    } catch (e: unknown) {
+      const message =
+        e instanceof Error ? e.message : "Something went wrong.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -71,6 +81,9 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
           {investorUser?.email && investorUser.full_name && (
             <div className="mt-0.5 text-xs text-white/50">{investorUser.email}</div>
           )}
+          <div className="mt-0.5 text-xs text-white/40">
+            Connected {formatConnectionDate(investor.created_at)}
+          </div>
           <div className="mt-2">
             <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge}`}>
               {statusLabel}

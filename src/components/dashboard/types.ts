@@ -39,7 +39,8 @@ export type DashboardLayout = {
 
 export type DashboardView = {
   id: string;
-  investor_id: string;
+  investor_id: string | null;
+  founder_id?: string | null;
   company_id: string;
   name: string;
   is_default: boolean;
