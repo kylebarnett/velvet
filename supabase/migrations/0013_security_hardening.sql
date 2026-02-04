@@ -14,6 +14,8 @@
 -- ============================================================
 
 DROP POLICY IF EXISTS "invitations_lookup_by_token" ON public.portfolio_invitations;
+DROP POLICY IF EXISTS "invitations_select_own" ON public.portfolio_invitations;
+DROP POLICY IF EXISTS "invitations_select_founder" ON public.portfolio_invitations;
 
 -- Investors can read their own invitations
 CREATE POLICY "invitations_select_own"
