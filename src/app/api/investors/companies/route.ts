@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
 
 // GET - List all companies in investor's portfolio with tags
-export async function GET() {
+export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
-  const { data: relationships, error } = await supabase
+  const url = new URL(req.url);
+  const { limit, offset } = parsePagination(url);
+
+  const { data: relationships, error, count } = await supabase
     .from("investor_company_relationships")
     .select(`
       id,
@@ -27,9 +31,10 @@ export async function GET() {
         industry,
         business_model
       )
-    `)
+    `, { count: "exact" })
     .eq("investor_id", user.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) return jsonError(error.message, 500);
 
@@ -41,5 +46,12 @@ export async function GET() {
     ...(r.companies as any),
   }));
 
-  return NextResponse.json({ companies });
+  return NextResponse.json(
+    { companies, total: count ?? companies.length },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=60, stale-while-revalidate=120",
+      },
+    },
+  );
 }

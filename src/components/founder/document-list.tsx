@@ -233,6 +233,7 @@ function PreviewPane({
             disabled={deleting}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-red-400/60 hover:bg-white/10 disabled:opacity-60"
             title="Delete"
+            aria-label="Delete document"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -241,6 +242,7 @@ function PreviewPane({
             type="button"
             onClick={onClose}
             className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-md text-white/40 hover:bg-white/5 hover:text-white/60"
+            aria-label="Close preview"
           >
             <X className="h-4 w-4" />
           </button>
@@ -638,6 +640,7 @@ export function FounderDocumentList() {
                                 onClick={(e) => { e.stopPropagation(); downloadDocument(doc); }}
                                 className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
                                 title="Download"
+                                aria-label="Download document"
                               >
                                 <Download className="h-4 w-4 text-white/60" />
                               </button>
@@ -646,6 +649,7 @@ export function FounderDocumentList() {
                                 disabled={deleting}
                                 className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
                                 title="Delete"
+                                aria-label="Delete document"
                               >
                                 <Trash2 className="h-4 w-4 text-red-400/60" />
                               </button>

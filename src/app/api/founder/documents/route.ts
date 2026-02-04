@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
 
 export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
@@ -23,6 +24,7 @@ export async function GET(req: Request) {
   // Get optional type filter from query params
   const url = new URL(req.url);
   const typeFilter = url.searchParams.get("type");
+  const { limit, offset } = parsePagination(url);
 
   // Build query
   let query = supabase
@@ -38,9 +40,10 @@ export async function GET(req: Request) {
       period_label,
       ingestion_status,
       uploaded_at
-    `)
+    `, { count: "exact" })
     .eq("company_id", company.id)
-    .order("uploaded_at", { ascending: false });
+    .order("uploaded_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   // Apply type filter if provided
   const validTypes = [
@@ -58,7 +61,7 @@ export async function GET(req: Request) {
     query = query.eq("document_type", typeFilter);
   }
 
-  const { data: documents, error } = await query;
+  const { data: documents, error, count } = await query;
 
   if (error) {
     return jsonError(error.message, 500);
@@ -67,5 +70,6 @@ export async function GET(req: Request) {
   return NextResponse.json({
     companyName: company.name ?? null,
     documents: documents ?? [],
+    total: count ?? (documents ?? []).length,
   });
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
 import {
   extractNumericValue,
   aggregateMetricValues,
@@ -101,10 +102,12 @@ export async function GET(req: Request) {
     });
   }
 
+  const { limit, offset } = parsePagination(url);
+
   // Fetch metric values for these companies
   let query = supabase
     .from("company_metric_values")
-    .select("id, company_id, metric_name, period_type, period_start, period_end, value")
+    .select("id, company_id, metric_name, period_type, period_start, period_end, value", { count: "exact" })
     .in("company_id", companyIds)
     .eq("period_type", periodType);
 
@@ -115,7 +118,9 @@ export async function GET(req: Request) {
     query = query.lte("period_start", endDate);
   }
 
-  const { data: metricValues, error: mvError } = await query;
+  query = query.range(offset, offset + limit - 1);
+
+  const { data: metricValues, error: mvError, count: metricCount } = await query;
   if (mvError) return jsonError(mvError.message, 500);
 
   const values = (metricValues ?? []) as MetricValue[];
@@ -327,6 +332,7 @@ export async function GET(req: Request) {
       aggregates,
       byPeriod,
       byCompany,
+      totalMetricValues: metricCount ?? values.length,
     },
     {
       headers: {

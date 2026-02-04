@@ -15,6 +15,7 @@ const updateSchema = z.object({
     h: z.number().min(1).max(10),
     config: z.record(z.string(), z.unknown()),
   })).optional(),
+  expectedUpdatedAt: z.string().datetime().optional(),
 });
 
 // GET - Get a single dashboard view
@@ -65,7 +66,7 @@ export async function PUT(
   // Verify ownership
   const { data: existing } = await supabase
     .from("dashboard_views")
-    .select("id, company_id")
+    .select("id, company_id, updated_at")
     .eq("id", id)
     .eq("investor_id", user.id)
     .single();
@@ -74,7 +75,12 @@ export async function PUT(
     return jsonError("View not found.", 404);
   }
 
-  const { name, isDefault, layout } = parsed.data;
+  const { name, isDefault, layout, expectedUpdatedAt } = parsed.data;
+
+  // Optimistic locking: reject if the record was modified since client last fetched
+  if (expectedUpdatedAt && existing.updated_at && expectedUpdatedAt !== existing.updated_at) {
+    return jsonError("This view was modified by another session. Please refresh and try again.", 409);
+  }
 
   // If setting as default, unset other defaults first
   if (isDefault) {

@@ -2,17 +2,21 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
 
 // GET - List all templates for investor (system + user templates)
-export async function GET() {
+export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
+  const url = new URL(req.url);
+  const { limit, offset } = parsePagination(url);
+
   // Fetch both system templates and user's own templates
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from("metric_templates")
     .select(`
       id,
@@ -30,10 +34,11 @@ export async function GET() {
         data_type,
         sort_order
       )
-    `)
+    `, { count: "exact" })
     .or(`is_system.eq.true,investor_id.eq.${user.id}`)
     .order("is_system", { ascending: false })
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) return jsonError(error.message, 500);
 
@@ -53,7 +58,7 @@ export async function GET() {
 
   // Cache for 60 seconds, revalidate in background
   return NextResponse.json(
-    { templates },
+    { templates, total: count ?? templates.length },
     {
       headers: {
         "Cache-Control": "private, max-age=60, stale-while-revalidate=120",

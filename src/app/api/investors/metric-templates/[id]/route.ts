@@ -70,6 +70,7 @@ const updateSchema = z.object({
       sort_order: z.number().int().default(0),
     }),
   ).min(1),
+  expectedUpdatedAt: z.string().datetime().optional(),
 });
 
 export async function PUT(
@@ -93,7 +94,7 @@ export async function PUT(
   const adminClient = createSupabaseAdminClient();
   const { data: existing } = await adminClient
     .from("metric_templates")
-    .select("id, is_system, investor_id")
+    .select("id, is_system, investor_id, updated_at")
     .eq("id", id)
     .single();
 
@@ -101,7 +102,12 @@ export async function PUT(
   if (existing.is_system) return jsonError("Cannot edit system templates.", 403);
   if (existing.investor_id !== user.id) return jsonError("Not authorized.", 403);
 
-  const { name, description, items } = parsed.data;
+  const { name, description, items, expectedUpdatedAt } = parsed.data;
+
+  // Optimistic locking: reject if the record was modified since client last fetched
+  if (expectedUpdatedAt && existing.updated_at && expectedUpdatedAt !== existing.updated_at) {
+    return jsonError("This template was modified by another session. Please refresh and try again.", 409);
+  }
 
   // Update template
   const { error: updateError } = await adminClient

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { escapeHtml } from "@/lib/utils/html";
+import { sendEmailBatchWithRetry } from "@/lib/email/retry";
 
 const BATCH_SIZE = 100;
 
@@ -256,42 +257,22 @@ export async function POST(req: Request) {
       };
     });
 
-    // Send in batches
+    // Send in batches with retry
     for (let i = 0; i < emailsToSend.length; i += BATCH_SIZE) {
       const batch = emailsToSend.slice(i, i + BATCH_SIZE);
       const batchPayload = batch.map(({ reminderIds: _ids, ...rest }) => rest);
 
-      try {
-        const res = await fetch("https://api.resend.com/emails/batch", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(batchPayload),
-        });
+      const result = await sendEmailBatchWithRetry(apiKey, batchPayload);
+      sent += result.sent;
 
-        if (res.ok) {
-          const json = await res.json().catch(() => null);
-          const successCount =
-            json?.data && Array.isArray(json.data)
-              ? json.data.filter((d: { id?: string }) => d?.id).length
-              : batch.length;
-
-          sent += successCount;
-
-          // Mark reminders as sent
-          for (let j = 0; j < batch.length; j++) {
-            if (!json?.data || json.data[j]?.id) {
-              await adminClient
-                .from("metric_request_reminders")
-                .update({ status: "sent", sent_at: now.toISOString() })
-                .in("id", batch[j].reminderIds);
-            }
-          }
+      // Mark reminders as sent if the batch succeeded
+      if (result.sent > 0) {
+        for (const email of batch) {
+          await adminClient
+            .from("metric_request_reminders")
+            .update({ status: "sent", sent_at: now.toISOString() })
+            .in("id", email.reminderIds);
         }
-      } catch (err) {
-        console.error("Reminder email send error:", err);
       }
     }
   } else if (!apiKey) {
@@ -314,7 +295,7 @@ export async function POST(req: Request) {
   });
 }
 
-// Also support GET for easier testing in development
-export async function GET(req: Request) {
-  return POST(req);
+// GET not allowed — cron endpoints are POST-only
+export async function GET() {
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }

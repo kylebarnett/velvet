@@ -637,6 +637,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                         onClick={() => startEdit(contact)}
                         className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10"
                         title="Edit"
+                        aria-label="Edit contact"
                       >
                         <Pencil className="h-4 w-4 text-white/60" />
                       </button>
@@ -645,6 +646,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                         disabled={loading}
                         className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
                         title="Delete"
+                        aria-label="Delete contact"
                       >
                         <Trash2 className="h-4 w-4 text-red-400/60" />
                       </button>
@@ -666,6 +668,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                       checked={selectedIds.size === contacts.length && contacts.length > 0}
                       onChange={toggleSelectAll}
                       className="rounded border-white/20"
+                      aria-label="Select all contacts"
                     />
                   </th>
                   {([
@@ -759,6 +762,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                               disabled={loading}
                               className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
                               title={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
+                              aria-label={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
                             >
                               <Mail className="h-4 w-4 text-white/60" />
                             </button>
@@ -767,6 +771,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                             onClick={() => startEdit(contact)}
                             className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
                             title="Edit contact"
+                            aria-label="Edit contact"
                           >
                             <Pencil className="h-4 w-4 text-white/60" />
                           </button>
@@ -775,6 +780,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                             disabled={loading}
                             className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
                             title="Delete contact"
+                            aria-label="Delete contact"
                           >
                             <Trash2 className="h-4 w-4 text-red-400/60" />
                           </button>
@@ -800,6 +806,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
               onClick={() => goToPage(pagination.page - 1)}
               disabled={pagination.page === 1 || fetching}
               className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Previous page"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -835,6 +842,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
               onClick={() => goToPage(pagination.page + 1)}
               disabled={pagination.page === pagination.totalPages || fetching}
               className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Next page"
             >
               <ChevronRight className="h-4 w-4" />
             </button>

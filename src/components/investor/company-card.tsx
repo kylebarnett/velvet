@@ -97,31 +97,34 @@ function CompanyLogoDisplay({
 
 function TrendIndicator({ percentChange }: { percentChange: number | null }) {
   if (percentChange == null) {
-    return <Minus className="h-4 w-4 text-white/40" />;
+    return <Minus className="h-4 w-4 text-white/40" aria-hidden="true" />;
   }
 
   if (percentChange > 0) {
     return (
-      <div className="flex items-center gap-1 text-emerald-400">
-        <TrendingUp className="h-4 w-4" />
+      <div className="flex items-center gap-1 text-emerald-400" role="status">
+        <TrendingUp className="h-4 w-4" aria-hidden="true" />
         <span className="text-xs font-medium">+{percentChange.toFixed(0)}%</span>
+        <span className="sr-only">Trending up {percentChange.toFixed(0)} percent</span>
       </div>
     );
   }
 
   if (percentChange < 0) {
     return (
-      <div className="flex items-center gap-1 text-red-400">
-        <TrendingDown className="h-4 w-4" />
+      <div className="flex items-center gap-1 text-red-400" role="status">
+        <TrendingDown className="h-4 w-4" aria-hidden="true" />
         <span className="text-xs font-medium">{percentChange.toFixed(0)}%</span>
+        <span className="sr-only">Trending down {Math.abs(percentChange).toFixed(0)} percent</span>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-1 text-white/40">
-      <Minus className="h-4 w-4" />
+    <div className="flex items-center gap-1 text-white/40" role="status">
+      <Minus className="h-4 w-4" aria-hidden="true" />
       <span className="text-xs font-medium">0%</span>
+      <span className="sr-only">No change</span>
     </div>
   );
 }

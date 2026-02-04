@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
 
 // GET - List all documents across investor's portfolio
 export async function GET(req: Request) {
@@ -14,6 +15,7 @@ export async function GET(req: Request) {
   const companyId = url.searchParams.get("companyId");
   const documentType = url.searchParams.get("type");
   const search = url.searchParams.get("search");
+  const { limit, offset } = parsePagination(url);
 
   // Build query for documents in investor's approved portfolio companies
   let query = supabase
@@ -31,7 +33,7 @@ export async function GET(req: Request) {
         id,
         name
       )
-    `)
+    `, { count: "exact" })
     .order("uploaded_at", { ascending: false });
 
   // Filter by companies in investor's approved portfolio
@@ -67,7 +69,9 @@ export async function GET(req: Request) {
     query = query.ilike("file_name", `%${search}%`);
   }
 
-  const { data: documents, error } = await query;
+  query = query.range(offset, offset + limit - 1);
+
+  const { data: documents, error, count } = await query;
 
   if (error) return jsonError(error.message, 500);
 
@@ -93,5 +97,12 @@ export async function GET(req: Request) {
     };
   });
 
-  return NextResponse.json({ documents: result });
+  return NextResponse.json(
+    { documents: result, total: count ?? result.length },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=60, stale-while-revalidate=120",
+      },
+    },
+  );
 }

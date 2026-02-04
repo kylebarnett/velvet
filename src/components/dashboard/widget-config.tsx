@@ -51,6 +51,7 @@ export function WidgetConfig({
           type="button"
           onClick={onClose}
           className="text-white/40 hover:text-white/60"
+          aria-label="Close widget configuration"
         >
           <X className="h-4 w-4" />
         </button>

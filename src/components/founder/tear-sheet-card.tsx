@@ -39,6 +39,7 @@ export function TearSheetCard({
         setShowConfirm(true);
       }}
       className="shrink-0 rounded-md p-1.5 text-white/30 hover:bg-white/5 hover:text-red-300"
+      aria-label="Delete tear sheet"
     >
       <Trash2 className="h-4 w-4" />
     </button>

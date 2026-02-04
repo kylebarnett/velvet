@@ -8,6 +8,7 @@ import {
   calculateReminderDates,
 } from "@/lib/schedules";
 import { escapeHtml } from "@/lib/utils/html";
+import { sendEmailBatchWithRetry } from "@/lib/email/retry";
 
 const BATCH_SIZE = 100;
 
@@ -372,31 +373,11 @@ export async function POST(req: Request) {
         };
       });
 
-      // Send in batches
+      // Send in batches with retry
       for (let i = 0; i < emailsToSend.length; i += BATCH_SIZE) {
         const batch = emailsToSend.slice(i, i + BATCH_SIZE);
-
-        try {
-          const res = await fetch("https://api.resend.com/emails/batch", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${apiKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(batch),
-          });
-
-          if (res.ok) {
-            const json = await res.json().catch(() => null);
-            if (json?.data && Array.isArray(json.data)) {
-              emailsSent += json.data.filter((d: { id?: string }) => d?.id).length;
-            } else {
-              emailsSent += batch.length;
-            }
-          }
-        } catch (err) {
-          console.error("Email send error:", err);
-        }
+        const result = await sendEmailBatchWithRetry(apiKey, batch);
+        emailsSent += result.sent;
       }
     }
 
@@ -449,7 +430,7 @@ export async function POST(req: Request) {
   });
 }
 
-// Also support GET for easier testing in development
-export async function GET(req: Request) {
-  return POST(req);
+// GET not allowed — cron endpoints are POST-only
+export async function GET() {
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }

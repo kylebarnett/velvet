@@ -115,6 +115,7 @@ export function ViewSelector({
                       onClick={(e) => handleDeleteClick(e, view)}
                       className="mr-2 rounded p-1 text-white/30 transition-colors hover:bg-white/10 hover:text-red-400"
                       title="Delete view"
+                      aria-label={`Delete ${view.name} view`}
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>

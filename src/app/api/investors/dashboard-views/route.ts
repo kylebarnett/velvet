@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
 
 const createSchema = z.object({
   companyId: z.string().uuid(),
@@ -31,6 +32,8 @@ export async function GET(req: Request) {
 
   if (!companyId) return jsonError("companyId is required.", 400);
 
+  const { limit, offset } = parsePagination(url);
+
   // Verify investor has a relationship with this company
   const { data: relationship } = await supabase
     .from("investor_company_relationships")
@@ -42,16 +45,24 @@ export async function GET(req: Request) {
   if (!relationship) return jsonError("Company not in portfolio.", 403);
 
   // Fetch views
-  const { data: views, error } = await supabase
+  const { data: views, error, count } = await supabase
     .from("dashboard_views")
-    .select("id, name, is_default, layout, created_at, updated_at")
+    .select("id, name, is_default, layout, created_at, updated_at", { count: "exact" })
     .eq("investor_id", user.id)
     .eq("company_id", companyId)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    .range(offset, offset + limit - 1);
 
   if (error) return jsonError(error.message, 500);
 
-  return NextResponse.json({ views: views ?? [] });
+  return NextResponse.json(
+    { views: views ?? [], total: count ?? (views ?? []).length },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=60, stale-while-revalidate=120",
+      },
+    },
+  );
 }
 
 // POST - Create a new dashboard view

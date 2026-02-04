@@ -9,6 +9,7 @@ const schema = z.object({
   industry: z.string().nullable().optional(),
   business_model: z.string().nullable().optional(),
   website: z.string().nullable().optional(),
+  expectedUpdatedAt: z.string().datetime().optional(),
 });
 
 export async function PUT(
@@ -35,6 +36,20 @@ export async function PUT(
     .single();
 
   if (!relationship) return jsonError("Company not in portfolio.", 403);
+
+  // Optimistic locking: check updated_at if provided
+  if (parsed.data.expectedUpdatedAt) {
+    const adminCheck = createSupabaseAdminClient();
+    const { data: current } = await adminCheck
+      .from("companies")
+      .select("updated_at")
+      .eq("id", companyId)
+      .single();
+
+    if (current?.updated_at && parsed.data.expectedUpdatedAt !== current.updated_at) {
+      return jsonError("This company was modified by another session. Please refresh and try again.", 409);
+    }
+  }
 
   // Use admin client since investor may not have direct update on companies
   const adminClient = createSupabaseAdminClient();
