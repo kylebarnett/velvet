@@ -43,9 +43,8 @@ export default async function FounderLayout({
       nav={[
         { href: "/portal", label: "Dashboard" },
         { href: "/portal/requests", label: "Requests", badge: pendingCount },
-        { href: "/portal/documents", label: "Documents" },
-        { href: "/portal/tear-sheets", label: "Tear Sheets" },
         { href: "/portal/investors", label: "Investors" },
+        { href: "/portal/team", label: "Team" },
       ]}
       company={company}
     >

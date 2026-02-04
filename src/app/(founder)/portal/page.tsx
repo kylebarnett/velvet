@@ -1,9 +1,6 @@
-import Link from "next/link";
-import { Settings } from "lucide-react";
-
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { FounderDashboardClient } from "@/components/founder/founder-dashboard-client";
+import { FounderPortalTabs } from "@/components/founder/founder-portal-tabs";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +35,7 @@ export default async function FounderDashboardPage() {
   const { data: metricValues } = await supabase
     .from("company_metric_values")
     .select(
-      "id, metric_name, period_type, period_start, period_end, value, notes, submitted_at, updated_at",
+      "id, metric_name, period_type, period_start, period_end, value, notes, submitted_at, updated_at, source, ai_confidence",
     )
     .eq("company_id", company.id)
     .order("period_start", { ascending: false });
@@ -58,31 +55,13 @@ export default async function FounderDashboardPage() {
     .order("name", { ascending: true });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-white/60">
-            Visualize your company metrics and track performance.
-          </p>
-        </div>
-        <Link
-          href="/portal/dashboard/edit"
-          className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2 sm:py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
-        >
-          <Settings className="h-3.5 w-3.5" />
-          Edit Dashboard
-        </Link>
-      </div>
-
-      <FounderDashboardClient
-        companyId={company.id}
-        companyName={company.name}
-        companyIndustry={company.industry}
-        metrics={metricValues ?? []}
-        views={views ?? []}
-        templates={templates ?? []}
-      />
-    </div>
+    <FounderPortalTabs
+      companyId={company.id}
+      companyName={company.name}
+      companyIndustry={company.industry}
+      metrics={metricValues ?? []}
+      views={views ?? []}
+      templates={templates ?? []}
+    />
   );
 }
