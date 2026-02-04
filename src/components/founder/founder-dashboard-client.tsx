@@ -15,6 +15,7 @@ import {
 } from "@/components/dashboard";
 import { DateRange } from "@/components/dashboard/date-range-selector";
 import { Download } from "lucide-react";
+import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 
 type DashboardView = {
   id: string;
@@ -41,6 +42,57 @@ type FounderDashboardClientProps = {
   templates: DashboardTemplate[];
 };
 
+/**
+ * Ensures an "All Metrics" table exists and all tables show all metrics.
+ * Used for saved views where we want to preserve user's layout positions.
+ */
+function ensureMetricsTable(widgets: Widget[]): Widget[] {
+  const hasTable = widgets.some((w) => w.type === "table");
+
+  // Ensure all existing tables show all metrics (preserve positions)
+  const updatedWidgets = widgets.map((w) => {
+    if (w.type === "table" && w.config && typeof w.config === "object") {
+      return {
+        ...w,
+        config: {
+          ...w.config,
+          showAllMetrics: true,
+        },
+      };
+    }
+    return w;
+  });
+
+  if (hasTable) {
+    return updatedWidgets;
+  }
+
+  // No table exists - add one below all existing widgets
+  const maxY = widgets.reduce((max, w) => Math.max(max, w.y + w.h), 0);
+
+  return [
+    ...updatedWidgets,
+    {
+      id: "table-all",
+      type: "table",
+      x: 0,
+      y: maxY,
+      w: 12,
+      h: 3,
+      config: {
+        metrics: [],
+        periodType: "quarterly",
+        title: "All Metrics",
+        showAllMetrics: true,
+      },
+    },
+  ];
+}
+
+/**
+ * Reorders widgets for templates/defaults: cards at top, then table, then charts.
+ * Only used for default layouts, NOT for saved views.
+ */
 function reorderWidgetsWithCardsFirst(widgets: Widget[]): Widget[] {
   const metricCards = widgets.filter((w) => w.type === "metric-card");
   const tableWidgets = widgets.filter((w) => w.type === "table");
@@ -233,6 +285,12 @@ export function FounderDashboardClient({
   const [periodType, setPeriodType] = React.useState<PeriodType>("quarterly");
   const [dateRange, setDateRange] = React.useState<DateRange>("1y");
   const [isExporting, setIsExporting] = React.useState(false);
+  const [detailMetric, setDetailMetric] = React.useState<string | null>(null);
+
+  // Sync views state when props change (e.g., after navigation with fresh server data)
+  React.useEffect(() => {
+    setViews(initialViews);
+  }, [initialViews]);
 
   // Build list of available metric names
   const availableMetricNames = React.useMemo(() => {
@@ -292,15 +350,18 @@ export function FounderDashboardClient({
   let widgets: Widget[];
 
   if (currentView?.layout) {
+    // Saved views: preserve positions but ensure metrics table exists
     const layout = currentView.layout as DashboardLayout | Widget[];
     if (Array.isArray(layout)) {
-      widgets = reorderWidgetsWithCardsFirst(layout);
+      widgets = ensureMetricsTable(layout);
     } else if (layout.widgets) {
-      widgets = reorderWidgetsWithCardsFirst(layout.widgets);
+      widgets = ensureMetricsTable(layout.widgets);
     } else {
+      // No valid layout in saved view, fall back to default
       widgets = getDefaultLayout(companyIndustry, templates, availableMetricNames);
     }
   } else {
+    // No saved view selected, use default layout (with reordering for templates)
     widgets = getDefaultLayout(companyIndustry, templates, availableMetricNames);
   }
 
@@ -358,7 +419,10 @@ export function FounderDashboardClient({
 
       {/* Dashboard grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-12">
-        {widgets.map((widget) => {
+        {/* Sort widgets by y position (row), then x position (column) */}
+        {[...widgets]
+          .sort((a, b) => a.y - b.y || a.x - b.x)
+          .map((widget) => {
           const colSpanClass =
             widget.w <= 4
               ? "sm:col-span-4 md:col-span-4 lg:col-span-4"
@@ -376,6 +440,7 @@ export function FounderDashboardClient({
                 widget={widget}
                 metrics={filteredMetrics}
                 periodTypeOverride={periodType}
+                onMetricClick={setDetailMetric}
               />
             </div>
           );
@@ -389,6 +454,16 @@ export function FounderDashboardClient({
             Click &quot;Edit Dashboard&quot; to add charts and metrics.
           </p>
         </div>
+      )}
+
+      {detailMetric && (
+        <MetricDetailPanel
+          companyId={companyId}
+          metricName={detailMetric}
+          onClose={() => setDetailMetric(null)}
+          editable
+          onValueUpdated={() => router.refresh()}
+        />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   FileText,
   Trash2,
@@ -21,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ExtractionStatusBadge } from "./extraction-status-badge";
+import { ExtractionReviewPanel } from "./extraction-review-panel";
 
 type Document = {
   id: string;
@@ -307,6 +310,7 @@ function PreviewPane({
 /*  Main component                                                     */
 /* ------------------------------------------------------------------ */
 export function FounderDocumentList() {
+  const router = useRouter();
   const [documents, setDocuments] = React.useState<Document[]>([]);
   const [companyName, setCompanyName] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -320,6 +324,7 @@ export function FounderDocumentList() {
   const [deleting, setDeleting] = React.useState(false);
   const [success, setSuccess] = React.useState<string | null>(null);
   const [previewDoc, setPreviewDoc] = React.useState<Document | null>(null);
+  const [reviewDoc, setReviewDoc] = React.useState<Document | null>(null);
 
   // Auto-dismiss success message
   React.useEffect(() => {
@@ -525,6 +530,9 @@ export function FounderDocumentList() {
                         )}
                         <span className="text-xs text-white/40">{formatFileSize(doc.file_size)}</span>
                       </div>
+                      <div className="mt-1.5">
+                        <ExtractionStatusBadge status={doc.ingestion_status} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -597,6 +605,7 @@ export function FounderDocumentList() {
                         <th className="p-3 font-medium">Period</th>
                         <th className="p-3 font-medium">Size</th>
                         <th className="p-3 font-medium">Uploaded</th>
+                        <th className="p-3 font-medium">AI</th>
                         <th className="p-3 font-medium">Actions</th>
                       </tr>
                     </thead>
@@ -634,6 +643,20 @@ export function FounderDocumentList() {
                           </td>
                           <td className="p-3 text-white/60 whitespace-nowrap">{formatFileSize(doc.file_size)}</td>
                           <td className="p-3 text-white/60 whitespace-nowrap">{formatDate(doc.uploaded_at)}</td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                              <ExtractionStatusBadge status={doc.ingestion_status} />
+                              {(doc.ingestion_status === "completed" || doc.ingestion_status === "pending") && (
+                                <button
+                                  type="button"
+                                  onClick={() => setReviewDoc(doc)}
+                                  className="rounded-md border border-violet-500/20 bg-violet-500/10 px-2 py-0.5 text-[11px] font-medium text-violet-200 hover:bg-violet-500/20"
+                                >
+                                  {doc.ingestion_status === "completed" ? "Review" : "Extract"}
+                                </button>
+                              )}
+                            </div>
+                          </td>
                           <td className="p-3">
                             <div className="flex items-center gap-1">
                               <button
@@ -679,6 +702,19 @@ export function FounderDocumentList() {
             )}
           </div>
         </>
+      )}
+
+      {/* Extraction review panel */}
+      {reviewDoc && (
+        <ExtractionReviewPanel
+          documentId={reviewDoc.id}
+          documentName={reviewDoc.file_name}
+          onClose={() => setReviewDoc(null)}
+          onMetricsAccepted={() => {
+            // Refresh server data so dashboard shows updated metrics
+            router.refresh();
+          }}
+        />
       )}
 
       {/* Delete confirmation modal */}

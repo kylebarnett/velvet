@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { GridLayout, Layout, LayoutItem } from "react-grid-layout";
+import { GridLayout, Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { GripVertical, Settings } from "lucide-react";
@@ -65,6 +65,23 @@ export function DashboardCanvas({
     onLayoutChange(updatedWidgets);
   }
 
+  // Also handle drag/resize stop events for more reliable updates
+  function handleDragStop(
+    layout: Layout,
+    _oldItem: unknown,
+    _newItem: unknown,
+  ) {
+    handleLayoutChange(layout);
+  }
+
+  function handleResizeStop(
+    layout: Layout,
+    _oldItem: unknown,
+    _newItem: unknown,
+  ) {
+    handleLayoutChange(layout);
+  }
+
   function getWidgetPreview(widget: Widget): string {
     const { config } = widget;
     if (isChartConfig(config)) {
@@ -108,6 +125,8 @@ export function DashboardCanvas({
           enabled: true,
         }}
         onLayoutChange={handleLayoutChange}
+        onDragStop={handleDragStop}
+        onResizeStop={handleResizeStop}
       >
         {widgets.map((widget) => (
           <div

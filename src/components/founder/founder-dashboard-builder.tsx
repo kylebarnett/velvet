@@ -216,11 +216,11 @@ export function FounderDashboardBuilder({
         if (!res.ok) throw new Error(json.error ?? "Failed to save");
       }
 
-      router.push("/portal");
-      router.refresh();
+      // Navigate to portal with cache buster to ensure fresh data
+      router.push(`/portal?t=${Date.now()}`);
     } catch (err) {
+      console.error("[dashboard-builder] Save error:", err);
       setError(err instanceof Error ? err.message : "Failed to save");
-    } finally {
       setIsSaving(false);
     }
   }
@@ -244,11 +244,10 @@ export function FounderDashboardBuilder({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to save");
 
-      router.push("/portal");
-      router.refresh();
+      // Navigate to portal with cache buster to ensure fresh data
+      router.push(`/portal?t=${Date.now()}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
-    } finally {
       setIsSaving(false);
       setShowSaveAs(false);
     }
