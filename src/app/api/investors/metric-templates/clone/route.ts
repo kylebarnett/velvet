@@ -70,10 +70,10 @@ export async function POST(req: Request) {
     const { error: itemsError } = await supabase
       .from("metric_template_items")
       .insert(
-        items.map((item: any) => ({
+        items.map((item: { metric_name: string; period_type: string; data_type: string; sort_order: number }) => ({
           template_id: newTemplate.id,
           metric_name: item.metric_name,
-          period_type: "quarterly",
+          period_type: item.period_type,
           data_type: item.data_type,
           sort_order: item.sort_order,
         })),

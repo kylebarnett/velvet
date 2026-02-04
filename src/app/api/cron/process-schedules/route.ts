@@ -46,11 +46,11 @@ interface Schedule {
 
 // POST - Process all due schedules (called by Vercel Cron)
 export async function POST(req: Request) {
-  // Verify cron secret
+  // Verify cron secret — reject if not configured or mismatched
   const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
