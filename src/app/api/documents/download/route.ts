@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 const uuidSchema = z.string().uuid();
 
@@ -60,8 +61,9 @@ export async function GET(req: Request) {
     return jsonError("Forbidden.", 403);
   }
 
-  // Create a signed URL for the file
-  const { data, error } = await supabase.storage
+  // Create a signed URL using admin client — ownership verified above
+  const admin = createSupabaseAdminClient();
+  const { data, error } = await admin.storage
     .from("documents")
     .createSignedUrl(filePath, 60); // 60 second expiry
 

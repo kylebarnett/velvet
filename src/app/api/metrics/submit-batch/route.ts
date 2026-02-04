@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 const batchSchema = z.object({
   companyId: z.string().uuid(),
@@ -18,6 +19,9 @@ const batchSchema = z.object({
     )
     .min(1)
     .max(100),
+  // Request IDs to mark as fulfilled — passed directly from the UI
+  // which knows exactly which requests are being addressed.
+  fulfillRequestIds: z.array(z.string().uuid()).optional(),
 });
 
 export async function POST(req: Request) {
@@ -30,7 +34,7 @@ export async function POST(req: Request) {
   const role = user.user_metadata?.role;
   if (role !== "founder") return jsonError("Forbidden.", 403);
 
-  const { companyId, submissions } = parsed.data;
+  const { companyId, submissions, fulfillRequestIds } = parsed.data;
 
   // Verify the founder owns this company
   const { data: company } = await supabase
@@ -69,6 +73,42 @@ export async function POST(req: Request) {
       errors.push(`${sub.metricName}: Failed to submit.`);
     } else {
       submitted++;
+    }
+  }
+
+  // Directly mark the specified requests as fulfilled.
+  // The UI passes the exact request IDs that correspond to the submitted
+  // metrics, so no fragile name/date matching is needed.
+  if (submitted > 0 && fulfillRequestIds && fulfillRequestIds.length > 0) {
+    try {
+      const admin = createSupabaseAdminClient();
+
+      // Verify these requests belong to this company before updating
+      const { data: validRequests } = await admin
+        .from("metric_requests")
+        .select("id")
+        .eq("company_id", companyId)
+        .eq("status", "pending")
+        .in("id", fulfillRequestIds);
+
+      const validIds = (validRequests ?? []).map((r) => r.id);
+
+      if (validIds.length > 0) {
+        const { error: updateError } = await admin
+          .from("metric_requests")
+          .update({
+            status: "submitted",
+            updated_at: new Date().toISOString(),
+          })
+          .in("id", validIds);
+
+        if (updateError) {
+          console.error("Failed to fulfill requests:", updateError);
+        }
+      }
+    } catch (e) {
+      // Non-fatal — the values were submitted successfully
+      console.error("Failed to auto-fulfill requests:", e);
     }
   }
 

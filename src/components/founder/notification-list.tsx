@@ -11,6 +11,7 @@ type GroupedRequest = {
   dueDate: string | null;
   status: string;
   investorCount: number;
+  investorNames: string[];
   requestIds: string[];
   hasSubmission: boolean;
 };
@@ -22,11 +23,13 @@ type PeriodGroup = {
   periodEnd: string;
   dueDate: string | null;
   metrics: GroupedRequest[];
+  investorNames: string[];
 };
 
 type NotificationListProps = {
+  mode?: "pending" | "completed";
   onCompanyId: (id: string) => void;
-  onSubmitGroup: (group: {
+  onSubmitGroup?: (group: {
     periodType: string;
     periodStart: string;
     periodEnd: string;
@@ -98,6 +101,7 @@ function LoadingSkeleton() {
 }
 
 export function NotificationList({
+  mode = "pending",
   onCompanyId,
   onSubmitGroup,
 }: NotificationListProps) {
@@ -142,16 +146,24 @@ export function NotificationList({
           periodEnd: req.periodEnd,
           dueDate: req.dueDate,
           metrics: [],
+          investorNames: [],
         });
       }
-      groups.get(key)!.metrics.push(req);
+      const group = groups.get(key)!;
+      group.metrics.push(req);
+      // Collect unique investor names across all metrics in this period
+      for (const name of req.investorNames ?? []) {
+        if (!group.investorNames.includes(name)) {
+          group.investorNames.push(name);
+        }
+      }
       // Use earliest due date
       if (
         req.dueDate &&
-        (!groups.get(key)!.dueDate ||
-          new Date(req.dueDate) < new Date(groups.get(key)!.dueDate!))
+        (!group.dueDate ||
+          new Date(req.dueDate) < new Date(group.dueDate))
       ) {
-        groups.get(key)!.dueDate = req.dueDate;
+        group.dueDate = req.dueDate;
       }
     }
     // Sort by due date (earliest first), then by period start
@@ -178,105 +190,158 @@ export function NotificationList({
     );
   }
 
-  if (pendingRequests.length === 0 && submittedRequests.length === 0) {
+  const displayRequests = mode === "completed" ? submittedRequests : pendingRequests;
+
+  if (displayRequests.length === 0) {
     return (
       <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-        <div className="text-sm text-white/60">No metric requests yet.</div>
+        <div className="text-sm text-white/60">
+          {mode === "completed"
+            ? "No completed submissions yet."
+            : "No pending metric requests."}
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === "completed") {
+    // Group completed requests by period (same grouping logic as pending)
+    const completedGroups = new Map<string, PeriodGroup>();
+    for (const req of submittedRequests) {
+      const key = `${req.periodType}-${req.periodStart}-${req.periodEnd}`;
+      if (!completedGroups.has(key)) {
+        completedGroups.set(key, {
+          label: formatPeriodLabel(req.periodType, req.periodStart),
+          periodType: req.periodType,
+          periodStart: req.periodStart,
+          periodEnd: req.periodEnd,
+          dueDate: req.dueDate,
+          metrics: [],
+          investorNames: [],
+        });
+      }
+      const group = completedGroups.get(key)!;
+      group.metrics.push(req);
+      for (const name of req.investorNames ?? []) {
+        if (!group.investorNames.includes(name)) {
+          group.investorNames.push(name);
+        }
+      }
+    }
+
+    const sortedCompleted = Array.from(completedGroups.values()).sort(
+      (a, b) =>
+        new Date(b.periodStart).getTime() - new Date(a.periodStart).getTime(),
+    );
+
+    return (
+      <div className="space-y-3">
+        {sortedCompleted.map((group) => (
+          <div
+            key={`${group.periodType}-${group.periodStart}`}
+            className="rounded-xl border border-white/10 bg-white/[0.03] p-4"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-medium text-white/70">
+                    {group.label}
+                  </span>
+                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-200">
+                    Submitted
+                  </span>
+                </div>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {group.metrics.map((m) => (
+                    <span
+                      key={m.metricName}
+                      className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/50"
+                    >
+                      {m.metricName}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-2 text-xs text-white/40">
+                  {group.metrics.length} metric
+                  {group.metrics.length !== 1 ? "s" : ""} &middot;{" "}
+                  Requested by{" "}
+                  {group.investorNames.length > 0
+                    ? group.investorNames.join(", ")
+                    : "investor"}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {periodGroups.length > 0 && (
-        <div className="space-y-3">
-          {periodGroups.map((group) => {
-            const urgency = getDueUrgency(group.dueDate);
-            const totalInvestors = Math.max(
-              ...group.metrics.map((m) => m.investorCount),
-            );
+    <div className="space-y-3">
+      {periodGroups.map((group) => {
+        const urgency = getDueUrgency(group.dueDate);
+        const totalInvestors = Math.max(
+          ...group.metrics.map((m) => m.investorCount),
+        );
 
-            return (
-              <div
-                key={`${group.periodType}-${group.periodStart}`}
-                className="rounded-xl border border-white/10 bg-white/5 p-4"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-medium">
-                        {group.label}
-                      </span>
-                      {urgency && (
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${urgency.color}`}
-                        >
-                          {urgency.label}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      {group.metrics.map((m) => (
-                        <span
-                          key={m.metricName}
-                          className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/70"
-                        >
-                          {m.metricName}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="mt-2 text-xs text-white/50">
-                      {group.metrics.length} metric
-                      {group.metrics.length !== 1 ? "s" : ""} &middot;{" "}
-                      {totalInvestors} investor
-                      {totalInvestors !== 1 ? "s" : ""} requesting
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onSubmitGroup({
-                        periodType: group.periodType,
-                        periodStart: group.periodStart,
-                        periodEnd: group.periodEnd,
-                      })
-                    }
-                    className="inline-flex h-8 shrink-0 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
-                  >
-                    Submit
-                  </button>
+        return (
+          <div
+            key={`${group.periodType}-${group.periodStart}`}
+            className="rounded-xl border border-white/10 bg-white/5 p-4"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-medium">
+                    {group.label}
+                  </span>
+                  {urgency && (
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${urgency.color}`}
+                    >
+                      {urgency.label}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {group.metrics.map((m) => (
+                    <span
+                      key={m.metricName}
+                      className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/70"
+                    >
+                      {m.metricName}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-2 text-xs text-white/50">
+                  {group.metrics.length} metric
+                  {group.metrics.length !== 1 ? "s" : ""} &middot;{" "}
+                  Requested by{" "}
+                  {group.investorNames.length > 0
+                    ? group.investorNames.join(", ")
+                    : `${totalInvestors} investor${totalInvestors !== 1 ? "s" : ""}`}
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
-
-      {submittedRequests.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-medium text-white/50">Completed</h2>
-          {submittedRequests.map((req) => (
-            <div
-              key={`${req.metricName}-${req.periodStart}-${req.periodEnd}`}
-              className="rounded-xl border border-white/5 bg-white/[0.02] p-4"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-sm text-white/60">
-                    {req.metricName}
-                  </span>
-                  <span className="ml-2 text-xs text-white/40">
-                    {formatPeriod(req.periodStart, req.periodType)}
-                  </span>
-                </div>
-                <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-200">
-                  Submitted
-                </span>
-              </div>
+              {onSubmitGroup && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onSubmitGroup({
+                      periodType: group.periodType,
+                      periodStart: group.periodStart,
+                      periodEnd: group.periodEnd,
+                    })
+                  }
+                  className="inline-flex h-8 shrink-0 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
+                >
+                  Submit
+                </button>
+              )}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        );
+      })}
     </div>
   );
 }

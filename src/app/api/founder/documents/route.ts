@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   // Get founder's company
   const { data: company, error: companyError } = await supabase
     .from("companies")
-    .select("id")
+    .select("id, name")
     .eq("founder_id", user.id)
     .single();
 
@@ -35,6 +35,7 @@ export async function GET(req: Request) {
       file_size,
       document_type,
       description,
+      period_label,
       ingestion_status,
       uploaded_at
     `)
@@ -63,5 +64,8 @@ export async function GET(req: Request) {
     return jsonError(error.message, 500);
   }
 
-  return NextResponse.json({ documents: documents ?? [] });
+  return NextResponse.json({
+    companyName: company.name ?? null,
+    documents: documents ?? [],
+  });
 }

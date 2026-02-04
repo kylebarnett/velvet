@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 type GroupedRequest = {
@@ -10,15 +10,9 @@ type GroupedRequest = {
   periodStart: string;
   periodEnd: string;
   investorCount: number;
+  investorNames: string[];
+  requestIds: string[];
   hasSubmission: boolean;
-};
-
-type SubmissionRow = {
-  metricName: string;
-  values: Record<string, string>; // period key -> value
-  notes: string;
-  investorCount: number;
-  isFromRequest: boolean;
 };
 
 type Period = {
@@ -39,6 +33,16 @@ type BatchSubmissionTableProps = {
   onBack: () => void;
 };
 
+// Format a local Date as YYYY-MM-DD without timezone shift.
+// Using toISOString() converts to UTC first, which shifts the date
+// backwards in US timezones (e.g. 2026-01-01 local → 2025-12-31 UTC).
+function fmtDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 function generateQuarterlyPeriods(
   requestedStart: string | null,
   count: number,
@@ -47,7 +51,9 @@ function generateQuarterlyPeriods(
   let date: Date;
 
   if (requestedStart) {
-    date = new Date(requestedStart);
+    // Parse YYYY-MM-DD as local date (not UTC) by splitting manually
+    const [y, mo, d] = requestedStart.split("-").map(Number);
+    date = new Date(y, mo - 1, d);
   } else {
     const now = new Date();
     // Start from the previous completed quarter
@@ -62,13 +68,14 @@ function generateQuarterlyPeriods(
     const start = new Date(qYear, (q - 1) * 3, 1);
     const end = new Date(qYear, q * 3, 0);
 
-    const key = `${start.toISOString().split("T")[0]}`;
+    const startStr = fmtDate(start);
+    const endStr = fmtDate(end);
     periods.push({
-      key,
-      start: start.toISOString().split("T")[0],
-      end: end.toISOString().split("T")[0],
+      key: startStr,
+      start: startStr,
+      end: endStr,
       label: `Q${q} '${String(qYear).slice(-2)}`,
-      isRequested: requestedStart === key,
+      isRequested: requestedStart === startStr,
     });
 
     // Move to previous quarter
@@ -86,7 +93,7 @@ function generateAnnualPeriods(
   let year: number;
 
   if (requestedStart) {
-    year = new Date(requestedStart).getFullYear();
+    year = parseInt(requestedStart.split("-")[0], 10);
   } else {
     year = new Date().getFullYear() - 1;
   }
@@ -115,7 +122,8 @@ function generateMonthlyPeriods(
   let date: Date;
 
   if (requestedStart) {
-    date = new Date(requestedStart);
+    const [y, mo, d] = requestedStart.split("-").map(Number);
+    date = new Date(y, mo - 1, d);
   } else {
     const now = new Date();
     date = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -124,17 +132,17 @@ function generateMonthlyPeriods(
   for (let i = 0; i < count; i++) {
     const start = new Date(date.getFullYear(), date.getMonth(), 1);
     const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-    const key = start.toISOString().split("T")[0];
+    const startStr = fmtDate(start);
 
     periods.push({
-      key,
-      start: key,
-      end: end.toISOString().split("T")[0],
+      key: startStr,
+      start: startStr,
+      end: fmtDate(end),
       label: start.toLocaleDateString("en-US", {
         month: "short",
         year: "2-digit",
       }),
-      isRequested: requestedStart === key,
+      isRequested: requestedStart === startStr,
     });
 
     date = new Date(date.getFullYear(), date.getMonth() - 1, 1);
@@ -154,21 +162,33 @@ function LoadingSkeleton() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 bg-white/5">
-              <th className="px-4 py-3 text-left"><div className="h-4 w-16 animate-pulse rounded bg-white/10" /></th>
+              <th className="px-4 py-3 text-left">
+                <div className="h-4 w-16 animate-pulse rounded bg-white/10" />
+              </th>
               {[0, 1, 2, 3].map((i) => (
-                <th key={i} className="px-3 py-3 text-center"><div className="mx-auto h-4 w-14 animate-pulse rounded bg-white/10" /></th>
+                <th key={i} className="px-3 py-3 text-center">
+                  <div className="mx-auto h-4 w-14 animate-pulse rounded bg-white/10" />
+                </th>
               ))}
-              <th className="px-3 py-3"><div className="h-4 w-12 animate-pulse rounded bg-white/10" /></th>
+              <th className="px-3 py-3">
+                <div className="h-4 w-12 animate-pulse rounded bg-white/10" />
+              </th>
             </tr>
           </thead>
           <tbody>
             {[0, 1, 2].map((r) => (
               <tr key={r} className="border-b border-white/5">
-                <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse rounded bg-white/10" /></td>
+                <td className="px-4 py-3">
+                  <div className="h-4 w-24 animate-pulse rounded bg-white/10" />
+                </td>
                 {[0, 1, 2, 3].map((c) => (
-                  <td key={c} className="px-2 py-3"><div className="mx-auto h-9 w-full animate-pulse rounded-md bg-white/5" /></td>
+                  <td key={c} className="px-2 py-3">
+                    <div className="mx-auto h-9 w-full animate-pulse rounded-md bg-white/5" />
+                  </td>
                 ))}
-                <td className="px-2 py-3"><div className="h-9 w-full animate-pulse rounded-md bg-white/5" /></td>
+                <td className="px-2 py-3">
+                  <div className="h-9 w-full animate-pulse rounded-md bg-white/5" />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -189,16 +209,24 @@ export function BatchSubmissionTable({
   const [periodType, setPeriodType] = React.useState<string>(
     prefilterPeriod?.periodType ?? "quarterly",
   );
-  const [rows, setRows] = React.useState<SubmissionRow[]>([]);
+
+  // Raw API data — fetched once on mount
+  const [rawRequests, setRawRequests] = React.useState<GroupedRequest[]>([]);
   const [existingValues, setExistingValues] = React.useState<
     Record<string, Record<string, string>>
   >({});
   const [loading, setLoading] = React.useState(true);
+
+  // User-entered data — persists across period type changes
+  const [userValues, setUserValues] = React.useState<
+    Record<string, Record<string, string>>
+  >({});
+  // Notes keyed by "periodType:metricName" so quarterly and annual notes are separate
+  const [userNotes, setUserNotes] = React.useState<Record<string, string>>({});
+
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
-  const [newMetricName, setNewMetricName] = React.useState("");
-  const [showAddMetric, setShowAddMetric] = React.useState(false);
   const [confirmModal, setConfirmModal] = React.useState(false);
   const [pendingSubmissions, setPendingSubmissions] = React.useState<
     Array<{
@@ -210,8 +238,6 @@ export function BatchSubmissionTable({
       notes?: string;
     }>
   >([]);
-  const [allMetricNames, setAllMetricNames] = React.useState<string[]>([]);
-  const [showSuggestions, setShowSuggestions] = React.useState(false);
 
   // Generate periods based on type — reversed to chronological (oldest left)
   const periods = React.useMemo(() => {
@@ -227,7 +253,7 @@ export function BatchSubmissionTable({
     return generated.reverse();
   }, [periodType, prefilterPeriod]);
 
-  // Load requests and existing values
+  // Fetch data once on mount
   React.useEffect(() => {
     async function load() {
       try {
@@ -253,12 +279,6 @@ export function BatchSubmissionTable({
           value: { raw?: string } | string | number;
         }> = metricJson.metrics ?? [];
 
-        // Collect all known metric names for suggestions
-        const knownNames = new Set<string>();
-        for (const m of existingMetrics) knownNames.add(m.metric_name);
-        for (const r of requests) knownNames.add(r.metricName);
-        setAllMetricNames(Array.from(knownNames).sort());
-
         // Build existing values map: metricName -> periodKey -> value
         const existing: Record<string, Record<string, string>> = {};
         for (const m of existingMetrics) {
@@ -273,29 +293,7 @@ export function BatchSubmissionTable({
           }
         }
         setExistingValues(existing);
-
-        // Build rows from requests
-        const rowMap = new Map<string, SubmissionRow>();
-
-        // Add rows from pending requests
-        for (const req of requests) {
-          if (!rowMap.has(req.metricName)) {
-            const values: Record<string, string> = {};
-            // Pre-fill from existing values
-            for (const p of periods) {
-              values[p.key] = existing[req.metricName]?.[p.key] ?? "";
-            }
-            rowMap.set(req.metricName, {
-              metricName: req.metricName,
-              values,
-              notes: "",
-              investorCount: req.investorCount,
-              isFromRequest: true,
-            });
-          }
-        }
-
-        setRows(Array.from(rowMap.values()));
+        setRawRequests(requests);
       } catch (e: unknown) {
         const message =
           e instanceof Error ? e.message : "Something went wrong.";
@@ -305,7 +303,61 @@ export function BatchSubmissionTable({
       }
     }
     load();
-  }, [periods]);
+  }, []);
+
+  // Derive display rows from raw data + current periods + user edits
+  const rows = React.useMemo(() => {
+    const rowMap = new Map<
+      string,
+      {
+        metricName: string;
+        investorNames: string[];
+        investorCount: number;
+        requestIds: string[];
+      }
+    >();
+
+    for (const req of rawRequests) {
+      if (!rowMap.has(req.metricName)) {
+        rowMap.set(req.metricName, {
+          metricName: req.metricName,
+          investorNames: req.investorNames ?? [],
+          investorCount: req.investorCount,
+          requestIds: [...(req.requestIds ?? [])],
+        });
+      } else {
+        // Merge investor names and request IDs from multiple period groups
+        const row = rowMap.get(req.metricName)!;
+        for (const name of req.investorNames ?? []) {
+          if (!row.investorNames.includes(name)) {
+            row.investorNames.push(name);
+          }
+        }
+        for (const id of req.requestIds ?? []) {
+          if (!row.requestIds.includes(id)) {
+            row.requestIds.push(id);
+          }
+        }
+        row.investorCount = Math.max(row.investorCount, req.investorCount);
+      }
+    }
+
+    return Array.from(rowMap.values()).map((row) => {
+      const values: Record<string, string> = {};
+      for (const p of periods) {
+        // User-entered value takes priority, then existing DB value, then empty
+        values[p.key] =
+          userValues[row.metricName]?.[p.key] ??
+          existingValues[row.metricName]?.[p.key] ??
+          "";
+      }
+      return {
+        ...row,
+        values,
+        notes: userNotes[`${periodType}:${row.metricName}`] ?? "",
+      };
+    });
+  }, [rawRequests, periods, periodType, userValues, userNotes, existingValues]);
 
   // Auto-dismiss success
   React.useEffect(() => {
@@ -320,51 +372,23 @@ export function BatchSubmissionTable({
     periodKey: string,
     value: string,
   ) {
-    setRows((prev) =>
-      prev.map((r) =>
-        r.metricName === metricName
-          ? { ...r, values: { ...r.values, [periodKey]: value } }
-          : r,
-      ),
-    );
+    setUserValues((prev) => ({
+      ...prev,
+      [metricName]: { ...prev[metricName], [periodKey]: value },
+    }));
   }
 
   function updateNotes(metricName: string, notes: string) {
-    setRows((prev) =>
-      prev.map((r) => (r.metricName === metricName ? { ...r, notes } : r)),
-    );
-  }
-
-  function addMetricRow(name?: string) {
-    const metricName = (name ?? newMetricName).trim();
-    if (!metricName || rows.some((r) => r.metricName === metricName)) return;
-    const values: Record<string, string> = {};
-    for (const p of periods) {
-      values[p.key] = existingValues[metricName]?.[p.key] ?? "";
-    }
-    setRows([
-      ...rows,
-      {
-        metricName,
-        values,
-        notes: "",
-        investorCount: 0,
-        isFromRequest: false,
-      },
-    ]);
-    setNewMetricName("");
-    setShowAddMetric(false);
-    setShowSuggestions(false);
-  }
-
-  function removeRow(metricName: string) {
-    setRows((prev) => prev.filter((r) => r.metricName !== metricName));
+    setUserNotes((prev) => ({
+      ...prev,
+      [`${periodType}:${metricName}`]: notes,
+    }));
   }
 
   function prepareSubmissions() {
     if (!companyId) return;
 
-    // Collect all non-empty values
+    // Collect all non-empty values that differ from existing
     const submissions: Array<{
       metricName: string;
       periodType: string;
@@ -411,18 +435,27 @@ export function BatchSubmissionTable({
 
     const submissions = pendingSubmissions;
 
+    // Collect all request IDs for submitted metrics so the API can
+    // directly mark them as fulfilled (no fragile date matching needed)
+    const submittedNames = new Set(submissions.map((s) => s.metricName));
+    const fulfillRequestIds = rows
+      .filter((r) => submittedNames.has(r.metricName))
+      .flatMap((r) => r.requestIds);
+
     try {
       const res = await fetch("/api/metrics/submit-batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ companyId, submissions }),
+        body: JSON.stringify({ companyId, submissions, fulfillRequestIds }),
       });
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Submission failed.");
 
-      setSuccess(
-        `Submitted ${json.submitted} metric${json.submitted !== 1 ? "s" : ""} successfully.${json.failed > 0 ? ` ${json.failed} failed.` : ""}`,
+      // Remove submitted metric rows from the table
+      const remaining = rawRequests.filter(
+        (r) => !submittedNames.has(r.metricName),
       );
+      setRawRequests(remaining);
 
       // Update existing values cache
       const updated = { ...existingValues };
@@ -431,6 +464,22 @@ export function BatchSubmissionTable({
         updated[sub.metricName][sub.periodStart] = sub.value;
       }
       setExistingValues(updated);
+
+      // Clear user-entered data for submitted metrics
+      setUserValues((prev) => {
+        const next = { ...prev };
+        for (const name of submittedNames) delete next[name];
+        return next;
+      });
+
+      if (remaining.length === 0) {
+        // All metrics submitted — go back to pending view
+        onBack();
+      } else {
+        setSuccess(
+          `Submitted ${json.submitted} metric${json.submitted !== 1 ? "s" : ""} successfully.${json.failed > 0 ? ` ${json.failed} failed.` : ""}`,
+        );
+      }
     } catch (e: unknown) {
       const message =
         e instanceof Error ? e.message : "Something went wrong.";
@@ -439,17 +488,6 @@ export function BatchSubmissionTable({
       setSubmitting(false);
     }
   }
-
-  // Suggestions for add metric input
-  const suggestions = React.useMemo(() => {
-    if (!newMetricName.trim()) return [];
-    const currentNames = new Set(rows.map((r) => r.metricName));
-    return allMetricNames.filter(
-      (name) =>
-        !currentNames.has(name) &&
-        name.toLowerCase().includes(newMetricName.toLowerCase()),
-    );
-  }, [newMetricName, allMetricNames, rows]);
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -493,15 +531,10 @@ export function BatchSubmissionTable({
 
       {rows.length === 0 ? (
         <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-white/60">No metrics to submit.</p>
-          <button
-            type="button"
-            onClick={() => setShowAddMetric(true)}
-            className="mt-3 inline-flex items-center gap-1 text-sm text-white/70 hover:text-white"
-          >
-            <Plus className="h-4 w-4" />
-            Add a metric
-          </button>
+          <p className="text-white/60">No metrics requested yet.</p>
+          <p className="mt-1 text-sm text-white/40">
+            Metrics will appear here when an investor sends you a request.
+          </p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-white/10">
@@ -524,7 +557,6 @@ export function BatchSubmissionTable({
                 <th className="px-3 py-3 text-left font-medium text-white/70 min-w-[160px]">
                   Notes
                 </th>
-                <th className="px-2 py-3 w-8" />
               </tr>
             </thead>
             <tbody>
@@ -534,10 +566,9 @@ export function BatchSubmissionTable({
                     <div className="font-medium text-white/90">
                       {row.metricName}
                     </div>
-                    {row.investorCount > 0 && (
+                    {row.investorNames.length > 0 && (
                       <div className="text-[10px] text-white/40">
-                        {row.investorCount} investor
-                        {row.investorCount !== 1 ? "s" : ""}
+                        {row.investorNames.join(", ")}
                       </div>
                     )}
                   </td>
@@ -581,99 +612,12 @@ export function BatchSubmissionTable({
                       className="h-9 w-full rounded-md border border-white/10 bg-black/30 px-2 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
                     />
                   </td>
-                  <td className="px-2 py-2">
-                    {!row.isFromRequest && (
-                      <button
-                        type="button"
-                        onClick={() => removeRow(row.metricName)}
-                        className="rounded p-1 text-white/30 hover:bg-white/10 hover:text-white/60"
-                        title="Remove"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-
-      {/* Add metric row */}
-      <div className="flex items-center gap-2">
-        {showAddMetric ? (
-          <div className="relative flex items-center gap-2">
-            <div className="relative">
-              <input
-                type="text"
-                value={newMetricName}
-                onChange={(e) => {
-                  setNewMetricName(e.target.value);
-                  setShowSuggestions(true);
-                }}
-                onFocus={() => setShowSuggestions(true)}
-                placeholder="Metric name (e.g. Revenue)"
-                className="h-9 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") addMetricRow();
-                  if (e.key === "Escape") {
-                    setShowAddMetric(false);
-                    setNewMetricName("");
-                    setShowSuggestions(false);
-                  }
-                }}
-              />
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute left-0 top-full z-20 mt-1 max-h-40 w-full overflow-y-auto rounded-md border border-white/10 bg-zinc-900 py-1 shadow-xl">
-                  {suggestions.map((name) => (
-                    <button
-                      key={name}
-                      type="button"
-                      className="w-full px-3 py-1.5 text-left text-sm text-white/70 hover:bg-white/10"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        addMetricRow(name);
-                      }}
-                    >
-                      {name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => addMetricRow()}
-              disabled={!newMetricName.trim()}
-              className="h-9 rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-50"
-            >
-              Add
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowAddMetric(false);
-                setNewMetricName("");
-                setShowSuggestions(false);
-              }}
-              className="h-9 rounded-md border border-white/10 px-3 text-xs text-white/60 hover:bg-white/5"
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setShowAddMetric(true)}
-            className="flex items-center gap-1 text-xs text-white/50 hover:text-white/70"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add metric
-          </button>
-        )}
-      </div>
 
       {error && (
         <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">

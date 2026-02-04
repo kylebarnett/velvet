@@ -35,6 +35,14 @@ export function DocumentUploadModal({
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [description, setDescription] = React.useState("");
 
+  // Period selector state
+  const currentYear = new Date().getFullYear();
+  const currentQ = Math.ceil((new Date().getMonth() + 1) / 3);
+  const [periodQuarter, setPeriodQuarter] = React.useState(`Q${currentQ}`);
+  const [periodYear, setPeriodYear] = React.useState(String(currentYear));
+  const periodLabel = `${periodQuarter} ${periodYear}`;
+  const yearOptions = Array.from({ length: 5 }, (_, i) => String(currentYear - i));
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
@@ -77,6 +85,7 @@ export function DocumentUploadModal({
     formData.append("file", selectedFile);
     formData.append("companyId", companyId);
     formData.append("documentType", documentType);
+    formData.append("periodLabel", periodLabel);
     if (description.trim()) formData.append("description", description.trim());
 
     try {
@@ -168,6 +177,35 @@ export function DocumentUploadModal({
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <label className="text-sm font-medium">
+              Time period <span className="text-red-400">*</span>
+            </label>
+            <div className="flex gap-2">
+              <Select value={periodQuarter} onValueChange={setPeriodQuarter}>
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Q1">Q1</SelectItem>
+                  <SelectItem value="Q2">Q2</SelectItem>
+                  <SelectItem value="Q3">Q3</SelectItem>
+                  <SelectItem value="Q4">Q4</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={periodYear} onValueChange={setPeriodYear}>
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map((y) => (
+                    <SelectItem key={y} value={y}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid gap-2">

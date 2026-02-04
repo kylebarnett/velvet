@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
@@ -44,6 +45,13 @@ export async function POST(req: Request) {
     return jsonError("Invalid documentType.", 400);
   }
 
+  // Get period label (e.g. "Q1 2026")
+  const periodLabelRaw = form.get("periodLabel");
+  const periodLabel =
+    typeof periodLabelRaw === "string" && periodLabelRaw.trim()
+      ? periodLabelRaw.trim()
+      : null;
+
   // Get optional description
   const descriptionRaw = form.get("description");
   const description =
@@ -67,13 +75,24 @@ export async function POST(req: Request) {
   const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
   const filePath = `${companyId}/${Date.now()}-${sanitizedName}`;
 
-  const { error: uploadError } = await supabase.storage
+  // Ensure the storage bucket exists (uses admin client to create if missing)
+  const admin = createSupabaseAdminClient();
+  const { data: buckets } = await admin.storage.listBuckets();
+  if (!buckets?.some((b) => b.name === "documents")) {
+    await admin.storage.createBucket("documents", { public: false });
+  }
+
+  // Use admin client for storage upload — ownership verified above
+  const { error: uploadError } = await admin.storage
     .from("documents")
     .upload(filePath, file, { upsert: false });
 
   if (uploadError) return jsonError(uploadError.message, 400);
 
-  const { data: doc, error: docErr } = await supabase
+  // Use admin client to insert the document record — ownership already
+  // verified above, and the founder's client may be blocked by RLS if
+  // current_user_role() doesn't resolve correctly.
+  const { data: doc, error: docErr } = await admin
     .from("documents")
     .insert({
       company_id: companyId,
@@ -84,6 +103,7 @@ export async function POST(req: Request) {
       file_size: file.size,
       document_type: documentType,
       description: description,
+      period_label: periodLabel,
       ingestion_status: "pending",
     })
     .select("id")

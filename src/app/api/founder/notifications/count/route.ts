@@ -26,7 +26,10 @@ export async function GET() {
     .eq("company_id", company.id)
     .eq("status", "pending");
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Notification count error:", error);
+    return jsonError("Failed to load notification count.", 500);
+  }
 
   return NextResponse.json({ count: count ?? 0 });
 }

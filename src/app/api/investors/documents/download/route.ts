@@ -3,6 +3,7 @@ import archiver from "archiver";
 import { PassThrough } from "stream";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
@@ -83,6 +84,10 @@ export async function GET(req: Request) {
   // Track filenames to handle duplicates
   const usedNames = new Map<string, number>();
 
+  // Use admin client for storage downloads — ownership verified via
+  // approved portfolio relationships above
+  const admin = createSupabaseAdminClient();
+
   for (const doc of documents) {
     // Handle Supabase join type (may be array or single object)
     const companyRaw = doc.companies;
@@ -90,7 +95,7 @@ export async function GET(req: Request) {
     const companyName = company?.name ?? "Unknown";
 
     // Download file from Supabase Storage
-    const { data: fileData, error: downloadError } = await supabase.storage
+    const { data: fileData, error: downloadError } = await admin.storage
       .from("documents")
       .download(doc.file_path);
 
