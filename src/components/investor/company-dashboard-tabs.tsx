@@ -39,6 +39,7 @@ export function CompanyDashboardTabs({ companyId }: CompanyDashboardTabsProps) {
       onChange={handleTabChange}
       size="sm"
       showIcons={true}
+      variant="underline"
     />
   );
 }

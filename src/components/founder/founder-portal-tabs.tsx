@@ -34,13 +34,11 @@ interface FounderPortalTabsProps {
   metrics: MetricValue[];
   views: DashboardView[];
   templates: DashboardTemplate[];
+  /** Optional document count for badge */
+  documentCount?: number;
+  /** Optional tear sheet count for badge */
+  tearSheetCount?: number;
 }
-
-const tabs: TabItem<Tab>[] = [
-  { value: "metrics", label: "Metrics", icon: BarChart3 },
-  { value: "documents", label: "Documents", icon: FileText },
-  { value: "tear-sheets", label: "Tear Sheets", icon: FileSpreadsheet },
-];
 
 export function FounderPortalTabs({
   companyId,
@@ -49,6 +47,8 @@ export function FounderPortalTabs({
   metrics,
   views,
   templates,
+  documentCount,
+  tearSheetCount,
 }: FounderPortalTabsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,6 +56,19 @@ export function FounderPortalTabs({
   const activeTab: Tab = (
     tabParam === "documents" || tabParam === "tear-sheets" ? tabParam : "metrics"
   ) as Tab;
+
+  // Compute unique metrics count
+  const uniqueMetricNames = React.useMemo(() => {
+    const names = new Set<string>();
+    metrics.forEach((m) => names.add(m.metric_name));
+    return names.size;
+  }, [metrics]);
+
+  const tabs: TabItem<Tab>[] = [
+    { value: "metrics", label: "Metrics", icon: BarChart3, badge: uniqueMetricNames || undefined },
+    { value: "documents", label: "Documents", icon: FileText, badge: documentCount },
+    { value: "tear-sheets", label: "Tear Sheets", icon: FileSpreadsheet, badge: tearSheetCount },
+  ];
 
   function handleTabChange(tab: Tab) {
     if (tab === "metrics") {
@@ -67,33 +80,45 @@ export function FounderPortalTabs({
 
   return (
     <div className="space-y-6">
-      {/* Header with title and tabs */}
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+      {/* Header section */}
+      <div className="space-y-4">
+        {/* Title row */}
         <div className="space-y-1">
           <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-white/50">
             Visualize your company metrics and track performance.
           </p>
         </div>
 
-        <SlidingTabs tabs={tabs} value={activeTab} onChange={handleTabChange} />
+        {/* Tab navigation */}
+        <SlidingTabs
+          tabs={tabs}
+          value={activeTab}
+          onChange={handleTabChange}
+          variant="underline"
+        />
       </div>
 
-      {/* Tab content */}
-      {activeTab === "metrics" && (
-        <FounderDashboardClient
-          companyId={companyId}
-          companyName={companyName}
-          companyIndustry={companyIndustry}
-          metrics={metrics}
-          views={views}
-          templates={templates}
-        />
-      )}
+      {/* Tab content with fade-in animation */}
+      <div
+        key={activeTab}
+        className="animate-fade-in"
+      >
+        {activeTab === "metrics" && (
+          <FounderDashboardClient
+            companyId={companyId}
+            companyName={companyName}
+            companyIndustry={companyIndustry}
+            metrics={metrics}
+            views={views}
+            templates={templates}
+          />
+        )}
 
-      {activeTab === "documents" && <DocumentsTab companyId={companyId} />}
+        {activeTab === "documents" && <DocumentsTab companyId={companyId} />}
 
-      {activeTab === "tear-sheets" && <TearSheetsTab />}
+        {activeTab === "tear-sheets" && <TearSheetsTab />}
+      </div>
     </div>
   );
 }
