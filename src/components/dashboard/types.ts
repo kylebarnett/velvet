@@ -99,6 +99,8 @@ export type MetricValue = {
   notes: string | null;
   submitted_at: string;
   updated_at: string;
+  source?: string;
+  ai_confidence?: number | null;
 };
 
 // Extract numeric value from metric value

@@ -21,12 +21,17 @@ type DashboardWidgetProps = {
   widget: Widget;
   metrics: MetricValue[];
   periodTypeOverride?: PeriodType;
+  onMetricClick?: (metricName: string) => void;
+  /** Company ID for persisting metric order in tables */
+  companyId?: string;
 };
 
 export function DashboardWidget({
   widget,
   metrics,
   periodTypeOverride,
+  onMetricClick,
+  companyId,
 }: DashboardWidgetProps) {
   const { config } = widget;
 
@@ -85,7 +90,16 @@ export function DashboardWidget({
       periodType,
       config.showAllMetrics
     );
-    return <MetricsTable data={tableData} title={config.title} />;
+    // Generate storage key for persisting metric order
+    const storageKey = companyId ? `metrics-order-${companyId}-${widget.id}` : undefined;
+    return (
+      <MetricsTable
+        data={tableData}
+        title={config.title}
+        onMetricClick={onMetricClick}
+        storageKey={storageKey}
+      />
+    );
   }
 
   return (
@@ -200,20 +214,29 @@ function prepareTableData(
   }
 
   // Convert to table format
-  return Array.from(byMetric.entries()).map(([metricName, values]) => ({
-    metricName,
-    periodType,
-    periods: values
-      .sort(
-        (a, b) =>
-          new Date(b.period_start).getTime() - new Date(a.period_start).getTime()
-      )
-      .map((v) => ({
+  return Array.from(byMetric.entries()).map(([metricName, values]) => {
+    const sorted = values.sort(
+      (a, b) =>
+        new Date(b.period_start).getTime() - new Date(a.period_start).getTime()
+    );
+    // Use the most recent value's source info
+    const latest = sorted[0];
+    return {
+      metricName,
+      periodType,
+      source: latest?.source,
+      aiConfidence: latest?.ai_confidence,
+      periods: sorted.map((v) => ({
         periodStart: v.period_start,
         periodEnd: v.period_end,
         value: getNumericValue(v.value),
+        source: v.source,
+        aiConfidence: v.ai_confidence,
+        submittedAt: v.submitted_at,
+        updatedAt: v.updated_at,
       })),
-  }));
+    };
+  });
 }
 
 function getLatestMetricValues(

@@ -29,7 +29,17 @@ export function getChartColor(index: number): string {
   return CHART_COLORS[index % CHART_COLORS.length];
 }
 
-// Format values for display
+// Format number with commas for thousands
+// If value is a whole number (no cents), omit decimals
+function formatWithCommas(value: number): string {
+  const hasDecimals = value % 1 !== 0;
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: hasDecimals ? 2 : 0,
+  });
+}
+
+// Format values for display - shows full numbers, decimals only when needed
 export function formatValue(value: number | null | undefined, metricName?: string): string {
   if (value == null) return "-";
 
@@ -43,10 +53,10 @@ export function formatValue(value: number | null | undefined, metricName?: strin
     lowerName.includes("churn") ||
     lowerName.includes("conversion")
   ) {
-    return `${value.toFixed(1)}%`;
+    return `${formatWithCommas(value)}%`;
   }
 
-  // Currency/revenue metrics
+  // Currency/revenue metrics - show full value with $
   if (
     lowerName.includes("revenue") ||
     lowerName.includes("mrr") ||
@@ -60,25 +70,11 @@ export function formatValue(value: number | null | undefined, metricName?: strin
     lowerName.includes("aov") ||
     lowerName.includes("arpu")
   ) {
-    if (Math.abs(value) >= 1_000_000) {
-      return `$${(value / 1_000_000).toFixed(1)}M`;
-    }
-    if (Math.abs(value) >= 1_000) {
-      return `$${(value / 1_000).toFixed(0)}K`;
-    }
-    return `$${value.toFixed(0)}`;
+    return `$${formatWithCommas(value)}`;
   }
 
-  // Large numbers
-  if (Math.abs(value) >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1)}M`;
-  }
-  if (Math.abs(value) >= 1_000) {
-    return `${(value / 1_000).toFixed(1)}K`;
-  }
-
-  // Default
-  return value.toFixed(value % 1 === 0 ? 0 : 1);
+  // Default - show with commas, decimals only if needed
+  return formatWithCommas(value);
 }
 
 // Format period for display

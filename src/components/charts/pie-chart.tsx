@@ -63,11 +63,14 @@ export function PieChart({
           </Pie>
           <Tooltip
             contentStyle={{
-              backgroundColor: "rgba(24, 24, 27, 0.95)",
+              backgroundColor: "rgba(9, 9, 11, 0.95)",
               border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: "8px",
-              color: "white",
+              padding: "8px 12px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
             }}
+            itemStyle={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}
+            labelStyle={{ color: "rgba(255,255,255,0.5)", fontSize: 11, marginBottom: 4 }}
             formatter={(value, name) => [formatValue(value as number, name as string), name]}
           />
           {showLegend && (

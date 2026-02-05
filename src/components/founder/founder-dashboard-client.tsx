@@ -16,6 +16,7 @@ import {
 import { DateRange } from "@/components/dashboard/date-range-selector";
 import { Download, Settings } from "lucide-react";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
+import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 
 type DashboardView = {
   id: string;
@@ -282,8 +283,7 @@ export function FounderDashboardClient({
       initialViews[0]?.id ??
       null,
   );
-  const [periodType, setPeriodType] = React.useState<PeriodType>("quarterly");
-  const [dateRange, setDateRange] = React.useState<DateRange>("1y");
+  const { periodType, setPeriodType, dateRange, setDateRange } = useDashboardPreferences();
   const [isExporting, setIsExporting] = React.useState(false);
   const [detailMetric, setDetailMetric] = React.useState<string | null>(null);
 
@@ -450,6 +450,7 @@ export function FounderDashboardClient({
                 metrics={filteredMetrics}
                 periodTypeOverride={periodType}
                 onMetricClick={setDetailMetric}
+                companyId={companyId}
               />
             </div>
           );

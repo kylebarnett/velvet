@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 const schema = z.object({
   companyId: z.string().uuid(),
@@ -11,6 +12,9 @@ const schema = z.object({
   periodEnd: z.string().min(1),
   value: z.string().min(1),
   notes: z.string().optional(),
+  source: z.enum(["manual", "ai_extracted", "override"]).optional(),
+  sourceDocumentId: z.string().uuid().optional(),
+  changeReason: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -23,8 +27,18 @@ export async function POST(req: Request) {
   const role = user.user_metadata?.role;
   if (role !== "founder") return jsonError("Forbidden.", 403);
 
-  const { companyId, metricName, periodType, periodStart, periodEnd, value, notes } =
-    parsed.data;
+  const {
+    companyId,
+    metricName,
+    periodType,
+    periodStart,
+    periodEnd,
+    value,
+    notes,
+    source,
+    sourceDocumentId,
+    changeReason,
+  } = parsed.data;
 
   // Verify the founder owns this company
   const { data: company } = await supabase
@@ -35,6 +49,20 @@ export async function POST(req: Request) {
     .single();
 
   if (!company) return jsonError("Not authorized for this company.", 403);
+
+  const admin = createSupabaseAdminClient();
+  const effectiveSource = source ?? "manual";
+
+  // Check if value already exists to create history entry
+  const { data: existing } = await admin
+    .from("company_metric_values")
+    .select("id, value, source")
+    .eq("company_id", companyId)
+    .eq("metric_name", metricName)
+    .eq("period_type", periodType)
+    .eq("period_start", periodStart)
+    .eq("period_end", periodEnd)
+    .maybeSingle();
 
   // Upsert into company_metric_values
   const { data: submission, error } = await supabase
@@ -49,6 +77,8 @@ export async function POST(req: Request) {
         value: { raw: value },
         submitted_by: user.id,
         notes: notes ?? null,
+        source: effectiveSource,
+        source_document_id: sourceDocumentId ?? null,
       },
       {
         onConflict: "company_id,metric_name,period_type,period_start,period_end",
@@ -58,6 +88,19 @@ export async function POST(req: Request) {
     .single();
 
   if (error) return jsonError(error.message, 400);
+
+  // Create history entry if this was an update
+  if (existing) {
+    await admin.from("metric_value_history").insert({
+      metric_value_id: submission.id,
+      previous_value: existing.value,
+      new_value: { raw: value },
+      previous_source: existing.source ?? "manual",
+      new_source: effectiveSource,
+      changed_by: user.id,
+      change_reason: changeReason ?? null,
+    });
+  }
 
   return NextResponse.json({ id: submission.id, ok: true });
 }

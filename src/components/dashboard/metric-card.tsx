@@ -8,6 +8,7 @@ type MetricCardProps = {
   value: number | null;
   previousValue: number | null;
   showTrend?: boolean;
+  onClick?: () => void;
 };
 
 export function MetricCard({
@@ -15,6 +16,7 @@ export function MetricCard({
   value,
   previousValue,
   showTrend = true,
+  onClick,
 }: MetricCardProps) {
   const percentChange =
     value != null && previousValue != null && previousValue !== 0
@@ -22,7 +24,13 @@ export function MetricCard({
       : null;
 
   return (
-    <div className="flex flex-col rounded-xl border border-white/10 bg-white/5 p-4">
+    <div
+      className={`flex flex-col rounded-xl border border-white/10 bg-white/5 p-4 ${onClick ? "cursor-pointer transition-colors hover:bg-white/[0.08]" : ""}`}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") onClick(); } : undefined}
+    >
       <div className="text-xs font-medium text-white/50">{title}</div>
       <div className="mt-2 flex items-end justify-between">
         <span className="text-2xl font-semibold">

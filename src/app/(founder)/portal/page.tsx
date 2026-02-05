@@ -54,6 +54,18 @@ export default async function FounderDashboardPage() {
     .select("id, name, description, target_industry, layout, is_system")
     .order("name", { ascending: true });
 
+  // Fetch document count
+  const { count: documentCount } = await supabase
+    .from("documents")
+    .select("*", { count: "exact", head: true })
+    .eq("company_id", company.id);
+
+  // Fetch tear sheet count
+  const { count: tearSheetCount } = await supabase
+    .from("tear_sheets")
+    .select("*", { count: "exact", head: true })
+    .eq("company_id", company.id);
+
   return (
     <FounderPortalTabs
       companyId={company.id}
@@ -62,6 +74,8 @@ export default async function FounderDashboardPage() {
       metrics={metricValues ?? []}
       views={views ?? []}
       templates={templates ?? []}
+      documentCount={documentCount ?? 0}
+      tearSheetCount={tearSheetCount ?? 0}
     />
   );
 }

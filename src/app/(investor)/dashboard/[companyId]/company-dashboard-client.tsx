@@ -18,6 +18,7 @@ import {
 import { DateRange } from "@/components/dashboard/date-range-selector";
 import { CompanyDocumentsTab } from "@/components/investor/company-documents-tab";
 import { CompanyTearSheetsTab } from "@/components/investor/company-tear-sheets-tab";
+import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 
 type DashboardView = {
   id: string;
@@ -243,8 +244,7 @@ function MetricsTabContent({
   const [selectedViewId, setSelectedViewId] = React.useState<string | null>(
     initialViews.find((v) => v.is_default)?.id ?? initialViews[0]?.id ?? null
   );
-  const [periodType, setPeriodType] = React.useState<PeriodType>("quarterly");
-  const [dateRange, setDateRange] = React.useState<DateRange>("1y");
+  const { periodType, setPeriodType, dateRange, setDateRange } = useDashboardPreferences();
 
   async function handleDeleteView(viewId: string) {
     try {
@@ -357,6 +357,7 @@ function MetricsTabContent({
                 widget={widget}
                 metrics={filteredMetrics}
                 periodTypeOverride={periodType}
+                companyId={companyId}
               />
             </div>
           );

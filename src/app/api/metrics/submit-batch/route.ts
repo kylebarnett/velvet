@@ -15,6 +15,9 @@ const batchSchema = z.object({
         periodEnd: z.string().min(1),
         value: z.string().min(1),
         notes: z.string().optional(),
+        source: z.enum(["manual", "ai_extracted", "override"]).optional(),
+        sourceDocumentId: z.string().uuid().optional(),
+        changeReason: z.string().optional(),
       }),
     )
     .min(1)
@@ -62,6 +65,8 @@ export async function POST(req: Request) {
           value: { raw: sub.value },
           notes: sub.notes || null,
           submitted_by: user.id,
+          source: sub.source ?? "manual",
+          source_document_id: sub.sourceDocumentId ?? null,
         },
         {
           onConflict:

@@ -3,7 +3,30 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { formatValue, formatPeriod } from "@/components/charts/types";
-import { Sparkles, PenLine, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, PenLine, RotateCcw, ChevronLeft, ChevronRight, Info, GripVertical, ArrowUpDown } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  getDefaultAggregationType,
+  calculateRollingTotal,
+  getTotalColumnLabel,
+  type AggregationType,
+} from "@/lib/metrics/temporal-aggregation";
 
 type PeriodData = {
   periodStart: string;
@@ -15,18 +38,30 @@ type PeriodData = {
   updatedAt?: string;
 };
 
+type MetricRow = {
+  metricName: string;
+  periodType: string;
+  source?: string;
+  aiConfidence?: number | null;
+  periods: PeriodData[];
+  /** Override the default aggregation type for totals */
+  aggregationType?: AggregationType;
+};
+
 type MetricsTableProps = {
-  data: Array<{
-    metricName: string;
-    periodType: string;
-    source?: string;
-    aiConfidence?: number | null;
-    periods: PeriodData[];
-  }>;
+  data: MetricRow[];
   title?: string;
   onMetricClick?: (metricName: string) => void;
   /** Number of periods to show per page (default: 4) */
   periodsPerPage?: number;
+  /** Show the Total column (default: true) */
+  showTotals?: boolean;
+  /** Callback when metrics are reordered */
+  onReorder?: (metricNames: string[]) => void;
+  /** Allow reordering (default: true) */
+  allowReorder?: boolean;
+  /** Storage key for persisting metric order (e.g., "metrics-order-{companyId}") */
+  storageKey?: string;
 };
 
 type HoveredCell = {
@@ -178,19 +213,335 @@ function CellTooltip({
   );
 }
 
-export function MetricsTable({ data, title, onMetricClick, periodsPerPage = 4 }: MetricsTableProps) {
+type SortableMetricRowProps = {
+  metric: MetricRow;
+  displayPeriods: string[];
+  showTotals: boolean;
+  isReorderMode: boolean;
+  hoveredCell: HoveredCell;
+  onCellMouseEnter: (metricName: string, periodStart: string, cellEl: HTMLTableCellElement) => void;
+  onCellMouseLeave: () => void;
+};
+
+function SortableMetricRow({
+  metric,
+  displayPeriods,
+  showTotals,
+  isReorderMode,
+  hoveredCell,
+  onCellMouseEnter,
+  onCellMouseLeave,
+}: SortableMetricRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: metric.metricName });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const isAiExtracted = metric.source === "ai_extracted";
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      className={`border-b border-white/5 ${isDragging ? "bg-white/5" : ""}`}
+    >
+      {isReorderMode && (
+        <td className="w-8 py-2">
+          <button
+            type="button"
+            className="flex h-6 w-6 cursor-grab items-center justify-center rounded text-white/40 hover:bg-white/10 hover:text-white/60 active:cursor-grabbing"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+        </td>
+      )}
+      <td className="py-2">
+        <span className="inline-flex items-center gap-1.5 text-white/80">
+          {isAiExtracted && (
+            <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+          )}
+          {metric.metricName}
+        </span>
+      </td>
+      {displayPeriods.map((period) => {
+        const periodData = metric.periods.find(
+          (p) => p.periodStart === period,
+        );
+        const hasData = periodData && periodData.value != null;
+        const isHovered =
+          hoveredCell?.metricName === metric.metricName &&
+          hoveredCell?.periodStart === period;
+
+        // Color-coded cell background based on source
+        const cellBgColor =
+          periodData?.source === "ai_extracted"
+            ? "bg-violet-500/10"
+            : periodData?.source === "override"
+              ? "bg-amber-500/10"
+              : "";
+
+        return (
+          <td
+            key={period}
+            className={`py-2 text-right font-mono ${cellBgColor} ${
+              hasData
+                ? "cursor-default rounded transition-colors hover:bg-white/10"
+                : ""
+            } ${isHovered ? "bg-white/10" : ""}`}
+            onMouseEnter={
+              hasData && !isReorderMode
+                ? (e) =>
+                    onCellMouseEnter(
+                      metric.metricName,
+                      period,
+                      e.currentTarget,
+                    )
+                : undefined
+            }
+            onMouseLeave={hasData && !isReorderMode ? onCellMouseLeave : undefined}
+          >
+            {periodData
+              ? formatValue(periodData.value, metric.metricName)
+              : "—"}
+          </td>
+        );
+      })}
+      {showTotals && (() => {
+        // Get values for visible periods in order
+        const visibleValues = displayPeriods.map((period) => {
+          const periodData = metric.periods.find((p) => p.periodStart === period);
+          return periodData?.value ?? null;
+        });
+
+        // Determine aggregation type (use override or default)
+        const aggregationType = metric.aggregationType ?? getDefaultAggregationType(metric.metricName);
+        const total = calculateRollingTotal(visibleValues, aggregationType);
+
+        return (
+          <td className="py-2 pl-3 text-right font-mono border-l border-white/10 bg-white/[0.02]">
+            {total !== null ? (
+              <span className="text-white/90">
+                {formatValue(total, metric.metricName)}
+              </span>
+            ) : (
+              "—"
+            )}
+          </td>
+        );
+      })()}
+    </tr>
+  );
+}
+
+function TotalColumnTooltip({ periodType, periodsVisible }: { periodType: string; periodsVisible: number }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const periodLabel = periodType === "quarterly" ? "quarters" : periodType === "monthly" ? "months" : "periods";
+
+  return (
+    <div className="relative inline-flex">
+      <button
+        type="button"
+        className="ml-1 text-white/40 hover:text-white/60"
+        onMouseEnter={() => setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <Info className="h-3.5 w-3.5" />
+      </button>
+      {isOpen && (
+        <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-lg border border-white/10 bg-zinc-900 p-3 text-xs shadow-xl">
+          <p className="font-medium text-white/90">Rolling Total</p>
+          <p className="mt-1 text-white/60">
+            Calculated across the {periodsVisible} visible {periodLabel}. Updates as you paginate.
+          </p>
+          <div className="mt-2 space-y-1.5 border-t border-white/10 pt-2 text-white/60">
+            <p><span className="text-white/80">Flow metrics</span> (Revenue, Expenses) are summed.</p>
+            <p><span className="text-white/80">Point-in-time metrics</span> (ARR, Burn Rate) show the most recent value.</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Helper to sort data by saved order
+function sortDataByOrder(data: MetricRow[], savedOrder: string[]): MetricRow[] {
+  if (!savedOrder.length) return data;
+
+  const orderMap = new Map(savedOrder.map((name, idx) => [name.toLowerCase(), idx]));
+
+  return [...data].sort((a, b) => {
+    const aIdx = orderMap.get(a.metricName.toLowerCase());
+    const bIdx = orderMap.get(b.metricName.toLowerCase());
+
+    // If both have saved positions, sort by those
+    if (aIdx !== undefined && bIdx !== undefined) {
+      return aIdx - bIdx;
+    }
+    // Items with saved positions come first
+    if (aIdx !== undefined) return -1;
+    if (bIdx !== undefined) return 1;
+    // Otherwise maintain original order
+    return 0;
+  });
+}
+
+// Preference key for metric order
+function getPreferenceKey(storageKey: string): string {
+  return `metric_order.${storageKey}`;
+}
+
+export function MetricsTable({
+  data,
+  title,
+  onMetricClick,
+  periodsPerPage = 4,
+  showTotals = true,
+  onReorder,
+  allowReorder = true,
+  storageKey,
+}: MetricsTableProps) {
   const [hoveredCell, setHoveredCell] = useState<HoveredCell>(null);
   const [mounted, setMounted] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isReorderMode, setIsReorderMode] = useState(false);
+  const [orderedData, setOrderedData] = useState<MetricRow[]>(data); // Initialize with data
+  const [savedOrder, setSavedOrder] = useState<string[] | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isOverTooltipRef = useRef(false);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const justDraggedRef = useRef(false); // Track if we just completed a drag
+
+  // Load saved order from API on mount
+  useEffect(() => {
+    if (!storageKey) {
+      setSavedOrder([]); // Empty array means "loaded, but no custom order"
+      return;
+    }
+
+    const prefKey = getPreferenceKey(storageKey);
+
+    fetch(`/api/user/preferences?key=${encodeURIComponent(prefKey)}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.value && Array.isArray(json.value)) {
+          setSavedOrder(json.value);
+        } else {
+          setSavedOrder([]); // Empty array means "loaded, but no custom order"
+        }
+      })
+      .catch(() => {
+        setSavedOrder([]); // Empty array means "loaded, but no custom order"
+      });
+  }, [storageKey]); // Only run on mount, not when data changes
+
+  // Apply saved order when it's loaded or when data changes
+  useEffect(() => {
+    // Wait for savedOrder to be loaded (non-null)
+    if (savedOrder === null) return;
+
+    // Skip if we just completed a drag - we already set orderedData in handleDragEnd
+    if (justDraggedRef.current) {
+      justDraggedRef.current = false;
+      return;
+    }
+
+    if (savedOrder.length > 0) {
+      setOrderedData(sortDataByOrder(data, savedOrder));
+    } else {
+      // savedOrder is empty array - use data as-is
+      setOrderedData(data);
+    }
+  }, [data, savedOrder]);
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Save order to API (debounced)
+  const saveOrderToApi = useCallback((order: string[]) => {
+    if (!storageKey) return;
+
+    // Clear any pending save
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Debounce the save
+    saveTimeoutRef.current = setTimeout(() => {
+      const prefKey = getPreferenceKey(storageKey);
+      fetch("/api/user/preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: prefKey, value: order }),
+      }).catch(() => {
+        // Silently fail - the order is still saved in local state
+      });
+    }, 500);
+  }, [storageKey]);
+
+  // Cleanup debounce timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      // Mark that we just dragged - this prevents the effect from overwriting orderedData
+      justDraggedRef.current = true;
+
+      const oldIndex = orderedData.findIndex((item) => item.metricName === active.id);
+      const newIndex = orderedData.findIndex((item) => item.metricName === over.id);
+      const newOrder = arrayMove(orderedData, oldIndex, newIndex);
+      const newOrderNames = newOrder.map((item) => item.metricName);
+
+      // Update local state
+      setOrderedData(newOrder);
+      setSavedOrder(newOrderNames);
+
+      // Save to API
+      saveOrderToApi(newOrderNames);
+
+      // Notify parent of new order
+      onReorder?.(newOrderNames);
+    }
+  }, [orderedData, onReorder, saveOrderToApi]);
+
+  // Use orderedData for rendering
+  const displayData = orderedData;
 
   // Calculate source counts for summary
   const sourceCounts = useMemo(() => {
     let ai = 0,
       manual = 0,
       override = 0;
-    data.forEach((metric) => {
+    displayData.forEach((metric) => {
       metric.periods.forEach((p) => {
         if (p.value != null) {
           if (p.source === "ai_extracted") ai++;
@@ -200,17 +551,22 @@ export function MetricsTable({ data, title, onMetricClick, periodsPerPage = 4 }:
       });
     });
     return { ai, manual, override, total: ai + manual + override };
-  }, [data]);
+  }, [displayData]);
 
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
 
-  // Reset page when data changes
+  // Reset to show most recent periods when data changes
   useEffect(() => {
-    setCurrentPage(0);
-  }, [data]);
+    const allPeriodsSet = new Set<string>();
+    displayData.forEach((metric) => {
+      metric.periods.forEach((p) => allPeriodsSet.add(p.periodStart));
+    });
+    const maxStart = Math.max(0, allPeriodsSet.size - periodsPerPage);
+    setCurrentPage(maxStart);
+  }, [displayData, periodsPerPage]);
 
   const clearHoverTimeout = useCallback(() => {
     if (hoverTimeoutRef.current) {
@@ -258,7 +614,17 @@ export function MetricsTable({ data, title, onMetricClick, periodsPerPage = 4 }:
     return () => clearHoverTimeout();
   }, [clearHoverTimeout]);
 
-  if (!data.length) {
+  // Show loading state while preferences are being fetched
+  // This prevents flash of unsorted content on page load
+  if (savedOrder === null && storageKey) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
+      </div>
+    );
+  }
+
+  if (!displayData.length) {
     return (
       <div className="flex h-full items-center justify-center text-white/40">
         No data available
@@ -268,24 +634,24 @@ export function MetricsTable({ data, title, onMetricClick, periodsPerPage = 4 }:
 
   // Get all unique periods across metrics
   const allPeriods = new Set<string>();
-  data.forEach((metric) => {
+  displayData.forEach((metric) => {
     metric.periods.forEach((p) => allPeriods.add(p.periodStart));
   });
 
   const sortedPeriods = Array.from(allPeriods).sort(
-    (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
   );
 
-  // Pagination
-  const totalPages = Math.ceil(sortedPeriods.length / periodsPerPage);
-  const startIndex = currentPage * periodsPerPage;
+  // Sliding window pagination (move 1 period at a time)
+  const maxStartIndex = Math.max(0, sortedPeriods.length - periodsPerPage);
+  const startIndex = Math.min(currentPage, maxStartIndex);
   const displayPeriods = sortedPeriods.slice(startIndex, startIndex + periodsPerPage);
-  const hasPrevPage = currentPage > 0;
-  const hasNextPage = currentPage < totalPages - 1;
+  const hasPrevPage = startIndex > 0;
+  const hasNextPage = startIndex < maxStartIndex;
 
   // Find the period data for the hovered cell
   const hoveredPeriodData = hoveredCell
-    ? data
+    ? displayData
         .find((m) => m.metricName === hoveredCell.metricName)
         ?.periods.find((p) => p.periodStart === hoveredCell.periodStart)
     : null;
@@ -355,120 +721,110 @@ export function MetricsTable({ data, title, onMetricClick, periodsPerPage = 4 }:
         </div>
       )}
 
-      {/* Pagination controls */}
-      {totalPages > 1 && (
-        <div className="mb-3 flex items-center justify-between">
+      {/* Pagination controls - always visible for consistent UI */}
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
           <div className="text-xs text-white/40">
-            Showing periods {startIndex + 1}–{Math.min(startIndex + periodsPerPage, sortedPeriods.length)} of {sortedPeriods.length}
+            {sortedPeriods.length > periodsPerPage
+              ? `Showing ${displayPeriods.length} of ${sortedPeriods.length} periods`
+              : `${sortedPeriods.length} period${sortedPeriods.length !== 1 ? "s" : ""}`}
           </div>
-          <div className="flex items-center gap-1">
+          {allowReorder && (
             <button
               type="button"
-              onClick={() => setCurrentPage((p) => p - 1)}
-              disabled={!hasPrevPage}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/20"
-              title="Previous periods"
+              onClick={() => setIsReorderMode(!isReorderMode)}
+              className={`flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs transition-colors ${
+                isReorderMode
+                  ? "border-blue-500/50 bg-blue-500/20 text-blue-300"
+                  : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
+              }`}
+              title={isReorderMode ? "Exit reorder mode" : "Reorder metrics"}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ArrowUpDown className="h-3.5 w-3.5" />
+              {isReorderMode ? "Done" : "Reorder"}
             </button>
-            <span className="px-2 text-xs text-white/50">
-              {currentPage + 1} / {totalPages}
-            </span>
-            <button
-              type="button"
-              onClick={() => setCurrentPage((p) => p + 1)}
-              disabled={!hasNextPage}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/20"
-              title="Next periods"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
+          )}
         </div>
-      )}
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-white/10">
-              <th className="pb-2 text-left font-medium text-white/60">
-                Metric
-              </th>
-              {displayPeriods.map((period) => (
-                <th
-                  key={period}
-                  className="pb-2 text-right font-medium text-white/60"
-                >
-                  {formatPeriod(period, data[0]?.periodType ?? "quarterly")}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((metric) => {
-              const isAiExtracted = metric.source === "ai_extracted";
-              return (
-                <tr
-                  key={metric.metricName}
-                  className="border-b border-white/5"
-                >
-                  <td className="py-2">
-                    <span className="inline-flex items-center gap-1.5 text-white/80">
-                      {isAiExtracted && (
-                        <Sparkles className="h-3.5 w-3.5 text-violet-400" />
-                      )}
-                      {metric.metricName}
-                    </span>
-                  </td>
-                  {displayPeriods.map((period) => {
-                    const periodData = metric.periods.find(
-                      (p) => p.periodStart === period,
-                    );
-                    const hasData = periodData && periodData.value != null;
-                    const isHovered =
-                      hoveredCell?.metricName === metric.metricName &&
-                      hoveredCell?.periodStart === period;
-
-                    // Color-coded cell background based on source
-                    const cellBgColor =
-                      periodData?.source === "ai_extracted"
-                        ? "bg-violet-500/10"
-                        : periodData?.source === "override"
-                          ? "bg-amber-500/10"
-                          : "";
-
-                    return (
-                      <td
-                        key={period}
-                        className={`py-2 text-right font-mono ${cellBgColor} ${
-                          hasData
-                            ? "cursor-default rounded transition-colors hover:bg-white/10"
-                            : ""
-                        } ${isHovered ? "bg-white/10" : ""}`}
-                        onMouseEnter={
-                          hasData
-                            ? (e) =>
-                                handleCellMouseEnter(
-                                  metric.metricName,
-                                  period,
-                                  e.currentTarget,
-                                )
-                            : undefined
-                        }
-                        onMouseLeave={hasData ? handleCellMouseLeave : undefined}
-                      >
-                        {periodData
-                          ? formatValue(periodData.value, metric.metricName)
-                          : "—"}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setCurrentPage((p) => p - 1)}
+            disabled={!hasPrevPage}
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/20"
+            title="Earlier periods"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setCurrentPage((p) => p + 1)}
+            disabled={!hasNextPage}
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/20"
+            title="Later periods"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
+
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={displayData.map((m) => m.metricName)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10">
+                  {isReorderMode && (
+                    <th className="w-8 pb-2" />
+                  )}
+                  <th className="pb-2 text-left font-medium text-white/60">
+                    Metric
+                  </th>
+                  {displayPeriods.map((period) => (
+                    <th
+                      key={period}
+                      className="pb-2 text-right font-medium text-white/60"
+                    >
+                      {formatPeriod(period, displayData[0]?.periodType ?? "quarterly")}
+                    </th>
+                  ))}
+                  {showTotals && (
+                    <th className="pb-2 pl-3 text-right font-medium text-white/60 border-l border-white/10">
+                      <span className="inline-flex items-center">
+                        {getTotalColumnLabel(displayData[0]?.periodType ?? "quarterly", displayPeriods.length)}
+                        <TotalColumnTooltip
+                          periodType={displayData[0]?.periodType ?? "quarterly"}
+                          periodsVisible={displayPeriods.length}
+                        />
+                      </span>
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {displayData.map((metric) => (
+                  <SortableMetricRow
+                    key={metric.metricName}
+                    metric={metric}
+                    displayPeriods={displayPeriods}
+                    showTotals={showTotals}
+                    isReorderMode={isReorderMode}
+                    hoveredCell={hoveredCell}
+                    onCellMouseEnter={handleCellMouseEnter}
+                    onCellMouseLeave={handleCellMouseLeave}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Render tooltip via portal */}
       {mounted && hoveredCell && hoveredPeriodData && (
