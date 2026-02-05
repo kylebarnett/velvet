@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Settings } from "lucide-react";
 import {
   DashboardWidget,
   ViewSelector,
@@ -14,6 +16,8 @@ import {
   DashboardLayout,
 } from "@/components/dashboard";
 import { DateRange } from "@/components/dashboard/date-range-selector";
+import { CompanyDocumentsTab } from "@/components/investor/company-documents-tab";
+import { CompanyTearSheetsTab } from "@/components/investor/company-tear-sheets-tab";
 
 type DashboardView = {
   id: string;
@@ -39,6 +43,8 @@ type CompanyDashboardClientProps = {
   views: DashboardView[];
   templates: DashboardTemplate[];
 };
+
+type TabValue = "metrics" | "documents" | "tear-sheets";
 
 // Reorder widgets: 3 metric cards at top, then table, then other widgets
 function reorderWidgetsWithCardsFirst(widgets: Widget[]): Widget[] {
@@ -224,7 +230,7 @@ function filterMetricsByDateRange(
   );
 }
 
-export function CompanyDashboardClient({
+function MetricsTabContent({
   companyId,
   companyName,
   companyIndustry,
@@ -313,11 +319,20 @@ export function CompanyDashboardClient({
           <PeriodSelector value={periodType} onChange={setPeriodType} />
           <DateRangeSelector value={dateRange} onChange={setDateRange} />
         </div>
-        <ExportButton
-          companyId={companyId}
-          companyName={companyName}
-          periodType={periodType}
-        />
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/dashboard/${companyId}/edit`}
+            className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2 sm:py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
+          >
+            <Settings className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Edit Dashboard</span>
+          </Link>
+          <ExportButton
+            companyId={companyId}
+            companyName={companyName}
+            periodType={periodType}
+          />
+        </div>
       </div>
 
       {/* Dashboard grid - stacked on mobile, grid on desktop */}
@@ -357,5 +372,28 @@ export function CompanyDashboardClient({
         </div>
       )}
     </div>
+  );
+}
+
+export function CompanyDashboardClient(props: CompanyDashboardClientProps) {
+  const searchParams = useSearchParams();
+  const activeTab = (searchParams.get("tab") as TabValue) || "metrics";
+
+  return (
+    <>
+      {activeTab === "metrics" && <MetricsTabContent {...props} />}
+      {activeTab === "documents" && (
+        <CompanyDocumentsTab
+          companyId={props.companyId}
+          companyName={props.companyName}
+        />
+      )}
+      {activeTab === "tear-sheets" && (
+        <CompanyTearSheetsTab
+          companyId={props.companyId}
+          companyName={props.companyName}
+        />
+      )}
+    </>
   );
 }

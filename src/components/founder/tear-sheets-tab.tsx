@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowUpDown, LayoutGrid, List } from "lucide-react";
 import { TearSheetCard } from "@/components/founder/tear-sheet-card";
+import { SlidingTabs, SlidingIconTabs, TabItem } from "@/components/ui/sliding-tabs";
 
 type TearSheet = {
   id: string;
@@ -20,8 +21,20 @@ type TearSheet = {
 type ViewMode = "grid" | "list";
 type SortField = "date" | "status";
 type SortDir = "asc" | "desc";
+type QuarterFilter = "All" | "Q1" | "Q2" | "Q3" | "Q4";
 
-const QUARTERS = ["All", "Q1", "Q2", "Q3", "Q4"] as const;
+const QUARTER_TABS: TabItem<QuarterFilter>[] = [
+  { value: "All", label: "All" },
+  { value: "Q1", label: "Q1" },
+  { value: "Q2", label: "Q2" },
+  { value: "Q3", label: "Q3" },
+  { value: "Q4", label: "Q4" },
+];
+
+const VIEW_MODE_TABS: { value: ViewMode; icon: typeof LayoutGrid; label: string }[] = [
+  { value: "grid", icon: LayoutGrid, label: "Grid view" },
+  { value: "list", icon: List, label: "List view" },
+];
 
 /** Numeric value for sorting quarters chronologically. */
 function quarterNum(q: string): number {
@@ -62,7 +75,7 @@ export function TearSheetsTab() {
   const [viewMode, setViewMode] = React.useState<ViewMode>("list");
 
   // Filters
-  const [filterQuarter, setFilterQuarter] = React.useState("All");
+  const [filterQuarter, setFilterQuarter] = React.useState<QuarterFilter>("All");
   const [filterYear, setFilterYear] = React.useState("All");
 
   // Sort
@@ -172,24 +185,15 @@ export function TearSheetsTab() {
 
       {/* Filters & sort */}
       {showFilters && (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           {/* Quarter filter */}
-          <div className="flex gap-0.5 rounded-lg border border-white/10 bg-black/20 p-0.5">
-            {QUARTERS.map((q) => (
-              <button
-                key={q}
-                type="button"
-                onClick={() => setFilterQuarter(q)}
-                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                  filterQuarter === q
-                    ? "bg-white/10 text-white"
-                    : "text-white/50 hover:text-white/70"
-                }`}
-              >
-                {q}
-              </button>
-            ))}
-          </div>
+          <SlidingTabs
+            tabs={QUARTER_TABS}
+            value={filterQuarter}
+            onChange={setFilterQuarter}
+            size="sm"
+            showIcons={false}
+          />
 
           {/* Year filter */}
           {availableYears.length > 1 && (
@@ -208,7 +212,7 @@ export function TearSheetsTab() {
           )}
 
           {/* Sort buttons + view toggle */}
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-3">
             <button
               type="button"
               onClick={() => toggleSort("date")}
@@ -238,32 +242,11 @@ export function TearSheetsTab() {
               )}
             </button>
 
-            <div className="flex gap-0.5 rounded-lg border border-white/10 bg-black/20 p-0.5">
-              <button
-                type="button"
-                onClick={() => setViewMode("grid")}
-                className={`rounded-md p-1.5 transition-colors ${
-                  viewMode === "grid"
-                    ? "bg-white/10 text-white"
-                    : "text-white/40 hover:text-white/70"
-                }`}
-                title="Grid view"
-              >
-                <LayoutGrid className="h-3.5 w-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("list")}
-                className={`rounded-md p-1.5 transition-colors ${
-                  viewMode === "list"
-                    ? "bg-white/10 text-white"
-                    : "text-white/40 hover:text-white/70"
-                }`}
-                title="List view"
-              >
-                <List className="h-3.5 w-3.5" />
-              </button>
-            </div>
+            <SlidingIconTabs
+              tabs={VIEW_MODE_TABS}
+              value={viewMode}
+              onChange={setViewMode}
+            />
           </div>
         </div>
       )}

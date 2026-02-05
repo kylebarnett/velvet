@@ -8,6 +8,7 @@ import { Plus } from "lucide-react";
 import { RequestsTabContent } from "@/components/investor/requests-tab-content";
 import { TemplatesTabContent } from "@/components/investor/templates-tab-content";
 import { SchedulesTabContent } from "@/components/investor/schedules-tab-content";
+import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 
 type Request = {
   id: string;
@@ -28,10 +29,10 @@ type Company = {
 
 type Tab = "requests" | "templates" | "schedules";
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "requests", label: "Requests" },
-  { id: "templates", label: "Templates" },
-  { id: "schedules", label: "Schedules" },
+const TABS: TabItem<Tab>[] = [
+  { value: "requests", label: "Requests" },
+  { value: "templates", label: "Templates" },
+  { value: "schedules", label: "Schedules" },
 ];
 
 export function RequestsTabs({
@@ -44,7 +45,7 @@ export function RequestsTabs({
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab") as Tab | null;
-  const activeTab: Tab = tabParam && TABS.some((t) => t.id === tabParam) ? tabParam : "requests";
+  const activeTab: Tab = tabParam && TABS.some((t) => t.value === tabParam) ? tabParam : "requests";
 
   function setTab(tab: Tab) {
     const params = new URLSearchParams(searchParams.toString());
@@ -79,25 +80,13 @@ export function RequestsTabs({
       </div>
 
       {/* Tab bar */}
-      <div className="flex border-b border-white/10">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setTab(tab.id)}
-            className={`relative px-4 py-2.5 text-sm font-medium transition-colors ${
-              activeTab === tab.id
-                ? "text-white"
-                : "text-white/50 hover:text-white/70"
-            }`}
-          >
-            {tab.label}
-            {activeTab === tab.id && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white" />
-            )}
-          </button>
-        ))}
-      </div>
+      <SlidingTabs
+        tabs={TABS}
+        value={activeTab}
+        onChange={setTab}
+        size="sm"
+        showIcons={false}
+      />
 
       {/* Tab content */}
       {activeTab === "requests" && (

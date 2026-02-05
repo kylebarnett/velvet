@@ -3,10 +3,18 @@
 import * as React from "react";
 import { NotificationList } from "@/components/founder/notification-list";
 import { BatchSubmissionTable } from "@/components/founder/batch-submission-table";
+import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+
+type TabValue = "pending" | "completed";
+
+const tabs: TabItem<TabValue>[] = [
+  { value: "pending", label: "Pending" },
+  { value: "completed", label: "Completed" },
+];
 
 export default function FounderRequestsPage() {
   const [companyId, setCompanyId] = React.useState<string | null>(null);
-  const [tab, setTab] = React.useState<"pending" | "completed">("pending");
+  const [tab, setTab] = React.useState<TabValue>("pending");
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [submitPeriod, setSubmitPeriod] = React.useState<{
     periodType: string;
@@ -26,11 +34,6 @@ export default function FounderRequestsPage() {
     setSubmitPeriod(null);
     setRefreshKey((k) => k + 1);
   }
-
-  const tabs = [
-    { value: "pending" as const, label: "Pending" },
-    { value: "completed" as const, label: "Completed" },
-  ];
 
   // When a pending group's "Submit" is clicked, show the batch table inline
   if (submitPeriod) {
@@ -62,22 +65,13 @@ export default function FounderRequestsPage() {
       </div>
 
       {/* Tab toggle */}
-      <div className="flex gap-1 rounded-lg border border-white/10 bg-black/20 p-0.5 w-fit">
-        {tabs.map((t) => (
-          <button
-            key={t.value}
-            type="button"
-            onClick={() => setTab(t.value)}
-            className={`rounded-md px-4 py-1.5 text-xs font-medium transition-colors ${
-              tab === t.value
-                ? "bg-white/10 text-white"
-                : "text-white/50 hover:text-white/70"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <SlidingTabs
+        tabs={tabs}
+        value={tab}
+        onChange={setTab}
+        size="sm"
+        showIcons={false}
+      />
 
       {tab === "pending" && (
         <NotificationList

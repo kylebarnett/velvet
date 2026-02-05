@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { ArrowLeft, Settings } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CompanySwitcher } from "@/components/investor/company-switcher";
 import { InlineTags } from "@/components/investor/inline-tag";
 import { InlineWebsite } from "@/components/investor/inline-website";
-import { TileSettingsButton } from "@/components/investor/tile-settings-button";
+import { CompanyDashboardTabs } from "@/components/investor/company-dashboard-tabs";
 import { CompanyDashboardClient } from "./company-dashboard-client";
 
 export const dynamic = "force-dynamic";
@@ -21,10 +21,10 @@ export default async function CompanyDashboardPage({
 
   const { companyId } = await params;
 
-  // Verify relationship and get tile metric preferences
+  // Verify relationship
   const { data: relationship } = await supabase
     .from("investor_company_relationships")
-    .select("id, approval_status, logo_url, tile_primary_metric, tile_secondary_metric")
+    .select("id, approval_status, logo_url")
     .eq("investor_id", user.id)
     .eq("company_id", companyId)
     .single();
@@ -58,7 +58,6 @@ export default async function CompanyDashboardPage({
 
   // Get metric values if approved
   let metricValues: any[] = [];
-  const availableMetrics: { name: string; displayName: string }[] = [];
   if (isApproved) {
     const { data } = await supabase
       .from("company_metric_values")
@@ -66,20 +65,6 @@ export default async function CompanyDashboardPage({
       .eq("company_id", companyId)
       .order("period_start", { ascending: false });
     metricValues = data ?? [];
-
-    // Build unique list of metrics for tile config
-    const metricSet = new Set<string>();
-    for (const mv of metricValues) {
-      if (mv.metric_name && !metricSet.has(mv.metric_name.toLowerCase())) {
-        metricSet.add(mv.metric_name.toLowerCase());
-        availableMetrics.push({
-          name: mv.metric_name.toLowerCase(),
-          displayName: mv.metric_name,
-        });
-      }
-    }
-    // Sort alphabetically
-    availableMetrics.sort((a, b) => a.displayName.localeCompare(b.displayName));
   }
 
   // Get dashboard views for this company
@@ -168,24 +153,11 @@ export default async function CompanyDashboardPage({
           />
           <InlineWebsite companyId={company.id} website={company.website} />
         </div>
-        <div className="flex items-center gap-2">
-          {isApproved && availableMetrics.length > 0 && (
-            <TileSettingsButton
-              companyId={companyId}
-              companyName={company.name}
-              availableMetrics={availableMetrics}
-              initialPrimary={relationship.tile_primary_metric}
-              initialSecondary={relationship.tile_secondary_metric}
-            />
-          )}
-          <Link
-            href={`/dashboard/${companyId}/edit`}
-            className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2 sm:py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
-          >
-            <Settings className="h-3.5 w-3.5" />
-            Edit Dashboard
-          </Link>
-        </div>
+        {isApproved && (
+          <div className="shrink-0">
+            <CompanyDashboardTabs companyId={companyId} />
+          </div>
+        )}
       </div>
 
       {!isApproved && (

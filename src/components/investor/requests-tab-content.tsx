@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -34,7 +35,9 @@ export function RequestsTabContent({
   requests: Request[];
   companies: Company[];
 }) {
-  const [statusFilter, setStatusFilter] = React.useState("");
+  const searchParams = useSearchParams();
+  const initialStatus = searchParams.get("status") ?? "";
+  const [statusFilter, setStatusFilter] = React.useState(initialStatus);
   const [companyFilter, setCompanyFilter] = React.useState("");
 
   const filteredRequests = requests.filter((req) => {

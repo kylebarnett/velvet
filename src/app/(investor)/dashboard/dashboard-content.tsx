@@ -5,6 +5,7 @@ import Link from "next/link";
 import { LayoutGrid, List, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { CompanyCard } from "@/components/investor/company-card";
 import { CompanySearch } from "@/components/investor/company-search";
+import { TileSettingsMenu } from "@/components/investor/tile-settings-menu";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
 
 type Company = {
@@ -16,6 +17,8 @@ type Company = {
   industry: string | null;
   approvalStatus: string;
   logoUrl: string | null;
+  tilePrimaryMetric: string | null;
+  tileSecondaryMetric: string | null;
 };
 
 type MetricSnapshot = {
@@ -233,6 +236,17 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
           <div className="text-sm text-white/50">
             {filteredCompanies.length} of {companies.length}
           </div>
+          <TileSettingsMenu
+            companies={companies
+              .filter(c => ["auto_approved", "approved"].includes(c.approvalStatus))
+              .map(c => ({
+                id: c.id,
+                name: c.name,
+                logoUrl: c.logoUrl,
+                tilePrimaryMetric: c.tilePrimaryMetric,
+                tileSecondaryMetric: c.tileSecondaryMetric,
+              }))}
+          />
           <div className="flex items-center rounded-lg border border-white/10 bg-white/5 p-1">
             <button
               type="button"

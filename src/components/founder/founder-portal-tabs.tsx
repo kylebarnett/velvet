@@ -2,10 +2,12 @@
 
 import * as React from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { BarChart3, FileText, FileSpreadsheet } from "lucide-react";
 import { FounderDashboardClient } from "@/components/founder/founder-dashboard-client";
 import { DocumentsTab } from "@/components/founder/documents-tab";
 import { TearSheetsTab } from "@/components/founder/tear-sheets-tab";
 import { MetricValue } from "@/components/dashboard";
+import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 
 type Tab = "metrics" | "documents" | "tear-sheets";
 
@@ -34,10 +36,10 @@ interface FounderPortalTabsProps {
   templates: DashboardTemplate[];
 }
 
-const tabs: { value: Tab; label: string }[] = [
-  { value: "metrics", label: "Metrics" },
-  { value: "documents", label: "Documents" },
-  { value: "tear-sheets", label: "Tear Sheets" },
+const tabs: TabItem<Tab>[] = [
+  { value: "metrics", label: "Metrics", icon: BarChart3 },
+  { value: "documents", label: "Documents", icon: FileText },
+  { value: "tear-sheets", label: "Tear Sheets", icon: FileSpreadsheet },
 ];
 
 export function FounderPortalTabs({
@@ -66,30 +68,15 @@ export function FounderPortalTabs({
   return (
     <div className="space-y-6">
       {/* Header with title and tabs */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
           <p className="text-sm text-white/60">
             Visualize your company metrics and track performance.
           </p>
         </div>
-        {/* Tab bar */}
-        <div className="flex gap-1 rounded-lg border border-white/10 bg-black/20 p-0.5 w-fit">
-          {tabs.map((t) => (
-            <button
-              key={t.value}
-              type="button"
-              onClick={() => handleTabChange(t.value)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                activeTab === t.value
-                  ? "bg-white/10 text-white"
-                  : "text-white/50 hover:text-white/70"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+
+        <SlidingTabs tabs={tabs} value={activeTab} onChange={handleTabChange} />
       </div>
 
       {/* Tab content */}

@@ -6,6 +6,14 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { TearSheetEditor } from "@/components/founder/tear-sheet-editor";
 import { TearSheetPreview } from "@/components/founder/tear-sheet-preview";
+import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+
+type MobileViewMode = "editor" | "preview";
+
+const MOBILE_VIEW_TABS: TabItem<MobileViewMode>[] = [
+  { value: "editor", label: "Edit" },
+  { value: "preview", label: "Preview" },
+];
 
 type TearSheet = {
   id: string;
@@ -36,9 +44,7 @@ export default function EditTearSheetPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [saving, setSaving] = React.useState(false);
   const [success, setSuccess] = React.useState<string | null>(null);
-  const [mobileView, setMobileView] = React.useState<"editor" | "preview">(
-    "editor",
-  );
+  const [mobileView, setMobileView] = React.useState<MobileViewMode>("editor");
   const [exportingPdf, setExportingPdf] = React.useState(false);
   const previewRef = React.useRef<HTMLDivElement>(null);
 
@@ -251,29 +257,14 @@ export default function EditTearSheetPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Mobile toggle */}
-          <div className="flex gap-1 rounded-lg border border-white/10 bg-black/20 p-0.5 md:hidden">
-            <button
-              type="button"
-              onClick={() => setMobileView("editor")}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                mobileView === "editor"
-                  ? "bg-white/10 text-white"
-                  : "text-white/50"
-              }`}
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              onClick={() => setMobileView("preview")}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                mobileView === "preview"
-                  ? "bg-white/10 text-white"
-                  : "text-white/50"
-              }`}
-            >
-              Preview
-            </button>
+          <div className="md:hidden">
+            <SlidingTabs
+              tabs={MOBILE_VIEW_TABS}
+              value={mobileView}
+              onChange={setMobileView}
+              size="sm"
+              showIcons={false}
+            />
           </div>
 
           <button
