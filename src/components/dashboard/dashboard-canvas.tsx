@@ -140,7 +140,7 @@ export function DashboardCanvas({
             <div className="drag-handle flex items-center justify-between border-b border-white/5 bg-black/20 px-2 py-1 cursor-move">
               <div className="flex items-center gap-1.5">
                 <GripVertical className="h-3.5 w-3.5 text-white/30" />
-                <span className="text-xs text-white/50 truncate max-w-[200px]">
+                <span className="text-xs text-white/60 truncate max-w-[200px]">
                   {isChartConfig(widget.config) && widget.config.title
                     ? widget.config.title
                     : isMetricCardConfig(widget.config) && widget.config.title

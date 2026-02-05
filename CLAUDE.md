@@ -1368,6 +1368,13 @@ function escapeCsvField(value: string): string {
 | IDOR (insecure direct object reference) | Always verify ownership before operations |
 | Enumeration attacks | Use consistent error messages, verify ownership before fetch |
 
+### Security Vulnerability Policy
+When a security vulnerability is discovered:
+1. **Flag it immediately** with a `// WARNING: Security vulnerability` comment in the code
+2. **Suggest a secure alternative** alongside the warning
+3. **Never implement insecure patterns**, even if requested — always use the secure alternative
+4. If asked to implement an insecure pattern, refer to this policy
+
 ### Security Checklist for New Features
 - [ ] Authentication required (`getApiUser()`)
 - [ ] Role verified (`user.user_metadata?.role`)

@@ -135,7 +135,7 @@ export function RequestsTabContent({
             </button>
           )}
 
-          <span className="text-sm text-white/50">
+          <span className="text-sm text-white/60">
             {filteredRequests.length} of {requests.length}
           </span>
         </div>
@@ -183,7 +183,7 @@ export function RequestsTabContent({
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="font-medium truncate">{def?.name ?? "Unknown"}</div>
-                      <div className="mt-0.5 text-xs text-white/50">{def?.period_type}</div>
+                      <div className="mt-0.5 text-xs text-white/60">{def?.period_type}</div>
                     </div>
                     <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${statusStyle}`}>
                       {req.status}
@@ -222,11 +222,11 @@ export function RequestsTabContent({
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-white/10 bg-white/5">
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">Metric</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">Company</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">Period</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">Due date</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">Status</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Metric</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Company</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Period</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Due date</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -247,7 +247,7 @@ export function RequestsTabContent({
                       <tr key={req.id} className="border-b border-white/5">
                         <td className="px-4 py-3">
                           <div className="font-medium">{def?.name ?? "Unknown"}</div>
-                          <div className="text-xs text-white/50">{def?.period_type}</div>
+                          <div className="text-xs text-white/60">{def?.period_type}</div>
                         </td>
                         <td className="px-4 py-3">
                           {company ? (
@@ -264,7 +264,7 @@ export function RequestsTabContent({
                         <td className="px-4 py-3 text-white/70 whitespace-nowrap">
                           {req.period_start} to {req.period_end}
                         </td>
-                        <td className="px-4 py-3 text-white/50">{req.due_date ?? "—"}</td>
+                        <td className="px-4 py-3 text-white/60">{req.due_date ?? "—"}</td>
                         <td className="px-4 py-3">
                           <span className={`rounded-full px-2 py-0.5 text-xs ${statusStyle}`}>
                             {req.status}

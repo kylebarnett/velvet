@@ -285,7 +285,7 @@ export function MetricDetailPanel({
           )}
 
           {!loading && values.length === 0 && (
-            <div className="p-6 text-center text-sm text-white/40">
+            <div className="p-6 text-center text-sm text-white/60">
               No data available for this metric.
             </div>
           )}
@@ -295,7 +295,7 @@ export function MetricDetailPanel({
               {/* Trend Chart */}
               {chartData.length > 1 && (
                 <div>
-                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/60">
                     Trend
                   </h3>
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -350,7 +350,7 @@ export function MetricDetailPanel({
               {/* Source Info */}
               {current && (
                 <div>
-                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/60">
                     Source
                   </h3>
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -359,7 +359,7 @@ export function MetricDetailPanel({
                         source={current.source}
                         confidence={current.ai_confidence}
                       />
-                      <span className="text-xs text-white/40">
+                      <span className="text-xs text-white/60">
                         {new Date(current.submitted_at).toLocaleDateString(
                           "en-US",
                           {
@@ -371,7 +371,7 @@ export function MetricDetailPanel({
                       </span>
                     </div>
                     {current.source_document_id && (
-                      <div className="mt-2 flex items-center gap-1.5 text-xs text-white/50">
+                      <div className="mt-2 flex items-center gap-1.5 text-xs text-white/60">
                         <FileText className="h-3.5 w-3.5" />
                         {documents.find(
                           (d) => d.id === current.source_document_id,
@@ -379,7 +379,7 @@ export function MetricDetailPanel({
                       </div>
                     )}
                     {current.notes && (
-                      <p className="mt-2 text-xs text-white/50 italic">
+                      <p className="mt-2 text-xs text-white/60 italic">
                         {current.notes}
                       </p>
                     )}
@@ -390,7 +390,7 @@ export function MetricDetailPanel({
               {/* AI Resolution (founder only, when source is ai_extracted) */}
               {editable && current && current.source === "ai_extracted" && (
                 <div>
-                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/60">
                     Review AI Extraction
                   </h3>
                   <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
@@ -403,7 +403,7 @@ export function MetricDetailPanel({
                         )}
                       </span>
                     </div>
-                    <p className="mt-2 text-xs text-white/50">
+                    <p className="mt-2 text-xs text-white/60">
                       Confirm this value is correct, or correct it with the right number.
                     </p>
                     <div className="mt-3 flex gap-2">
@@ -470,7 +470,7 @@ export function MetricDetailPanel({
               {/* Edit (founder only) */}
               {editable && current && (
                 <div>
-                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/60">
                     Edit Value
                   </h3>
                   {!editing ? (
@@ -487,7 +487,7 @@ export function MetricDetailPanel({
                   ) : (
                     <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-4">
                       <div>
-                        <label className="text-[10px] text-white/40 uppercase tracking-wider">
+                        <label className="text-[10px] text-white/60 uppercase tracking-wider">
                           New Value
                         </label>
                         <input
@@ -498,7 +498,7 @@ export function MetricDetailPanel({
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] text-white/40 uppercase tracking-wider">
+                        <label className="text-[10px] text-white/60 uppercase tracking-wider">
                           Reason (optional)
                         </label>
                         <input

@@ -60,7 +60,7 @@ export function WidgetConfig({
       <div className="space-y-4">
         {/* Title field (common to all) */}
         <div>
-          <label className="block text-xs text-white/50 mb-1">Title</label>
+          <label className="block text-xs text-white/60 mb-1">Title</label>
           <input
             type="text"
             value={
@@ -82,7 +82,7 @@ export function WidgetConfig({
         {isChartConfig(config) && (
           <>
             <div>
-              <label className="block text-xs text-white/50 mb-1">Chart Type</label>
+              <label className="block text-xs text-white/60 mb-1">Chart Type</label>
               <Select value={config.chartType} onValueChange={(v) => updateConfig({ chartType: v as ChartConfig["chartType"] })}>
                 <SelectTrigger size="sm">
                   <SelectValue />
@@ -97,7 +97,7 @@ export function WidgetConfig({
             </div>
 
             <div>
-              <label className="block text-xs text-white/50 mb-1">Metrics</label>
+              <label className="block text-xs text-white/60 mb-1">Metrics</label>
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {availableMetrics.length === 0 ? (
                   <p className="text-xs text-white/40">No metrics available</p>
@@ -129,7 +129,7 @@ export function WidgetConfig({
             </div>
 
             <div>
-              <label className="block text-xs text-white/50 mb-1">Period</label>
+              <label className="block text-xs text-white/60 mb-1">Period</label>
               <Select value={config.periodType} onValueChange={(v) => updateConfig({ periodType: v as ChartConfig["periodType"] })}>
                 <SelectTrigger size="sm">
                   <SelectValue />
@@ -158,7 +158,7 @@ export function WidgetConfig({
         {isMetricCardConfig(config) && (
           <>
             <div>
-              <label className="block text-xs text-white/50 mb-1">Metric</label>
+              <label className="block text-xs text-white/60 mb-1">Metric</label>
               <Select value={config.metric || "__none__"} onValueChange={(v) => updateConfig({ metric: v === "__none__" ? "" : v })}>
                 <SelectTrigger size="sm">
                   <SelectValue placeholder="Select a metric..." />
@@ -190,7 +190,7 @@ export function WidgetConfig({
         {isTableConfig(config) && (
           <>
             <div>
-              <label className="block text-xs text-white/50 mb-1">Metrics</label>
+              <label className="block text-xs text-white/60 mb-1">Metrics</label>
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {availableMetrics.length === 0 ? (
                   <p className="text-xs text-white/40">No metrics available</p>
@@ -222,7 +222,7 @@ export function WidgetConfig({
             </div>
 
             <div>
-              <label className="block text-xs text-white/50 mb-1">Period</label>
+              <label className="block text-xs text-white/60 mb-1">Period</label>
               <Select value={config.periodType} onValueChange={(v) => updateConfig({ periodType: v as TableConfig["periodType"] })}>
                 <SelectTrigger size="sm">
                   <SelectValue />

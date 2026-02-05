@@ -94,11 +94,11 @@ export default function DocumentsPage() {
       if (res.ok && json?.companies) {
         // Only include companies with approved status
         const approved = json.companies.filter(
-          (c: any) =>
+          (c: { approvalStatus: string }) =>
             c.approvalStatus === "auto_approved" || c.approvalStatus === "approved"
         );
         setCompanies(
-          approved.map((c: any) => ({
+          approved.map((c: { id: string; name: string }) => ({
             id: c.id,
             name: c.name,
           }))
@@ -402,7 +402,7 @@ export default function DocumentsPage() {
         <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
           <FileText className="mx-auto h-8 w-8 text-white/30" />
           <p className="mt-2 text-sm text-white/60">No documents found.</p>
-          <p className="mt-1 text-xs text-white/40">
+          <p className="mt-1 text-xs text-white/60">
             {search || companyFilter || typeFilter || dateFilter !== "all"
               ? "Try adjusting your filters."
               : "Documents uploaded by founders will appear here."}
@@ -422,7 +422,7 @@ export default function DocumentsPage() {
                 onChange={toggleSelectAll}
                 className="h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
               />
-              <span className="text-xs text-white/50">Select all</span>
+              <span className="text-xs text-white/60">Select all</span>
             </div>
 
             {filteredDocuments.map((doc) => (
@@ -443,7 +443,7 @@ export default function DocumentsPage() {
                       <div className="min-w-0 flex-1">
                         <p className="font-medium truncate">{doc.file_name}</p>
                         {doc.description && (
-                          <p className="text-xs text-white/50 line-clamp-2 mt-0.5">{doc.description}</p>
+                          <p className="text-xs text-white/60 line-clamp-2 mt-0.5">{doc.description}</p>
                         )}
                       </div>
                     </div>
@@ -451,9 +451,9 @@ export default function DocumentsPage() {
                       <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
                         {TYPE_LABELS[doc.document_type] ?? doc.document_type}
                       </span>
-                      <span className="text-xs text-white/50">{formatFileSize(doc.file_size)}</span>
+                      <span className="text-xs text-white/60">{formatFileSize(doc.file_size)}</span>
                     </div>
-                    <div className="mt-1 text-xs text-white/40">
+                    <div className="mt-1 text-xs text-white/60">
                       {doc.company?.name ?? "Unknown"} · {formatDate(doc.uploaded_at)}
                     </div>
                   </div>
@@ -474,7 +474,7 @@ export default function DocumentsPage() {
           {/* Desktop Table View */}
           <div className="hidden sm:block rounded-xl border border-white/10 bg-white/5">
             {/* Table header */}
-            <div className="flex items-center gap-4 border-b border-white/10 px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">
+            <div className="flex items-center gap-4 border-b border-white/10 px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">
               <div className="w-6">
                 <input
                   type="checkbox"
@@ -509,7 +509,7 @@ export default function DocumentsPage() {
                   <div className="flex-1 min-w-0">
                     <p className="truncate text-sm font-medium">{doc.file_name}</p>
                     {doc.description && (
-                      <p className="truncate text-xs text-white/50">{doc.description}</p>
+                      <p className="truncate text-xs text-white/60">{doc.description}</p>
                     )}
                   </div>
                   <div className="w-32 truncate text-sm text-white/70">
@@ -520,10 +520,10 @@ export default function DocumentsPage() {
                       {TYPE_LABELS[doc.document_type] ?? doc.document_type}
                     </span>
                   </div>
-                  <div className="w-20 text-sm text-white/50">
+                  <div className="w-20 text-sm text-white/60">
                     {formatFileSize(doc.file_size)}
                   </div>
-                  <div className="w-24 text-sm text-white/50">
+                  <div className="w-24 text-sm text-white/60">
                     {formatDate(doc.uploaded_at)}
                   </div>
                   <div className="w-10">

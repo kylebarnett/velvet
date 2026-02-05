@@ -255,7 +255,7 @@ export function NotificationList({
                   {group.metrics.map((m) => (
                     <span
                       key={m.metricName}
-                      className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/50"
+                      className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/60"
                     >
                       {m.metricName}
                     </span>
@@ -314,7 +314,7 @@ export function NotificationList({
                     </span>
                   ))}
                 </div>
-                <div className="mt-2 text-xs text-white/50">
+                <div className="mt-2 text-xs text-white/60">
                   {group.metrics.length} metric
                   {group.metrics.length !== 1 ? "s" : ""} &middot;{" "}
                   Requested by{" "}

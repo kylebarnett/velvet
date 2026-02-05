@@ -18,9 +18,38 @@ export async function POST(req: Request) {
   const file = form.get("file");
   if (!(file instanceof File)) return jsonError("Missing file.", 400);
 
+  // Validate file type - only allow safe document and image formats
+  const allowedMimeTypes = new Set([
+    "application/pdf",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "text/csv",
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+  ]);
+  if (!allowedMimeTypes.has(file.type)) {
+    return jsonError(
+      "Unsupported file type. Allowed: PDF, Excel, CSV, PNG, JPG, WebP.",
+      400,
+    );
+  }
+
+  // Validate file size (max 50MB)
+  const maxSize = 50 * 1024 * 1024;
+  if (file.size > maxSize) {
+    return jsonError("File too large. Maximum size is 50MB.", 400);
+  }
+
   const companyId = form.get("companyId");
   if (typeof companyId !== "string" || !companyId) {
     return jsonError("Missing companyId.", 400);
+  }
+
+  // Validate UUID format to reject malformed IDs early
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(companyId)) {
+    return jsonError("Invalid companyId format.", 400);
   }
 
   // Get document type (required)

@@ -96,7 +96,7 @@ export function TearSheetCard({
               >
                 {tearSheet.status === "published" ? "Published" : "Draft"}
               </span>
-              <span className="text-xs text-white/50">
+              <span className="text-xs text-white/60">
                 {tearSheet.quarter} {tearSheet.year}
               </span>
               {tearSheet.share_enabled && (

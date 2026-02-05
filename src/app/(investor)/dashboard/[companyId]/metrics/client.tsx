@@ -78,7 +78,7 @@ export function CompanyMetricsClient({
                       className="text-left hover:underline underline-offset-2"
                     >
                       <div className="font-medium">{mv.metric_name}</div>
-                      <div className="text-xs text-white/50">{mv.period_type}</div>
+                      <div className="text-xs text-white/60">{mv.period_type}</div>
                     </button>
                   </td>
                   <td className="px-4 py-3 text-white/70">
@@ -93,10 +93,10 @@ export function CompanyMetricsClient({
                       confidence={mv.ai_confidence}
                     />
                   </td>
-                  <td className="px-4 py-3 text-white/50">
+                  <td className="px-4 py-3 text-white/60">
                     {mv.notes ?? "\u2014"}
                   </td>
-                  <td className="px-4 py-3 text-white/50">
+                  <td className="px-4 py-3 text-white/60">
                     {new Date(mv.submitted_at).toLocaleDateString()}
                   </td>
                 </tr>

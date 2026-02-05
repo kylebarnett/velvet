@@ -262,7 +262,7 @@ export default function TearSheetsPage() {
 
       {!loading && displayed.length === 0 && tearSheets.length > 0 && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-white/60">
             No tear sheets match the selected filters.
           </p>
         </div>
@@ -284,7 +284,7 @@ export default function TearSheetsPage() {
         <div className="overflow-hidden rounded-xl border border-white/10">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-white/[0.03] text-left text-xs font-medium text-white/50">
+              <tr className="border-b border-white/10 bg-white/[0.03] text-left text-xs font-medium text-white/60">
                 <th className="px-4 py-2.5">Title</th>
                 <th className="px-4 py-2.5">Period</th>
                 <th className="px-4 py-2.5">Status</th>

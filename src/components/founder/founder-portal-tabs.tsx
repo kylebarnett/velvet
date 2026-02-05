@@ -85,7 +85,7 @@ export function FounderPortalTabs({
         {/* Title row */}
         <div className="space-y-1">
           <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-white/60">
             Visualize your company metrics and track performance.
           </p>
         </div>

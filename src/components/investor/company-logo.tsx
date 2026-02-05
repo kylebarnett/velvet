@@ -187,7 +187,7 @@ export function CompanyLogo({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+          accept="image/png,image/jpeg,image/webp"
           onChange={handleFileChange}
           className="hidden"
         />

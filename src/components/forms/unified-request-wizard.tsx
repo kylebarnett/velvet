@@ -84,7 +84,7 @@ function MetricChip({ name }: { name: string }) {
           <p className="mt-1 text-xs text-white/60">{metricInfo.description}</p>
           {metricInfo.formula && (
             <div className="mt-2 rounded bg-white/5 px-2 py-1.5">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-white/40">Formula</p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-white/60">Formula</p>
               <p className="mt-0.5 text-xs text-emerald-400">{metricInfo.formula}</p>
             </div>
           )}
@@ -351,7 +351,7 @@ export function UnifiedRequestWizard() {
               <span className="text-sm font-medium">{tmpl.name}</span>
             </div>
             {tmpl.description && (
-              <p className="mt-1 text-xs text-white/50">{tmpl.description}</p>
+              <p className="mt-1 text-xs text-white/60">{tmpl.description}</p>
             )}
             <div className="mt-2 flex flex-wrap gap-1.5">
               {displayedMetrics.map((item) => (
@@ -492,15 +492,15 @@ export function UnifiedRequestWizard() {
     <div className="space-y-4 sm:space-y-6">
       {/* Progress indicator */}
       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
-        <span className={step === 1 ? "text-white" : "text-white/40"}>
+        <span className={step === 1 ? "text-white" : "text-white/60"}>
           1. Template
         </span>
         <span className="text-white/20">/</span>
-        <span className={step === 2 ? "text-white" : "text-white/40"}>
+        <span className={step === 2 ? "text-white" : "text-white/60"}>
           2. Companies
         </span>
         <span className="text-white/20">/</span>
-        <span className={step === 3 ? "text-white" : "text-white/40"}>
+        <span className={step === 3 ? "text-white" : "text-white/60"}>
           3. Frequency
         </span>
       </div>
@@ -540,7 +540,7 @@ export function UnifiedRequestWizard() {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium">Custom metric</span>
-                <p className="mt-0.5 text-xs text-white/50">
+                <p className="mt-0.5 text-xs text-white/60">
                   Request a single metric without using a template
                 </p>
               </div>
@@ -677,12 +677,12 @@ export function UnifiedRequestWizard() {
                       <span className="font-medium">{c.name}</span>
                       <div className="mt-1 flex flex-wrap gap-1.5">
                         {c.stage && (
-                          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
+                          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">
                             {c.stage.replace(/_/g, " ")}
                           </span>
                         )}
                         {c.industry && (
-                          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
+                          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">
                             {INDUSTRY_LABELS[c.industry] ?? c.industry}
                           </span>
                         )}
@@ -748,7 +748,7 @@ export function UnifiedRequestWizard() {
                   <Send className="h-5 w-5 text-blue-300" />
                 </div>
                 <h3 className="mt-3 font-medium">One-time request</h3>
-                <p className="mt-1 text-sm text-white/50">
+                <p className="mt-1 text-sm text-white/60">
                   Request metrics for a specific period. Good for ad-hoc data collection.
                 </p>
               </button>
@@ -763,7 +763,7 @@ export function UnifiedRequestWizard() {
                     <CalendarClock className="h-5 w-5 text-violet-300" />
                   </div>
                   <h3 className="mt-3 font-medium">Recurring schedule</h3>
-                  <p className="mt-1 text-sm text-white/50">
+                  <p className="mt-1 text-sm text-white/60">
                     Automatically request metrics on a regular cadence with email reminders.
                   </p>
                 </button>
@@ -865,15 +865,15 @@ export function UnifiedRequestWizard() {
                   <h3 className="text-sm font-medium text-white/80">Summary</h3>
                   <div className="mt-2 space-y-1 text-sm text-white/60">
                     <p>
-                      <span className="text-white/40">Template:</span>{" "}
+                      <span className="text-white/60">Template:</span>{" "}
                       {useCustomMetric ? `Custom: ${customMetricName}` : selectedTemplate?.name}
                     </p>
                     <p>
-                      <span className="text-white/40">Companies:</span>{" "}
+                      <span className="text-white/60">Companies:</span>{" "}
                       {selectedCompanyIds.size} selected
                     </p>
                     <p>
-                      <span className="text-white/40">Period:</span>{" "}
+                      <span className="text-white/60">Period:</span>{" "}
                       {getPeriodLabel(
                         periodType === "quarterly"
                           ? { type: "quarterly", year: selectedYear, quarter: selectedQuarter }
@@ -882,12 +882,12 @@ export function UnifiedRequestWizard() {
                     </p>
                     {!useCustomMetric && selectedTemplate && (
                       <p>
-                        <span className="text-white/40">Metrics:</span>{" "}
+                        <span className="text-white/60">Metrics:</span>{" "}
                         {selectedTemplate.metric_template_items.length} per company
                       </p>
                     )}
                     <p>
-                      <span className="text-white/40">Total requests:</span>{" "}
+                      <span className="text-white/60">Total requests:</span>{" "}
                       {useCustomMetric
                         ? selectedCompanyIds.size
                         : selectedCompanyIds.size * (selectedTemplate?.metric_template_items.length ?? 0)}
@@ -932,7 +932,7 @@ export function UnifiedRequestWizard() {
                     placeholder={`${selectedTemplate?.name ?? "Metrics"} - ${cadence}`}
                     className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
                   />
-                  <p className="mt-1 text-xs text-white/40">
+                  <p className="mt-1 text-xs text-white/60">
                     A descriptive name to identify this schedule
                   </p>
                 </div>
@@ -953,7 +953,7 @@ export function UnifiedRequestWizard() {
                     >
                       Include all portfolio companies
                     </label>
-                    <p className="mt-0.5 text-xs text-white/50">
+                    <p className="mt-0.5 text-xs text-white/60">
                       Override company selection and include all companies (current: {selectedCompanyIds.size} selected)
                     </p>
                   </div>
@@ -975,7 +975,7 @@ export function UnifiedRequestWizard() {
                       >
                         Include future companies
                       </label>
-                      <p className="mt-0.5 text-xs text-white/50">
+                      <p className="mt-0.5 text-xs text-white/60">
                         Companies added to your portfolio later will automatically be included
                       </p>
                     </div>
@@ -995,7 +995,7 @@ export function UnifiedRequestWizard() {
                   <label className="text-sm font-medium text-white/70">
                     Days until due date
                   </label>
-                  <p className="mt-1 text-xs text-white/50">
+                  <p className="mt-1 text-xs text-white/60">
                     How many days founders have to submit after the request is created
                   </p>
                   <Select value={String(dueDaysOffset)} onValueChange={(v) => setDueDaysOffset(Number(v))}>
@@ -1029,7 +1029,7 @@ export function UnifiedRequestWizard() {
                     >
                       Send reminder emails
                     </label>
-                    <p className="mt-0.5 text-xs text-white/50">
+                    <p className="mt-0.5 text-xs text-white/60">
                       Automatically remind founders before the due date
                     </p>
                   </div>
@@ -1062,7 +1062,7 @@ export function UnifiedRequestWizard() {
                         </button>
                       ))}
                     </div>
-                    <p className="mt-2 text-xs text-white/40">
+                    <p className="mt-2 text-xs text-white/60">
                       Reminders are automatically cancelled when metrics are submitted
                     </p>
                   </div>
@@ -1073,11 +1073,11 @@ export function UnifiedRequestWizard() {
                   <h3 className="text-sm font-medium text-white/70">Summary</h3>
                   <div className="mt-3 space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-white/50">Template</span>
+                      <span className="text-white/60">Template</span>
                       <span className="text-white">{selectedTemplate?.name}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-white/50">Companies</span>
+                      <span className="text-white/60">Companies</span>
                       <span className="text-white">
                         {allCompanies
                           ? `All (${companies.length})`
@@ -1085,17 +1085,17 @@ export function UnifiedRequestWizard() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-white/50">Frequency</span>
+                      <span className="text-white/60">Frequency</span>
                       <span className="text-white capitalize">
                         {cadence} on day {dayOfMonth}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-white/50">Due in</span>
+                      <span className="text-white/60">Due in</span>
                       <span className="text-white">{dueDaysOffset} days</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-white/50">Reminders</span>
+                      <span className="text-white/60">Reminders</span>
                       <span className="text-white">
                         {reminderEnabled
                           ? reminderDays.map((d) => `${d}d`).join(", ")

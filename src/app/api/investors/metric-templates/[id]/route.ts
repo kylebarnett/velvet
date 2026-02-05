@@ -51,7 +51,7 @@ export async function GET(
     created_at: data.created_at,
     updated_at: data.updated_at,
     metric_template_items: (data.metric_template_items ?? []).sort(
-      (a: any, b: any) => a.sort_order - b.sort_order,
+      (a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order,
     ),
   };
 

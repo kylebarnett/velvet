@@ -108,17 +108,8 @@ export async function POST(
         oldValue.period_start !== finalPeriodStart ||
         oldValue.period_end !== finalPeriodEnd;
 
-      console.log("[extraction-review] Update check:", {
-        oldPeriodStart: oldValue.period_start,
-        oldPeriodEnd: oldValue.period_end,
-        newPeriodStart: finalPeriodStart,
-        newPeriodEnd: finalPeriodEnd,
-        periodChanged,
-      });
-
       if (periodChanged) {
         // Delete the old value since we're moving to a new period
-        console.log("[extraction-review] Deleting old value:", mapping.metric_value_id);
         await admin
           .from("company_metric_values")
           .delete()
@@ -191,14 +182,6 @@ export async function POST(
     metricValueId = inserted.id;
   }
 
-  console.log("[extraction-review] Metric value saved:", {
-    metricValueId,
-    metricName: finalMetricName,
-    periodStart: finalPeriodStart,
-    periodEnd: finalPeriodEnd,
-    action,
-  });
-
   // Update the mapping with the linked metric value and corrected period
   const mappingUpdate = {
     status: "accepted",
@@ -208,8 +191,6 @@ export async function POST(
     ...(periodEnd && { extracted_period_end: finalPeriodEnd }),
     ...(metricName && { extracted_metric_name: finalMetricName }),
   };
-
-  console.log("[extraction-review] Updating mapping:", mappingUpdate);
 
   await admin
     .from("document_metric_mappings")

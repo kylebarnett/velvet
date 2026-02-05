@@ -82,8 +82,8 @@ export function MetricRequestForm() {
       }
       setSuccess("Request created.");
       form.reset();
-    } catch (e: any) {
-      setError(e?.message ?? "Something went wrong.");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     }
   }
 

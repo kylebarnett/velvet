@@ -102,7 +102,7 @@ export function ScheduleCard({
           >
             {schedule.name}
           </Link>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-white/50">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-white/60">
             <span className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               {getCadenceDescription(schedule.cadence)}
@@ -243,7 +243,7 @@ export function ScheduleCard({
       )}
 
       {/* Next run / Last run */}
-      <div className="mt-3 flex flex-wrap gap-4 text-xs text-white/50">
+      <div className="mt-3 flex flex-wrap gap-4 text-xs text-white/60">
         {schedule.nextRunAt && schedule.isActive && (
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />

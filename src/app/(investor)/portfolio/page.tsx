@@ -43,9 +43,11 @@ export default async function PortfolioPage() {
     .eq("investor_id", user.id);
 
   // Sort A-Z by company name, then last name
-  const sorted = (allContacts ?? []).sort((a: any, b: any) => {
-    const companyA = (Array.isArray(a.companies) ? a.companies[0]?.name : a.companies?.name) ?? "";
-    const companyB = (Array.isArray(b.companies) ? b.companies[0]?.name : b.companies?.name) ?? "";
+  const sorted = (allContacts ?? []).sort((a, b) => {
+    const aCompanies = a.companies as { name: string } | { name: string }[] | null;
+    const bCompanies = b.companies as { name: string } | { name: string }[] | null;
+    const companyA = (Array.isArray(aCompanies) ? aCompanies[0]?.name : aCompanies?.name) ?? "";
+    const companyB = (Array.isArray(bCompanies) ? bCompanies[0]?.name : bCompanies?.name) ?? "";
     const cmp = companyA.localeCompare(companyB, undefined, { sensitivity: "base" });
     if (cmp !== 0) return cmp;
     return (a.last_name ?? "").localeCompare(b.last_name ?? "", undefined, { sensitivity: "base" });

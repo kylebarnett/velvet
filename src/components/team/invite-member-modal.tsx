@@ -104,7 +104,7 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
                 Invitation created for {email}
               </div>
               <div>
-                <label className="text-xs text-white/40">
+                <label className="text-xs text-white/60">
                   Invite Link (Dev Mode)
                 </label>
                 <div className="mt-1 flex gap-2">
@@ -139,7 +139,7 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-white/40">Email</label>
+                <label className="text-xs text-white/60">Email</label>
                 <input
                   type="email"
                   value={email}
@@ -149,7 +149,7 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
                 />
               </div>
               <div>
-                <label className="text-xs text-white/40">Role</label>
+                <label className="text-xs text-white/60">Role</label>
                 <div className="mt-1">
                   <MemberRoleSelector value={role} onChange={setRole} />
                 </div>

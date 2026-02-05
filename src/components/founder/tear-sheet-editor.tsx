@@ -169,7 +169,7 @@ export function TearSheetEditor({
       {/* Key Metrics */}
       <section className="rounded-xl border border-white/10 bg-white/5 p-5">
         <h2 className="text-sm font-medium">Key Metrics</h2>
-        <p className="mt-1 text-xs text-white/50">
+        <p className="mt-1 text-xs text-white/60">
           Auto-populated from your {tearSheet.quarter} {tearSheet.year}{" "}
           submissions. Toggle which metrics to include.
         </p>
@@ -219,7 +219,7 @@ export function TearSheetEditor({
         <label className="text-sm font-medium">
           Highlights
         </label>
-        <p className="mt-1 text-xs text-white/50">
+        <p className="mt-1 text-xs text-white/60">
           Key wins and accomplishments this quarter.
         </p>
         <div className="mt-3">
@@ -236,7 +236,7 @@ export function TearSheetEditor({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-medium">Milestones</h2>
-            <p className="mt-1 text-xs text-white/50">
+            <p className="mt-1 text-xs text-white/60">
               Notable achievements and progress markers.
             </p>
           </div>
@@ -295,7 +295,7 @@ export function TearSheetEditor({
         <label className="text-sm font-medium">
           Challenges
         </label>
-        <p className="mt-1 text-xs text-white/50">
+        <p className="mt-1 text-xs text-white/60">
           Issues faced and how you&apos;re addressing them.
         </p>
         <div className="mt-3">
@@ -312,7 +312,7 @@ export function TearSheetEditor({
         <label className="text-sm font-medium">
           Team Updates
         </label>
-        <p className="mt-1 text-xs text-white/50">
+        <p className="mt-1 text-xs text-white/60">
           Hires, departures, and organizational changes.
         </p>
         <div className="mt-3">
@@ -329,7 +329,7 @@ export function TearSheetEditor({
         <label className="text-sm font-medium">
           Outlook
         </label>
-        <p className="mt-1 text-xs text-white/50">
+        <p className="mt-1 text-xs text-white/60">
           Goals and expectations for next quarter.
         </p>
         <div className="mt-3">
@@ -346,7 +346,7 @@ export function TearSheetEditor({
         <label className="text-sm font-medium">
           Ask of Investors
         </label>
-        <p className="mt-1 text-xs text-white/50">
+        <p className="mt-1 text-xs text-white/60">
           How can your investors help right now?
         </p>
         <div className="mt-3">

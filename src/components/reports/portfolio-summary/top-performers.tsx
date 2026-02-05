@@ -68,7 +68,7 @@ export function TopPerformers({ companies }: TopPerformersProps) {
               <p className="text-xs text-white/40">by growth rate</p>
             </div>
           </div>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-white/60">
             Not enough data to rank performers yet.
           </p>
           <p className="mt-1 text-xs text-white/30">
@@ -110,7 +110,7 @@ export function TopPerformers({ companies }: TopPerformersProps) {
                 className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
                   index < 3
                     ? MEDAL_STYLES[index]
-                    : "bg-white/[0.05] text-white/50 ring-1 ring-white/[0.08]"
+                    : "bg-white/[0.05] text-white/60 ring-1 ring-white/[0.08]"
                 }`}
               >
                 {index + 1}

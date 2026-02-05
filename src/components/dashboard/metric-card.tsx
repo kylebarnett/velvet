@@ -31,7 +31,7 @@ export function MetricCard({
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") onClick(); } : undefined}
     >
-      <div className="text-xs font-medium text-white/50">{title}</div>
+      <div className="text-xs font-medium text-white/60">{title}</div>
       <div className="mt-2 flex items-end justify-between">
         <span className="text-2xl font-semibold">
           {formatValue(value, title)}

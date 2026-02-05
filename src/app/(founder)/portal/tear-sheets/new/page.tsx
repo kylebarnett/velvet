@@ -116,7 +116,7 @@ export default function NewTearSheetPage() {
           <div className="grid gap-2">
             <label className="text-sm font-medium" htmlFor="ts-title">
               Title{" "}
-              <span className="font-normal text-white/50">(optional)</span>
+              <span className="font-normal text-white/60">(optional)</span>
             </label>
             <input
               id="ts-title"

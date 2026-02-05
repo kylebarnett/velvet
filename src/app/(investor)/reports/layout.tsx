@@ -16,7 +16,7 @@ export default function ReportsLayout({
         </div>
         <div>
           <h1 className="text-xl font-semibold tracking-tight text-white">Portfolio Summary</h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-white/60">
             Aggregated metrics across your portfolio
           </p>
         </div>

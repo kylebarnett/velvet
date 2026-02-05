@@ -71,15 +71,38 @@ export function SlidingTabs<T extends string = string>({
     md: "h-4 w-4",
   };
 
+  function handleKeyDown(e: React.KeyboardEvent, currentIndex: number) {
+    let nextIndex: number | null = null;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      nextIndex = (currentIndex + 1) % tabs.length;
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      nextIndex = 0;
+    } else if (e.key === "End") {
+      e.preventDefault();
+      nextIndex = tabs.length - 1;
+    }
+    if (nextIndex !== null) {
+      const nextTab = tabs[nextIndex];
+      onChange(nextTab.value);
+      tabRefs.current.get(nextTab.value)?.focus();
+    }
+  }
+
   if (variant === "underline") {
     return (
       <div className={`relative ${className}`}>
         {/* Container with subtle border bottom */}
         <div
           ref={containerRef}
+          role="tablist"
           className="relative flex items-center border-b border-white/[0.06]"
         >
-          {tabs.map((tab) => {
+          {tabs.map((tab, index) => {
             const Icon = tab.icon;
             const isActive = value === tab.value;
             const isHovered = hoveredTab === tab.value;
@@ -90,12 +113,17 @@ export function SlidingTabs<T extends string = string>({
                   if (el) tabRefs.current.set(tab.value, el);
                 }}
                 type="button"
+                role="tab"
+                aria-selected={isActive}
+                tabIndex={isActive ? 0 : -1}
                 onClick={() => onChange(tab.value)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
                 onMouseEnter={() => setHoveredTab(tab.value)}
                 onMouseLeave={() => setHoveredTab(null)}
                 className={`
                   group relative z-10 flex items-center font-medium
                   transition-all duration-300 ease-out
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950 rounded-sm
                   ${sizeClasses[size]}
                   ${isActive
                     ? "text-white"
@@ -180,8 +208,8 @@ export function SlidingTabs<T extends string = string>({
   // Original pill variant
   return (
     <div className={`relative ${className}`}>
-      <div ref={containerRef} className="relative flex items-center gap-1">
-        {tabs.map((tab) => {
+      <div ref={containerRef} role="tablist" className="relative flex items-center gap-1">
+        {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = value === tab.value;
           return (
@@ -191,10 +219,15 @@ export function SlidingTabs<T extends string = string>({
                 if (el) tabRefs.current.set(tab.value, el);
               }}
               type="button"
+              role="tab"
+              aria-selected={isActive}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => onChange(tab.value)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
               className={`
                 relative z-10 flex items-center rounded-lg font-medium
                 transition-colors duration-200
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40
                 ${sizeClasses[size]}
                 ${isActive ? "text-white" : "text-white/50 hover:text-white/80"}
               `}
@@ -277,10 +310,26 @@ export function SlidingIconTabs<T extends string = string>({
     return () => window.removeEventListener("resize", updateIndicator);
   }, [value]);
 
+  function handleIconKeyDown(e: React.KeyboardEvent, currentIndex: number) {
+    let nextIndex: number | null = null;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      nextIndex = (currentIndex + 1) % tabs.length;
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+    }
+    if (nextIndex !== null) {
+      const nextTab = tabs[nextIndex];
+      onChange(nextTab.value);
+      tabRefs.current.get(nextTab.value)?.focus();
+    }
+  }
+
   return (
     <div className={`relative ${className}`}>
-      <div ref={containerRef} className="relative flex items-center gap-0.5">
-        {tabs.map((tab) => {
+      <div ref={containerRef} role="tablist" className="relative flex items-center gap-0.5">
+        {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = value === tab.value;
           return (
@@ -290,11 +339,17 @@ export function SlidingIconTabs<T extends string = string>({
                 if (el) tabRefs.current.set(tab.value, el);
               }}
               type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-label={tab.label}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => onChange(tab.value)}
+              onKeyDown={(e) => handleIconKeyDown(e, index)}
               title={tab.label}
               className={`
                 relative z-10 rounded-md p-1.5
                 transition-colors duration-200
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40
                 ${isActive ? "text-white" : "text-white/40 hover:text-white/70"}
               `}
             >

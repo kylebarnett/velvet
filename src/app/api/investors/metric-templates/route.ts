@@ -52,7 +52,7 @@ export async function GET(req: Request) {
     created_at: t.created_at,
     updated_at: t.updated_at,
     metric_template_items: (t.metric_template_items ?? []).sort(
-      (a: any, b: any) => a.sort_order - b.sort_order,
+      (a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order,
     ),
   }));
 

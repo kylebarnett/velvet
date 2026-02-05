@@ -64,14 +64,14 @@ export function MetricHistoryTimeline({ history }: Props) {
               {entry.changed_by_name && (
                 <>
                   <span className="text-white/20">|</span>
-                  <span className="text-white/50">{entry.changed_by_name}</span>
+                  <span className="text-white/60">{entry.changed_by_name}</span>
                 </>
               )}
             </div>
 
             <div className="mt-2 flex items-center gap-2">
               {prevVal && (
-                <span className="rounded-md bg-white/5 px-2 py-0.5 font-mono text-sm text-white/50">
+                <span className="rounded-md bg-white/5 px-2 py-0.5 font-mono text-sm text-white/60">
                   {prevVal}
                 </span>
               )}
@@ -94,7 +94,7 @@ export function MetricHistoryTimeline({ history }: Props) {
             )}
 
             {entry.change_reason && (
-              <p className="mt-2 text-xs text-white/50 italic">
+              <p className="mt-2 text-xs text-white/60 italic">
                 {entry.change_reason}
               </p>
             )}

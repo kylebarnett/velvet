@@ -79,7 +79,7 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
             )}
           </div>
           {investorUser?.email && investorUser.full_name && (
-            <div className="mt-0.5 text-xs text-white/50">{investorUser.email}</div>
+            <div className="mt-0.5 text-xs text-white/60">{investorUser.email}</div>
           )}
           <div className="mt-0.5 text-xs text-white/40">
             Connected {formatConnectionDate(investor.created_at)}

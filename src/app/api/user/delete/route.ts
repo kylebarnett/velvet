@@ -25,6 +25,10 @@ export async function POST(req: Request) {
   const userId = user.id;
   const role = user.user_metadata?.role;
 
+  if (role !== "investor" && role !== "founder") {
+    return jsonError("Unknown account role. Please contact support.", 400);
+  }
+
   // Cascade delete user-owned data before removing auth user
   if (role === "investor") {
     // Delete in dependency order (children first)

@@ -112,7 +112,7 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
         {isOpen && (
           <div className="absolute left-0 top-full z-50 mt-1 w-64 max-w-[calc(100vw-2rem)] rounded-lg border border-white/10 bg-zinc-900 py-1 shadow-xl">
             <div className="px-3 py-2 border-b border-white/10">
-              <p className="text-xs text-white/50">
+              <p className="text-xs text-white/60">
                 Configure which metrics appear on company tiles
               </p>
             </div>

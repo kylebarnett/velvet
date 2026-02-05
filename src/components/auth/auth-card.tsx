@@ -83,7 +83,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
 
   const watchedRole = form.watch("role");
 
-  async function onSubmit(values: any) {
+  async function onSubmit(values: Record<string, string | undefined>) {
     setError(null);
     setIsSubmitting(true);
     try {
@@ -119,8 +119,8 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Signup failed.");
       window.location.href = "/app";
-    } catch (e: any) {
-      setError(e?.message ?? "Something went wrong.");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setIsSubmitting(false);
     }
@@ -180,7 +180,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
             {...form.register("email")}
           />
           {inviteEmail && (
-            <p className="text-xs text-white/50">
+            <p className="text-xs text-white/60">
               Email is pre-filled from your invitation link.
             </p>
           )}

@@ -65,9 +65,10 @@ export async function POST(request: NextRequest) {
   }
 
   // Wait for the trigger to create the public.users row
+  // Uses exponential backoff: 50, 100, 200, 400, 800, 1600ms (total ~3.15s max)
   if (data.user) {
-    let attempts = 0;
-    while (attempts < 10) {
+    let delay = 50;
+    for (let attempt = 0; attempt < 6; attempt++) {
       const { data: userRow } = await adminClient
         .from("users")
         .select("id")
@@ -76,9 +77,8 @@ export async function POST(request: NextRequest) {
 
       if (userRow) break;
 
-      // Wait 100ms before retrying
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      attempts++;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      delay *= 2;
     }
   }
 
@@ -99,6 +99,7 @@ export async function POST(request: NextRequest) {
 
     if (companyUpdateError) {
       console.error("Failed to link founder to company:", companyUpdateError);
+      return jsonError("Account created but failed to link company. Please contact support.", 500);
     }
 
     // Update invitation status
@@ -136,6 +137,7 @@ export async function POST(request: NextRequest) {
     });
     if (companyError) {
       console.error("Failed to create company record:", companyError);
+      return jsonError("Account created but failed to create company. Please contact support.", 500);
     }
   }
 

@@ -616,7 +616,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                           </div>
                           {statusBadge(contact.status)}
                         </div>
-                        <div className="mt-2 text-sm text-white/50 truncate">
+                        <div className="mt-2 text-sm text-white/60 truncate">
                           {getCompanyName(contact)}
                         </div>
                       </div>

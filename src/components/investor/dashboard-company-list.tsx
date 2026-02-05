@@ -50,7 +50,7 @@ export function DashboardCompanyList({ companies }: { companies: Company[] }) {
             <div className="flex items-center">
               <span className="text-sm font-medium">{company.name}</span>
               {company.stage && (
-                <span className="ml-2 rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
+                <span className="ml-2 rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">
                   {company.stage.replace(/_/g, " ")}
                 </span>
               )}

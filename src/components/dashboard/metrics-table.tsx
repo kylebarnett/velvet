@@ -167,7 +167,7 @@ function CellTooltip({
 
       <div className="space-y-2 text-xs">
         <div className="flex items-center justify-between">
-          <span className="text-white/50">Source</span>
+          <span className="text-white/60">Source</span>
           <span
             className={`rounded px-1.5 py-0.5 font-medium ${
               isAi
@@ -183,7 +183,7 @@ function CellTooltip({
 
         {isAi && periodData.aiConfidence != null && (
           <div className="flex items-center justify-between">
-            <span className="text-white/50">Confidence</span>
+            <span className="text-white/60">Confidence</span>
             <span className="text-white/80">
               {Math.round(periodData.aiConfidence * 100)}%
             </span>
@@ -192,7 +192,7 @@ function CellTooltip({
 
         {displayDate && (
           <div className="flex items-center justify-between">
-            <span className="text-white/50">Last updated</span>
+            <span className="text-white/60">Last updated</span>
             <span className="text-white/80">{formatDate(displayDate)}</span>
           </div>
         )}
@@ -626,7 +626,7 @@ export function MetricsTable({
 
   if (!displayData.length) {
     return (
-      <div className="flex h-full items-center justify-center text-white/40">
+      <div className="flex h-full items-center justify-center text-white/60">
         No data available
       </div>
     );
@@ -684,7 +684,7 @@ export function MetricsTable({
                 {sourceCounts.override} Override
               </span>
             )}
-            <span className="ml-auto text-white/40">
+            <span className="ml-auto text-white/60">
               {sourceCounts.total} values
             </span>
           </div>
@@ -724,7 +724,7 @@ export function MetricsTable({
       {/* Pagination controls - always visible for consistent UI */}
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="text-xs text-white/40">
+          <div className="text-xs text-white/60">
             {sortedPeriods.length > periodsPerPage
               ? `Showing ${displayPeriods.length} of ${sortedPeriods.length} periods`
               : `${sortedPeriods.length} period${sortedPeriods.length !== 1 ? "s" : ""}`}

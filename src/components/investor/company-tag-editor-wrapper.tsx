@@ -47,7 +47,7 @@ export function CompanyTagEditorWrapper({
               <TagBadge label="Model" value={businessModel} />
             </>
           ) : (
-            <span className="text-sm text-white/50">No tags set. Click Edit to add tags.</span>
+            <span className="text-sm text-white/60">No tags set. Click Edit to add tags.</span>
           )}
         </div>
       )}

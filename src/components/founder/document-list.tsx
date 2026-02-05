@@ -202,20 +202,20 @@ function PreviewPane({
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium truncate">{doc.file_name}</div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
-            <span className="flex items-center gap-1 text-xs text-white/50">
+            <span className="flex items-center gap-1 text-xs text-white/60">
               <Tag className="h-3 w-3 shrink-0" />
               {documentTypeLabels[doc.document_type] ?? doc.document_type}
             </span>
             {doc.period_label && (
-              <span className="flex items-center gap-1 text-xs text-white/50">
+              <span className="flex items-center gap-1 text-xs text-white/60">
                 <Calendar className="h-3 w-3 shrink-0" />
                 {doc.period_label}
               </span>
             )}
-            <span className="text-xs text-white/40">
+            <span className="text-xs text-white/60">
               {formatFileSize(doc.file_size)}
             </span>
-            <span className="text-xs text-white/40">
+            <span className="text-xs text-white/60">
               {formatDate(doc.uploaded_at)}
             </span>
           </div>
@@ -255,7 +255,7 @@ function PreviewPane({
       {/* Description if present */}
       {doc.description && (
         <div className="border-b border-white/5 px-4 py-2">
-          <p className="text-xs text-white/50 leading-relaxed">
+          <p className="text-xs text-white/60 leading-relaxed">
             {doc.description}
           </p>
         </div>
@@ -269,7 +269,7 @@ function PreviewPane({
           </div>
         )}
         {error && (
-          <div className="flex items-center justify-center py-20 text-sm text-white/40">
+          <div className="flex items-center justify-center py-20 text-sm text-white/60">
             {error}
           </div>
         )}
@@ -293,7 +293,7 @@ function PreviewPane({
         {!loading && !isPdf && !isImage && (
           <div className="flex flex-col items-center justify-center gap-3 py-20">
             <FileText className="h-12 w-12 text-white/10" />
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-white/60">
               Preview not available for this file type.
             </p>
             <p className="text-xs text-white/30">
@@ -482,7 +482,7 @@ export function FounderDocumentList() {
             {searchQuery ? "No documents match your search." : "No documents found."}
           </p>
           {!searchQuery && (
-            <p className="mt-1 text-sm text-white/40">
+            <p className="mt-1 text-sm text-white/60">
               Upload your first document to get started.
             </p>
           )}
@@ -528,7 +528,7 @@ export function FounderDocumentList() {
                             {doc.period_label}
                           </span>
                         )}
-                        <span className="text-xs text-white/40">{formatFileSize(doc.file_size)}</span>
+                        <span className="text-xs text-white/60">{formatFileSize(doc.file_size)}</span>
                       </div>
                       <div className="mt-1.5">
                         <ExtractionStatusBadge status={doc.ingestion_status} />
@@ -584,7 +584,7 @@ export function FounderDocumentList() {
                                 {documentTypeShortLabels[doc.document_type] ?? doc.document_type}
                               </span>
                               {doc.period_label && (
-                                <span className="inline-flex items-center gap-1 text-[11px] text-white/40">
+                                <span className="inline-flex items-center gap-1 text-[11px] text-white/60">
                                   <Calendar className="h-2.5 w-2.5" />
                                   {doc.period_label}
                                 </span>
@@ -622,7 +622,7 @@ export function FounderDocumentList() {
                               <div className="min-w-0">
                                 <span className="font-medium">{doc.file_name}</span>
                                 {doc.description && (
-                                  <div className="text-xs text-white/50 truncate">{doc.description}</div>
+                                  <div className="text-xs text-white/60 truncate">{doc.description}</div>
                                 )}
                               </div>
                             </div>

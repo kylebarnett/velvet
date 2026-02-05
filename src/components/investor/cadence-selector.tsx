@@ -102,7 +102,7 @@ export function CadenceSelector({
                     {option.label}
                   </span>
                 </div>
-                <span className="mt-1 text-xs text-white/50">
+                <span className="mt-1 text-xs text-white/60">
                   {option.description}
                 </span>
               </button>
@@ -121,7 +121,7 @@ export function CadenceSelector({
               ? "quarter's first month"
               : "year (January)"}
         </label>
-        <p className="mt-1 text-xs text-white/50">
+        <p className="mt-1 text-xs text-white/60">
           Requests will be created on this day to request data for the previous{" "}
           {value === "monthly"
             ? "month"

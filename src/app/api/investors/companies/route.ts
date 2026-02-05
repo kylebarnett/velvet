@@ -38,13 +38,16 @@ export async function GET(req: Request) {
 
   if (error) return jsonError(error.message, 500);
 
-  const companies = (relationships ?? []).map((r) => ({
-    relationshipId: r.id,
-    approvalStatus: r.approval_status,
-    isInvitingInvestor: r.is_inviting_investor,
-    logoUrl: r.logo_url,
-    ...(r.companies as any),
-  }));
+  const companies = (relationships ?? []).map((r) => {
+    const company = Array.isArray(r.companies) ? r.companies[0] : r.companies;
+    return {
+      relationshipId: r.id,
+      approvalStatus: r.approval_status,
+      isInvitingInvestor: r.is_inviting_investor,
+      logoUrl: r.logo_url,
+      ...(company as Record<string, unknown>),
+    };
+  });
 
   return NextResponse.json(
     { companies, total: count ?? companies.length },

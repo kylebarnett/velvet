@@ -169,7 +169,7 @@ export default async function ScheduleDetailPage({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Cadence */}
         <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="flex items-center gap-2 text-white/50">
+          <div className="flex items-center gap-2 text-white/60">
             <Calendar className="h-4 w-4" />
             <span className="text-xs">Cadence</span>
           </div>
@@ -181,7 +181,7 @@ export default async function ScheduleDetailPage({
 
         {/* Next run */}
         <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="flex items-center gap-2 text-white/50">
+          <div className="flex items-center gap-2 text-white/60">
             <Clock className="h-4 w-4" />
             <span className="text-xs">Next Run</span>
           </div>
@@ -203,7 +203,7 @@ export default async function ScheduleDetailPage({
 
         {/* Companies */}
         <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="flex items-center gap-2 text-white/50">
+          <div className="flex items-center gap-2 text-white/60">
             <Building2 className="h-4 w-4" />
             <span className="text-xs">Companies</span>
           </div>
@@ -219,7 +219,7 @@ export default async function ScheduleDetailPage({
 
         {/* Reminders */}
         <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="flex items-center gap-2 text-white/50">
+          <div className="flex items-center gap-2 text-white/60">
             <Bell className="h-4 w-4" />
             <span className="text-xs">Reminders</span>
           </div>
@@ -244,14 +244,14 @@ export default async function ScheduleDetailPage({
           <div className="mt-2">
             <div className="font-medium">{template.name}</div>
             {template.description && (
-              <p className="mt-1 text-sm text-white/50">{template.description}</p>
+              <p className="mt-1 text-sm text-white/60">{template.description}</p>
             )}
           </div>
 
           {/* Metrics */}
           {metrics.length > 0 && (
             <div className="mt-4">
-              <div className="text-xs font-medium text-white/50 mb-2">
+              <div className="text-xs font-medium text-white/60 mb-2">
                 Metrics ({metrics.length})
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -302,11 +302,11 @@ export default async function ScheduleDetailPage({
         <h2 className="text-sm font-medium text-white/70">Configuration</h2>
         <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
           <div className="flex justify-between">
-            <span className="text-white/50">Due date offset</span>
+            <span className="text-white/60">Due date offset</span>
             <span>{schedule.due_days_offset} days after request</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-white/50">Last run</span>
+            <span className="text-white/60">Last run</span>
             <span>
               {schedule.last_run_at
                 ? format(new Date(schedule.last_run_at), "MMM d, yyyy")
@@ -314,11 +314,11 @@ export default async function ScheduleDetailPage({
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-white/50">Total runs</span>
+            <span className="text-white/60">Total runs</span>
             <span>{runs.length}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-white/50">Created</span>
+            <span className="text-white/60">Created</span>
             <span>{format(new Date(schedule.created_at), "MMM d, yyyy")}</span>
           </div>
         </div>

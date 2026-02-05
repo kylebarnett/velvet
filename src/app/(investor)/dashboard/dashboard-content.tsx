@@ -163,7 +163,7 @@ function CompanyListRow({
             </span>
           )}
         </div>
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-white/50">
+        <div className="mt-0.5 flex items-center gap-2 text-xs text-white/60">
           {company.industry && (
             <span className="capitalize">{company.industry.replace(/_/g, " ")}</span>
           )}
@@ -178,7 +178,7 @@ function CompanyListRow({
         {latestMetric && latestMetric.value != null ? (
           <>
             <div className="text-right">
-              <div className="text-xs text-white/50">{latestMetric.name}</div>
+              <div className="text-xs text-white/60">{latestMetric.name}</div>
               <div className="font-semibold">
                 {formatValue(latestMetric.value, latestMetric.name)}
               </div>
@@ -189,7 +189,7 @@ function CompanyListRow({
             {secondaryMetric && secondaryMetric.value != null && (
               <>
                 <div className="text-right border-l border-white/10 pl-6">
-                  <div className="text-xs text-white/40">{secondaryMetric.name}</div>
+                  <div className="text-xs text-white/60">{secondaryMetric.name}</div>
                   <div className="text-sm font-medium text-white/80">
                     {formatValue(secondaryMetric.value, secondaryMetric.name)}
                   </div>
@@ -203,7 +203,7 @@ function CompanyListRow({
         ) : !hasFounder ? (
           <span className="text-xs text-amber-200/60">Awaiting founder signup</span>
         ) : isApproved ? (
-          <span className="text-xs text-white/40">No metrics yet</span>
+          <span className="text-xs text-white/60">No metrics yet</span>
         ) : null}
       </div>
     </Link>
@@ -233,7 +233,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
           />
         </div>
         <div className="flex items-center justify-between gap-3 sm:justify-end">
-          <div className="text-sm text-white/50">
+          <div className="text-sm text-white/60">
             {filteredCompanies.length} of {companies.length}
           </div>
           <TileSettingsMenu

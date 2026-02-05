@@ -174,7 +174,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
           <React.Fragment key={s.id}>
             <div
               className={`flex items-center gap-2 ${
-                i <= step ? "text-white" : "text-white/40"
+                i <= step ? "text-white" : "text-white/60"
               }`}
             >
               <div
@@ -183,7 +183,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                     ? "bg-emerald-500/20 text-emerald-300"
                     : i === step
                       ? "bg-white/20 text-white"
-                      : "bg-white/5 text-white/40"
+                      : "bg-white/5 text-white/60"
                 }`}
               >
                 {i < step ? <Check className="h-3 w-3" /> : i + 1}
@@ -240,11 +240,11 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                     >
                       <span className="font-medium">{t.name}</span>
                       {t.description && (
-                        <span className="mt-1 text-xs text-white/50 line-clamp-2">
+                        <span className="mt-1 text-xs text-white/60 line-clamp-2">
                           {t.description}
                         </span>
                       )}
-                      <span className="mt-2 text-xs text-white/40">
+                      <span className="mt-2 text-xs text-white/60">
                         {t.metric_template_items.length} metrics
                       </span>
                     </button>
@@ -273,11 +273,11 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                     >
                       <span className="font-medium">{t.name}</span>
                       {t.description && (
-                        <span className="mt-1 text-xs text-white/50 line-clamp-2">
+                        <span className="mt-1 text-xs text-white/60 line-clamp-2">
                           {t.description}
                         </span>
                       )}
-                      <span className="mt-2 text-xs text-white/40">
+                      <span className="mt-2 text-xs text-white/60">
                         {t.metric_template_items.length} metrics
                       </span>
                     </button>
@@ -314,7 +314,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                 >
                   All portfolio companies
                 </label>
-                <p className="mt-0.5 text-xs text-white/50">
+                <p className="mt-0.5 text-xs text-white/60">
                   Automatically include all companies in your portfolio
                 </p>
               </div>
@@ -336,7 +336,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                   >
                     Include future companies
                   </label>
-                  <p className="mt-0.5 text-xs text-white/50">
+                  <p className="mt-0.5 text-xs text-white/60">
                     Companies added to your portfolio later will automatically
                     be included
                   </p>
@@ -387,7 +387,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                       />
                       <div className="min-w-0 flex-1">
                         <div className="font-medium truncate">{company.name}</div>
-                        <div className="flex gap-2 text-xs text-white/40">
+                        <div className="flex gap-2 text-xs text-white/60">
                           {company.industry && (
                             <span>
                               {INDUSTRY_LABELS[company.industry] ?? company.industry}
@@ -426,7 +426,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
               <label className="text-sm font-medium text-white/70">
                 Days until due date
               </label>
-              <p className="mt-1 text-xs text-white/50">
+              <p className="mt-1 text-xs text-white/60">
                 How many days founders have to submit their metrics after the
                 request is created
               </p>
@@ -469,7 +469,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                 placeholder={`${selectedTemplate?.name ?? "Metrics"} - ${cadence}`}
                 className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
               />
-              <p className="mt-1 text-xs text-white/40">
+              <p className="mt-1 text-xs text-white/60">
                 A descriptive name to identify this schedule
               </p>
             </div>
@@ -490,7 +490,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                 >
                   Send reminder emails
                 </label>
-                <p className="mt-0.5 text-xs text-white/50">
+                <p className="mt-0.5 text-xs text-white/60">
                   Automatically remind founders before the due date
                 </p>
               </div>
@@ -524,7 +524,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                     </button>
                   ))}
                 </div>
-                <p className="mt-2 text-xs text-white/40">
+                <p className="mt-2 text-xs text-white/60">
                   Select when to send reminder emails (reminders are
                   automatically cancelled when metrics are submitted)
                 </p>
@@ -536,11 +536,11 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
               <h3 className="text-sm font-medium text-white/70">Summary</h3>
               <div className="mt-3 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-white/50">Template</span>
+                  <span className="text-white/60">Template</span>
                   <span className="text-white">{selectedTemplate?.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/50">Companies</span>
+                  <span className="text-white/60">Companies</span>
                   <span className="text-white">
                     {allCompanies
                       ? `All (${companies.length})`
@@ -548,17 +548,17 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/50">Frequency</span>
+                  <span className="text-white/60">Frequency</span>
                   <span className="text-white capitalize">
                     {cadence} on day {dayOfMonth}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/50">Due in</span>
+                  <span className="text-white/60">Due in</span>
                   <span className="text-white">{dueDaysOffset} days</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/50">Reminders</span>
+                  <span className="text-white/60">Reminders</span>
                   <span className="text-white">
                     {reminderEnabled
                       ? reminderDays.map((d) => `${d}d`).join(", ")

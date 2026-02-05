@@ -51,8 +51,8 @@ export function DocumentUploadForm({ company }: Props) {
       setSuccess("Document uploaded successfully.");
       setDocumentType("");
       e.currentTarget.reset();
-    } catch (err: any) {
-      setError(err?.message ?? "Something went wrong.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setIsUploading(false);
     }
@@ -99,7 +99,7 @@ export function DocumentUploadForm({ company }: Props) {
 
         <div className="grid gap-2">
           <label className="text-sm font-medium" htmlFor="description">
-            Description <span className="font-normal text-white/50">(optional)</span>
+            Description <span className="font-normal text-white/60">(optional)</span>
           </label>
           <textarea
             id="description"

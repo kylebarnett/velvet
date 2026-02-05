@@ -71,7 +71,7 @@ function TearSheetCard({
             <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
               Published
             </span>
-            <span className="text-xs text-white/50">
+            <span className="text-xs text-white/60">
               {tearSheet.quarter} {tearSheet.year}
             </span>
           </div>
@@ -294,7 +294,7 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
             </select>
           )}
 
-          <span className="text-sm text-white/50">
+          <span className="text-sm text-white/60">
             {filteredTearSheets.length} tear sheet{filteredTearSheets.length !== 1 ? "s" : ""}
           </span>
         </div>
@@ -345,7 +345,7 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
       {/* No results after filter */}
       {!loading && filteredTearSheets.length === 0 && tearSheets.length > 0 && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-white/60">
             No tear sheets match the selected filters.
           </p>
         </div>

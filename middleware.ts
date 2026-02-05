@@ -1,6 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+const PROTECTED_PATHS = [
+  "/dashboard",
+  "/portfolio",
+  "/reports",
+  "/requests",
+  "/documents",
+  "/team",
+  "/portal",
+  "/app",
+];
+
+const AUTH_PATHS = ["/login", "/signup"];
+
 export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -26,7 +39,25 @@ export async function middleware(request: NextRequest) {
   });
 
   // Refresh session if expired (required for Server Components)
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+
+  // Redirect unauthenticated users away from protected routes
+  const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
+  if (isProtected && !user) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Redirect authenticated users away from auth pages
+  const isAuthPage = AUTH_PATHS.some((p) => pathname.startsWith(p));
+  if (isAuthPage && user) {
+    return NextResponse.redirect(new URL("/app", request.url));
+  }
 
   return response;
 }

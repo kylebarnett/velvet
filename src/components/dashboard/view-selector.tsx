@@ -75,7 +75,7 @@ export function ViewSelector({
         {isOpen && (
           <div className="absolute left-0 top-full z-50 mt-1 min-w-[200px] overflow-hidden rounded-lg border border-white/10 bg-zinc-900 shadow-xl">
             {views.length === 0 ? (
-              <div className="px-3 py-2 text-xs text-white/50">No saved views</div>
+              <div className="px-3 py-2 text-xs text-white/60">No saved views</div>
             ) : (
               views.map((view) => (
                 <div

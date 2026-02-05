@@ -201,7 +201,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
               {confidenceLabel(confidence)} ({(confidence * 100).toFixed(0)}%)
             </span>
           </div>
-          <div className="flex items-center gap-2 mt-0.5 text-xs text-white/50">
+          <div className="flex items-center gap-2 mt-0.5 text-xs text-white/60">
             <span className="font-mono">{mapping.extracted_value?.raw ?? "—"}</span>
             {mapping.extracted_value?.unit && (
               <span>{mapping.extracted_value.unit}</span>
@@ -341,7 +341,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
         <div className="mt-3 space-y-3 border-t border-white/5 pt-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] text-white/40 uppercase tracking-wider">
+              <label className="text-[10px] text-white/60 uppercase tracking-wider">
                 Metric Name
               </label>
               <input
@@ -352,7 +352,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
               />
             </div>
             <div>
-              <label className="text-[10px] text-white/40 uppercase tracking-wider">
+              <label className="text-[10px] text-white/60 uppercase tracking-wider">
                 Value
               </label>
               <input
@@ -366,7 +366,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
 
           {/* Period selector */}
           <div>
-            <label className="text-[10px] text-white/40 uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[10px] text-white/60 uppercase tracking-wider flex items-center gap-1.5">
               Period
               {periodChanged && (
                 <span className="text-amber-400 normal-case flex items-center gap-1">

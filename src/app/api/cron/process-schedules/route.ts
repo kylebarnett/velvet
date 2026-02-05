@@ -141,7 +141,6 @@ export async function POST(req: Request) {
     }
 
     if (companyIds.length === 0) {
-      console.log(`Schedule ${schedule.id} has no companies, skipping`);
       continue;
     }
 
@@ -151,7 +150,6 @@ export async function POST(req: Request) {
       : schedule.metric_templates;
 
     if (!template || !template.metric_template_items || template.metric_template_items.length === 0) {
-      console.log(`Schedule ${schedule.id} has no template items, skipping`);
       continue;
     }
 
@@ -182,6 +180,90 @@ export async function POST(req: Request) {
     let emailsSent = 0;
     const createdRequestIds: string[] = [];
 
+    const periodStartStr = periodStart.toISOString().split("T")[0];
+    const periodEndStr = periodEnd.toISOString().split("T")[0];
+    const dueDateStr = dueDate.toISOString().split("T")[0];
+
+    // Batch-fetch all metric definitions for this investor (avoid N+1)
+    const metricNames = templateItems.map((i) => i.metric_name);
+    const { data: existingDefs } = await adminClient
+      .from("metric_definitions")
+      .select("id, name, period_type")
+      .eq("investor_id", schedule.investor_id)
+      .in("name", metricNames);
+
+    const defMap = new Map<string, string>();
+    for (const def of existingDefs ?? []) {
+      defMap.set(`${def.name}|${def.period_type}`, def.id);
+    }
+
+    // Ensure all metric definitions exist (create missing ones in batch)
+    const missingDefs: { investor_id: string; name: string; period_type: string; data_type: string }[] = [];
+    for (const item of templateItems) {
+      const key = `${item.metric_name}|${item.period_type}`;
+      if (!defMap.has(key)) {
+        missingDefs.push({
+          investor_id: schedule.investor_id,
+          name: item.metric_name,
+          period_type: item.period_type,
+          data_type: item.data_type,
+        });
+      }
+    }
+
+    if (missingDefs.length > 0) {
+      const { data: newDefs, error: defError } = await adminClient
+        .from("metric_definitions")
+        .insert(missingDefs)
+        .select("id, name, period_type");
+
+      if (defError) {
+        for (const def of missingDefs) {
+          errors.push({
+            metric: def.name,
+            message: defError.message ?? "Failed to create metric definition",
+          });
+        }
+      } else {
+        for (const def of newDefs ?? []) {
+          defMap.set(`${def.name}|${def.period_type}`, def.id);
+        }
+      }
+    }
+
+    // Batch-fetch all existing requests for this investor + period + companies (avoid N+1)
+    const allDefIds = [...new Set(defMap.values())];
+    const validCompanyIds = (companies ?? [])
+      .filter((c) => c.founder_id)
+      .map((c) => c.id);
+
+    const existingRequestSet = new Set<string>();
+    if (allDefIds.length > 0 && validCompanyIds.length > 0) {
+      const { data: existingRequests } = await adminClient
+        .from("metric_requests")
+        .select("company_id, metric_definition_id")
+        .eq("investor_id", schedule.investor_id)
+        .eq("period_start", periodStartStr)
+        .eq("period_end", periodEndStr)
+        .in("company_id", validCompanyIds)
+        .in("metric_definition_id", allDefIds);
+
+      for (const req of existingRequests ?? []) {
+        existingRequestSet.add(`${req.company_id}|${req.metric_definition_id}`);
+      }
+    }
+
+    // Build batch of new requests to insert
+    const requestsToInsert: {
+      investor_id: string;
+      company_id: string;
+      metric_definition_id: string;
+      period_start: string;
+      period_end: string;
+      due_date: string;
+      schedule_id: string;
+    }[] = [];
+
     // Process each company
     for (const company of companies ?? []) {
       const founder = Array.isArray(company.users) ? company.users[0] : company.users;
@@ -193,82 +275,43 @@ export async function POST(req: Request) {
 
       // Create metric requests for each template item
       for (const item of templateItems) {
-        // Ensure metric definition exists
-        const { data: existingDef } = await adminClient
-          .from("metric_definitions")
-          .select("id")
-          .eq("investor_id", schedule.investor_id)
-          .eq("name", item.metric_name)
-          .eq("period_type", item.period_type)
-          .single();
+        const defKey = `${item.metric_name}|${item.period_type}`;
+        const metricDefId = defMap.get(defKey);
 
-        let metricDefId: string;
-
-        if (existingDef) {
-          metricDefId = existingDef.id;
-        } else {
-          const { data: newDef, error: defError } = await adminClient
-            .from("metric_definitions")
-            .insert({
-              investor_id: schedule.investor_id,
-              name: item.metric_name,
-              period_type: item.period_type,
-              data_type: item.data_type,
-            })
-            .select("id")
-            .single();
-
-          if (defError || !newDef) {
-            errors.push({
-              company: company.name,
-              metric: item.metric_name,
-              message: defError?.message ?? "Failed to create metric definition",
-            });
-            continue;
-          }
-
-          metricDefId = newDef.id;
+        if (!metricDefId) {
+          continue; // Definition creation failed earlier
         }
 
-        // Check if request already exists
-        const { data: existingRequest } = await adminClient
-          .from("metric_requests")
-          .select("id")
-          .eq("investor_id", schedule.investor_id)
-          .eq("company_id", company.id)
-          .eq("metric_definition_id", metricDefId)
-          .eq("period_start", periodStart.toISOString().split("T")[0])
-          .eq("period_end", periodEnd.toISOString().split("T")[0])
-          .single();
-
-        if (existingRequest) {
-          continue; // Skip duplicate
+        // Skip if request already exists (checked from batch lookup)
+        if (existingRequestSet.has(`${company.id}|${metricDefId}`)) {
+          continue;
         }
 
-        // Create metric request
-        const { data: newRequest, error: reqError } = await adminClient
-          .from("metric_requests")
-          .insert({
-            investor_id: schedule.investor_id,
-            company_id: company.id,
-            metric_definition_id: metricDefId,
-            period_start: periodStart.toISOString().split("T")[0],
-            period_end: periodEnd.toISOString().split("T")[0],
-            due_date: dueDate.toISOString().split("T")[0],
-            schedule_id: schedule.id,
-          })
-          .select("id")
-          .single();
+        requestsToInsert.push({
+          investor_id: schedule.investor_id,
+          company_id: company.id,
+          metric_definition_id: metricDefId,
+          period_start: periodStartStr,
+          period_end: periodEndStr,
+          due_date: dueDateStr,
+          schedule_id: schedule.id,
+        });
+      }
+    }
 
-        if (reqError) {
-          errors.push({
-            company: company.name,
-            metric: item.metric_name,
-            message: reqError.message,
-          });
-        } else if (newRequest) {
-          requestsCreated++;
-          createdRequestIds.push(newRequest.id);
+    // Batch-insert all new metric requests
+    if (requestsToInsert.length > 0) {
+      const { data: newRequests, error: reqError } = await adminClient
+        .from("metric_requests")
+        .insert(requestsToInsert)
+        .select("id");
+
+      if (reqError) {
+        errors.push({ message: reqError.message });
+      } else {
+        requestsCreated = newRequests?.length ?? 0;
+        for (const req of newRequests ?? []) {
+          createdRequestIds.push(req.id);
         }
       }
     }

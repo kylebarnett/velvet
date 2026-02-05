@@ -295,7 +295,7 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
               {downloading ? "..." : `${selectedIds.size} selected`}
             </button>
           )}
-          <span className="text-sm text-white/50">
+          <span className="text-sm text-white/60">
             {filteredDocuments.length} document{filteredDocuments.length !== 1 ? "s" : ""}
           </span>
         </div>
@@ -327,7 +327,7 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
         <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
           <FileText className="mx-auto h-8 w-8 text-white/30" />
           <p className="mt-2 text-sm text-white/60">No documents found.</p>
-          <p className="mt-1 text-xs text-white/40">
+          <p className="mt-1 text-xs text-white/60">
             {search || typeFilter || dateFilter !== "all"
               ? "Try adjusting your filters."
               : "Documents uploaded by the founder will appear here."}
@@ -346,7 +346,7 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
               onChange={toggleSelectAll}
               className="h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
             />
-            <span className="text-xs text-white/50">Select all</span>
+            <span className="text-xs text-white/60">Select all</span>
           </div>
 
           {filteredDocuments.map((doc) => (
@@ -364,16 +364,16 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
               <div className="min-w-0 flex-1">
                 <p className="font-medium truncate text-sm">{doc.file_name}</p>
                 {doc.description && (
-                  <p className="text-xs text-white/50 truncate">{doc.description}</p>
+                  <p className="text-xs text-white/60 truncate">{doc.description}</p>
                 )}
               </div>
               <span className="hidden sm:inline-flex shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-xs">
                 {TYPE_LABELS[doc.document_type] ?? doc.document_type}
               </span>
-              <span className="hidden sm:inline shrink-0 text-xs text-white/50">
+              <span className="hidden sm:inline shrink-0 text-xs text-white/60">
                 {formatFileSize(doc.file_size)}
               </span>
-              <span className="shrink-0 text-xs text-white/40">
+              <span className="shrink-0 text-xs text-white/60">
                 {formatDate(doc.uploaded_at)}
               </span>
               <button

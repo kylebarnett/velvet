@@ -68,7 +68,6 @@ export class GeminiExtractor implements MetricExtractor {
       throw new Error("Gemini file upload returned no file URI.");
     }
 
-    console.log(`[gemini] File uploaded: ${fileUri} (${numBytes} bytes)`);
     return fileUri;
   }
 
@@ -125,7 +124,7 @@ export class GeminiExtractor implements MetricExtractor {
       if (response.status !== 429 || attempt === MAX_RETRIES) break;
 
       const delay = Math.min(2000 * Math.pow(2, attempt), 30000);
-      console.log(`[gemini] Rate limited (429), retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})...`);
+      console.warn(`[gemini] Rate limited (429), retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})`);
       await new Promise((r) => setTimeout(r, delay));
     }
 

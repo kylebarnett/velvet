@@ -45,7 +45,7 @@ export function Alert({
     >
       {showIcon ? (
         <div className="flex items-start gap-2">
-          <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+          <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <div>{children}</div>
         </div>
       ) : (

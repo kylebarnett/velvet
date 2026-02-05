@@ -7,6 +7,7 @@ import { CompanySwitcher } from "@/components/investor/company-switcher";
 import { InlineTags } from "@/components/investor/inline-tag";
 import { InlineWebsite } from "@/components/investor/inline-website";
 import { CompanyDashboardTabs } from "@/components/investor/company-dashboard-tabs";
+import type { MetricValue } from "@/components/dashboard";
 import { CompanyDashboardClient } from "./company-dashboard-client";
 
 export const dynamic = "force-dynamic";
@@ -57,14 +58,14 @@ export default async function CompanyDashboardPage({
     relationship.approval_status === "approved";
 
   // Get metric values if approved
-  let metricValues: any[] = [];
+  let metricValues: MetricValue[] = [];
   if (isApproved) {
     const { data } = await supabase
       .from("company_metric_values")
       .select("id, metric_name, period_type, period_start, period_end, value, notes, submitted_at, updated_at")
       .eq("company_id", companyId)
       .order("period_start", { ascending: false });
-    metricValues = data ?? [];
+    metricValues = (data ?? []) as MetricValue[];
   }
 
   // Get dashboard views for this company

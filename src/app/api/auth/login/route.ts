@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   const { email, password } = parsed.data;
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return jsonError(error.message, 400);
+  if (error) return jsonError("Invalid email or password.", 401);
 
   return NextResponse.json({ ok: true }, { headers: response.headers });
 }

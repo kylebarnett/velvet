@@ -245,7 +245,7 @@ export function ExtractionReviewPanel({
               <Sparkles className="h-5 w-5 text-violet-400" />
               AI Extraction Review
             </h2>
-            <div className="mt-1 flex items-center gap-1.5 text-sm text-white/50">
+            <div className="mt-1 flex items-center gap-1.5 text-sm text-white/60">
               <FileText className="h-3.5 w-3.5" />
               <span className="truncate">{documentName}</span>
             </div>

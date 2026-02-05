@@ -148,7 +148,7 @@ export function MetricDrilldownPanel({
             <p className="mt-1 text-2xl font-bold text-white">
               {formatValue(total, metricName)}
             </p>
-            <p className="mt-1 text-sm text-white/50">
+            <p className="mt-1 text-sm text-white/60">
               Across {companies.length} {companies.length === 1 ? "company" : "companies"}
             </p>
           </div>
@@ -288,7 +288,7 @@ function CompanyRow({
           </span>
           <ArrowUpRight className="h-4 w-4 flex-shrink-0 text-white/0 transition-colors group-hover:text-white/60" />
         </div>
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-white/50">
+        <div className="mt-0.5 flex items-center gap-2 text-xs text-white/60">
           {industryLabel && <span>{industryLabel}</span>}
           {industryLabel && stageLabel && <span>·</span>}
           {stageLabel && <span>{stageLabel}</span>}

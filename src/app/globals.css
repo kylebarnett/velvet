@@ -3,6 +3,39 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Surface colors */
+  --surface-primary: #0a0a0a;
+  --surface-raised: rgba(255, 255, 255, 0.05);
+  --surface-overlay: rgba(0, 0, 0, 0.3);
+
+  /* Border colors */
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+
+  /* Text colors */
+  --text-primary: #fafafa;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.4);
+
+  /* Status colors */
+  --status-success-bg: rgba(16, 185, 129, 0.2);
+  --status-success-text: #a7f3d0;
+  --status-warning-bg: rgba(245, 158, 11, 0.2);
+  --status-warning-text: #fde68a;
+  --status-error-bg: rgba(239, 68, 68, 0.2);
+  --status-error-text: #fecaca;
+  --status-info-bg: rgba(59, 130, 246, 0.2);
+  --status-info-text: #bfdbfe;
+
+  /* Z-index scale */
+  --z-dropdown: 30;
+  --z-sticky: 35;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-popover: 55;
+  --z-toast: 60;
 }
 
 @theme inline {
@@ -22,7 +55,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans, system-ui, -apple-system, sans-serif);
 }
 
 /* Tab content fade-in animation */
@@ -39,4 +72,16 @@ body {
 
 .animate-fade-in {
   animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

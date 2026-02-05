@@ -55,7 +55,7 @@ function MetricChip({ name }: { name: string }) {
           <p className="mt-1 text-xs text-white/60">{metricInfo.description}</p>
           {metricInfo.formula && (
             <div className="mt-2 rounded bg-white/5 px-2 py-1.5">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-white/40">Formula</p>
+              <p className="text-[10px] font-medium uppercase tracking-wide text-white/60">Formula</p>
               <p className="mt-0.5 text-xs text-emerald-400">{metricInfo.formula}</p>
             </div>
           )}
@@ -155,8 +155,8 @@ export function TemplatesTabContent() {
 
       setTemplates(templatesJson.templates ?? []);
       setHiddenTemplateIds(hiddenJson?.hiddenTemplates ?? []);
-    } catch (e: any) {
-      setError(e?.message ?? "Something went wrong.");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -183,8 +183,8 @@ export function TemplatesTabContent() {
       setTimeout(() => {
         myTemplatesRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
-    } catch (e: any) {
-      setError(e?.message ?? "Something went wrong.");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
       setEditingSystem(null);
     }
   }
@@ -205,8 +205,8 @@ export function TemplatesTabContent() {
         throw new Error(json?.error ?? "Failed to hide template.");
       }
       setHiddenTemplateIds((prev) => [...prev, tmpl.id]);
-    } catch (e: any) {
-      setError(e?.message ?? "Something went wrong.");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     }
   }
 
@@ -222,8 +222,8 @@ export function TemplatesTabContent() {
         throw new Error(json?.error ?? "Failed to restore template.");
       }
       setHiddenTemplateIds((prev) => prev.filter((id) => id !== templateId));
-    } catch (e: any) {
-      setError(e?.message ?? "Something went wrong.");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     }
   }
 
@@ -252,8 +252,8 @@ export function TemplatesTabContent() {
         deletedIds.forEach((id) => next.delete(id));
         return next;
       });
-    } catch (e: any) {
-      setError(e?.message ?? "Something went wrong.");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setBulkDeleting(false);
     }
@@ -281,7 +281,7 @@ export function TemplatesTabContent() {
               <span className="text-sm font-medium">{tmpl.name}</span>
             </div>
             {tmpl.description && (
-              <p className="mt-1 text-xs text-white/50">{tmpl.description}</p>
+              <p className="mt-1 text-xs text-white/60">{tmpl.description}</p>
             )}
             <div className="mt-2 flex flex-wrap gap-1.5">
               {displayedMetrics.map((item) => (
@@ -395,7 +395,7 @@ export function TemplatesTabContent() {
               </button>
             </div>
             {tmpl.description && (
-              <p className="mt-1 text-xs text-white/50">{tmpl.description}</p>
+              <p className="mt-1 text-xs text-white/60">{tmpl.description}</p>
             )}
             <div className="mt-2 flex flex-wrap gap-1.5">
               {displayedMetrics.map((item) => (
@@ -535,7 +535,7 @@ export function TemplatesTabContent() {
                 <h2 className="text-sm font-medium text-white/80">
                   Industry Templates
                 </h2>
-                <span className="text-xs text-white/40">
+                <span className="text-xs text-white/60">
                   Pre-built metrics by industry
                 </span>
               </div>
@@ -577,7 +577,7 @@ export function TemplatesTabContent() {
                   My Templates
                 </h2>
                 {userTemplates.length > 0 && (
-                  <span className="text-xs text-white/40">
+                  <span className="text-xs text-white/60">
                     {userTemplates.length}{" "}
                     {userTemplates.length === 1 ? "template" : "templates"}
                   </span>
@@ -587,7 +587,7 @@ export function TemplatesTabContent() {
                 <div className="flex items-center gap-2">
                   {selectedIds.size > 0 ? (
                     <>
-                      <span className="text-xs text-white/50">
+                      <span className="text-xs text-white/60">
                         {selectedIds.size} selected
                       </span>
                       <button
@@ -633,7 +633,7 @@ export function TemplatesTabContent() {
                 <div className="text-sm text-white/60">
                   No custom templates yet.
                 </div>
-                <div className="mt-2 text-xs text-white/40">
+                <div className="mt-2 text-xs text-white/60">
                   Clone an industry template above or{" "}
                   <button
                     type="button"

@@ -34,20 +34,22 @@ export async function POST(
 
   if (!company) return jsonError("Not authorized to access this document.", 403);
 
-  // Prevent re-processing
-  if (doc.ingestion_status === "processing") {
-    return jsonError("Document is already being processed.", 409);
-  }
-
   const admin = createSupabaseAdminClient();
 
-  // Mark as processing
-  const { error: updateError } = await admin
+  // Atomically set status to "processing" only if not already processing.
+  // This prevents concurrent requests from both starting extraction.
+  const { data: updated, error: updateError } = await admin
     .from("documents")
     .update({ ingestion_status: "processing" })
-    .eq("id", id);
+    .eq("id", id)
+    .neq("ingestion_status", "processing")
+    .select("id")
+    .maybeSingle();
 
   if (updateError) return jsonError(updateError.message, 400);
+  if (!updated) {
+    return jsonError("Document is already being processed.", 409);
+  }
 
   try {
     // Download file from storage
@@ -84,7 +86,6 @@ export async function POST(
     }
 
     const targetMetrics = Array.from(metricNames);
-    console.log(`[ingest] Target metrics (${targetMetrics.length}):`, targetMetrics);
 
     // Run AI extraction
     const extractor = createExtractor();
@@ -106,12 +107,6 @@ export async function POST(
     const adjustedCount = normalizedMetrics.filter(
       (m) => m.period_was_adjusted,
     ).length;
-    if (adjustedCount > 0) {
-      console.log(
-        `[ingest] Normalized ${adjustedCount}/${normalizedMetrics.length} metric periods`,
-      );
-    }
-
     // Create document_metric_mappings rows for each extracted metric
     if (normalizedMetrics.length > 0) {
       const mappings = normalizedMetrics.map((m) => ({

@@ -70,7 +70,7 @@ function RunRow({ run }: { run: ScheduleRun }) {
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-4 text-xs text-white/50">
+        <div className="hidden sm:flex items-center gap-4 text-xs text-white/60">
           <span>
             {run.requestsCreated} request{run.requestsCreated !== 1 ? "s" : ""}
           </span>
@@ -103,7 +103,7 @@ function RunRow({ run }: { run: ScheduleRun }) {
       {expanded && hasErrors && (
         <div className="border-t border-white/5 bg-black/20 px-4 py-3">
           {/* Mobile stats */}
-          <div className="mb-3 flex flex-wrap gap-3 text-xs text-white/50 sm:hidden">
+          <div className="mb-3 flex flex-wrap gap-3 text-xs text-white/60 sm:hidden">
             <span>
               {run.requestsCreated} request{run.requestsCreated !== 1 ? "s" : ""}
             </span>
@@ -115,7 +115,7 @@ function RunRow({ run }: { run: ScheduleRun }) {
             </span>
           </div>
 
-          <div className="text-xs font-medium text-white/50 mb-2">Errors</div>
+          <div className="text-xs font-medium text-white/60 mb-2">Errors</div>
           <div className="space-y-1.5">
             {run.errors.map((error, i) => (
               <div
@@ -123,10 +123,10 @@ function RunRow({ run }: { run: ScheduleRun }) {
                 className="rounded bg-red-500/5 px-2 py-1.5 text-xs text-red-300"
               >
                 {error.company && (
-                  <span className="text-white/50">{error.company}: </span>
+                  <span className="text-white/60">{error.company}: </span>
                 )}
                 {error.metric && (
-                  <span className="text-white/50">{error.metric} - </span>
+                  <span className="text-white/60">{error.metric} - </span>
                 )}
                 {error.message}
               </div>
@@ -142,7 +142,7 @@ export function ScheduleRunHistory({ runs }: ScheduleRunHistoryProps) {
   if (runs.length === 0) {
     return (
       <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-        <div className="text-sm text-white/50">
+        <div className="text-sm text-white/60">
           No runs yet. This schedule will run automatically on its next scheduled
           date, or you can trigger it manually.
         </div>

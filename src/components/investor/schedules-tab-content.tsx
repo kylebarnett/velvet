@@ -30,8 +30,8 @@ export function SchedulesTabContent() {
         }
 
         setSchedules(json.schedules ?? []);
-      } catch (e: any) {
-        setError(e?.message ?? "Something went wrong.");
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : "Something went wrong.");
         setSchedules([]);
       } finally {
         setLoading(false);

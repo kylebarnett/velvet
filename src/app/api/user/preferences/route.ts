@@ -35,7 +35,7 @@ export async function GET(req: Request) {
 /**
  * PUT /api/user/preferences
  * Update user preferences. Merges with existing preferences.
- * Body: { key: string, value: any } or { preferences: Record<string, any> }
+ * Body: { key: string, value: unknown } or { preferences: Record<string, unknown> }
  */
 export async function PUT(req: Request) {
   const { supabase, user } = await getApiUser();

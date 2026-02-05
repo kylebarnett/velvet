@@ -87,51 +87,39 @@ export async function GET(req: Request) {
     return jsonError(countError.message, 500);
   }
 
-  // Get all matching data for proper alphabetical sorting
+  // Apply database-level sorting
+  const ascending = sortDir !== "desc";
+  switch (sortField) {
+    case "contact":
+      dataQuery = dataQuery.order("last_name", { ascending }).order("first_name", { ascending });
+      break;
+    case "email":
+      dataQuery = dataQuery.order("email", { ascending });
+      break;
+    case "status":
+      dataQuery = dataQuery.order("status", { ascending });
+      break;
+    case "company":
+    default:
+      // Sort by company name via foreign table
+      dataQuery = dataQuery.order("name", { referencedTable: "companies", ascending });
+      break;
+  }
+
+  // Apply database-level pagination
+  dataQuery = dataQuery.range(offset, offset + limit - 1);
+
   const { data, error } = await dataQuery;
 
   if (error) {
     return jsonError(error.message, 500);
   }
 
-  // Sort by requested field
-  const sorted = (data ?? []).sort((a: any, b: any) => {
-    let cmp = 0;
-    switch (sortField) {
-      case "company": {
-        const ca = (Array.isArray(a.companies) ? a.companies[0]?.name : a.companies?.name) ?? "";
-        const cb = (Array.isArray(b.companies) ? b.companies[0]?.name : b.companies?.name) ?? "";
-        cmp = ca.localeCompare(cb, undefined, { sensitivity: "base" });
-        break;
-      }
-      case "contact":
-        cmp = `${a.last_name ?? ""} ${a.first_name ?? ""}`.localeCompare(
-          `${b.last_name ?? ""} ${b.first_name ?? ""}`, undefined, { sensitivity: "base" }
-        );
-        break;
-      case "email":
-        cmp = (a.email ?? "").localeCompare(b.email ?? "", undefined, { sensitivity: "base" });
-        break;
-      case "status":
-        cmp = (a.status ?? "").localeCompare(b.status ?? "", undefined, { sensitivity: "base" });
-        break;
-      default: {
-        const da = (Array.isArray(a.companies) ? a.companies[0]?.name : a.companies?.name) ?? "";
-        const db = (Array.isArray(b.companies) ? b.companies[0]?.name : b.companies?.name) ?? "";
-        cmp = da.localeCompare(db, undefined, { sensitivity: "base" });
-      }
-    }
-    return sortDir === "desc" ? -cmp : cmp;
-  });
-
   const total = totalCount ?? 0;
   const totalPages = Math.ceil(total / limit);
 
-  // Apply pagination after sorting
-  const paginated = sorted.slice(offset, offset + limit);
-
   return NextResponse.json({
-    contacts: paginated,
+    contacts: data ?? [],
     pagination: {
       page,
       limit,

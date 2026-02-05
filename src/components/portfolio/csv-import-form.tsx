@@ -275,10 +275,10 @@ export function CsvImportForm() {
         <p className="mt-4 text-sm text-white/70">
           {file ? file.name : "Drag and drop a CSV file, or click to select"}
         </p>
-        <p className="mt-2 text-xs text-white/50">
+        <p className="mt-2 text-xs text-white/60">
           <span className="font-medium text-white/60">Required:</span> Company Name, First Name, Last Name, Email
         </p>
-        <p className="mt-0.5 text-xs text-white/50">
+        <p className="mt-0.5 text-xs text-white/60">
           <span className="font-medium text-white/60">Optional:</span> Company Website
         </p>
       </div>

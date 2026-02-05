@@ -130,7 +130,7 @@ export function CompanySwitcher({ currentCompanyId, currentCompanyName, companie
             {filteredCompanies.length === 0 ? (
               <div className="flex flex-col items-center py-8 text-center">
                 <Building2 className="mb-2 h-8 w-8 text-white/20" />
-                <p className="text-sm text-white/50">No companies found</p>
+                <p className="text-sm text-white/60">No companies found</p>
               </div>
             ) : (
               <div className="py-1">
@@ -205,7 +205,7 @@ function CompanyOption({
           )}
         </div>
         {(industryLabel || stageLabel) && (
-          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-white/50">
+          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-white/60">
             {industryLabel && <span>{industryLabel}</span>}
             {industryLabel && stageLabel && <span>·</span>}
             {stageLabel && <span>{stageLabel}</span>}

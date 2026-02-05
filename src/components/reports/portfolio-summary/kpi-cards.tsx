@@ -246,7 +246,7 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
                 {kpi.icon}
               </div>
               {kpi.coverage < 100 && (
-                <div className="flex items-center gap-1 rounded-full bg-white/[0.05] px-2 py-1 text-[10px] font-medium text-white/50">
+                <div className="flex items-center gap-1 rounded-full bg-white/[0.05] px-2 py-1 text-[10px] font-medium text-white/60">
                   <div className="h-1.5 w-1.5 rounded-full bg-amber-400/60" />
                   {kpi.coverage}%
                 </div>
@@ -258,7 +258,7 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
               <div className="text-3xl font-semibold tracking-tight text-white">
                 {kpi.value}
               </div>
-              <div className="mt-1 text-sm text-white/50">{kpi.label}</div>
+              <div className="mt-1 text-sm text-white/60">{kpi.label}</div>
             </div>
 
             {/* Footer */}

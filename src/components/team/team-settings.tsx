@@ -148,7 +148,7 @@ export function TeamSettings({ currentUserId }: Props) {
         <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
           <Users className="mx-auto h-10 w-10 text-white/30" />
           <h3 className="mt-4 text-base font-semibold">Create a Team</h3>
-          <p className="mt-2 text-sm text-white/50 max-w-sm mx-auto">
+          <p className="mt-2 text-sm text-white/60 max-w-sm mx-auto">
             Invite team members to collaborate on your portfolio. Team members
             share access to portfolio data based on their role.
           </p>
@@ -196,7 +196,7 @@ export function TeamSettings({ currentUserId }: Props) {
           </div>
           <div>
             <h2 className="font-semibold">{org.name}</h2>
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-white/60">
               {members.length} member{members.length !== 1 ? "s" : ""}
             </p>
           </div>
@@ -221,7 +221,7 @@ export function TeamSettings({ currentUserId }: Props) {
 
       {/* Members */}
       <div>
-        <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+        <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/60">
           Members
         </h3>
         <MemberList

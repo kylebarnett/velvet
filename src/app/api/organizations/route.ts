@@ -45,15 +45,15 @@ export async function POST(req: Request) {
     return jsonError("Forbidden.", 403);
   }
 
-  // Check if user already has an org
+  // Check if user already owns an org (invited members should still be able to create their own)
   const { data: existing } = await supabase
-    .from("organization_members")
+    .from("organizations")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("owner_id", user.id)
     .limit(1);
 
   if (existing && existing.length > 0) {
-    return jsonError("You already belong to an organization.", 400);
+    return jsonError("You already own an organization.", 400);
   }
 
   const admin = createSupabaseAdminClient();

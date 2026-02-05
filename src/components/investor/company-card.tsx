@@ -160,7 +160,7 @@ export function CompanyCard({
 
       <div className="mt-3">
         <h3 className="font-medium text-white">{name}</h3>
-        <div className="mt-1 flex items-center gap-2 text-xs text-white/50">
+        <div className="mt-1 flex items-center gap-2 text-xs text-white/60">
           {industry && <span className="capitalize">{industry.replace(/_/g, " ")}</span>}
           {industry && stage && <span>-</span>}
           {stage && <span className="capitalize">{stage.replace(/_/g, " ")}</span>}
@@ -172,7 +172,7 @@ export function CompanyCard({
           {/* Primary metric */}
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-white/50">{latestMetric.name}</div>
+              <div className="text-xs text-white/60">{latestMetric.name}</div>
               <div className="mt-0.5 text-lg font-semibold">
                 {formatValue(latestMetric.value, latestMetric.name)}
               </div>

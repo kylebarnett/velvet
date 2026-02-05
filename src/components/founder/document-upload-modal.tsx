@@ -211,7 +211,7 @@ export function DocumentUploadModal({
           <div className="grid gap-2">
             <label className="text-sm font-medium" htmlFor="modal-description">
               Description{" "}
-              <span className="font-normal text-white/50">(optional)</span>
+              <span className="font-normal text-white/60">(optional)</span>
             </label>
             <textarea
               id="modal-description"
@@ -239,7 +239,7 @@ export function DocumentUploadModal({
                   <Upload className="h-5 w-5 text-white/50" />
                   <div className="text-left">
                     <div className="text-sm font-medium">{selectedFile.name}</div>
-                    <div className="text-xs text-white/50">
+                    <div className="text-xs text-white/60">
                       {formatFileSize(selectedFile.size)}
                     </div>
                   </div>
@@ -271,7 +271,7 @@ export function DocumentUploadModal({
           {/* Upload progress bar */}
           {isUploading && (
             <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs text-white/50">
+              <div className="flex items-center justify-between text-xs text-white/60">
                 <span>Uploading...</span>
                 <span>{uploadProgress}%</span>
               </div>

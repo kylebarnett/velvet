@@ -98,8 +98,8 @@ export function TemplateAssignModal({ open, templateId, templateName, onClose, o
       if (!res.ok) throw new Error(json?.error ?? "Failed to assign.");
       setResult({ requestsCreated: json.requestsCreated, skipped: json.skipped });
       onAssigned();
-    } catch (e: any) {
-      setError(e?.message ?? "Something went wrong.");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -144,7 +144,7 @@ export function TemplateAssignModal({ open, templateId, templateName, onClose, o
                 </button>
               </div>
               {loadingCompanies ? (
-                <div className="text-sm text-white/50">Loading...</div>
+                <div className="text-sm text-white/60">Loading...</div>
               ) : (
                 <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-white/10 bg-black/30 p-2">
                   {companies.map((c) => (
@@ -160,14 +160,14 @@ export function TemplateAssignModal({ open, templateId, templateName, onClose, o
                       />
                       <span>{c.name}</span>
                       {c.stage && (
-                        <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-xs text-white/50">
+                        <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-xs text-white/60">
                           {c.stage.replace(/_/g, " ")}
                         </span>
                       )}
                     </label>
                   ))}
                   {companies.length === 0 && (
-                    <div className="px-2 py-1 text-sm text-white/50">No companies in portfolio.</div>
+                    <div className="px-2 py-1 text-sm text-white/60">No companies in portfolio.</div>
                   )}
                 </div>
               )}
