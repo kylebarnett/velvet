@@ -255,7 +255,7 @@ export default async function InvestorDashboardPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-sm text-white/60">
           Portfolio overview and recent metric activity.
         </p>
@@ -263,17 +263,18 @@ export default async function InvestorDashboardPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         {[
-          { label: "Portfolio companies", value: String(companies.length) },
-          { label: "Pending requests", value: String(pendingRequests ?? 0) },
-          { label: "Submitted this week", value: String(recentSubmissions ?? 0) },
+          { label: "Portfolio companies", value: String(companies.length), href: "/portfolio" },
+          { label: "Pending requests", value: String(pendingRequests ?? 0), href: "/requests?status=pending" },
+          { label: "Submitted this week", value: String(recentSubmissions ?? 0), href: "/requests?status=submitted" },
         ].map((card) => (
-          <div
+          <Link
             key={card.label}
-            className="rounded-xl border border-white/10 bg-white/5 p-4"
+            href={card.href}
+            className="group rounded-xl border border-white/10 bg-white/5 p-4 transition-colors hover:border-white/20 hover:bg-white/[0.07]"
           >
-            <div className="text-sm text-white/60">{card.label}</div>
+            <div className="text-sm text-white/60 group-hover:text-white/70">{card.label}</div>
             <div className="mt-2 text-2xl font-semibold">{card.value}</div>
-          </div>
+          </Link>
         ))}
       </div>
 

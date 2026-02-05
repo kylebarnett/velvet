@@ -3,6 +3,15 @@
 import * as React from "react";
 import { ArrowLeft } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
+import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+
+type PeriodTypeValue = "quarterly" | "annual";
+
+const PERIOD_TYPE_TABS: TabItem<PeriodTypeValue>[] = [
+  { value: "quarterly", label: "Quarterly" },
+  { value: "annual", label: "Annual" },
+];
 
 type GroupedRequest = {
   metricName: string;
@@ -206,8 +215,8 @@ export function BatchSubmissionTable({
   const [companyId, setCompanyId] = React.useState<string | null>(
     initialCompanyId,
   );
-  const [periodType, setPeriodType] = React.useState<string>(
-    prefilterPeriod?.periodType ?? "quarterly",
+  const [periodType, setPeriodType] = React.useState<PeriodTypeValue>(
+    (prefilterPeriod?.periodType as PeriodTypeValue) ?? "quarterly",
   );
 
   // Raw API data — fetched once on mount
@@ -228,6 +237,7 @@ export function BatchSubmissionTable({
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
   const [confirmModal, setConfirmModal] = React.useState(false);
+  const [detailMetric, setDetailMetric] = React.useState<string | null>(null);
   const [pendingSubmissions, setPendingSubmissions] = React.useState<
     Array<{
       metricName: string;
@@ -506,27 +516,13 @@ export function BatchSubmissionTable({
         </button>
 
         {/* Period type toggle */}
-        <div className="flex gap-1 rounded-lg border border-white/10 bg-black/20 p-0.5">
-          {(
-            [
-              { value: "quarterly", label: "Quarterly" },
-              { value: "annual", label: "Annual" },
-            ] as const
-          ).map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setPeriodType(opt.value)}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                periodType === opt.value
-                  ? "bg-white/10 text-white"
-                  : "text-white/50 hover:text-white/70"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+        <SlidingTabs
+          tabs={PERIOD_TYPE_TABS}
+          value={periodType}
+          onChange={setPeriodType}
+          size="sm"
+          showIcons={false}
+        />
       </div>
 
       {rows.length === 0 ? (
@@ -563,9 +559,13 @@ export function BatchSubmissionTable({
               {rows.map((row) => (
                 <tr key={row.metricName} className="border-b border-white/5">
                   <td className="sticky left-0 z-10 bg-zinc-950 px-4 py-2">
-                    <div className="font-medium text-white/90">
+                    <button
+                      type="button"
+                      onClick={() => setDetailMetric(row.metricName)}
+                      className="font-medium text-white/90 hover:text-white hover:underline underline-offset-2 text-left"
+                    >
                       {row.metricName}
-                    </div>
+                    </button>
                     {row.investorNames.length > 0 && (
                       <div className="text-[10px] text-white/40">
                         {row.investorNames.join(", ")}
@@ -592,7 +592,7 @@ export function BatchSubmissionTable({
                             )
                           }
                           placeholder={hasExisting ? existing : "\u2014"}
-                          className={`h-9 w-full rounded-md border bg-black/30 px-2 text-center text-sm font-mono outline-none focus:border-white/20 ${
+                          className={`h-9 w-full rounded-md border bg-black/30 px-2 text-center text-sm font-mono focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 ${
                             hasExisting && !row.values[p.key]
                               ? "border-white/5 text-white/40"
                               : "border-white/10 text-white"
@@ -609,7 +609,7 @@ export function BatchSubmissionTable({
                         updateNotes(row.metricName, e.target.value)
                       }
                       placeholder="Optional notes..."
-                      className="h-9 w-full rounded-md border border-white/10 bg-black/30 px-2 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+                      className="h-9 w-full rounded-md border border-white/10 bg-black/30 px-2 text-sm placeholder:text-white/30 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
                     />
                   </td>
                 </tr>
@@ -637,11 +637,21 @@ export function BatchSubmissionTable({
             type="button"
             onClick={prepareSubmissions}
             disabled={submitting}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-white px-5 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+            className="inline-flex h-10 items-center justify-center rounded-md bg-white px-5 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             {submitting ? "Submitting..." : "Submit all"}
           </button>
         </div>
+      )}
+
+      {/* Metric Detail Panel */}
+      {detailMetric && companyId && (
+        <MetricDetailPanel
+          companyId={companyId}
+          metricName={detailMetric}
+          onClose={() => setDetailMetric(null)}
+          editable
+        />
       )}
 
       <ConfirmModal

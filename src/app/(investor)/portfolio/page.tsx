@@ -94,14 +94,14 @@ export default async function PortfolioPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/portfolio/add"
-            className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10"
+            className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
             data-onboarding="add-contact"
           >
             Add Contact
           </Link>
           <Link
             href="/portfolio/import"
-            className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
+            className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50"
             data-onboarding="import-csv"
           >
             Import CSV
@@ -110,7 +110,7 @@ export default async function PortfolioPage() {
       </div>
 
       {/* Portfolio Insights */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
         <Link
           href="/dashboard"
           className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 hover:bg-white/10 transition-colors"

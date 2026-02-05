@@ -213,7 +213,7 @@ export function MetricRequestForm() {
 
       <div className="mt-4 flex items-center justify-end">
         <button
-          className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+          className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
           disabled={form.formState.isSubmitting}
           type="submit"
         >

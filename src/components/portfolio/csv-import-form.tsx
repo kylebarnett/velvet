@@ -424,7 +424,7 @@ export function CsvImportForm() {
           <button
             onClick={handleImport}
             disabled={!canImport}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+            className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             {importing
               ? "Importing..."

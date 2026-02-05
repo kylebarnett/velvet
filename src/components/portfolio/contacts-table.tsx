@@ -457,7 +457,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
         <button
           onClick={sendAllPending}
           disabled={loading}
-          className="flex sm:hidden w-full h-10 items-center justify-center gap-2 rounded-md bg-white text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+          className="flex sm:hidden w-full h-10 items-center justify-center gap-2 rounded-md bg-white text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
         >
           <Send className="h-4 w-4" />
           Send All Pending ({pendingCount})
@@ -472,7 +472,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
             <button
               onClick={() => sendInvite(Array.from(selectedIds))}
               disabled={loading}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-white/10 px-3 text-sm hover:bg-white/20 disabled:opacity-60"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-white/10 px-3 text-sm hover:bg-white/20 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
             >
               <Mail className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Send Invitations</span>
@@ -481,7 +481,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
             <button
               onClick={bulkDelete}
               disabled={loading}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-red-500/20 px-3 text-sm text-red-200 hover:bg-red-500/30 disabled:opacity-60"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-red-500/20 px-3 text-sm text-red-200 hover:bg-red-500/30 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             >
               <Trash2 className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Delete</span>
@@ -635,7 +635,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                       )}
                       <button
                         onClick={() => startEdit(contact)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                         title="Edit"
                         aria-label="Edit contact"
                       >
@@ -644,7 +644,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                       <button
                         onClick={() => openDeleteModal(contact)}
                         disabled={loading}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
                         title="Delete"
                         aria-label="Delete contact"
                       >
@@ -760,7 +760,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                             <button
                               onClick={() => sendInvite([contact.id])}
                               disabled={loading}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
                               title={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
                               aria-label={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
                             >
@@ -769,7 +769,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                           )}
                           <button
                             onClick={() => startEdit(contact)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                             title="Edit contact"
                             aria-label="Edit contact"
                           >
@@ -778,7 +778,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                           <button
                             onClick={() => openDeleteModal(contact)}
                             disabled={loading}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
                             title="Delete contact"
                             aria-label="Delete contact"
                           >

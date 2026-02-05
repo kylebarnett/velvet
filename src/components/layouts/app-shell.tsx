@@ -203,7 +203,7 @@ export function AppShell({
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-white/10 bg-zinc-950/95 px-4 backdrop-blur-sm md:hidden">
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-white/5"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
           type="button"
           aria-label="Open menu"
         >
@@ -212,7 +212,7 @@ export function AppShell({
         <span className="text-sm font-medium">{currentPageTitle}</span>
         <button
           onClick={onLogout}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-white/5"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
           type="button"
           aria-label="Log out"
         >
@@ -260,7 +260,7 @@ export function AppShell({
           </Link>
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-white/5"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
             type="button"
             aria-label="Close menu"
           >
@@ -309,7 +309,7 @@ export function AppShell({
               <span className="truncate">{company?.name ?? title}</span>
             </Link>
             <button
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/5"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
               onClick={onLogout}
               type="button"
               aria-label="Log out"

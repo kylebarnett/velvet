@@ -102,7 +102,7 @@ export function AddContactForm() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="grid gap-2">
             <label className="text-sm text-white/70" htmlFor="first_name">
               First name
@@ -158,7 +158,7 @@ export function AddContactForm() {
 
       <div className="mt-4 flex items-center justify-end">
         <button
-          className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+          className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
           disabled={form.formState.isSubmitting}
           type="submit"
         >

@@ -143,7 +143,7 @@ export function CompanyTagEditor({
 
       <div className="flex items-center gap-3">
         <button
-          className="inline-flex h-8 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-60"
+          className="inline-flex h-8 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
           onClick={handleSave}
           disabled={saving}
           type="button"

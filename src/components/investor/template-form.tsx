@@ -146,7 +146,7 @@ export function TemplateForm({
           <button
             type="button"
             onClick={addItem}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             <Plus className="h-3.5 w-3.5" />
             Add metric
@@ -199,7 +199,7 @@ export function TemplateForm({
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+          className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
         >
           {saving
             ? "Saving..."
@@ -210,7 +210,7 @@ export function TemplateForm({
         <button
           type="button"
           onClick={() => onCancel ? onCancel() : router.push("/requests?tab=templates")}
-          className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10"
+          className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
         >
           Cancel
         </button>

@@ -311,7 +311,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
         )}
 
         <button
-          className="inline-flex h-11 w-full items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex h-11 w-full items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
           disabled={isSubmitting}
           type="submit"
         >

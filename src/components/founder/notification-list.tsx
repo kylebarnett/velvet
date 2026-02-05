@@ -333,7 +333,7 @@ export function NotificationList({
                       periodEnd: group.periodEnd,
                     })
                   }
-                  className="inline-flex h-8 shrink-0 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
+                  className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
                 >
                   Submit
                 </button>

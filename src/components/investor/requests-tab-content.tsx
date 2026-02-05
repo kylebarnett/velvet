@@ -58,7 +58,7 @@ export function RequestsTabContent({
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
         <button
           onClick={() => setStatusFilter("")}
           className={`rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 text-left hover:bg-white/10 transition-colors ${
@@ -222,11 +222,11 @@ export function RequestsTabContent({
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-white/10 bg-white/5">
-                    <th className="px-4 py-3 font-medium text-white/70">Metric</th>
-                    <th className="px-4 py-3 font-medium text-white/70">Company</th>
-                    <th className="px-4 py-3 font-medium text-white/70">Period</th>
-                    <th className="px-4 py-3 font-medium text-white/70">Due date</th>
-                    <th className="px-4 py-3 font-medium text-white/70">Status</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">Metric</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">Company</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">Period</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">Due date</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/50">Status</th>
                   </tr>
                 </thead>
                 <tbody>

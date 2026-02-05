@@ -24,7 +24,7 @@ const SelectTrigger = React.forwardRef<
       "hover:border-white/20 focus:border-white/20",
       "disabled:cursor-not-allowed disabled:opacity-50",
       "data-[placeholder]:text-white/50",
-      size === "sm" ? "h-9" : size === "md" ? "h-10" : "h-11",
+      size === "sm" ? "h-9" : "h-10",
       className
     )}
     {...props}

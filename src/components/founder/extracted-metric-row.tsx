@@ -2,6 +2,13 @@
 
 import * as React from "react";
 import { Check, X, ChevronDown, ChevronUp, AlertTriangle, Pencil } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ExtractionMapping = {
   id: string;
@@ -173,15 +180,6 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
     mapping.extracted_period_end,
   ]);
 
-  // Handle period selection
-  const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selected = periodOptions.find((p) => p.periodStart === e.target.value);
-    if (selected) {
-      setEditPeriodStart(selected.periodStart);
-      setEditPeriodEnd(selected.periodEnd);
-    }
-  };
-
   return (
     <div
       className={`rounded-lg border p-3 transition-colors ${
@@ -246,7 +244,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 type="button"
                 onClick={() => setEditMode(true)}
                 disabled={disabled}
-                className="h-6 w-6 inline-flex items-center justify-center rounded-md text-white/40 hover:bg-white/10 hover:text-white/60 disabled:opacity-40"
+                className="h-6 w-6 inline-flex items-center justify-center rounded-md text-white/40 hover:bg-white/10 hover:text-white/60 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-white/20"
                 title="Edit metric"
               >
                 <Pencil className="h-3 w-3" />
@@ -266,7 +264,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 setEditPeriodEnd(mapping.extracted_period_end);
               }}
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-white/10 text-white/60 text-xs hover:bg-white/10 disabled:opacity-40"
+              className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-white/10 text-white/60 text-xs hover:bg-white/10 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-white/20"
             >
               Cancel
             </button>
@@ -282,7 +280,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 setEditMode(false);
               }}
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-violet-500/20 text-violet-200 text-xs font-medium hover:bg-violet-500/30 disabled:opacity-40"
+              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-violet-500/20 text-violet-200 text-xs font-medium hover:bg-violet-500/30 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
             >
               <Check className="h-3.5 w-3.5" />
               Save
@@ -294,7 +292,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
             <button
               type="button"
               onClick={() => setExpanded((p) => !p)}
-              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-white/40 hover:bg-white/10 hover:text-white/60"
+              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-white/40 hover:bg-white/10 hover:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/20"
               title="Edit before accepting"
             >
               {expanded ? (
@@ -307,7 +305,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
               type="button"
               onClick={() => onReject(mapping.id)}
               disabled={disabled}
-              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-red-400/60 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40"
+              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-red-400/60 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               title="Reject"
             >
               <X className="h-4 w-4" />
@@ -328,7 +326,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 )
               }
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-emerald-500/20 text-emerald-200 text-xs font-medium hover:bg-emerald-500/30 disabled:opacity-40"
+              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-emerald-500/20 text-emerald-200 text-xs font-medium hover:bg-emerald-500/30 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
               title="Accept"
             >
               <Check className="h-3.5 w-3.5" />
@@ -341,7 +339,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
       {/* Expanded edit form */}
       {((expanded && !isReviewed) || editMode) && (
         <div className="mt-3 space-y-3 border-t border-white/5 pt-3">
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>
               <label className="text-[10px] text-white/40 uppercase tracking-wider">
                 Metric Name
@@ -377,17 +375,29 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 </span>
               )}
             </label>
-            <select
+            <Select
               value={editPeriodStart}
-              onChange={handlePeriodChange}
-              className="mt-1 h-8 w-full rounded-md border border-white/10 bg-black/30 px-2 text-sm outline-none focus:border-white/20 appearance-none cursor-pointer"
+              onValueChange={(value) => {
+                const selected = periodOptions.find((p) => p.periodStart === value);
+                if (selected) {
+                  setEditPeriodStart(selected.periodStart);
+                  setEditPeriodEnd(selected.periodEnd);
+                }
+              }}
             >
-              {periodOptions.map((opt) => (
-                <option key={opt.periodStart} value={opt.periodStart}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger size="sm" className="mt-1">
+                <SelectValue>
+                  {periodOptions.find((p) => p.periodStart === editPeriodStart)?.label ?? "Select period"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {periodOptions.map((opt) => (
+                  <SelectItem key={opt.periodStart} value={opt.periodStart}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <p className="mt-1 text-[10px] text-white/30">
               Select the correct period if AI extracted the wrong one
             </p>

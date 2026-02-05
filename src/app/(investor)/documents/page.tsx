@@ -9,6 +9,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+
+type DateFilterValue = "all" | "7" | "30" | "90";
+
+const DATE_FILTER_TABS: TabItem<DateFilterValue>[] = [
+  { value: "all", label: "All" },
+  { value: "7", label: "7d" },
+  { value: "30", label: "30d" },
+  { value: "90", label: "90d" },
+];
 
 const DOCUMENT_TYPES = [
   { value: "income_statement", label: "Income Statement" },
@@ -70,7 +80,7 @@ export default function DocumentsPage() {
   const [search, setSearch] = React.useState("");
   const [companyFilter, setCompanyFilter] = React.useState("");
   const [typeFilter, setTypeFilter] = React.useState("");
-  const [dateFilter, setDateFilter] = React.useState<"all" | "7" | "30" | "90">("all");
+  const [dateFilter, setDateFilter] = React.useState<DateFilterValue>("all");
 
   // Selection
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
@@ -269,7 +279,7 @@ export default function DocumentsPage() {
             placeholder="Search by filename..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-10 w-full sm:w-64 rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
+            className="h-10 w-full sm:w-64 rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm placeholder:text-white/40 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
           />
           {search && (
             <button
@@ -321,28 +331,13 @@ export default function DocumentsPage() {
           </Select>
 
           {/* Date filter */}
-          <div className="flex rounded-md border border-white/10 overflow-hidden">
-            {[
-              { value: "all" as const, label: "All" },
-              { value: "7" as const, label: "7d" },
-              { value: "30" as const, label: "30d" },
-              { value: "90" as const, label: "90d" },
-            ].map((option) => (
-              <button
-                key={option.value}
-                onClick={() => setDateFilter(option.value)}
-                className={`flex-1 sm:flex-none px-3 py-2 text-sm ${
-                  dateFilter === option.value
-                    ? "bg-white/10 text-white"
-                    : "bg-black/30 text-white/60 hover:bg-white/5"
-                }`}
-                type="button"
-              >
-                <span className="sm:hidden">{option.label}</span>
-                <span className="hidden sm:inline">{option.value === "all" ? "All time" : `${option.value} days`}</span>
-              </button>
-            ))}
-          </div>
+          <SlidingTabs
+            tabs={DATE_FILTER_TABS}
+            value={dateFilter}
+            onChange={setDateFilter}
+            size="sm"
+            showIcons={false}
+          />
         </div>
 
         {/* Bulk actions */}
@@ -351,7 +346,7 @@ export default function DocumentsPage() {
             <button
               onClick={downloadAllForCompany}
               disabled={downloading}
-              className="inline-flex h-10 items-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-60"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
               type="button"
             >
               <Download className="h-4 w-4" />
@@ -363,7 +358,7 @@ export default function DocumentsPage() {
             <button
               onClick={downloadSelected}
               disabled={downloading}
-              className="inline-flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+              className="inline-flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
               type="button"
             >
               <Download className="h-4 w-4" />
@@ -464,9 +459,10 @@ export default function DocumentsPage() {
                   </div>
                   <button
                     onClick={() => downloadSingle(doc)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                     type="button"
                     title="Download"
+                    aria-label={`Download ${doc.file_name}`}
                   >
                     <Download className="h-4 w-4 text-white/50" />
                   </button>
@@ -533,9 +529,10 @@ export default function DocumentsPage() {
                   <div className="w-10">
                     <button
                       onClick={() => downloadSingle(doc)}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                       type="button"
                       title="Download"
+                      aria-label={`Download ${doc.file_name}`}
                     >
                       <Download className="h-4 w-4 text-white/50" />
                     </button>

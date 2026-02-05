@@ -225,7 +225,7 @@ function PreviewPane({
           <button
             type="button"
             onClick={() => onDownload(doc)}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs text-white/70 hover:bg-white/10"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs text-white/70 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             <Download className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Download</span>
@@ -234,7 +234,7 @@ function PreviewPane({
             type="button"
             onClick={() => onDelete(doc)}
             disabled={deleting}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-red-400/60 hover:bg-white/10 disabled:opacity-60"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-red-400/60 hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
             title="Delete"
             aria-label="Delete document"
           >
@@ -244,7 +244,7 @@ function PreviewPane({
           <button
             type="button"
             onClick={onClose}
-            className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-md text-white/40 hover:bg-white/5 hover:text-white/60"
+            className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-md text-white/40 hover:bg-white/5 hover:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/20"
             aria-label="Close preview"
           >
             <X className="h-4 w-4" />
@@ -661,7 +661,7 @@ export function FounderDocumentList() {
                             <div className="flex items-center gap-1">
                               <button
                                 onClick={(e) => { e.stopPropagation(); downloadDocument(doc); }}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                                 title="Download"
                                 aria-label="Download document"
                               >
@@ -670,7 +670,7 @@ export function FounderDocumentList() {
                               <button
                                 onClick={(e) => { e.stopPropagation(); openDeleteModal(doc); }}
                                 disabled={deleting}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
                                 title="Delete"
                                 aria-label="Delete document"
                               >

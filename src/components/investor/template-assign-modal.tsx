@@ -123,7 +123,7 @@ export function TemplateAssignModal({ open, templateId, templateName, onClose, o
             </div>
             <button
               onClick={onClose}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50"
               type="button"
             >
               Done
@@ -216,7 +216,7 @@ export function TemplateAssignModal({ open, templateId, templateName, onClose, o
               <button
                 onClick={handleAssign}
                 disabled={loading || selectedIds.size === 0 || !periodStart || !periodEnd}
-                className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
                 type="button"
               >
                 {loading
@@ -225,7 +225,7 @@ export function TemplateAssignModal({ open, templateId, templateName, onClose, o
               </button>
               <button
                 onClick={onClose}
-                className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                 type="button"
               >
                 Cancel

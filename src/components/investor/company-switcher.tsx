@@ -109,7 +109,7 @@ export function CompanySwitcher({ currentCompanyId, currentCompanyName, companie
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-white/10 bg-zinc-900/95 shadow-2xl backdrop-blur-sm">
+        <div className="absolute left-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-white/10 bg-zinc-900/95 shadow-2xl backdrop-blur-sm">
           {/* Search input */}
           <div className="border-b border-white/10 p-3">
             <div className="relative">

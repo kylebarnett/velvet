@@ -366,7 +366,7 @@ export function MetricsTable({ data, title, onMetricClick, periodsPerPage = 4 }:
               type="button"
               onClick={() => setCurrentPage((p) => p - 1)}
               disabled={!hasPrevPage}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/20"
               title="Previous periods"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -378,7 +378,7 @@ export function MetricsTable({ data, title, onMetricClick, periodsPerPage = 4 }:
               type="button"
               onClick={() => setCurrentPage((p) => p + 1)}
               disabled={!hasNextPage}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/20"
               title="Next periods"
             >
               <ChevronRight className="h-4 w-4" />

@@ -174,7 +174,7 @@ export function TeamSettings({ currentUserId }: Props) {
               type="button"
               onClick={handleCreateOrg}
               disabled={creating || !orgName.trim()}
-              className="h-11 rounded-md bg-white px-5 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+              className="h-11 rounded-md bg-white px-5 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
             >
               {creating ? "Creating..." : "Create"}
             </button>

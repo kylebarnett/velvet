@@ -220,7 +220,7 @@ export function TileMetricConfig({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             Cancel
           </button>
@@ -228,7 +228,7 @@ export function TileMetricConfig({
             type="button"
             onClick={handleSave}
             disabled={saving || !hasChanges}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             Save

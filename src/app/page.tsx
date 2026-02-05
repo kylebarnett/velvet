@@ -19,13 +19,13 @@ export default function Home() {
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
-            className="inline-flex h-11 items-center justify-center rounded-md bg-white px-5 text-sm font-medium text-black hover:bg-white/90"
+            className="inline-flex h-11 items-center justify-center rounded-md bg-white px-5 text-sm font-medium text-black hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50"
             href="/login"
           >
             Login
           </Link>
           <Link
-            className="inline-flex h-11 items-center justify-center rounded-md border border-white/15 bg-transparent px-5 text-sm font-medium text-white hover:bg-white/5"
+            className="inline-flex h-11 items-center justify-center rounded-md border border-white/15 bg-transparent px-5 text-sm font-medium text-white hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
             href="/signup"
           >
             Sign up

@@ -30,7 +30,7 @@ export function CompanyTagEditorWrapper({
         <div className="text-sm font-medium">Company Tags</div>
         <button
           onClick={() => setIsEditing(!isEditing)}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10"
+          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
           type="button"
         >
           <Pencil className="h-3 w-3" />

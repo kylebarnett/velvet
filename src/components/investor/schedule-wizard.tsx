@@ -588,7 +588,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             type="button"
             onClick={handleNext}
             disabled={!canProceed()}
-            className="flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             Continue
             <ArrowRight className="h-4 w-4" />
@@ -598,7 +598,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             type="button"
             onClick={handleSubmit}
             disabled={!canProceed() || submitting}
-            className="flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             {submitting ? (
               <>

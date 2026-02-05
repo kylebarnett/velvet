@@ -68,7 +68,7 @@ export function WidgetLibrary({ onAddWidget }: WidgetLibraryProps) {
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 p-4">
       <h3 className="mb-3 text-sm font-medium text-white/80">Widget Library</h3>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {WIDGET_TEMPLATES.map((template) => (
           <button
             key={`${template.type}-${template.subtype ?? ""}`}

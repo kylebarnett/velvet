@@ -82,7 +82,7 @@ export function ConfirmModal({
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {cancelLabel}
           </button>

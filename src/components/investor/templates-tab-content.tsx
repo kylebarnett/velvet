@@ -312,7 +312,7 @@ export function TemplatesTabContent() {
             {isHidden ? (
               <button
                 onClick={() => handleRestore(tmpl.id)}
-                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
+                className="inline-flex h-9 items-center gap-1.5 rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
                 type="button"
               >
                 <Eye className="h-3.5 w-3.5" />
@@ -322,7 +322,7 @@ export function TemplatesTabContent() {
               <>
                 <button
                   onClick={() => setAssignModal({ open: true, template: tmpl })}
-                  className="inline-flex h-8 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
                   type="button"
                 >
                   Assign
@@ -330,7 +330,7 @@ export function TemplatesTabContent() {
                 <button
                   onClick={() => handleClone(tmpl)}
                   disabled={editingSystem === tmpl.id}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10 disabled:opacity-60"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10 disabled:opacity-60"
                   type="button"
                   title="Clone to My Templates"
                 >
@@ -339,9 +339,10 @@ export function TemplatesTabContent() {
                 </button>
                 <button
                   onClick={() => setHideModal({ open: true, template: tmpl })}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                   type="button"
                   title="Hide from view"
+                  aria-label={`Hide ${tmpl.name} template`}
                 >
                   <EyeOff className="h-4 w-4 text-white/40" />
                 </button>
@@ -424,7 +425,7 @@ export function TemplatesTabContent() {
           <div className="flex shrink-0 gap-1.5">
             <button
               onClick={() => setAssignModal({ open: true, template: tmpl })}
-              className="inline-flex h-8 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
+              className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
               type="button"
             >
               Assign
@@ -432,7 +433,7 @@ export function TemplatesTabContent() {
             <button
               type="button"
               onClick={() => setFormModal({ open: true, mode: "edit", template: tmpl })}
-              className="inline-flex h-8 items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10"
+              className="inline-flex h-9 items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10"
             >
               <Pencil className="h-3.5 w-3.5 sm:mr-1.5" />
               <span className="hidden sm:inline">Edit</span>
@@ -445,9 +446,10 @@ export function TemplatesTabContent() {
                   label: `"${tmpl.name}"`,
                 })
               }
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
               type="button"
               title="Delete template"
+              aria-label={`Delete ${tmpl.name} template`}
             >
               <Trash2 className="h-4 w-4 text-red-400/60" />
             </button>
@@ -467,7 +469,7 @@ export function TemplatesTabContent() {
         <button
           type="button"
           onClick={() => setFormModal({ open: true, mode: "create", template: null })}
-          className="inline-flex h-9 items-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
+          className="inline-flex h-10 items-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50"
           data-onboarding="new-template"
         >
           <Plus className="h-4 w-4" />
@@ -591,7 +593,7 @@ export function TemplatesTabContent() {
                       <button
                         type="button"
                         onClick={selectNone}
-                        className="inline-flex h-7 items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-white/60 hover:bg-white/10"
+                        className="inline-flex h-7 items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-white/60 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                         title="Clear selection"
                       >
                         <XSquare className="h-3.5 w-3.5" />
@@ -607,7 +609,7 @@ export function TemplatesTabContent() {
                             label: `${selectedIds.size} template${selectedIds.size > 1 ? "s" : ""}`,
                           })
                         }
-                        className="inline-flex h-7 items-center gap-1 rounded-md border border-red-500/20 bg-red-500/10 px-2 text-xs text-red-200 hover:bg-red-500/20 disabled:opacity-60"
+                        className="inline-flex h-7 items-center gap-1 rounded-md border border-red-500/20 bg-red-500/10 px-2 text-xs text-red-200 hover:bg-red-500/20 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-red-500/50"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         {bulkDeleting ? "Deleting..." : "Delete selected"}
@@ -617,7 +619,7 @@ export function TemplatesTabContent() {
                     <button
                       type="button"
                       onClick={selectAll}
-                      className="inline-flex h-7 items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-white/50 hover:bg-white/10 hover:text-white/70"
+                      className="inline-flex h-7 items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-white/50 hover:bg-white/10 hover:text-white/70 focus:outline-none focus:ring-2 focus:ring-white/20"
                     >
                       <CheckSquare className="h-3.5 w-3.5" />
                       Select all

@@ -378,9 +378,10 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
               </span>
               <button
                 onClick={() => downloadSingle(doc)}
-                className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+                className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                 type="button"
                 title="Download"
+                aria-label={`Download ${doc.file_name}`}
               >
                 <Download className="h-4 w-4 text-white/50" />
               </button>

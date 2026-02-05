@@ -153,8 +153,9 @@ export function MemberList({
                         onClick={() =>
                           setRemoveModal({ open: true, member })
                         }
-                        className="rounded-md p-1.5 text-red-400/60 hover:bg-red-500/10 hover:text-red-300"
+                        className="rounded-md p-1.5 text-red-400/60 hover:bg-red-500/10 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-white/20"
                         title="Remove member"
+                        aria-label={`Remove ${member.name || member.email}`}
                       >
                         <UserMinus className="h-4 w-4" />
                       </button>

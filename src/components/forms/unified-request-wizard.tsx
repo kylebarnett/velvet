@@ -450,7 +450,7 @@ export function UnifiedRequestWizard() {
           <div className="mt-6 flex items-center justify-center gap-3">
             <button
               onClick={() => router.push(result.type === "recurring" ? "/requests?tab=schedules" : "/requests")}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50"
               type="button"
             >
               {result.type === "recurring" ? "View Schedules" : "View Requests"}
@@ -477,7 +477,7 @@ export function UnifiedRequestWizard() {
                 setReminderDays([3, 1]);
                 setAllCompanies(false);
               }}
-              className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
               type="button"
             >
               Create More
@@ -517,7 +517,7 @@ export function UnifiedRequestWizard() {
           <div className="flex items-center gap-4">
             <Link
               href="/requests"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
@@ -584,7 +584,7 @@ export function UnifiedRequestWizard() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setStep(1)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
               type="button"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -698,7 +698,7 @@ export function UnifiedRequestWizard() {
             <button
               onClick={() => setStep(3)}
               disabled={selectedCompanyIds.size === 0 || (useCustomMetric && !customMetricName.trim())}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
               type="button"
             >
               Continue
@@ -713,7 +713,7 @@ export function UnifiedRequestWizard() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => { setStep(2); setFrequency(null); }}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
               type="button"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -899,7 +899,7 @@ export function UnifiedRequestWizard() {
               <div className="flex items-center justify-end gap-3">
                 <button
                   onClick={() => setFrequency(null)}
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10"
+                  className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                   type="button"
                 >
                   Back
@@ -907,7 +907,7 @@ export function UnifiedRequestWizard() {
                 <button
                   onClick={handleSubmitOneTime}
                   disabled={submitting}
-                  className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+                  className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
                   type="button"
                 >
                   {submitting ? "Creating..." : "Create Requests"}
@@ -1109,7 +1109,7 @@ export function UnifiedRequestWizard() {
               <div className="flex items-center justify-end gap-3">
                 <button
                   onClick={() => setFrequency(null)}
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10"
+                  className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
                   type="button"
                 >
                   Back
@@ -1117,7 +1117,7 @@ export function UnifiedRequestWizard() {
                 <button
                   onClick={handleSubmitRecurring}
                   disabled={submitting || !scheduleName.trim()}
-                  className="flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/50"
                   type="button"
                 >
                   {submitting ? (
