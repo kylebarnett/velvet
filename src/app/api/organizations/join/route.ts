@@ -43,15 +43,15 @@ export async function POST(req: Request) {
     return jsonError("This invitation was sent to a different email address.", 403);
   }
 
-  // Check if already a member
-  const { data: existing } = await admin
+  // Check if already a member of THIS organization
+  const { data: existingInOrg } = await admin
     .from("organization_members")
     .select("id")
     .eq("organization_id", invitation.organization_id)
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (existing) {
+  if (existingInOrg) {
     // Already a member, just mark invitation as accepted
     await admin
       .from("organization_invitations")
@@ -59,6 +59,18 @@ export async function POST(req: Request) {
       .eq("id", invitation.id);
 
     return NextResponse.json({ ok: true, alreadyMember: true });
+  }
+
+  // Check if user already belongs to ANY organization
+  const { data: existingMembership } = await admin
+    .from("organization_members")
+    .select("id, organizations(name)")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (existingMembership) {
+    return jsonError("You already belong to an organization. Users can only be members of one organization at a time.", 400);
   }
 
   // Add as member

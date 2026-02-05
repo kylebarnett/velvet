@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Mail, X, Clock } from "lucide-react";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 type Invitation = {
   id: string;
@@ -32,16 +33,24 @@ export function PendingInvitations({
   onUpdated,
 }: Props) {
   const [cancelling, setCancelling] = React.useState<string | null>(null);
+  const [cancelModal, setCancelModal] = React.useState<{
+    open: boolean;
+    invitation: Invitation | null;
+  }>({ open: false, invitation: null });
 
   const pending = invitations.filter((inv) => inv.status === "pending");
 
   if (pending.length === 0) return null;
 
-  async function handleCancel(invId: string) {
-    setCancelling(invId);
+  async function handleCancel() {
+    const inv = cancelModal.invitation;
+    if (!inv) return;
+
+    setCancelModal({ open: false, invitation: null });
+    setCancelling(inv.id);
     try {
       await fetch(
-        `/api/organizations/${orgId}/invitations/${invId}`,
+        `/api/organizations/${orgId}/invitations/${inv.id}`,
         { method: "DELETE" },
       );
       onUpdated();
@@ -89,7 +98,7 @@ export function PendingInvitations({
               {isAdmin && (
                 <button
                   type="button"
-                  onClick={() => handleCancel(inv.id)}
+                  onClick={() => setCancelModal({ open: true, invitation: inv })}
                   disabled={cancelling === inv.id}
                   className="rounded-md p-1.5 text-white/30 hover:bg-white/5 hover:text-white/60 disabled:opacity-40"
                   title="Cancel invitation"
@@ -101,6 +110,21 @@ export function PendingInvitations({
           );
         })}
       </div>
+
+      <ConfirmModal
+        open={cancelModal.open}
+        title="Cancel Invitation"
+        message={
+          cancelModal.invitation
+            ? `Cancel the invitation to ${cancelModal.invitation.email}? They will no longer be able to join your team with this link.`
+            : ""
+        }
+        confirmLabel="Cancel Invitation"
+        cancelLabel="Keep"
+        variant="danger"
+        onConfirm={handleCancel}
+        onCancel={() => setCancelModal({ open: false, invitation: null })}
+      />
     </div>
   );
 }

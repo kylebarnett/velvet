@@ -61,7 +61,7 @@ export async function POST(
 
   const { email, role } = parsed.data;
 
-  // Check if already a member
+  // Check if user with this email already exists
   const admin = createSupabaseAdminClient();
   const { data: existingUser } = await admin
     .from("users")
@@ -70,6 +70,7 @@ export async function POST(
     .maybeSingle();
 
   if (existingUser) {
+    // Check if already a member of THIS organization
     const { data: existingMember } = await admin
       .from("organization_members")
       .select("id")
@@ -79,6 +80,18 @@ export async function POST(
 
     if (existingMember) {
       return jsonError("This person is already a member.", 400);
+    }
+
+    // Check if already a member of ANY organization
+    const { data: existingOrgMember } = await admin
+      .from("organization_members")
+      .select("id")
+      .eq("user_id", existingUser.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (existingOrgMember) {
+      return jsonError("This person already belongs to another organization.", 400);
     }
   }
 
@@ -109,8 +122,12 @@ export async function POST(
 
   if (error) return jsonError(error.message, 400);
 
-  // In production, send invitation email here
-  // For now, return the invite link for dev mode
+  // TODO: Production - Send invitation email via Resend
+  // - Get org name and inviter name for personalized email
+  // - Use escapeHtml() for XSS protection in email HTML
+  // - Send email with accept invitation link
+  // - See /api/investors/portfolio/invite/route.ts for reference implementation
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001";
   const inviteUrl = `${appUrl}/signup?org_invite=${invitation.token}`;
 
