@@ -272,14 +272,14 @@ function SortableMetricRow({
         </td>
       )}
       <td
-        className={`sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-zinc-950 py-2 pr-4`}
+        className={`sticky ${isReorderMode ? "left-8" : "left-0"} z-10 overflow-hidden bg-zinc-950 py-2 pr-4`}
         style={{ boxShadow: "4px 0 8px -4px rgba(0,0,0,0.4)" }}
       >
-        <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-white/80">
+        <span className="inline-flex max-w-full items-center gap-1.5 text-white/80" title={metric.metricName}>
           {isAiExtracted && (
-            <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+            <Sparkles className="h-3.5 w-3.5 shrink-0 text-violet-400" />
           )}
-          {metric.metricName}
+          <span className="truncate">{metric.metricName}</span>
         </span>
       </td>
       {displayPeriods.map((period) => {
@@ -302,7 +302,7 @@ function SortableMetricRow({
         return (
           <td
             key={period}
-            className={`px-3 py-2 text-right font-mono ${cellBgColor} ${
+            className={`overflow-hidden px-3 py-2 text-right font-mono ${cellBgColor} ${
               hasData
                 ? "cursor-default rounded transition-colors hover:bg-white/10"
                 : ""
@@ -319,9 +319,11 @@ function SortableMetricRow({
             }
             onMouseLeave={hasData && !isReorderMode ? onCellMouseLeave : undefined}
           >
-            {periodData
-              ? formatValue(periodData.value, metric.metricName)
-              : "—"}
+            <span className="block truncate whitespace-nowrap">
+              {periodData
+                ? formatValue(periodData.value, metric.metricName)
+                : "—"}
+            </span>
           </td>
         );
       })}
@@ -336,11 +338,11 @@ function SortableMetricRow({
 
         return (
           <td
-            className="sticky right-0 z-10 min-w-[72px] bg-zinc-950 py-2 px-2 text-right font-mono"
+            className="sticky right-0 z-10 overflow-hidden bg-zinc-950 py-2 px-2 text-right font-mono"
             style={{ boxShadow: "-4px 0 8px -4px rgba(0,0,0,0.4)" }}
           >
             {total !== null ? (
-              <span className="text-white/90" title={`${aggSymbol} ${aggregationType === "sum" ? "Sum" : "Latest"}`}>
+              <span className="block truncate whitespace-nowrap text-white/90" title={`${aggSymbol} ${aggregationType === "sum" ? "Sum" : "Latest"}: ${formatValue(total, metric.metricName)}`}>
                 {formatValue(total, metric.metricName)}
               </span>
             ) : (
@@ -446,10 +448,13 @@ export function MetricsTable({
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const justDraggedRef = useRef(false); // Track if we just completed a drag
   const scrollRef = useRef<HTMLDivElement>(null);
-  const metricColRef = useRef<HTMLTableCellElement>(null);
   const [periodColWidth, setPeriodColWidth] = useState<number | null>(null);
   const [visiblePeriodSet, setVisiblePeriodSet] = useState<string[]>([]);
   const periodHeaderRefs = useRef<Map<string, HTMLTableCellElement>>(new Map());
+
+  const METRIC_COL_WIDTH = 170;
+  const TOTAL_COL_WIDTH = showTotals ? 110 : 0;
+  const GRIP_COL_WIDTH = isReorderMode ? 32 : 0;
 
   // Measure container and compute period column width so exactly 4 fit
   useEffect(() => {
@@ -459,11 +464,8 @@ export function MetricsTable({
     function measure() {
       if (!scrollRef.current) return;
       const containerWidth = scrollRef.current.clientWidth;
-      // Measure the actual metric name column width, fallback to 180
-      const metricWidth = metricColRef.current?.offsetWidth ?? 180;
-      const totalColWidth = showTotals ? 80 : 0;
-      const available = containerWidth - metricWidth - totalColWidth;
-      setPeriodColWidth(Math.max(100, Math.floor(available / 4)));
+      const available = containerWidth - METRIC_COL_WIDTH - TOTAL_COL_WIDTH - GRIP_COL_WIDTH;
+      setPeriodColWidth(Math.max(80, Math.floor(available / 4)));
     }
 
     measure();
@@ -471,18 +473,16 @@ export function MetricsTable({
     const observer = new ResizeObserver(() => measure());
     observer.observe(scrollEl);
     return () => observer.disconnect();
-  }, [showTotals]);
+  }, [showTotals, TOTAL_COL_WIDTH, GRIP_COL_WIDTH]);
 
   // Determine which period headers are actually visible between the sticky columns
   const updateVisiblePeriods = useCallback(() => {
-    if (!scrollRef.current || !metricColRef.current) return;
+    if (!scrollRef.current) return;
     const scrollRect = scrollRef.current.getBoundingClientRect();
-    const metricColW = metricColRef.current.offsetWidth;
-    const totalColW = showTotals ? 80 : 0;
 
     // The visible period area is between the two sticky columns
-    const visibleLeft = scrollRect.left + metricColW;
-    const visibleRight = scrollRect.right - totalColW;
+    const visibleLeft = scrollRect.left + METRIC_COL_WIDTH + GRIP_COL_WIDTH;
+    const visibleRight = scrollRect.right - TOTAL_COL_WIDTH;
 
     const visible: string[] = [];
     periodHeaderRefs.current.forEach((el, period) => {
@@ -496,7 +496,7 @@ export function MetricsTable({
     // Sort chronologically
     visible.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     setVisiblePeriodSet(visible);
-  }, [showTotals]);
+  }, [METRIC_COL_WIDTH, GRIP_COL_WIDTH, TOTAL_COL_WIDTH]);
 
   useEffect(() => {
     const scrollEl = scrollRef.current;
@@ -836,14 +836,24 @@ export function MetricsTable({
           strategy={verticalListSortingStrategy}
         >
           <div ref={scrollRef} className="overflow-x-auto">
-            <table className="text-sm" style={{ tableLayout: "fixed" }}>
+            <table
+              className="text-sm"
+              style={{
+                tableLayout: "fixed",
+                width:
+                  GRIP_COL_WIDTH +
+                  METRIC_COL_WIDTH +
+                  displayPeriods.length * (periodColWidth ?? 150) +
+                  TOTAL_COL_WIDTH,
+              }}
+            >
               <colgroup>
-                {isReorderMode && <col style={{ width: 32 }} />}
-                <col style={{ width: "auto" }} />
+                {isReorderMode && <col style={{ width: GRIP_COL_WIDTH }} />}
+                <col style={{ width: METRIC_COL_WIDTH }} />
                 {displayPeriods.map((period) => (
                   <col key={period} style={{ width: periodColWidth ?? 150 }} />
                 ))}
-                {showTotals && <col style={{ width: 80 }} />}
+                {showTotals && <col style={{ width: TOTAL_COL_WIDTH }} />}
               </colgroup>
               <thead>
                 <tr className="border-b border-white/10">
@@ -851,7 +861,6 @@ export function MetricsTable({
                     <th className="sticky left-0 z-10 w-8 bg-zinc-950 pb-2" />
                   )}
                   <th
-                    ref={metricColRef}
                     className={`sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-zinc-950 pb-2 pr-4 text-left font-medium text-white/60`}
                     style={{ boxShadow: "4px 0 8px -4px rgba(0,0,0,0.4)" }}
                   >
@@ -864,9 +873,11 @@ export function MetricsTable({
                         if (el) periodHeaderRefs.current.set(period, el);
                         else periodHeaderRefs.current.delete(period);
                       }}
-                      className="px-3 pb-2 text-right font-medium text-white/60"
+                      className="overflow-hidden px-3 pb-2 text-right font-medium text-white/60"
                     >
-                      {formatPeriod(period, displayData[0]?.periodType ?? "quarterly")}
+                      <span className="block truncate whitespace-nowrap">
+                        {formatPeriod(period, displayData[0]?.periodType ?? "quarterly")}
+                      </span>
                     </th>
                   ))}
                   {showTotals && (
@@ -874,7 +885,8 @@ export function MetricsTable({
                       className="sticky right-0 z-10 bg-zinc-950 pb-2 px-2 text-right font-medium text-white/60"
                       style={{ boxShadow: "-4px 0 8px -4px rgba(0,0,0,0.4)" }}
                     >
-                      <span className="inline-flex items-center gap-1">
+                      <span className="inline-flex items-center justify-end gap-1">
+                        Total
                         <TotalColumnTooltip
                           periodType={displayData[0]?.periodType ?? "quarterly"}
                           periodsVisible={visiblePeriods.length}
