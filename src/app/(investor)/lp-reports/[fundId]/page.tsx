@@ -119,6 +119,7 @@ export default async function FundDetailPage({
           title: r.title as string,
           status: r.status as string,
           created_at: r.created_at as string,
+          content: (r.content ?? null) as Record<string, unknown> | null,
         }))}
         companies={companies}
       />

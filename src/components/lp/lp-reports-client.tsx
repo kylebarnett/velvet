@@ -29,7 +29,7 @@ export function LPReportsClient({ funds: initialFunds }: LPReportsClientProps) {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">LP Reports</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Funds</h1>
           <p className="mt-0.5 text-sm text-white/60">
             Manage funds, track performance, and generate LP reports.
           </p>

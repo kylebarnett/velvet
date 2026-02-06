@@ -61,11 +61,41 @@ export function PerformanceSummary({
   currency,
 }: PerformanceSummaryProps) {
   const kpis = [
-    { label: "TVPI", value: formatMultiple(tvpi), color: getMultipleColor(tvpi), tooltip: "Total Value to Paid-In" },
-    { label: "DPI", value: formatMultiple(dpi), color: getMultipleColor(dpi), tooltip: "Distributions to Paid-In" },
-    { label: "RVPI", value: formatMultiple(rvpi), color: getMultipleColor(rvpi), tooltip: "Residual Value to Paid-In" },
-    { label: "IRR", value: formatPercent(irr), color: getIRRColor(irr), tooltip: "Internal Rate of Return" },
-    { label: "MOIC", value: formatMultiple(moic), color: getMultipleColor(moic), tooltip: "Multiple on Invested Capital" },
+    {
+      label: "TVPI",
+      value: formatMultiple(tvpi),
+      color: getMultipleColor(tvpi),
+      tooltip: "Total Value to Paid-In",
+      formula: "(Unrealized + Realized) / Invested",
+    },
+    {
+      label: "DPI",
+      value: formatMultiple(dpi),
+      color: getMultipleColor(dpi),
+      tooltip: "Distributions to Paid-In",
+      formula: "Realized / Invested",
+    },
+    {
+      label: "RVPI",
+      value: formatMultiple(rvpi),
+      color: getMultipleColor(rvpi),
+      tooltip: "Residual Value to Paid-In",
+      formula: "Unrealized / Invested",
+    },
+    {
+      label: "IRR",
+      value: formatPercent(irr),
+      color: getIRRColor(irr),
+      tooltip: "Internal Rate of Return",
+      formula: "Newton-Raphson on dated cash flows",
+    },
+    {
+      label: "MOIC",
+      value: formatMultiple(moic),
+      color: getMultipleColor(moic),
+      tooltip: "Multiple on Invested Capital",
+      formula: "(Unrealized + Realized) / Invested",
+    },
   ];
 
   return (
@@ -75,13 +105,19 @@ export function PerformanceSummary({
         {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className="rounded-xl border border-white/10 bg-white/5 p-4"
-            title={kpi.tooltip}
+            className="group relative rounded-xl border border-white/10 bg-white/5 p-4"
           >
             <p className="text-[10px] uppercase tracking-wider text-white/40">{kpi.label}</p>
             <p className={cn("mt-1 text-2xl font-semibold", kpi.color)}>
               {kpi.value}
             </p>
+            {/* Hover tooltip */}
+            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-lg border border-white/10 bg-zinc-900 px-3 py-2.5 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+              <p className="text-xs font-medium text-white/90">{kpi.tooltip}</p>
+              <p className="mt-1 font-mono text-[11px] text-white/50">{kpi.formula}</p>
+              {/* Arrow */}
+              <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-zinc-900" />
+            </div>
           </div>
         ))}
       </div>

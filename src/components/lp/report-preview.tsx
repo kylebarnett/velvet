@@ -2,6 +2,7 @@
 
 import { forwardRef } from "react";
 import DOMPurify from "dompurify";
+import { getReportTheme, type ReportThemeColors } from "@/lib/lp/report-themes";
 
 type PerformanceSnapshot = {
   tvpi: number | null;
@@ -31,6 +32,7 @@ type ReportPreviewProps = {
   performance: PerformanceSnapshot;
   investments: InvestmentSnapshot[];
   quarterlySummary: string;
+  theme?: ReportThemeColors;
 };
 
 /* ---------- Formatting helpers ---------- */
@@ -68,25 +70,6 @@ function fmtMOIC(invested: number, current: number, realized: number): string {
   return `${((current + realized) / invested).toFixed(2)}x`;
 }
 
-/* ---------- Design tokens (inline styles for reliable PDF capture) ---------- */
-
-const colors = {
-  headerBg: "#1e3a5f",
-  headerText: "#ffffff",
-  sectionHeading: "#1e3a5f",
-  bodyText: "#1e293b",
-  secondaryText: "#64748b",
-  kpiCardBg: "#f8fafc",
-  kpiCardBorder: "#e2e8f0",
-  tableHeaderBg: "#f1f5f9",
-  tableBorder: "#e2e8f0",
-  tableAltRow: "#f8fafc",
-  positive: "#059669",
-  divider: "#e2e8f0",
-  pageBg: "#ffffff",
-  badgeBg: "rgba(255,255,255,0.2)",
-};
-
 /* ---------- Sanitization for quarterly summary ---------- */
 
 const ALLOWED_TAGS = ["p", "br", "strong", "em", "ul", "ol", "li", "a", "span"];
@@ -102,7 +85,7 @@ function sanitizeHtml(html: string): string {
 
 /* ---------- Sub-components ---------- */
 
-function KPICard({ label, value }: { label: string; value: string }) {
+function KPICard({ label, value, colors }: { label: string; value: string; colors: ReportThemeColors }) {
   return (
     <div
       style={{
@@ -139,7 +122,7 @@ function KPICard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function CurrencyCard({ label, value }: { label: string; value: string }) {
+function CurrencyCard({ label, value, colors }: { label: string; value: string; colors: ReportThemeColors }) {
   return (
     <div
       style={{
@@ -176,7 +159,7 @@ function CurrencyCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SectionDivider() {
+function SectionDivider({ colors }: { colors: ReportThemeColors }) {
   return (
     <hr
       style={{
@@ -201,9 +184,11 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
       performance,
       investments,
       quarterlySummary,
+      theme,
     },
     ref,
   ) {
+    const colors = theme ?? getReportTheme().colors;
     const totalInvested = investments.reduce((sum, inv) => sum + inv.invested, 0);
     const totalCurrent = investments.reduce((sum, inv) => sum + inv.current, 0);
     const totalRealized = investments.reduce((sum, inv) => sum + inv.realized, 0);
@@ -310,11 +295,11 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
               className="grid grid-cols-5 gap-3"
               style={{ marginBottom: "12px" }}
             >
-              <KPICard label="TVPI" value={fmtMultiple(performance.tvpi)} />
-              <KPICard label="DPI" value={fmtMultiple(performance.dpi)} />
-              <KPICard label="RVPI" value={fmtMultiple(performance.rvpi)} />
-              <KPICard label="IRR" value={fmtPercent(performance.irr)} />
-              <KPICard label="MOIC" value={fmtMultiple(performance.moic)} />
+              <KPICard label="TVPI" value={fmtMultiple(performance.tvpi)} colors={colors} />
+              <KPICard label="DPI" value={fmtMultiple(performance.dpi)} colors={colors} />
+              <KPICard label="RVPI" value={fmtMultiple(performance.rvpi)} colors={colors} />
+              <KPICard label="IRR" value={fmtPercent(performance.irr)} colors={colors} />
+              <KPICard label="MOIC" value={fmtMultiple(performance.moic)} colors={colors} />
             </div>
 
             {/* Currency totals - 3 column grid */}
@@ -322,10 +307,12 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
               <CurrencyCard
                 label="Total Invested"
                 value={fmtCurrency(performance.totalInvested, currency)}
+                colors={colors}
               />
               <CurrencyCard
                 label="Current Value"
                 value={fmtCurrency(performance.totalCurrentValue, currency)}
+                colors={colors}
               />
               <CurrencyCard
                 label="Total Value"
@@ -333,11 +320,12 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
                   performance.totalCurrentValue + performance.totalRealizedValue,
                   currency,
                 )}
+                colors={colors}
               />
             </div>
           </div>
 
-          <SectionDivider />
+          <SectionDivider colors={colors} />
 
           {/* Quarterly Summary */}
           {quarterlySummary && quarterlySummary !== "<p></p>" && (
@@ -365,7 +353,7 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(quarterlySummary) }}
                 />
               </div>
-              <SectionDivider />
+              <SectionDivider colors={colors} />
             </>
           )}
 

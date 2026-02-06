@@ -44,10 +44,15 @@ export async function GET(
 
   const rows = rawInvestments ?? [];
 
+  function safeNumber(x: unknown): number {
+    const n = Number(x);
+    return isNaN(n) ? 0 : n;
+  }
+
   const investments: Investment[] = rows.map((row) => ({
-    invested_amount: Number(row.invested_amount) || 0,
-    current_value: Number(row.current_value) || 0,
-    realized_value: Number(row.realized_value) || 0,
+    invested_amount: safeNumber(row.invested_amount),
+    current_value: safeNumber(row.current_value),
+    realized_value: safeNumber(row.realized_value),
   }));
 
   const tvpi = calculateTVPI(investments);
@@ -60,9 +65,9 @@ export async function GET(
   const now = new Date();
 
   for (const row of rows) {
-    const investedAmt = Number(row.invested_amount) || 0;
-    const realizedAmt = Number(row.realized_value) || 0;
-    const currentAmt = Number(row.current_value) || 0;
+    const investedAmt = safeNumber(row.invested_amount);
+    const realizedAmt = safeNumber(row.realized_value);
+    const currentAmt = safeNumber(row.current_value);
 
     const investmentDate = row.investment_date
       ? new Date(row.investment_date)

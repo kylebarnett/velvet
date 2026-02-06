@@ -8,6 +8,7 @@ import Link from "next/link";
 import { SlidingTabs, type TabItem } from "@/components/ui/sliding-tabs";
 import { RichTextEditor } from "@/components/founder/rich-text-editor";
 import { ReportPreview } from "./report-preview";
+import { ThemeSelector } from "./theme-selector";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import {
   calculateTVPI,
@@ -16,6 +17,11 @@ import {
   calculateMOIC,
   type Investment,
 } from "@/lib/lp/calculations";
+import {
+  getReportTheme,
+  DEFAULT_THEME_ID,
+  type ReportThemeId,
+} from "@/lib/lp/report-themes";
 import { cn } from "@/lib/utils/cn";
 
 /* ---------- Types ---------- */
@@ -59,6 +65,7 @@ type ReportContent = {
   summary?: Record<string, unknown>;
   investments?: { id: string; company: string; invested: number; current: number; realized: number }[];
   generatedAt?: string;
+  theme?: string;
 };
 
 type EditorTab = "edit" | "preview";
@@ -110,6 +117,9 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   const [quarterlySummary, setQuarterlySummary] = useState(
     existingContent?.quarterlySummary ?? "",
   );
+  const [themeId, setThemeId] = useState<ReportThemeId>(
+    (existingContent?.theme as ReportThemeId) ?? DEFAULT_THEME_ID,
+  );
 
   // Investment selection — default to all if no prior selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
@@ -136,6 +146,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     reportType: report.report_type,
     status: report.status,
     quarterlySummary: existingContent?.quarterlySummary ?? "",
+    themeId: (existingContent?.theme as ReportThemeId) ?? DEFAULT_THEME_ID,
     selectedIds: new Set(
       existingContent?.selectedInvestmentIds && Array.isArray(existingContent.selectedInvestmentIds) && existingContent.selectedInvestmentIds.length > 0
         ? existingContent.selectedInvestmentIds
@@ -152,10 +163,11 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
       reportType !== init.reportType ||
       status !== init.status ||
       quarterlySummary !== init.quarterlySummary ||
+      themeId !== init.themeId ||
       selectedIds.size !== init.selectedIds.size ||
       [...selectedIds].some((id) => !init.selectedIds.has(id));
     setIsDirty(dirty);
-  }, [title, reportDate, reportType, status, quarterlySummary, selectedIds]);
+  }, [title, reportDate, reportType, status, quarterlySummary, themeId, selectedIds]);
 
   // beforeunload warning
   useEffect(() => {
@@ -240,6 +252,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     const content: Record<string, unknown> = {
       quarterlySummary,
       selectedInvestmentIds: [...selectedIds],
+      theme: themeId,
       summary: {
         tvpi: performance.tvpi,
         dpi: performance.dpi,
@@ -286,6 +299,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         reportType,
         status,
         quarterlySummary,
+        themeId,
         selectedIds: new Set(selectedIds),
       };
       setIsDirty(false);
@@ -473,6 +487,14 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             </div>
           </div>
 
+          {/* Report Theme */}
+          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+              Report Theme
+            </h3>
+            <ThemeSelector value={themeId} onChange={setThemeId} />
+          </div>
+
           {/* Investment Selection */}
           <div className="rounded-xl border border-white/10 bg-white/5 p-4">
             <div className="mb-3 flex items-center justify-between">
@@ -580,6 +602,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             performance={performance}
             investments={previewInvestments}
             quarterlySummary={quarterlySummary}
+            theme={getReportTheme(themeId).colors}
           />
           </div>
         </div>

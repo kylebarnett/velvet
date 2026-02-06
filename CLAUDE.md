@@ -6,6 +6,17 @@
 
 Velvet is a portfolio metrics platform connecting investors with founders. Investors can import portfolio companies, invite founders, and request metrics. Founders can submit metrics and upload documents.
 
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router, serverless API routes)
+- **Language**: TypeScript with `@/*` path aliases
+- **Frontend**: React with Tailwind CSS v4 (`@theme` directive in `globals.css`)
+- **Theme**: Dark mode only via `next-themes`
+- **Database**: Supabase (PostgreSQL with Row Level Security)
+- **Auth**: Supabase Auth with `@supabase/ssr` for session management
+- **Deployment**: Vercel (with Vercel Cron for scheduled jobs)
+- **Middleware**: `src/middleware.ts` for session refresh and route protection
+
 ## Architecture
 
 ### User Roles
@@ -26,8 +37,9 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `/requests/new` - Unified request wizard (template selection, companies, period)
 - `/requests/schedules/[id]` - Schedule detail and run history
 - `/documents` - Cross-portfolio document browser with filters and bulk download
-- `/lp-reports` - LP fund management with performance metrics (TVPI, DPI, IRR, MOIC)
-- `/lp-reports/[fundId]` - Fund detail with investments and performance charts
+- `/lp-reports` - Funds management with performance metrics (TVPI, DPI, IRR, MOIC) (sidebar: "Funds")
+- `/lp-reports/[fundId]` - Fund detail with tabbed layout (Reports default, Overview tab for performance/investments/chart)
+- `/lp-reports/[fundId]/reports/[reportId]` - Full-page report editor with investment selection, rich text summary, live KPIs, PDF export
 - `/reports/compare` - Multi-company metric comparison (2-8 companies, normalization)
 - `/reports/trends` - Portfolio growth distribution, YoY comparison, outlier detection
 - `/reports/benchmarks` - Metric benchmarking with percentile rankings across portfolio
@@ -1184,14 +1196,17 @@ Located in `src/lib/lp/calculations.ts`:
 
 ### Components
 Located in `src/components/lp/`:
-- `lp-reports-client.tsx` — Main page with fund cards and create fund modal
+- `lp-reports-client.tsx` — Main "Funds" page with fund cards and create fund modal
 - `fund-card.tsx` — Fund summary card with TVPI/DPI/MOIC KPI row
 - `fund-form-modal.tsx` — Create/edit fund with Zod + react-hook-form
-- `fund-detail-client.tsx` — Fund detail with performance summary + investments table
-- `performance-summary.tsx` — KPI cards (TVPI, DPI, RVPI, IRR, MOIC) with color coding
+- `fund-detail-client.tsx` — Fund detail with SlidingTabs (Overview default, Reports tab). Reports tab shows LP report list + generate button (clicking a report navigates to editor). Overview tab shows performance summary, investments table, and chart.
+- `report-form-modal.tsx` — Generate LP report with auto-populated performance snapshot; redirects to editor on creation
+- `report-editor.tsx` — Full-page report editor: two-column layout (editor + live preview), investment selection checkboxes, rich text quarterly summary, live KPI recalculation, dirty state tracking + beforeunload, PDF export, delete with confirmation
+- `report-preview.tsx` — PDF-ready report preview (forwardRef) with KPIs, currency totals, quarterly summary (RichTextDisplay), investments table with per-row MOIC. Print-friendly styles.
+- `performance-summary.tsx` — KPI cards (TVPI, DPI, RVPI, IRR, MOIC) with color coding and hover tooltips showing full name + calculation formula
 - `investment-table.tsx` — Editable investments table with per-row MOIC
 - `investment-form-modal.tsx` — Add/edit investment with company dropdown
-- `fund-performance-chart.tsx` — Recharts area chart for NAV over time
+- `fund-performance-chart.tsx` — Recharts bar chart with per-bar colors (Invested=blue, Unrealized=emerald, Realized=amber, Total=violet)
 
 ### API Routes
 - `GET/POST /api/investors/funds` — List/create funds
@@ -1200,6 +1215,7 @@ Located in `src/components/lp/`:
 - `PUT/DELETE /api/investors/funds/[id]/investments/[investmentId]` — Update/delete investment
 - `GET /api/investors/funds/[id]/performance` — Calculated TVPI/DPI/RVPI/MOIC
 - `GET/POST /api/investors/funds/[id]/reports` — List/create LP reports
+- `GET/PUT/DELETE /api/investors/funds/[id]/reports/[reportId]` — Read/update/delete single LP report
 
 ### Setup
 1. Run migration `0022_lp_reporting.sql`

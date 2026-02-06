@@ -7,8 +7,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
+  Cell,
 } from "recharts";
 
 import { formatValue } from "@/components/charts/types";
@@ -19,6 +19,8 @@ type FundPerformanceChartProps = {
   totalRealizedValue: number;
   currency: string;
 };
+
+const BAR_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"];
 
 export function FundPerformanceChart({
   totalInvested,
@@ -34,22 +36,10 @@ export function FundPerformanceChart({
   }
 
   const data = [
-    {
-      name: "Invested",
-      value: totalInvested,
-    },
-    {
-      name: "Unrealized",
-      value: totalCurrentValue,
-    },
-    {
-      name: "Realized",
-      value: totalRealizedValue,
-    },
-    {
-      name: "Total Value",
-      value: totalCurrentValue + totalRealizedValue,
-    },
+    { name: "Invested", value: totalInvested, color: BAR_COLORS[0] },
+    { name: "Unrealized", value: totalCurrentValue, color: BAR_COLORS[1] },
+    { name: "Realized", value: totalRealizedValue, color: BAR_COLORS[2] },
+    { name: "Total Value", value: totalCurrentValue + totalRealizedValue, color: BAR_COLORS[3] },
   ];
 
   return (
@@ -73,6 +63,8 @@ export function FundPerformanceChart({
             dy={10}
           />
           <YAxis
+            domain={[0, "auto"]}
+            allowDecimals={false}
             tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
             tickLine={false}
             axisLine={false}
@@ -96,18 +88,11 @@ export function FundPerformanceChart({
             }}
             formatter={(value) => [formatValue(value as number, "Revenue"), "Amount"]}
           />
-          <Legend
-            wrapperStyle={{ paddingTop: 10 }}
-            formatter={(value) => (
-              <span className="text-xs text-white/70">{value}</span>
-            )}
-          />
-          <Bar
-            dataKey="value"
-            name="Amount"
-            fill="#3b82f6"
-            radius={[4, 4, 0, 0]}
-          />
+          <Bar dataKey="value" name="Amount" radius={[4, 4, 0, 0]}>
+            {data.map((entry, index) => (
+              <Cell key={index} fill={entry.color} />
+            ))}
+          </Bar>
         </RechartsBarChart>
       </ResponsiveContainer>
     </div>
