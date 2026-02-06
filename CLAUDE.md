@@ -134,7 +134,7 @@ This project uses Tailwind CSS v4 with the new configuration format:
 - PostCSS plugin: `@tailwindcss/postcss` (configured in `postcss.config.mjs`)
 
 ### Theme Provider
-The app uses `next-themes` for theme management (`src/components/theme-provider.tsx`):
+The app uses `next-themes` for theme management (`src/components/ui/theme-provider.tsx`):
 ```tsx
 <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
   {children}
@@ -2071,7 +2071,7 @@ const { periodType, setPeriodType, dateRange, setDateRange, isLoaded } = useDash
 ### useDebounce
 Debounces value changes, commonly used for search inputs:
 ```tsx
-import { useDebounce } from "@/lib/hooks/use-debounce";
+import { useDebounce } from "@/hooks/use-debounce";
 
 function SearchComponent() {
   const [search, setSearch] = useState("");
@@ -2087,7 +2087,7 @@ function SearchComponent() {
   return <input value={search} onChange={(e) => setSearch(e.target.value)} />;
 }
 ```
-- Location: `src/lib/hooks/use-debounce.ts`
+- Location: `src/hooks/use-debounce.ts`
 - Generic type: `useDebounce<T>(value: T, delay: number): T`
 
 ## Types & Constants
