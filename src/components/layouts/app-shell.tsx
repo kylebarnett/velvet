@@ -4,15 +4,38 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, HelpCircle, LogOut, Menu, X } from "lucide-react";
+import {
+  Briefcase,
+  Building2,
+  Users,
+  Send,
+  BarChart3,
+  FileText,
+  UserPlus,
+  LayoutDashboard,
+  Inbox,
+  Shield,
+  ChevronDown,
+  HelpCircle,
+  LogOut,
+  Menu,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils/cn";
+
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
 
 export type NavItem = {
   href: string;
   label: string;
   badge?: number;
+  icon?: string;
+  divider?: boolean;
   children?: NavItem[];
 };
 
@@ -22,10 +45,56 @@ export type CompanyInfo = {
   logoUrl: string | null;
 };
 
+export type UserInfo = {
+  fullName: string | null;
+  email: string;
+};
+
+/* ------------------------------------------------------------------ */
+/*  Icon map (string keys → Lucide components)                         */
+/* ------------------------------------------------------------------ */
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  briefcase: Briefcase,
+  building2: Building2,
+  users: Users,
+  send: Send,
+  "bar-chart-3": BarChart3,
+  "file-text": FileText,
+  "user-plus": UserPlus,
+  "layout-dashboard": LayoutDashboard,
+  inbox: Inbox,
+  shield: Shield,
+};
+
+function NavIcon({ name, className }: { name?: string; className?: string }) {
+  if (!name) return null;
+  const Icon = ICON_MAP[name];
+  return Icon ? <Icon className={className} /> : null;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
+function getInitials(name: string | null, email: string): string {
+  if (name) {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+  return email.substring(0, 2).toUpperCase();
+}
+
+/* ------------------------------------------------------------------ */
+/*  AppShell                                                           */
+/* ------------------------------------------------------------------ */
+
 export function AppShell({
   title,
   nav,
   company,
+  user,
   children,
   showTakeTour,
   onTakeTour,
@@ -33,6 +102,7 @@ export function AppShell({
   title: string;
   nav: NavItem[];
   company?: CompanyInfo;
+  user?: UserInfo;
   children: React.ReactNode;
   showTakeTour?: boolean;
   onTakeTour?: () => void;
@@ -107,6 +177,71 @@ export function AppShell({
     return title;
   }, [pathname, nav, title]);
 
+  /* ---------------------------------------------------------------- */
+  /*  Brand header                                                     */
+  /* ---------------------------------------------------------------- */
+
+  const brandHeader = (
+    <div className="px-4 pb-4 pt-5">
+      <Link className="flex items-center gap-2.5" href="/app">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-sm font-bold">
+          V
+        </span>
+        <span className="text-[15px] font-semibold tracking-tight">Velvet</span>
+      </Link>
+      {company && (
+        <div className="ml-[42px] mt-0.5 flex items-center gap-1.5">
+          {company.logoUrl && !logoError ? (
+            <Image
+              src={company.logoUrl}
+              alt={`${company.name} logo`}
+              width={14}
+              height={14}
+              className="rounded-sm"
+              onError={() => setLogoError(true)}
+              unoptimized
+            />
+          ) : null}
+          <span className="truncate text-xs text-white/50">{company.name}</span>
+        </div>
+      )}
+      <div className="mx-0 mt-4 border-t border-white/[0.06]" />
+    </div>
+  );
+
+  /* ---------------------------------------------------------------- */
+  /*  User profile footer                                              */
+  /* ---------------------------------------------------------------- */
+
+  const profileFooter = user ? (
+    <div className="border-t border-white/[0.06] p-3">
+      <div className="flex items-center gap-2.5">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-medium">
+          {getInitials(user.fullName, user.email)}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-white/90">
+            {user.fullName || user.email.split("@")[0]}
+          </p>
+          <p className="truncate text-xs text-white/40">{user.email}</p>
+        </div>
+        <button
+          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-white/40 hover:bg-white/[0.06] hover:text-white/70"
+          onClick={onLogout}
+          type="button"
+          aria-label="Log out"
+          title="Log out"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  ) : null;
+
+  /* ---------------------------------------------------------------- */
+  /*  Nav rendering                                                    */
+  /* ---------------------------------------------------------------- */
+
   const renderNavItems = (mobile = false) => (
     <>
       {nav.map((item) => {
@@ -121,24 +256,28 @@ export function AppShell({
         if (hasChildren) {
           return (
             <div key={item.href}>
+              {item.divider && <div className="mx-3 my-2 border-t border-white/[0.06]" />}
               <button
                 onClick={() => toggleSection(item.href)}
                 className={cn(
-                  "flex h-12 md:h-10 w-full items-center justify-between rounded-md px-3 text-sm text-white/70 hover:bg-white/5 hover:text-white",
+                  "relative flex w-full items-center gap-2.5 rounded-md px-3 text-sm transition-colors",
+                  mobile ? "h-12" : "h-9",
+                  "text-white/60 hover:bg-white/[0.04] hover:text-white/80",
                   (active || isChildActive) && "text-white",
                 )}
                 type="button"
               >
+                <NavIcon name={item.icon} className="h-[18px] w-[18px] shrink-0" />
                 <span>{item.label}</span>
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 transition-transform",
+                    "ml-auto h-4 w-4 text-white/30 transition-transform",
                     isExpanded && "rotate-180"
                   )}
                 />
               </button>
               {isExpanded && (
-                <div className="ml-3 border-l border-white/10 pl-2">
+                <div className="ml-[15px] border-l border-white/[0.06]">
                   {item.children?.map((child) => {
                     const childActive =
                       pathname === child.href || pathname?.startsWith(child.href + "/");
@@ -146,13 +285,22 @@ export function AppShell({
                       <Link
                         key={child.href}
                         className={cn(
-                          "flex h-11 md:h-9 items-center rounded-md px-3 text-sm text-white/60 hover:bg-white/5 hover:text-white",
-                          childActive && "bg-white/10 text-white",
+                          "relative flex items-center gap-2.5 rounded-r-md pl-4 pr-3 text-sm transition-colors",
+                          mobile ? "h-11" : "h-8",
+                          "text-white/60 hover:bg-white/[0.04] hover:text-white/80",
+                          childActive &&
+                            "bg-white/[0.06] text-white before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-white/70",
                         )}
                         href={child.href}
                         onClick={mobile ? () => setMobileMenuOpen(false) : undefined}
                       >
-                        {child.label}
+                        <NavIcon name={child.icon} className="h-4 w-4 shrink-0" />
+                        <span>{child.label}</span>
+                        {child.badge != null && child.badge > 0 && (
+                          <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-white/15 px-1.5 text-[10px] font-medium text-white">
+                            {child.badge > 99 ? "99+" : child.badge}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}
@@ -163,22 +311,28 @@ export function AppShell({
         }
 
         return (
-          <Link
-            key={item.href}
-            className={cn(
-              "flex h-12 md:h-10 items-center justify-between rounded-md px-3 text-sm text-white/70 hover:bg-white/5 hover:text-white",
-              active && "bg-white/10 text-white",
-            )}
-            href={item.href}
-            onClick={mobile ? () => setMobileMenuOpen(false) : undefined}
-          >
-            <span>{item.label}</span>
-            {item.badge != null && item.badge > 0 && (
-              <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-white/15 px-1.5 text-[10px] font-medium text-white">
-                {item.badge > 99 ? "99+" : item.badge}
-              </span>
-            )}
-          </Link>
+          <React.Fragment key={item.href}>
+            {item.divider && <div className="mx-3 my-2 border-t border-white/[0.06]" />}
+            <Link
+              className={cn(
+                "relative flex items-center gap-2.5 rounded-md px-3 text-sm transition-colors",
+                mobile ? "h-12" : "h-9",
+                "text-white/60 hover:bg-white/[0.04] hover:text-white/80",
+                active &&
+                  "bg-white/[0.06] text-white before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-white",
+              )}
+              href={item.href}
+              onClick={mobile ? () => setMobileMenuOpen(false) : undefined}
+            >
+              <NavIcon name={item.icon} className="h-[18px] w-[18px] shrink-0" />
+              <span>{item.label}</span>
+              {item.badge != null && item.badge > 0 && (
+                <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-white/15 px-1.5 text-[10px] font-medium text-white">
+                  {item.badge > 99 ? "99+" : item.badge}
+                </span>
+              )}
+            </Link>
+          </React.Fragment>
         );
       })}
       {showTakeTour && onTakeTour && (
@@ -187,15 +341,22 @@ export function AppShell({
             if (mobile) setMobileMenuOpen(false);
             onTakeTour();
           }}
-          className="mt-4 flex h-12 md:h-10 w-full items-center gap-2 rounded-md px-3 text-sm text-white/50 hover:bg-white/5 hover:text-white/70"
+          className={cn(
+            "mt-4 flex w-full items-center gap-2.5 rounded-md px-3 text-sm text-white/40 hover:bg-white/[0.04] hover:text-white/60",
+            mobile ? "h-12" : "h-9",
+          )}
           type="button"
         >
-          <HelpCircle className="h-4 w-4" />
+          <HelpCircle className="h-[18px] w-[18px] shrink-0" />
           Take tour
         </button>
       )}
     </>
   );
+
+  /* ---------------------------------------------------------------- */
+  /*  Render                                                           */
+  /* ---------------------------------------------------------------- */
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50">
@@ -210,14 +371,8 @@ export function AppShell({
           <Menu className="h-5 w-5" />
         </button>
         <span className="text-sm font-medium">{currentPageTitle}</span>
-        <button
-          onClick={onLogout}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
-          type="button"
-          aria-label="Log out"
-        >
-          <LogOut className="h-4 w-4 text-white/70" />
-        </button>
+        {/* Spacer to keep title centered */}
+        <div className="h-10 w-10" />
       </header>
 
       {/* Mobile Menu Overlay */}
@@ -231,32 +386,21 @@ export function AppShell({
       {/* Mobile Drawer */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 transform bg-zinc-950 border-r border-white/10 transition-transform duration-300 ease-in-out md:hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-72 transform flex-col bg-zinc-950 border-r border-white/10 transition-transform duration-300 ease-in-out md:hidden",
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
+        {/* Mobile brand header */}
+        <div className="flex items-center justify-between px-4 pt-5 pb-2">
           <Link
-            className="flex items-center gap-2 text-sm font-semibold tracking-tight"
+            className="flex items-center gap-2.5"
             href="/app"
             onClick={() => setMobileMenuOpen(false)}
           >
-            {company && company.logoUrl && !logoError ? (
-              <Image
-                src={company.logoUrl}
-                alt={`${company.name} logo`}
-                width={24}
-                height={24}
-                className="rounded"
-                onError={() => setLogoError(true)}
-                unoptimized
-              />
-            ) : company ? (
-              <span className="flex h-6 w-6 items-center justify-center rounded bg-white/10 text-xs font-medium uppercase">
-                {company.name.charAt(0)}
-              </span>
-            ) : null}
-            <span>{company?.name ?? title}</span>
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-sm font-bold">
+              V
+            </span>
+            <span className="text-[15px] font-semibold tracking-tight">Velvet</span>
           </Link>
           <button
             onClick={() => setMobileMenuOpen(false)}
@@ -267,60 +411,87 @@ export function AppShell({
             <X className="h-5 w-5" />
           </button>
         </div>
-        <nav className="flex-1 overflow-y-auto px-2 py-4">
+        {company && (
+          <div className="ml-[42px] px-4 flex items-center gap-1.5">
+            {company.logoUrl && !logoError ? (
+              <Image
+                src={company.logoUrl}
+                alt={`${company.name} logo`}
+                width={14}
+                height={14}
+                className="rounded-sm"
+                onError={() => setLogoError(true)}
+                unoptimized
+              />
+            ) : null}
+            <span className="truncate text-xs text-white/50">{company.name}</span>
+          </div>
+        )}
+        <div className="mx-4 mt-4 border-t border-white/[0.06]" />
+
+        <nav className="flex-1 overflow-y-auto px-2 py-3">
           {renderNavItems(true)}
         </nav>
-        <div className="border-t border-white/10 p-4">
-          <button
-            onClick={onLogout}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-white/5 text-sm text-white/70 hover:bg-white/10"
-            type="button"
-          >
-            <LogOut className="h-4 w-4" />
-            Log out
-          </button>
-        </div>
+
+        {/* Mobile profile footer */}
+        {user ? (
+          <div className="border-t border-white/[0.06] p-3">
+            <div className="flex items-center gap-2.5 mb-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-medium">
+                {getInitials(user.fullName, user.email)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-white/90">
+                  {user.fullName || user.email.split("@")[0]}
+                </p>
+                <p className="truncate text-xs text-white/40">{user.email}</p>
+              </div>
+            </div>
+            <button
+              onClick={onLogout}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-white/5 text-sm text-white/70 hover:bg-white/10"
+              type="button"
+            >
+              <LogOut className="h-4 w-4" />
+              Log out
+            </button>
+          </div>
+        ) : (
+          <div className="border-t border-white/10 p-4">
+            <button
+              onClick={onLogout}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-white/5 text-sm text-white/70 hover:bg-white/10"
+              type="button"
+            >
+              <LogOut className="h-4 w-4" />
+              Log out
+            </button>
+          </div>
+        )}
       </aside>
 
       {/* Desktop Layout */}
       <div className="hidden md:grid md:min-h-screen md:grid-cols-[260px_1fr] lg:grid-cols-[280px_1fr]">
         {/* Desktop Sidebar */}
-        <aside className="sticky top-0 h-screen border-r border-white/10 bg-black/40">
-          <div className="flex h-14 items-center justify-between px-4">
-            <Link
-              className="flex items-center gap-2 text-sm font-semibold tracking-tight"
-              href="/app"
-            >
-              {company && company.logoUrl && !logoError ? (
-                <Image
-                  src={company.logoUrl}
-                  alt={`${company.name} logo`}
-                  width={24}
-                  height={24}
-                  className="rounded"
-                  onError={() => setLogoError(true)}
-                  unoptimized
-                />
-              ) : company ? (
-                <span className="flex h-6 w-6 items-center justify-center rounded bg-white/10 text-xs font-medium uppercase">
-                  {company.name.charAt(0)}
-                </span>
-              ) : null}
-              <span className="truncate">{company?.name ?? title}</span>
-            </Link>
-            <button
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
-              onClick={onLogout}
-              type="button"
-              aria-label="Log out"
-              title="Log out"
-            >
-              <LogOut className="h-4 w-4 text-white/70" />
-            </button>
-          </div>
-          <nav className="px-2 py-3">
+        <aside className="sticky top-0 flex h-screen flex-col border-r border-white/10 bg-black/40">
+          {brandHeader}
+          <nav className="flex-1 overflow-y-auto px-2">
             {renderNavItems(false)}
           </nav>
+          {profileFooter}
+          {/* Fallback logout if no user prop */}
+          {!user && (
+            <div className="border-t border-white/[0.06] p-3">
+              <button
+                className="flex h-9 w-full items-center justify-center gap-2 rounded-md text-sm text-white/50 hover:bg-white/[0.06] hover:text-white/70"
+                onClick={onLogout}
+                type="button"
+              >
+                <LogOut className="h-4 w-4" />
+                Log out
+              </button>
+            </div>
+          )}
         </aside>
 
         {/* Desktop Main Content */}

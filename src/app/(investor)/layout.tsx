@@ -25,6 +25,11 @@ export default async function InvestorLayout({
   const shouldAutoStart = onboardingStep === null && !onboardingComplete;
   const initialStep = shouldAutoStart ? 0 : onboardingStep;
 
+  const userInfo = {
+    fullName: freshUser?.user_metadata?.full_name ?? null,
+    email: freshUser?.email ?? "",
+  };
+
   return (
     <InvestorLayoutClient
       initialOnboardingStep={initialStep}
@@ -36,20 +41,21 @@ export default async function InvestorLayout({
           {
             href: "/portfolio",
             label: "Portfolio",
+            icon: "briefcase",
             children: [
-              { href: "/dashboard", label: "Companies" },
-              { href: "/portfolio", label: "Contacts" },
-              { href: "/requests", label: "Requests" },
+              { href: "/dashboard", label: "Companies", icon: "building2" },
+              { href: "/portfolio", label: "Contacts", icon: "users" },
+              { href: "/requests", label: "Requests", icon: "send" },
             ],
           },
-          { href: "/reports", label: "Reports" },
-          { href: "/documents", label: "Documents" },
-          { href: "/team", label: "Team" },
+          { href: "/reports", label: "Reports", icon: "bar-chart-3", divider: true },
+          { href: "/documents", label: "Documents", icon: "file-text" },
+          { href: "/team", label: "Team", icon: "user-plus" },
         ]}
+        user={userInfo}
       >
         {children}
       </InvestorAppShell>
     </InvestorLayoutClient>
   );
 }
-

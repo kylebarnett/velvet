@@ -37,16 +37,22 @@ export default async function FounderLayout({
     pendingCount = count ?? 0;
   }
 
+  const userInfo = {
+    fullName: user.user_metadata?.full_name ?? null,
+    email: user.email ?? "",
+  };
+
   return (
     <AppShell
       title="Founder"
       nav={[
-        { href: "/portal", label: "Dashboard" },
-        { href: "/portal/requests", label: "Requests", badge: pendingCount },
-        { href: "/portal/investors", label: "Investors" },
-        { href: "/portal/team", label: "Team" },
+        { href: "/portal", label: "Dashboard", icon: "layout-dashboard" },
+        { href: "/portal/requests", label: "Requests", icon: "inbox", badge: pendingCount },
+        { href: "/portal/investors", label: "Investors", icon: "shield" },
+        { href: "/portal/team", label: "Team", icon: "user-plus" },
       ]}
       company={company}
+      user={userInfo}
     >
       {children}
     </AppShell>
