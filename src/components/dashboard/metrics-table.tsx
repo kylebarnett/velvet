@@ -51,7 +51,7 @@ type MetricRow = {
 type MetricsTableProps = {
   data: MetricRow[];
   title?: string;
-  onMetricClick?: (metricName: string) => void;
+  onMetricClick?: (metricName: string, periodStart?: string) => void;
   /** Show the Total column (default: true) */
   showTotals?: boolean;
   /** Callback when metrics are reordered */
@@ -912,7 +912,7 @@ export function MetricsTable({
           onViewDetails={() => {
             isOverTooltipRef.current = false;
             setHoveredCell(null);
-            onMetricClick?.(hoveredCell.metricName);
+            onMetricClick?.(hoveredCell.metricName, hoveredCell.periodStart);
           }}
           onMouseEnter={handleTooltipMouseEnter}
           onMouseLeave={handleTooltipMouseLeave}

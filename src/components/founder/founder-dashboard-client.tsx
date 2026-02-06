@@ -285,7 +285,10 @@ export function FounderDashboardClient({
   );
   const { periodType, setPeriodType, dateRange, setDateRange } = useDashboardPreferences();
   const [isExporting, setIsExporting] = React.useState(false);
-  const [detailMetric, setDetailMetric] = React.useState<string | null>(null);
+  const [detailSelection, setDetailSelection] = React.useState<{
+    metricName: string;
+    periodStart?: string;
+  } | null>(null);
 
   // Sync views state when props change (e.g., after navigation with fresh server data)
   React.useEffect(() => {
@@ -449,7 +452,9 @@ export function FounderDashboardClient({
                 widget={widget}
                 metrics={filteredMetrics}
                 periodTypeOverride={periodType}
-                onMetricClick={setDetailMetric}
+                onMetricClick={(name, period) =>
+                  setDetailSelection({ metricName: name, periodStart: period })
+                }
                 companyId={companyId}
               />
             </div>
@@ -466,11 +471,12 @@ export function FounderDashboardClient({
         </div>
       )}
 
-      {detailMetric && (
+      {detailSelection && (
         <MetricDetailPanel
           companyId={companyId}
-          metricName={detailMetric}
-          onClose={() => setDetailMetric(null)}
+          metricName={detailSelection.metricName}
+          initialPeriod={detailSelection.periodStart}
+          onClose={() => setDetailSelection(null)}
           editable
           onValueUpdated={() => router.refresh()}
         />

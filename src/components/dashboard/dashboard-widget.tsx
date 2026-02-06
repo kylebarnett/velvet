@@ -21,7 +21,7 @@ type DashboardWidgetProps = {
   widget: Widget;
   metrics: MetricValue[];
   periodTypeOverride?: PeriodType;
-  onMetricClick?: (metricName: string) => void;
+  onMetricClick?: (metricName: string, periodStart?: string) => void;
   /** Company ID for persisting metric order in tables */
   companyId?: string;
 };

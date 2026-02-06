@@ -30,7 +30,10 @@ export function CompanyMetricsClient({
   isApproved,
   metricValues,
 }: Props) {
-  const [selectedMetric, setSelectedMetric] = React.useState<string | null>(null);
+  const [metricSelection, setMetricSelection] = React.useState<{
+    metricName: string;
+    periodStart?: string;
+  } | null>(null);
 
   return (
     <div className="space-y-6">
@@ -74,7 +77,12 @@ export function CompanyMetricsClient({
                   <td className="px-4 py-3">
                     <button
                       type="button"
-                      onClick={() => setSelectedMetric(mv.metric_name)}
+                      onClick={() =>
+                        setMetricSelection({
+                          metricName: mv.metric_name,
+                          periodStart: mv.period_start,
+                        })
+                      }
                       className="text-left hover:underline underline-offset-2"
                     >
                       <div className="font-medium">{mv.metric_name}</div>
@@ -107,11 +115,12 @@ export function CompanyMetricsClient({
       )}
 
       {/* Metric Detail Panel */}
-      {selectedMetric && (
+      {metricSelection && (
         <MetricDetailPanel
           companyId={companyId}
-          metricName={selectedMetric}
-          onClose={() => setSelectedMetric(null)}
+          metricName={metricSelection.metricName}
+          initialPeriod={metricSelection.periodStart}
+          onClose={() => setMetricSelection(null)}
           editable={false}
         />
       )}

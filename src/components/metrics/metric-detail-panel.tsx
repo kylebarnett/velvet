@@ -13,6 +13,7 @@ import {
   Sparkles,
   Check,
   Pencil,
+  Calendar,
 } from "lucide-react";
 import {
   LineChart as RechartsLineChart,
@@ -66,6 +67,8 @@ type Props = {
   onClose: () => void;
   editable?: boolean; // true for founders
   onValueUpdated?: () => void;
+  /** Optional initial period to select (period_start string). Defaults to most recent. */
+  initialPeriod?: string;
 };
 
 export function MetricDetailPanel({
@@ -74,6 +77,7 @@ export function MetricDetailPanel({
   onClose,
   editable = false,
   onValueUpdated,
+  initialPeriod,
 }: Props) {
   const [loading, setLoading] = React.useState(true);
   const [values, setValues] = React.useState<MetricValue[]>([]);
@@ -83,6 +87,10 @@ export function MetricDetailPanel({
   const [isVisible, setIsVisible] = React.useState(false);
   const [historyExpanded, setHistoryExpanded] = React.useState(true);
   const [confirming, setConfirming] = React.useState(false);
+  const [periodDropdownOpen, setPeriodDropdownOpen] = React.useState(false);
+
+  // Selected period index (into the values array). -1 means "not yet initialized"
+  const [selectedPeriodIndex, setSelectedPeriodIndex] = React.useState(-1);
 
   // Edit state
   const [editing, setEditing] = React.useState(false);
@@ -91,6 +99,7 @@ export function MetricDetailPanel({
   const [submitting, setSubmitting] = React.useState(false);
 
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const periodDropdownRef = React.useRef<HTMLDivElement>(null);
 
   // Animate in
   React.useEffect(() => {
@@ -116,6 +125,22 @@ export function MetricDetailPanel({
     setTimeout(onClose, 200);
   }
 
+  // Close period dropdown on outside click
+  React.useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        periodDropdownRef.current &&
+        !periodDropdownRef.current.contains(e.target as Node)
+      ) {
+        setPeriodDropdownOpen(false);
+      }
+    }
+    if (periodDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [periodDropdownOpen]);
+
   // Fetch data
   React.useEffect(() => {
     async function load() {
@@ -128,9 +153,22 @@ export function MetricDetailPanel({
           throw new Error(json?.error ?? "Failed to load metric details.");
         }
         const json = await res.json();
-        setValues(json.values ?? []);
+        const loadedValues: MetricValue[] = json.values ?? [];
+        setValues(loadedValues);
         setHistory(json.history ?? []);
         setDocuments(json.documents ?? []);
+
+        // Initialize selected period
+        if (initialPeriod && loadedValues.length > 0) {
+          const idx = loadedValues.findIndex(
+            (v) => v.period_start === initialPeriod,
+          );
+          setSelectedPeriodIndex(idx >= 0 ? idx : loadedValues.length - 1);
+        } else {
+          setSelectedPeriodIndex(
+            loadedValues.length > 0 ? loadedValues.length - 1 : 0,
+          );
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
       } finally {
@@ -138,7 +176,7 @@ export function MetricDetailPanel({
       }
     }
     load();
-  }, [companyId, metricName]);
+  }, [companyId, metricName, initialPeriod]);
 
   // Compute chart data
   const chartData = React.useMemo(() => {
@@ -153,9 +191,13 @@ export function MetricDetailPanel({
     });
   }, [values]);
 
-  // Current (most recent) value
-  const current = values.length > 0 ? values[values.length - 1] : null;
-  const previous = values.length > 1 ? values[values.length - 2] : null;
+  // Selected period value (from dropdown, defaults to most recent)
+  const safeIndex =
+    selectedPeriodIndex >= 0 && selectedPeriodIndex < values.length
+      ? selectedPeriodIndex
+      : values.length - 1;
+  const current = values.length > 0 ? values[safeIndex] : null;
+  const previous = safeIndex > 0 ? values[safeIndex - 1] : null;
 
   const currentNum = current?.value?.raw ? parseFloat(current.value.raw) : null;
   const previousNum = previous?.value?.raw ? parseFloat(previous.value.raw) : null;
@@ -164,6 +206,11 @@ export function MetricDetailPanel({
     currentNum != null && previousNum != null && previousNum !== 0
       ? ((currentNum - previousNum) / Math.abs(previousNum)) * 100
       : null;
+
+  // Period label for the selected value
+  const selectedPeriodLabel = current
+    ? formatPeriod(current.period_start, current.period_type)
+    : null;
 
   async function handleSubmitOverride() {
     if (!current || !editValue.trim()) return;
@@ -191,13 +238,22 @@ export function MetricDetailPanel({
         throw new Error(json?.error ?? "Failed to update metric.");
       }
 
-      // Refresh data
+      // Refresh data (maintain selected period)
       const refreshRes = await fetch(
         `/api/metrics/detail?companyId=${encodeURIComponent(companyId)}&metricName=${encodeURIComponent(metricName)}`,
       );
       const refreshJson = await refreshRes.json();
-      setValues(refreshJson.values ?? []);
+      const refreshedValues: MetricValue[] = refreshJson.values ?? [];
+      setValues(refreshedValues);
       setHistory(refreshJson.history ?? []);
+
+      // Re-find the selected period in refreshed data
+      if (current) {
+        const newIdx = refreshedValues.findIndex(
+          (v) => v.period_start === current.period_start,
+        );
+        if (newIdx >= 0) setSelectedPeriodIndex(newIdx);
+      }
 
       setEditing(false);
       setEditValue("");
@@ -210,11 +266,18 @@ export function MetricDetailPanel({
     }
   }
 
+  const changeBadgeColor =
+    percentChange != null && percentChange > 0
+      ? "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20"
+      : percentChange != null && percentChange < 0
+        ? "bg-red-500/10 text-red-400 ring-1 ring-red-500/20"
+        : "bg-white/5 text-white/40 ring-1 ring-white/10";
+
   return (
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-200 ${
+        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-md transition-opacity duration-300 ${
           isVisible ? "opacity-100" : "opacity-0"
         }`}
         onClick={handleClose}
@@ -223,116 +286,183 @@ export function MetricDetailPanel({
 
       {/* Panel */}
       <div
-        className={`fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-white/10 bg-zinc-900 shadow-2xl transition-transform duration-200 sm:w-[480px] ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full flex-col bg-zinc-950 shadow-2xl transition-transform duration-300 ease-out sm:w-[500px] ${
           isVisible ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="metric-detail-title"
       >
+        {/* Left edge glow line */}
+        <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-blue-500/40 via-blue-500/10 to-transparent" />
+
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-white/10 p-6">
-          <div>
-            <h2
-              id="metric-detail-title"
-              className="text-lg font-semibold text-white"
-            >
-              {metricName}
-            </h2>
-            {currentNum != null && (
-              <div className="mt-1 flex items-center gap-3">
-                <span className="text-2xl font-bold text-white">
-                  {formatValue(currentNum, metricName)}
-                </span>
-                {percentChange != null && (
-                  <span
-                    className={`flex items-center gap-0.5 text-sm ${
-                      percentChange > 0
-                        ? "text-emerald-400"
-                        : percentChange < 0
-                          ? "text-red-400"
-                          : "text-white/40"
-                    }`}
-                  >
-                    {percentChange > 0 ? (
-                      <TrendingUp className="h-4 w-4" />
-                    ) : percentChange < 0 ? (
-                      <TrendingDown className="h-4 w-4" />
-                    ) : (
-                      <Minus className="h-4 w-4" />
-                    )}
-                    {percentChange > 0 ? "+" : ""}
-                    {percentChange.toFixed(1)}%
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
+        <div className="relative px-7 pt-7 pb-6">
+          {/* Close button */}
           <button
             onClick={handleClose}
-            className="rounded-lg p-2 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-all duration-150 hover:bg-white/10 hover:text-white"
             aria-label="Close panel"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
+
+          {/* Metric label */}
+          <span className="text-[11px] font-medium uppercase tracking-widest text-white/40">
+            Metric Detail
+          </span>
+
+          <h2
+            id="metric-detail-title"
+            className="mt-2 text-xl font-semibold tracking-tight text-white"
+          >
+            {metricName}
+          </h2>
+
+          {/* Period selector */}
+          {values.length > 0 && selectedPeriodLabel && (
+            <div ref={periodDropdownRef} className="relative mt-2.5">
+              <button
+                type="button"
+                onClick={() => setPeriodDropdownOpen((p) => !p)}
+                className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-sm text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
+              >
+                <Calendar className="h-3.5 w-3.5 text-white/40" />
+                <span className="tabular-nums">{selectedPeriodLabel}</span>
+                <ChevronDown
+                  className={`h-3.5 w-3.5 text-white/40 transition-transform duration-150 ${periodDropdownOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {periodDropdownOpen && (
+                <div className="absolute left-0 top-full z-50 mt-1.5 max-h-64 w-48 overflow-y-auto rounded-xl border border-white/[0.08] bg-zinc-900 py-1 shadow-xl">
+                  {[...values].reverse().map((v, revIdx) => {
+                    const realIdx = values.length - 1 - revIdx;
+                    const label = formatPeriod(v.period_start, v.period_type);
+                    const isSelected = realIdx === safeIndex;
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedPeriodIndex(realIdx);
+                          setPeriodDropdownOpen(false);
+                          setEditing(false);
+                        }}
+                        className={`flex w-full items-center justify-between px-3.5 py-2 text-left text-sm transition-colors ${
+                          isSelected
+                            ? "bg-blue-500/10 text-blue-300"
+                            : "text-white/60 hover:bg-white/5 hover:text-white/80"
+                        }`}
+                      >
+                        <span className="tabular-nums">{label}</span>
+                        {v.value?.raw != null && (
+                          <span className="ml-2 font-mono text-xs text-white/30 tabular-nums">
+                            {formatValue(parseFloat(v.value.raw), metricName)}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {currentNum != null && (
+            <div className="mt-3 flex items-baseline gap-3">
+              <span className="text-3xl font-bold tabular-nums tracking-tight text-white">
+                {formatValue(currentNum, metricName)}
+              </span>
+              {percentChange != null && (
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium tabular-nums ${changeBadgeColor}`}
+                >
+                  {percentChange > 0 ? (
+                    <TrendingUp className="h-3.5 w-3.5" />
+                  ) : percentChange < 0 ? (
+                    <TrendingDown className="h-3.5" />
+                  ) : (
+                    <Minus className="h-3.5 w-3.5" />
+                  )}
+                  {percentChange > 0 ? "+" : ""}
+                  {percentChange.toFixed(1)}%
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Accent line under header */}
+          <div className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-white/[0.08] via-white/[0.04] to-transparent" />
         </div>
 
-        {/* Content */}
+        {/* Scrollable content */}
         <div ref={contentRef} className="flex-1 overflow-y-auto">
           {loading && (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-6 w-6 animate-spin text-white/40" />
+            <div className="flex flex-col items-center justify-center gap-3 py-20">
+              <Loader2 className="h-5 w-5 animate-spin text-white/30" />
+              <span className="text-xs text-white/30">Loading details</span>
             </div>
           )}
 
           {error && (
-            <div className="m-4 rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            <div className="mx-7 mt-6 rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-300">
               {error}
             </div>
           )}
 
           {!loading && values.length === 0 && (
-            <div className="p-6 text-center text-sm text-white/60">
+            <div className="px-7 py-16 text-center text-sm text-white/40">
               No data available for this metric.
             </div>
           )}
 
           {!loading && values.length > 0 && (
-            <div className="space-y-6 p-6">
+            <div className="space-y-8 px-7 py-6">
               {/* Trend Chart */}
               {chartData.length > 1 && (
-                <div>
-                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/60">
+                <section>
+                  <h3 className="mb-4 text-[11px] font-medium uppercase tracking-widest text-white/40">
                     Trend
                   </h3>
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <ResponsiveContainer width="100%" height={200}>
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                    <ResponsiveContainer width="100%" height={180}>
                       <RechartsLineChart
                         data={chartData}
                         margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
                       >
+                        <defs>
+                          <linearGradient id="metricLine" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.6} />
+                            <stop offset="100%" stopColor="#3b82f6" stopOpacity={1} />
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid
                           strokeDasharray="3 3"
-                          stroke="rgba(255,255,255,0.1)"
+                          stroke="rgba(255,255,255,0.04)"
+                          vertical={false}
                         />
                         <XAxis
                           dataKey="period"
-                          tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
-                          tickLine={{ stroke: "rgba(255,255,255,0.2)" }}
-                          axisLine={{ stroke: "rgba(255,255,255,0.2)" }}
+                          tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }}
+                          tickLine={false}
+                          axisLine={false}
                         />
                         <YAxis
-                          tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
-                          tickLine={{ stroke: "rgba(255,255,255,0.2)" }}
-                          axisLine={{ stroke: "rgba(255,255,255,0.2)" }}
+                          tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }}
+                          tickLine={false}
+                          axisLine={false}
                           tickFormatter={(v) => formatValue(v)}
+                          width={60}
                         />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: "rgba(24, 24, 27, 0.95)",
-                            border: "1px solid rgba(255,255,255,0.1)",
-                            borderRadius: "8px",
+                            backgroundColor: "rgba(9, 9, 11, 0.95)",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                            borderRadius: "10px",
                             color: "white",
+                            padding: "8px 12px",
+                            fontSize: "12px",
+                            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
                           }}
                           formatter={(v) => [
                             formatValue(v as number, metricName),
@@ -342,31 +472,31 @@ export function MetricDetailPanel({
                         <Line
                           type="monotone"
                           dataKey="value"
-                          stroke="#3b82f6"
+                          stroke="url(#metricLine)"
                           strokeWidth={2}
-                          dot={{ fill: "#3b82f6", strokeWidth: 0, r: 4 }}
-                          activeDot={{ r: 6 }}
+                          dot={{ fill: "#3b82f6", strokeWidth: 0, r: 3 }}
+                          activeDot={{ r: 5, fill: "#3b82f6", stroke: "#1d4ed8", strokeWidth: 2 }}
                           connectNulls
                         />
                       </RechartsLineChart>
                     </ResponsiveContainer>
                   </div>
-                </div>
+                </section>
               )}
 
               {/* Source Info */}
               {current && (
-                <div>
-                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/60">
+                <section>
+                  <h3 className="mb-4 text-[11px] font-medium uppercase tracking-widest text-white/40">
                     Source
                   </h3>
-                  <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <div className="flex items-center gap-2">
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                    <div className="flex items-center justify-between">
                       <SourceBadge
                         source={current.source}
                         confidence={current.ai_confidence}
                       />
-                      <span className="text-xs text-white/60">
+                      <span className="text-[11px] tabular-nums text-white/35">
                         {new Date(current.submitted_at).toLocaleDateString(
                           "en-US",
                           {
@@ -378,42 +508,50 @@ export function MetricDetailPanel({
                       </span>
                     </div>
                     {current.source_document_id && (
-                      <div className="mt-2 flex items-center gap-1.5 text-xs text-white/60">
-                        <FileText className="h-3.5 w-3.5" />
-                        {documents.find(
-                          (d) => d.id === current.source_document_id,
-                        )?.file_name ?? "Linked document"}
+                      <div className="mt-3 flex items-center gap-2 rounded-lg bg-white/[0.03] px-3 py-2 text-xs text-white/50">
+                        <FileText className="h-3.5 w-3.5 shrink-0 text-white/30" />
+                        <span className="truncate">
+                          {documents.find(
+                            (d) => d.id === current.source_document_id,
+                          )?.file_name ?? "Linked document"}
+                        </span>
                       </div>
                     )}
                     {current.notes && (
-                      <p className="mt-2 text-xs text-white/60 italic">
+                      <p className="mt-3 border-t border-white/[0.04] pt-3 text-xs leading-relaxed text-white/50 italic">
                         {current.notes}
                       </p>
                     )}
                   </div>
-                </div>
+                </section>
               )}
 
               {/* AI Resolution (founder only, when source is ai_extracted) */}
               {editable && current && current.source === "ai_extracted" && (
-                <div>
-                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/60">
+                <section>
+                  <h3 className="mb-4 text-[11px] font-medium uppercase tracking-widest text-white/40">
                     Review AI Extraction
                   </h3>
-                  <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
-                    <div className="flex items-center gap-2 text-sm text-violet-200">
-                      <Sparkles className="h-4 w-4 text-violet-400" />
-                      <span>
-                        This value was extracted by AI
-                        {current.ai_confidence != null && (
-                          <> with {Math.round(current.ai_confidence * 100)}% confidence</>
-                        )}
-                      </span>
+                  <div className="rounded-xl border border-violet-500/15 bg-violet-500/[0.04] p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-500/15">
+                        <Sparkles className="h-4 w-4 text-violet-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-violet-200">
+                          AI-extracted value
+                          {current.ai_confidence != null && (
+                            <span className="ml-2 text-xs font-normal text-violet-300/60">
+                              {Math.round(current.ai_confidence * 100)}% confidence
+                            </span>
+                          )}
+                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-white/45">
+                          Confirm this value is correct, or correct it with the right number.
+                        </p>
+                      </div>
                     </div>
-                    <p className="mt-2 text-xs text-white/60">
-                      Confirm this value is correct, or correct it with the right number.
-                    </p>
-                    <div className="mt-3 flex gap-2">
+                    <div className="mt-4 flex gap-2">
                       <button
                         type="button"
                         onClick={async () => {
@@ -442,8 +580,15 @@ export function MetricDetailPanel({
                               `/api/metrics/detail?companyId=${encodeURIComponent(companyId)}&metricName=${encodeURIComponent(metricName)}`,
                             );
                             const refreshJson = await refreshRes.json();
-                            setValues(refreshJson.values ?? []);
+                            const rv: MetricValue[] = refreshJson.values ?? [];
+                            setValues(rv);
                             setHistory(refreshJson.history ?? []);
+                            if (current) {
+                              const ni = rv.findIndex(
+                                (v) => v.period_start === current.period_start,
+                              );
+                              if (ni >= 0) setSelectedPeriodIndex(ni);
+                            }
                             onValueUpdated?.();
                           } catch (err) {
                             setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -452,7 +597,7 @@ export function MetricDetailPanel({
                           }
                         }}
                         disabled={confirming || submitting}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-xs font-medium text-white hover:bg-emerald-500 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                        className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 text-xs font-medium text-white transition-colors hover:bg-emerald-500 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:ring-offset-1 focus:ring-offset-zinc-950"
                       >
                         <Check className="h-3.5 w-3.5" />
                         {confirming ? "Confirming..." : "Confirm value"}
@@ -464,20 +609,20 @@ export function MetricDetailPanel({
                           setEditing(true);
                         }}
                         disabled={confirming || submitting}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs text-white/70 hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
+                        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-xs text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white/80 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-white/15 focus:ring-offset-1 focus:ring-offset-zinc-950"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                         Correct value
                       </button>
                     </div>
                   </div>
-                </div>
+                </section>
               )}
 
               {/* Edit (founder only) */}
               {editable && current && (
-                <div>
-                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/60">
+                <section>
+                  <h3 className="mb-4 text-[11px] font-medium uppercase tracking-widest text-white/40">
                     Edit Value
                   </h3>
                   {!editing ? (
@@ -487,25 +632,26 @@ export function MetricDetailPanel({
                         setEditValue(current.value?.raw ?? "");
                         setEditing(true);
                       }}
-                      className="inline-flex h-9 items-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white/70 hover:bg-white/10"
+                      className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 text-sm text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white/80"
                     >
+                      <Pencil className="h-3.5 w-3.5" />
                       Override current value
                     </button>
                   ) : (
-                    <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div className="space-y-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
                       <div>
-                        <label className="text-[10px] text-white/60 uppercase tracking-wider">
+                        <label className="text-[10px] font-medium uppercase tracking-widest text-white/40">
                           New Value
                         </label>
                         <input
                           type="text"
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
-                          className="mt-1 h-9 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm font-mono outline-none focus:border-white/20"
+                          className="mt-1.5 h-10 w-full rounded-lg border border-white/[0.08] bg-black/40 px-3 text-sm font-mono text-white outline-none transition-colors focus:border-white/20 focus:ring-1 focus:ring-white/10"
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] text-white/60 uppercase tracking-wider">
+                        <label className="text-[10px] font-medium uppercase tracking-widest text-white/40">
                           Reason (optional)
                         </label>
                         <input
@@ -513,14 +659,14 @@ export function MetricDetailPanel({
                           value={editReason}
                           onChange={(e) => setEditReason(e.target.value)}
                           placeholder="e.g., Corrected from Q4 report"
-                          className="mt-1 h-9 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+                          className="mt-1.5 h-10 w-full rounded-lg border border-white/[0.08] bg-black/40 px-3 text-sm text-white outline-none transition-colors placeholder:text-white/25 focus:border-white/20 focus:ring-1 focus:ring-white/10"
                         />
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 pt-1">
                         <button
                           type="button"
                           onClick={() => setEditing(false)}
-                          className="h-8 rounded-md border border-white/10 bg-white/5 px-3 text-xs text-white/60 hover:bg-white/10"
+                          className="h-8 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-xs text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white/70"
                         >
                           Cancel
                         </button>
@@ -528,36 +674,38 @@ export function MetricDetailPanel({
                           type="button"
                           onClick={handleSubmitOverride}
                           disabled={submitting || !editValue.trim()}
-                          className="h-8 rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-60"
+                          className="h-8 rounded-lg bg-white px-3.5 text-xs font-medium text-zinc-950 transition-colors hover:bg-white/90 disabled:opacity-50"
                         >
                           {submitting ? "Saving..." : "Save override"}
                         </button>
                       </div>
                     </div>
                   )}
-                </div>
+                </section>
               )}
 
               {/* Activity Log */}
-              <div>
+              <section>
                 <button
                   type="button"
                   onClick={() => setHistoryExpanded((p) => !p)}
-                  className="flex w-full items-center justify-between text-xs font-medium uppercase tracking-wider text-white/40 hover:text-white/60"
+                  className="flex w-full items-center justify-between py-1 text-[11px] font-medium uppercase tracking-widest text-white/40 transition-colors hover:text-white/60"
                 >
                   <span>Activity Log ({history.length})</span>
-                  {historyExpanded ? (
-                    <ChevronUp className="h-3.5 w-3.5" />
-                  ) : (
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  )}
+                  <div className="flex h-5 w-5 items-center justify-center rounded-md bg-white/5">
+                    {historyExpanded ? (
+                      <ChevronUp className="h-3 w-3" />
+                    ) : (
+                      <ChevronDown className="h-3 w-3" />
+                    )}
+                  </div>
                 </button>
                 {historyExpanded && (
-                  <div className="mt-3">
+                  <div className="mt-4">
                     <MetricHistoryTimeline history={history} />
                   </div>
                 )}
-              </div>
+              </section>
             </div>
           )}
         </div>
