@@ -3,7 +3,6 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Download, Trash2, Check } from "lucide-react";
-import Link from "next/link";
 
 import { SlidingTabs, type TabItem } from "@/components/ui/sliding-tabs";
 import { RichTextEditor } from "@/components/founder/rich-text-editor";
@@ -358,13 +357,14 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   return (
     <div className="space-y-4">
       {/* Back link */}
-      <Link
-        href={`/lp-reports/${fund.id}?tab=reports`}
+      <button
+        type="button"
+        onClick={() => router.push(`/lp-reports/${fund.id}?tab=reports`)}
         className="flex items-center gap-1 text-xs text-white/40 hover:text-white"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to {fund.name}
-      </Link>
+      </button>
 
       {/* Header bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

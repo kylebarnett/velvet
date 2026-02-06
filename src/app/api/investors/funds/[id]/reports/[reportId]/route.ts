@@ -84,12 +84,16 @@ export async function PUT(
     return jsonError(`Invalid request body: ${parsed.error.message}`, 400);
   }
 
-  const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  const updateData: Record<string, unknown> = {};
   if (parsed.data.title !== undefined) updateData.title = parsed.data.title;
   if (parsed.data.report_date !== undefined) updateData.report_date = parsed.data.report_date;
   if (parsed.data.report_type !== undefined) updateData.report_type = parsed.data.report_type;
   if (parsed.data.status !== undefined) updateData.status = parsed.data.status;
   if (parsed.data.content !== undefined) updateData.content = parsed.data.content;
+
+  if (Object.keys(updateData).length === 0) {
+    return jsonError("No fields to update.", 400);
+  }
 
   const { data: report, error } = await supabase
     .from("lp_reports")
