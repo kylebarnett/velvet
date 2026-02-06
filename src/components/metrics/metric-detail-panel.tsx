@@ -90,10 +90,17 @@ export function MetricDetailPanel({
   const [editReason, setEditReason] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
 
+  const contentRef = React.useRef<HTMLDivElement>(null);
+
   // Animate in
   React.useEffect(() => {
     requestAnimationFrame(() => setIsVisible(true));
   }, []);
+
+  // Scroll page to top so the fixed panel is fully visible
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [metricName]);
 
   // Escape to close
   React.useEffect(() => {
@@ -271,7 +278,7 @@ export function MetricDetailPanel({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={contentRef} className="flex-1 overflow-y-auto">
           {loading && (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-6 w-6 animate-spin text-white/40" />
