@@ -46,7 +46,7 @@ type PerformanceData = {
 type FundDetailClientProps = {
   fund: Fund;
   investments: InvestmentRow[];
-  reports: LPReport[];
+  initialReports: LPReport[];
   companies: { id: string; name: string }[];
 };
 
@@ -60,7 +60,7 @@ const TABS: TabItem<Tab>[] = [
 export function FundDetailClient({
   fund,
   investments: initialInvestments,
-  reports,
+  initialReports,
   companies,
 }: FundDetailClientProps) {
   const router = useRouter();
@@ -73,6 +73,7 @@ export function FundDetailClient({
   const [showReport, setShowReport] = useState(false);
   const [performance, setPerformance] = useState<PerformanceData | null>(null);
   const [loadingPerf, setLoadingPerf] = useState(true);
+  const [reports, setReports] = useState<LPReport[]>(initialReports);
 
   function setTab(tab: Tab) {
     const params = new URLSearchParams(searchParams.toString());
@@ -103,9 +104,28 @@ export function FundDetailClient({
     }
   }, [fund.id]);
 
+  const fetchReports = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/investors/funds/${fund.id}/reports`);
+      if (res.ok) {
+        const data = await res.json();
+        setReports(data.reports ?? []);
+      }
+    } catch {
+      // Keep existing reports on error
+    }
+  }, [fund.id]);
+
   useEffect(() => {
     fetchPerformance();
   }, [fetchPerformance]);
+
+  // Re-fetch reports whenever the reports tab becomes active
+  useEffect(() => {
+    if (activeTab === "reports") {
+      fetchReports();
+    }
+  }, [activeTab, fetchReports]);
 
   function handleInvestmentRefresh() {
     router.refresh();
@@ -279,7 +299,7 @@ export function FundDetailClient({
         onClose={() => setShowReport(false)}
         onSaved={() => {
           setShowReport(false);
-          router.refresh();
+          fetchReports();
         }}
         fundId={fund.id}
         performance={performance}

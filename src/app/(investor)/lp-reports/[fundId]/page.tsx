@@ -111,7 +111,7 @@ export default async function FundDetailPage({
           created_at: fund.created_at as string,
         }}
         investments={investments}
-        reports={(reports ?? []).map((r) => ({
+        initialReports={(reports ?? []).map((r) => ({
           id: r.id as string,
           fund_id: r.fund_id as string,
           report_date: r.report_date as string,
