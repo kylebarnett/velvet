@@ -60,7 +60,6 @@ export function ReportFormModal({
   const [title, setTitle] = useState(defaultTitle());
   const [reportDate, setReportDate] = useState(toDateInputValue(new Date()));
   const [reportType, setReportType] = useState<"quarterly" | "annual" | "ad_hoc">("quarterly");
-  const [status, setStatus] = useState<"draft" | "published">("draft");
 
   // Reset form when modal opens
   useEffect(() => {
@@ -68,7 +67,6 @@ export function ReportFormModal({
       setTitle(defaultTitle());
       setReportDate(toDateInputValue(new Date()));
       setReportType("quarterly");
-      setStatus("draft");
       setError(null);
     }
   }, [open]);
@@ -135,7 +133,7 @@ export function ReportFormModal({
           title: title.trim(),
           report_date: reportDate,
           report_type: reportType,
-          status,
+          status: "draft",
           content: buildContentSnapshot(),
         }),
       });
@@ -217,19 +215,6 @@ export function ReportFormModal({
               <option value="quarterly">Quarterly</option>
               <option value="annual">Annual</option>
               <option value="ad_hoc">Ad Hoc</option>
-            </select>
-          </div>
-
-          {/* Status */}
-          <div>
-            <label className="mb-1 block text-sm text-white/70">Status</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as "draft" | "published")}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
             </select>
           </div>
 
