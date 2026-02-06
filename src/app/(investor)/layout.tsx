@@ -55,6 +55,7 @@ export default async function InvestorLayout({
             label: "Funds",
             icon: "landmark",
             children: [
+              { href: "/lp-reports", label: "Overview", icon: "landmark" },
               { href: "/lp-reports", label: "LP Reports", icon: "file-text" },
             ],
           },
