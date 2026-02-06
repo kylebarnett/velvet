@@ -119,13 +119,13 @@ export default async function CompanyDashboardPage({
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="flex items-center gap-1 text-sm text-white/50 hover:text-white"
+              className="flex items-center gap-1 text-xs text-white/40 hover:text-white"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">All Companies</span>
               <span className="sm:hidden">Back</span>
             </Link>
@@ -146,13 +146,15 @@ export default async function CompanyDashboardPage({
               </span>
             )}
           </div>
-          <InlineTags
-            companyId={company.id}
-            stage={company.stage}
-            industry={company.industry}
-            businessModel={company.business_model}
-          />
-          <InlineWebsite companyId={company.id} website={company.website} />
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+            <InlineTags
+              companyId={company.id}
+              stage={company.stage}
+              industry={company.industry}
+              businessModel={company.business_model}
+            />
+            <InlineWebsite companyId={company.id} website={company.website} />
+          </div>
         </div>
         {isApproved && (
           <div className="shrink-0">

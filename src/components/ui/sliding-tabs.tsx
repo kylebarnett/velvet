@@ -122,7 +122,7 @@ export function SlidingTabs<T extends string = string>({
                 onMouseLeave={() => setHoveredTab(null)}
                 className={`
                   group relative z-10 flex items-center font-medium
-                  transition-all duration-300 ease-out
+                  transition-all duration-150 ease-out
                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950 rounded-sm
                   ${sizeClasses[size]}
                   ${isActive
@@ -146,7 +146,7 @@ export function SlidingTabs<T extends string = string>({
                 {showIcons && Icon && (
                   <Icon
                     className={`
-                      relative transition-transform duration-300
+                      relative transition-transform duration-150
                       ${iconSizeClasses[size]}
                       ${isActive ? "scale-110" : "scale-100"}
                     `}
@@ -163,7 +163,7 @@ export function SlidingTabs<T extends string = string>({
                     className={`
                       relative ml-1.5 flex h-4 min-w-4 items-center justify-center
                       rounded-full px-1 text-[10px] font-semibold
-                      transition-all duration-300
+                      transition-all duration-150
                       ${isActive
                         ? "bg-white/20 text-white"
                         : "bg-white/10 text-white/50"
@@ -181,7 +181,7 @@ export function SlidingTabs<T extends string = string>({
           <div
             className={`
               absolute bottom-0 h-[2px]
-              ${isInitialized ? "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]" : ""}
+              ${isInitialized ? "transition-all duration-150 ease-[cubic-bezier(0.4,0,0.2,1)]" : ""}
             `}
             style={{
               left: indicatorStyle.left,
@@ -244,7 +244,7 @@ export function SlidingTabs<T extends string = string>({
         <div
           className={`
             absolute top-0 h-full rounded-lg bg-white/10
-            ${isInitialized ? "transition-all duration-300 ease-out" : ""}
+            ${isInitialized ? "transition-all duration-150 ease-out" : ""}
           `}
           style={{
             left: indicatorStyle.left,
@@ -259,7 +259,7 @@ export function SlidingTabs<T extends string = string>({
         className={`
           absolute -bottom-1 h-[2px] rounded-full
           bg-gradient-to-r from-transparent via-white/40 to-transparent
-          ${isInitialized ? "transition-all duration-300 ease-out" : ""}
+          ${isInitialized ? "transition-all duration-150 ease-out" : ""}
         `}
         style={{
           left: indicatorStyle.left + indicatorStyle.width * 0.15,
@@ -363,7 +363,7 @@ export function SlidingIconTabs<T extends string = string>({
         <div
           className={`
             absolute top-0 h-full rounded-md bg-white/10
-            ${isInitialized ? "transition-all duration-300 ease-out" : ""}
+            ${isInitialized ? "transition-all duration-150 ease-out" : ""}
           `}
           style={{
             left: indicatorStyle.left,

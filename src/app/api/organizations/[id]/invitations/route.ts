@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { escapeHtml } from "@/lib/utils/html";
 
 const inviteSchema = z.object({
   email: z.string().email(),
@@ -122,14 +123,81 @@ export async function POST(
 
   if (error) return jsonError(error.message, 400);
 
-  // TODO: Production - Send invitation email via Resend
-  // - Get org name and inviter name for personalized email
-  // - Use escapeHtml() for XSS protection in email HTML
-  // - Send email with accept invitation link
-  // - See /api/investors/portfolio/invite/route.ts for reference implementation
-
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001";
   const inviteUrl = `${appUrl}/signup?org_invite=${invitation.token}`;
+
+  // Get org name and inviter name for personalized email
+  const { data: org } = await admin
+    .from("organizations")
+    .select("name")
+    .eq("id", orgId)
+    .single();
+
+  const { data: inviterData } = await admin
+    .from("users")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+
+  const orgName = org?.name ?? "an organization";
+  const inviterName = inviterData?.full_name ?? "A team member";
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .button { display: inline-block; background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+    .footer { margin-top: 40px; font-size: 14px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p>Hi,</p>
+    <p><strong>${escapeHtml(inviterName)}</strong> has invited you to join <strong>${escapeHtml(orgName)}</strong> on Velvet as a <strong>${escapeHtml(role)}</strong>.</p>
+    <p>Velvet is a platform that helps teams manage portfolio metrics efficiently.</p>
+    <p>Click below to accept the invitation:</p>
+    <a href="${inviteUrl}" class="button">Accept Invitation</a>
+    <p>Or copy this link: ${inviteUrl}</p>
+    <div class="footer">
+      <p>If you have questions, reply to this email.</p>
+      <p>Best,<br>The Velvet Team</p>
+    </div>
+  </div>
+</body>
+</html>`.trim();
+
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (apiKey) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "Velvet <onboarding@resend.dev>",
+          to: [email],
+          subject: `You've been invited to join ${orgName} on Velvet`,
+          html,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Failed to send org invitation email:", text);
+      }
+    } catch (err) {
+      console.error("Failed to send org invitation email:", err);
+    }
+  } else {
+    console.log(`[DEV] Would send org invite to ${email}: ${inviteUrl}`);
+  }
 
   return NextResponse.json({
     id: invitation.id,

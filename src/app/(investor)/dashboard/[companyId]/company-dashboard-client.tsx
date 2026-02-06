@@ -316,13 +316,15 @@ function MetricsTabContent({
             onChange={setSelectedViewId}
             onDelete={handleDeleteView}
           />
+          <div className="hidden sm:block h-5 w-px bg-white/[0.06]" />
           <PeriodSelector value={periodType} onChange={setPeriodType} />
+          <div className="hidden sm:block h-5 w-px bg-white/[0.06]" />
           <DateRangeSelector value={dateRange} onChange={setDateRange} />
         </div>
         <div className="flex items-center gap-2">
           <Link
             href={`/dashboard/${companyId}/edit`}
-            className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2 sm:py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
+            className="flex items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 sm:py-1.5 text-xs font-medium text-white/60 hover:border-white/15 hover:text-white/80 transition-colors"
           >
             <Settings className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Edit Dashboard</span>
@@ -348,7 +350,7 @@ function MetricsTabContent({
           return (
             <div
               key={widget.id}
-              className={`rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 ${colSpanClass}`}
+              className={`rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 sm:p-4 ${colSpanClass}`}
               style={{
                 minHeight: `${widget.h * 80}px`,
               }}

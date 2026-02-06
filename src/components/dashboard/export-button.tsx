@@ -54,7 +54,7 @@ export function ExportButton({
       type="button"
       onClick={handleExport}
       disabled={isExporting}
-      className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20 disabled:opacity-50"
+      className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-white/60 hover:border-white/15 hover:text-white/80 transition-colors disabled:opacity-50"
     >
       <Download className="h-3.5 w-3.5" />
       {isExporting ? "Exporting..." : "Export CSV"}

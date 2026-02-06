@@ -69,3 +69,61 @@ Return a JSON object with this exact structure:
 
 If no matching financial metrics can be extracted, return: {"period_detected": null, "metrics": []}`;
 }
+
+export const EMAIL_EXTRACTION_SYSTEM_PROMPT = `You are a financial data extraction specialist. Your task is to extract financial metrics from investor update emails.
+
+Investor update emails typically contain:
+- Narrative text with metrics embedded ("Revenue grew 40% to $2.3M in Q4")
+- Tabular data with metric values
+- Monthly/quarterly/annual summaries
+
+For each metric you find, extract:
+- name: The metric name (e.g., "Revenue", "MRR", "Burn Rate", "Headcount")
+- value: The numeric value (as a number, not formatted string)
+- unit: The unit if applicable ("USD", "percent", null for dimensionless)
+- period_type: One of "monthly", "quarterly", "annual"
+- period_start: The start date of the reporting period in YYYY-MM-DD format
+- period_end: The end date of the reporting period in YYYY-MM-DD format
+- confidence: Your confidence in the extraction accuracy (0.0 to 1.0)
+- page_number: null (emails don't have pages)
+- context: A brief snippet of surrounding text that provides provenance for this value
+
+Rules:
+1. Extract ALL financial metrics you can find in the email
+2. For percentage values, store as the raw number (e.g., 85 for 85%, not 0.85)
+3. For currency values, store as the raw number without currency symbols
+4. Handle abbreviations: $2.3M = 2300000, $500K = 500000, 1.5B = 1500000000
+5. For quarterly periods: Q1 = Jan-Mar, Q2 = Apr-Jun, Q3 = Jul-Sep, Q4 = Oct-Dec
+6. Be conservative with confidence - lower confidence for values inferred from growth rates
+7. If a growth rate is mentioned (e.g., "grew 40%"), extract the absolute value if given, not the rate itself
+8. Do NOT extract projected/forecasted values — only actual/reported values
+
+Respond with valid JSON only. No markdown formatting, no code blocks.`;
+
+export function buildEmailUserPrompt(emailContent: string, targetMetrics?: string[]): string {
+  const metricsList = targetMetrics && targetMetrics.length > 0
+    ? "\n\nTARGET METRICS TO LOOK FOR (but also extract any other financial metrics you find):\n" + targetMetrics.map((m) => "- " + m).join("\n")
+    : "";
+
+  return "Extract financial metrics from this investor update email:\n\n---\n" + emailContent + "\n---\n" + metricsList + "\n\nReturn a JSON object with this exact structure:\n\n" +
+`{
+  "period_detected": {
+    "type": "monthly" | "quarterly" | "annual",
+    "start": "YYYY-MM-DD",
+    "end": "YYYY-MM-DD"
+  },
+  "metrics": [
+    {
+      "name": "string",
+      "value": number,
+      "unit": "USD" | "percent" | null,
+      "period_type": "monthly" | "quarterly" | "annual",
+      "period_start": "YYYY-MM-DD",
+      "period_end": "YYYY-MM-DD",
+      "confidence": 0.0-1.0,
+      "page_number": null,
+      "context": "string"
+    }
+  ]
+}` + '\n\nIf no financial metrics can be extracted, return: {"period_detected": null, "metrics": []}';
+}

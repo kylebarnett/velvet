@@ -15,6 +15,8 @@ import {
   LayoutDashboard,
   Inbox,
   Shield,
+  Sparkles,
+  Landmark,
   ChevronDown,
   HelpCircle,
   LogOut,
@@ -65,6 +67,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   "layout-dashboard": LayoutDashboard,
   inbox: Inbox,
   shield: Shield,
+  landmark: Landmark,
+  sparkles: Sparkles,
 };
 
 function NavIcon({ name, className }: { name?: string; className?: string }) {

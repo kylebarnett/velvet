@@ -10,7 +10,7 @@ const schema = z.object({
   periodType: z.enum(["monthly", "quarterly", "annual"]),
   periodStart: z.string().min(1),
   periodEnd: z.string().min(1),
-  value: z.string().min(1),
+  value: z.string().min(1).refine((v) => !isNaN(Number(v)), { message: "Value must be a number" }),
   notes: z.string().optional(),
   source: z.enum(["manual", "ai_extracted", "override"]).optional(),
   sourceDocumentId: z.string().uuid().optional(),

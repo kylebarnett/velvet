@@ -233,6 +233,9 @@ export function BatchSubmissionTable({
   // Notes keyed by "periodType:metricName" so quarterly and annual notes are separate
   const [userNotes, setUserNotes] = React.useState<Record<string, string>>({});
 
+  const [cellErrors, setCellErrors] = React.useState<Map<string, string>>(
+    new Map(),
+  );
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
@@ -377,6 +380,18 @@ export function BatchSubmissionTable({
     }
   }, [success]);
 
+  function validateCell(cellKey: string, value: string) {
+    setCellErrors((prev) => {
+      const next = new Map(prev);
+      if (value && isNaN(Number(value))) {
+        next.set(cellKey, "Must be a number");
+      } else {
+        next.delete(cellKey);
+      }
+      return next;
+    });
+  }
+
   function updateCellValue(
     metricName: string,
     periodKey: string,
@@ -386,6 +401,7 @@ export function BatchSubmissionTable({
       ...prev,
       [metricName]: { ...prev[metricName], [periodKey]: value },
     }));
+    validateCell(`${metricName}:${periodKey}`, value);
   }
 
   function updateNotes(metricName: string, notes: string) {
@@ -576,28 +592,39 @@ export function BatchSubmissionTable({
                     const existing =
                       existingValues[row.metricName]?.[p.key];
                     const hasExisting = !!existing;
+                    const cellKey = `${row.metricName}:${p.key}`;
+                    const cellError = cellErrors.get(cellKey);
                     return (
                       <td
                         key={p.key}
                         className={`px-2 py-2 ${p.isRequested ? "bg-white/[0.08]" : ""}`}
                       >
-                        <input
-                          type="text"
-                          value={row.values[p.key] ?? ""}
-                          onChange={(e) =>
-                            updateCellValue(
-                              row.metricName,
-                              p.key,
-                              e.target.value,
-                            )
-                          }
-                          placeholder={hasExisting ? existing : "\u2014"}
-                          className={`h-9 w-full rounded-md border bg-black/30 px-2 text-center text-sm font-mono focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 ${
-                            hasExisting && !row.values[p.key]
-                              ? "border-white/5 text-white/40"
-                              : "border-white/10 text-white"
-                          }`}
-                        />
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={row.values[p.key] ?? ""}
+                            onChange={(e) =>
+                              updateCellValue(
+                                row.metricName,
+                                p.key,
+                                e.target.value,
+                              )
+                            }
+                            placeholder={hasExisting ? existing : "\u2014"}
+                            className={`h-9 w-full rounded-md border bg-black/30 px-2 text-center text-sm font-mono focus:outline-none focus:ring-2 ${
+                              cellError
+                                ? "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20"
+                                : hasExisting && !row.values[p.key]
+                                  ? "border-white/5 text-white/40 focus:border-white/20 focus:ring-white/20"
+                                  : "border-white/10 text-white focus:border-white/20 focus:ring-white/20"
+                            }`}
+                          />
+                          {cellError && (
+                            <div className="absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-red-900/90 px-2 py-0.5 text-[10px] text-red-200">
+                              {cellError}
+                            </div>
+                          )}
+                        </div>
                       </td>
                     );
                   })}
@@ -636,10 +663,14 @@ export function BatchSubmissionTable({
           <button
             type="button"
             onClick={prepareSubmissions}
-            disabled={submitting}
+            disabled={submitting || cellErrors.size > 0}
             className="inline-flex h-10 items-center justify-center rounded-md bg-white px-5 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
           >
-            {submitting ? "Submitting..." : "Submit all"}
+            {submitting
+              ? "Submitting..."
+              : cellErrors.size > 0
+                ? `Submit all (${cellErrors.size} error${cellErrors.size !== 1 ? "s" : ""})`
+                : "Submit all"}
           </button>
         </div>
       )}

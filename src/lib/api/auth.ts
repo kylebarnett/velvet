@@ -10,7 +10,11 @@ export async function getApiUser() {
   return { supabase, user };
 }
 
-export function jsonError(message: string, status = 400) {
-  return NextResponse.json({ error: message }, { status });
+export function jsonError(
+  message: string,
+  status = 400,
+  headers?: Record<string, string>,
+) {
+  return NextResponse.json({ error: message }, { status, headers });
 }
 

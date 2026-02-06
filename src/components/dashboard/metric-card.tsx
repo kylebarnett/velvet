@@ -25,13 +25,13 @@ export function MetricCard({
 
   return (
     <div
-      className={`flex flex-col rounded-xl border border-white/10 bg-white/5 p-4 ${onClick ? "cursor-pointer transition-colors hover:bg-white/[0.08]" : ""}`}
+      className={`flex flex-col p-4 ${onClick ? "cursor-pointer transition-colors hover:bg-white/[0.04]" : ""}`}
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") onClick(); } : undefined}
     >
-      <div className="text-xs font-medium text-white/60">{title}</div>
+      <div className="text-xs font-medium uppercase tracking-wider text-white/40">{title}</div>
       <div className="mt-2 flex items-end justify-between">
         <span className="text-2xl font-semibold">
           {formatValue(value, title)}

@@ -26,6 +26,12 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `/requests/new` - Unified request wizard (template selection, companies, period)
 - `/requests/schedules/[id]` - Schedule detail and run history
 - `/documents` - Cross-portfolio document browser with filters and bulk download
+- `/lp-reports` - LP fund management with performance metrics (TVPI, DPI, IRR, MOIC)
+- `/lp-reports/[fundId]` - Fund detail with investments and performance charts
+- `/reports/compare` - Multi-company metric comparison (2-8 companies, normalization)
+- `/reports/trends` - Portfolio growth distribution, YoY comparison, outlier detection
+- `/reports/benchmarks` - Metric benchmarking with percentile rankings across portfolio
+- `/query` - Natural language portfolio queries (AI-powered Q&A)
 - `/team` - Team member management and invitations
 
 **Founders:**
@@ -48,9 +54,6 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 
 **Not Yet Implemented:**
 - `/templates`, `/templates/new`, `/templates/[id]` - Template management (currently via modals)
-- `/reports/compare`, `/reports/trends` - Coming soon
-- `GET/POST /api/investors/portfolio/reports` - Saved reports CRUD (documented but not implemented)
-- `GET /api/investors/portfolio/compare` - Company comparison (documented but not implemented)
 
 ### Key Principles
 - **Every account is standalone.** Investors and founders have completely separate dashboards. Each founder has their own isolated account and data.
@@ -83,6 +86,10 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `organizations` - Teams/organizations for collaboration (name, org_type, owner_id)
 - `organization_members` - User memberships with roles (admin, member, viewer)
 - `organization_invitations` - Pending team invitations with tokens
+- `funds` - LP funds per investor (name, vintage_year, fund_size, currency)
+- `fund_investments` - Individual fund investments linked to companies (invested_amount, current_value, realized_value)
+- `lp_reports` - LP report documents per fund (report_date, report_type, title, content JSONB, status)
+- `metric_benchmarks` - Anonymized percentile benchmarks (metric_name, period_type, industry, stage, p25/p50/p75/p90, sample_size)
 
 ### RLS Policies
 - All tables have Row Level Security enabled
@@ -100,6 +107,10 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 - `metric_request_schedules`: investors CRUD own schedules
 - `scheduled_request_runs`: investors SELECT runs for their schedules
 - `metric_request_reminders`: investors SELECT reminders for their requests; founders SELECT reminders for requests to their company
+- `funds`: investors CRUD own funds (investor_id = auth.uid())
+- `fund_investments`: investors CRUD investments in own funds (fund_id scoped through funds)
+- `lp_reports`: investors CRUD reports for own funds (fund_id scoped through funds)
+- `metric_benchmarks`: authenticated users SELECT only (anonymized aggregates, no individual data)
 
 ## Styling
 
@@ -673,12 +684,21 @@ Shows metric value source in tables/cards:
 - **ai_extracted**: Sparkles icon, violet, shows confidence %
 - **override**: RotateCcw icon, amber
 
+### AI Email Parsing
+Founders can paste investor update emails and extract metrics using AI:
+- `src/lib/ai/prompts.ts` — `EMAIL_EXTRACTION_SYSTEM_PROMPT` and `buildEmailUserPrompt()` for email-specific extraction
+- `src/app/api/founder/email-ingest/route.ts` — POST with AI extraction (Gemini preferred, OpenAI fallback)
+- `src/components/founder/email-paste-modal.tsx` — 5-state flow: idle → extracting → reviewing → saving → done
+- "Import from Email" button on founder dashboard (Metrics tab)
+- Extracted metrics go through review flow, saved via batch submit with `source: "ai_extracted"`
+
 ### API Routes
 - `POST /api/documents/upload` - Upload a document
 - `GET /api/documents/download` - Download documents
 - `POST /api/documents/[id]/ingest` - Trigger AI extraction for a document
 - `GET /api/documents/[id]/extraction-status` - Check extraction progress
 - `PUT /api/documents/[id]/extraction-review` - Accept/reject extracted values
+- `POST /api/founder/email-ingest` - Extract metrics from pasted email content (founder only)
 
 ### Database Tables
 - `document_metric_mappings` - Links documents to extracted values
@@ -1121,6 +1141,8 @@ Located in `src/lib/reports/aggregation.ts`:
   - `save-report-modal.tsx` - Modal to save current report
   - `portfolio-summary/` - Summary view components (KPICards, DistributionCharts, TopPerformers, AggregateTrend)
   - `company-comparison/` - Comparison view components (CompanyMultiSelect, ComparisonChart, ComparisonTable, NormalizationToggle)
+  - `trends/` - Trends view components (TrendsClient, GrowthDistributionChart, YoYComparisonChart, OutlierTable)
+  - `benchmarks/` - Benchmarking components (BenchmarksClient, BenchmarkChart, BenchmarkTable)
   - `metric-drilldown-panel.tsx` - Right-side sliding panel for metric breakdowns (see below)
 - `src/lib/reports/aggregation.ts` - Aggregation utilities and metric type classifications
 
@@ -1134,17 +1156,109 @@ Click a KPI card in the portfolio summary to open a detailed breakdown:
 - Escape key or backdrop click to close
 
 ### API Routes
-**Implemented:**
 - `GET /api/investors/portfolio/metrics` - Aggregated metrics across portfolio (supports filters)
 - `GET /api/investors/portfolio/distribution` - Portfolio breakdown by industry/stage/business model
-
-**Not Yet Implemented:**
-- `GET /api/investors/portfolio/compare` - Side-by-side comparison (planned)
-- `GET/POST /api/investors/portfolio/reports` - Saved reports CRUD (planned)
-- `GET/PUT/DELETE /api/investors/portfolio/reports/[id]` - Report management (planned)
+- `GET /api/investors/portfolio/compare` - Side-by-side company comparison (companyIds, metrics, periodType, normalize)
+- `GET /api/investors/portfolio/trends` - Growth distribution, YoY comparison, outlier detection
+- `GET/POST /api/investors/portfolio/reports` - List/create saved report configurations
+- `GET/PUT/DELETE /api/investors/portfolio/reports/[id]` - Read/update/delete saved report
+- `POST /api/investors/portfolio/query` - Natural language portfolio query (rate-limited 20/min)
+- `GET /api/investors/benchmarks` - Get benchmark data for metrics with company rankings
+- `GET/POST /api/cron/calculate-benchmarks` - Cron: recalculate percentile benchmarks (daily 5 AM UTC)
 
 ### Setup
 1. Run migration `0008_portfolio_reports.sql`
+
+## LP Reporting Module
+
+### Overview
+Investors can manage LP funds, track investments, and calculate performance metrics (TVPI, DPI, RVPI, IRR, MOIC). Each fund contains investments linked to portfolio companies.
+
+### Financial Calculations
+Located in `src/lib/lp/calculations.ts`:
+- `calculateTVPI(investments)` — (Unrealized + Realized) / Invested
+- `calculateDPI(investments)` — Realized / Invested
+- `calculateRVPI(investments)` — Unrealized / Invested
+- `calculateIRR(cashFlows)` — Newton-Raphson method (100 iterations, 1e-8 tolerance)
+- `calculateMOIC(investments)` — Multiple on Invested Capital
+
+### Components
+Located in `src/components/lp/`:
+- `lp-reports-client.tsx` — Main page with fund cards and create fund modal
+- `fund-card.tsx` — Fund summary card with TVPI/DPI/MOIC KPI row
+- `fund-form-modal.tsx` — Create/edit fund with Zod + react-hook-form
+- `fund-detail-client.tsx` — Fund detail with performance summary + investments table
+- `performance-summary.tsx` — KPI cards (TVPI, DPI, RVPI, IRR, MOIC) with color coding
+- `investment-table.tsx` — Editable investments table with per-row MOIC
+- `investment-form-modal.tsx` — Add/edit investment with company dropdown
+- `fund-performance-chart.tsx` — Recharts area chart for NAV over time
+
+### API Routes
+- `GET/POST /api/investors/funds` — List/create funds
+- `GET/PUT/DELETE /api/investors/funds/[id]` — Read/update/delete fund
+- `GET/POST /api/investors/funds/[id]/investments` — List/create fund investments
+- `PUT/DELETE /api/investors/funds/[id]/investments/[investmentId]` — Update/delete investment
+- `GET /api/investors/funds/[id]/performance` — Calculated TVPI/DPI/RVPI/MOIC
+- `GET/POST /api/investors/funds/[id]/reports` — List/create LP reports
+
+### Setup
+1. Run migration `0022_lp_reporting.sql`
+
+## Benchmarking Engine
+
+### Overview
+Anonymized percentile benchmarks calculated daily from portfolio metric data. Companies are ranked against peers filtered by metric, period type, industry, and stage.
+
+### Calculations
+Located in `src/lib/benchmarks/calculate.ts`:
+- `calculatePercentiles(values)` — R-7 linear interpolation for p25/p50/p75/p90 (requires min 5 values)
+- `getCompanyPercentile(value, benchmark)` — Estimates percentile rank 0-100
+- `getPercentileColor(percentile)` — Tailwind text color (<25 red, 25-50 amber, 50-75 blue, >75 emerald)
+- `getPercentileBgColor(percentile)` — Tailwind badge background classes
+
+### Components
+- `src/components/dashboard/benchmark-indicator.tsx` — Inline "P72" badge with 60s cache, hover tooltip
+- `src/components/reports/benchmarks/benchmarks-client.tsx` — Full page with metric selector, filters, chart + table
+- `src/components/reports/benchmarks/benchmark-chart.tsx` — Recharts BarChart with percentile reference lines
+- `src/components/reports/benchmarks/benchmark-table.tsx` — Sortable table with percentile badges
+
+### API Routes
+- `GET /api/investors/benchmarks` — Benchmark data with company rankings (supports metric, periodType, industry, stage params)
+- `GET/POST /api/cron/calculate-benchmarks` — Daily cron recalculates percentiles (min 5 companies per group)
+
+### Setup
+1. Run migration `0023_benchmarks.sql`
+2. Cron job configured in `vercel.json` (daily at 5 AM UTC)
+
+## Natural Language Portfolio Queries
+
+### Overview
+Investors can ask questions about their portfolio in natural language. AI parses the question into a structured query, executes it against the database, and returns a formatted answer.
+
+### Query Types
+- `metric_lookup` — "What is Company X's MRR?" → fetch specific metric
+- `comparison` — "Compare revenue of A vs B" → multi-company comparison with chart data
+- `aggregation` — "What's the average burn rate?" → portfolio-wide stats
+- `ranking` — "Top 5 companies by revenue growth" → sorted ranking
+
+### Architecture
+Located in `src/lib/ai/portfolio-query.ts`:
+- `PORTFOLIO_QUERY_SYSTEM_PROMPT` — Instructs AI to output structured JSON queries
+- `parseNaturalLanguageQuery(query)` — Calls Gemini or OpenAI to parse NL to structured query
+- `executeStructuredQuery(query, supabase, investorId)` — Executes against DB with RLS compliance
+- `formatQueryResult(result)` — Extracts human-readable answer
+
+### Components
+- `src/components/investor/query-client.tsx` — Chat-style UI with user queries and AI responses
+  - Inline Recharts BarChart when chartData returned
+  - Right sidebar: 6 suggested queries + recent queries from localStorage
+  - Auto-scroll to latest result
+
+### API Routes
+- `POST /api/investors/portfolio/query` — NL query (Zod: query 3-500 chars, rate-limited 20/min per user)
+
+### Setup
+1. Set `GOOGLE_AI_API_KEY` or `OPENAI_API_KEY` environment variable
 
 ## Scheduled Metric Requests
 
@@ -1247,7 +1361,8 @@ Configured in `vercel.json`:
 {
   "crons": [
     { "path": "/api/cron/process-schedules", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/send-reminders", "schedule": "0 * * * *" }
+    { "path": "/api/cron/send-reminders", "schedule": "0 * * * *" },
+    { "path": "/api/cron/calculate-benchmarks", "schedule": "0 5 * * *" }
   ]
 }
 ```
@@ -1256,6 +1371,7 @@ Configured in `vercel.json`:
 |----------|----------|---------|
 | `/api/cron/process-schedules` | Daily at 6 AM UTC | Creates metric requests from due schedules |
 | `/api/cron/send-reminders` | Hourly | Sends reminder emails for approaching due dates |
+| `/api/cron/calculate-benchmarks` | Daily at 5 AM UTC | Recalculates percentile benchmarks from anonymized metric data |
 
 **Cron Authentication:**
 ```typescript
@@ -2263,6 +2379,8 @@ Migration files in `supabase/migrations/`:
 - `0019_fix_org_members_rls.sql` - Fixes RLS circular dependency with `user_organization_ids()` helper function
 - `0020_users_org_visibility.sql` - Updates users RLS policy for org member profile visibility
 - `0021_user_preferences.sql` - Adds `preferences` JSONB column to users table with GIN index for cross-device user preferences
+- `0022_lp_reporting.sql` - Creates `funds`, `fund_investments`, `lp_reports` tables with RLS for investor-scoped LP fund management
+- `0023_benchmarks.sql` - Creates `metric_benchmarks` table with UNIQUE(metric_name, period_type, industry, stage) and authenticated read RLS
 
 Migrations must be run manually in the Supabase SQL Editor (Dashboard > SQL Editor > paste and run).
 

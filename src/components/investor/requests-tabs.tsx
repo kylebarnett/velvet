@@ -10,18 +10,6 @@ import { TemplatesTabContent } from "@/components/investor/templates-tab-content
 import { SchedulesTabContent } from "@/components/investor/schedules-tab-content";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 
-type Request = {
-  id: string;
-  period_start: string;
-  period_end: string;
-  status: string;
-  due_date: string | null;
-  created_at: string;
-  company_id: string;
-  companies: { id: string; name: string } | { id: string; name: string }[] | null;
-  metric_definitions: { name: string; period_type: string } | { name: string; period_type: string }[] | null;
-};
-
 type Company = {
   id: string;
   name: string;
@@ -36,10 +24,8 @@ const TABS: TabItem<Tab>[] = [
 ];
 
 export function RequestsTabs({
-  requests,
   companies,
 }: {
-  requests: Request[];
   companies: Company[];
 }) {
   const router = useRouter();
@@ -90,7 +76,7 @@ export function RequestsTabs({
 
       {/* Tab content */}
       {activeTab === "requests" && (
-        <RequestsTabContent requests={requests} companies={companies} />
+        <RequestsTabContent companies={companies} />
       )}
       {activeTab === "templates" && <TemplatesTabContent />}
       {activeTab === "schedules" && <SchedulesTabContent />}

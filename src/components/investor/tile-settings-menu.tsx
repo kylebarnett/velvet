@@ -102,7 +102,7 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs font-medium text-white/80 hover:border-white/20 transition-colors"
+          className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs font-medium text-white/60 hover:border-white/15 hover:text-white/80 transition-colors"
         >
           <Sliders className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Tile Settings</span>

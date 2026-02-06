@@ -9,29 +9,6 @@ export default async function RequestsPage() {
   const user = await requireRole("investor");
   const supabase = await createSupabaseServerClient();
 
-  // Fetch all metric requests with company and definition info
-  const { data: requests } = await supabase
-    .from("metric_requests")
-    .select(`
-      id,
-      period_start,
-      period_end,
-      status,
-      due_date,
-      created_at,
-      company_id,
-      companies (
-        id,
-        name
-      ),
-      metric_definitions (
-        name,
-        period_type
-      )
-    `)
-    .eq("investor_id", user.id)
-    .order("created_at", { ascending: false });
-
   // Get unique companies for filter dropdown
   const { data: relationships } = await supabase
     .from("investor_company_relationships")
@@ -49,7 +26,6 @@ export default async function RequestsPage() {
   return (
     <Suspense>
       <RequestsTabs
-        requests={requests ?? []}
         companies={companies}
       />
     </Suspense>

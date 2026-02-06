@@ -80,7 +80,7 @@ function CompanyLogoDisplay({
   const initial = name.charAt(0).toUpperCase();
 
   return (
-    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5">
+    <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border border-white/[0.08] bg-white/5">
       {displayUrl && !imgError ? (
         <img
           src={displayUrl}
@@ -147,7 +147,7 @@ export function CompanyCard({
   return (
     <Link
       href={`/dashboard/${id}`}
-      className="flex flex-col rounded-xl border border-white/10 bg-white/5 p-4 transition-colors hover:border-white/20 hover:bg-white/[0.07]"
+      className="card-hover-lift flex flex-col rounded-xl border border-white/[0.08] bg-white/[0.03] p-5 hover:border-white/15"
     >
       <div className="flex items-start justify-between">
         <CompanyLogoDisplay name={name} logoUrl={logoUrl} />
@@ -160,15 +160,14 @@ export function CompanyCard({
 
       <div className="mt-3">
         <h3 className="font-medium text-white">{name}</h3>
-        <div className="mt-1 flex items-center gap-2 text-xs text-white/60">
-          {industry && <span className="capitalize">{industry.replace(/_/g, " ")}</span>}
-          {industry && stage && <span>-</span>}
-          {stage && <span className="capitalize">{stage.replace(/_/g, " ")}</span>}
+        <div className="mt-1.5 flex items-center gap-1.5">
+          {industry && <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[11px] capitalize text-blue-300/70">{industry.replace(/_/g, " ")}</span>}
+          {stage && <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[11px] capitalize text-violet-300/70">{stage.replace(/_/g, " ")}</span>}
         </div>
       </div>
 
       {hasAnyMetric && (
-        <div className="mt-4 space-y-2 border-t border-white/10 pt-3">
+        <div className="mt-auto space-y-2 border-t border-white/[0.06] pt-3">
           {/* Primary metric */}
           <div className="flex items-center justify-between">
             <div>
@@ -182,7 +181,7 @@ export function CompanyCard({
 
           {/* Secondary metric (smaller) */}
           {secondaryMetric && secondaryMetric.value != null && (
-            <div className="flex items-center justify-between border-t border-white/5 pt-2">
+            <div className="flex items-center justify-between border-t border-white/[0.06] pt-2">
               <div>
                 <div className="text-xs text-white/40">{secondaryMetric.name}</div>
                 <div className="mt-0.5 text-sm font-medium text-white/80">
@@ -196,13 +195,13 @@ export function CompanyCard({
       )}
 
       {!hasAnyMetric && hasFounder && isApproved && (
-        <div className="mt-4 flex items-center border-t border-white/10 pt-3">
+        <div className="mt-auto flex items-center border-t border-white/[0.06] pt-3">
           <span className="text-xs text-white/40">No metrics submitted yet</span>
         </div>
       )}
 
       {!hasFounder && (
-        <div className="mt-4 flex items-center border-t border-white/10 pt-3">
+        <div className="mt-auto flex items-center border-t border-white/[0.06] pt-3">
           <span className="text-xs text-amber-200/60">Awaiting founder signup</span>
         </div>
       )}

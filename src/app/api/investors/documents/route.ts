@@ -66,7 +66,10 @@ export async function GET(req: Request) {
   }
 
   if (search) {
-    query = query.ilike("file_name", `%${search}%`);
+    const escapedSearch = search
+      .replace(/[%_]/g, "\\$&")
+      .replace(/[(),."'\\]/g, "");
+    query = query.ilike("file_name", `%${escapedSearch}%`);
   }
 
   query = query.range(offset, offset + limit - 1);

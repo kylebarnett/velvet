@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Building2, Clock, CheckCircle2 } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -253,7 +254,7 @@ export default async function InvestorDashboardPage() {
     .gte("updated_at", weekAgo.toISOString());
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="space-y-1">
         <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-sm text-white/60">
@@ -261,19 +262,22 @@ export default async function InvestorDashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-3">
         {[
-          { label: "Portfolio companies", value: String(companies.length), href: "/portfolio" },
-          { label: "Pending requests", value: String(pendingRequests ?? 0), href: "/requests?status=pending" },
-          { label: "Submitted this week", value: String(recentSubmissions ?? 0), href: "/requests?status=submitted" },
+          { label: "Portfolio companies", value: String(companies.length), href: "/portfolio", icon: Building2, gradient: "kpi-gradient-blue" },
+          { label: "Pending requests", value: String(pendingRequests ?? 0), href: "/requests?status=pending", icon: Clock, gradient: "kpi-gradient-amber" },
+          { label: "Submitted this week", value: String(recentSubmissions ?? 0), href: "/requests?status=submitted", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
         ].map((card) => (
           <Link
             key={card.label}
             href={card.href}
-            className="group rounded-xl border border-white/10 bg-white/5 p-4 transition-colors hover:border-white/20 hover:bg-white/[0.07]"
+            className={`card-hover-lift group rounded-xl border border-white/[0.08] ${card.gradient} p-5 hover:border-white/15`}
           >
-            <div className="text-sm text-white/60 group-hover:text-white/70">{card.label}</div>
-            <div className="mt-2 text-2xl font-semibold">{card.value}</div>
+            <div className="flex items-start justify-between">
+              <div className="text-xs font-medium uppercase tracking-wider text-white/40 group-hover:text-white/50">{card.label}</div>
+              <card.icon className="h-4 w-4 text-white/20" />
+            </div>
+            <div className="mt-3 text-3xl font-semibold tracking-tight">{card.value}</div>
           </Link>
         ))}
       </div>

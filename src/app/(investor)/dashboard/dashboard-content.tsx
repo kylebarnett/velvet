@@ -150,7 +150,7 @@ function CompanyListRow({
   return (
     <Link
       href={`/dashboard/${company.id}`}
-      className="flex items-center gap-4 rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition-colors hover:border-white/20 hover:bg-white/[0.07]"
+      className="card-hover-lift flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.03] px-5 py-3.5 hover:border-white/15"
     >
       <CompanyLogoSmall name={company.name} logoUrl={company.logoUrl} />
 
@@ -163,13 +163,12 @@ function CompanyListRow({
             </span>
           )}
         </div>
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-white/60">
+        <div className="mt-0.5 flex items-center gap-1.5">
           {company.industry && (
-            <span className="capitalize">{company.industry.replace(/_/g, " ")}</span>
+            <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[11px] capitalize text-blue-300/70">{company.industry.replace(/_/g, " ")}</span>
           )}
-          {company.industry && company.stage && <span>·</span>}
           {company.stage && (
-            <span className="capitalize">{company.stage.replace(/_/g, " ")}</span>
+            <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[11px] capitalize text-violet-300/70">{company.stage.replace(/_/g, " ")}</span>
           )}
         </div>
       </div>
@@ -188,7 +187,7 @@ function CompanyListRow({
             </div>
             {secondaryMetric && secondaryMetric.value != null && (
               <>
-                <div className="text-right border-l border-white/10 pl-6">
+                <div className="text-right border-l border-white/[0.06] pl-6">
                   <div className="text-xs text-white/60">{secondaryMetric.name}</div>
                   <div className="text-sm font-medium text-white/80">
                     {formatValue(secondaryMetric.value, secondaryMetric.name)}
@@ -223,7 +222,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
   }, [companies, searchQuery]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex-1 sm:max-w-md">
           <CompanySearch
@@ -233,7 +232,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
           />
         </div>
         <div className="flex items-center justify-between gap-3 sm:justify-end">
-          <div className="text-sm text-white/60">
+          <div className="rounded-full bg-white/5 px-2.5 py-1 text-xs text-white/60">
             {filteredCompanies.length} of {companies.length}
           </div>
           <TileSettingsMenu
@@ -247,7 +246,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
                 tileSecondaryMetric: c.tileSecondaryMetric,
               }))}
           />
-          <div className="flex items-center rounded-lg border border-white/10 bg-white/5 p-1">
+          <div className="flex items-center rounded-lg border border-white/[0.08] bg-black/20 p-1">
             <button
               type="button"
               onClick={() => setViewMode("grid")}
@@ -281,7 +280,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
           <p className="text-white/60">No companies match your search.</p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filteredCompanies.map((company) => (
             <CompanyCard
               key={company.id}
@@ -298,7 +297,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5">
           {filteredCompanies.map((company) => (
             <CompanyListRow
               key={company.id}

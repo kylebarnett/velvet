@@ -14,9 +14,10 @@ import {
   DashboardLayout,
 } from "@/components/dashboard";
 import { DateRange } from "@/components/dashboard/date-range-selector";
-import { Download, Settings } from "lucide-react";
+import { Download, Settings, Mail } from "lucide-react";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
+import { EmailPasteModal } from "@/components/founder/email-paste-modal";
 
 type DashboardView = {
   id: string;
@@ -289,6 +290,7 @@ export function FounderDashboardClient({
     metricName: string;
     periodStart?: string;
   } | null>(null);
+  const [showEmailModal, setShowEmailModal] = React.useState(false);
 
   // Sync views state when props change (e.g., after navigation with fresh server data)
   React.useEffect(() => {
@@ -373,21 +375,37 @@ export function FounderDashboardClient({
 
   if (!hasMetrics) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-        <p className="text-white/60">
-          No metrics submitted yet.
-        </p>
-        <p className="mt-2 text-sm text-white/40">
-          Submit metrics from the{" "}
-          <Link
-            href="/portal/requests"
-            className="underline underline-offset-4 hover:text-white"
-          >
-            Requests tab
-          </Link>{" "}
-          or add your own.
-        </p>
-      </div>
+      <>
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
+          <p className="text-white/60">
+            No metrics submitted yet.
+          </p>
+          <p className="mt-2 text-sm text-white/40">
+            Submit metrics from the{" "}
+            <Link
+              href="/portal/requests"
+              className="underline underline-offset-4 hover:text-white"
+            >
+              Requests tab
+            </Link>
+            , add your own, or{" "}
+            <button
+              type="button"
+              onClick={() => setShowEmailModal(true)}
+              className="underline underline-offset-4 hover:text-white"
+            >
+              import from an email
+            </button>
+            .
+          </p>
+        </div>
+        <EmailPasteModal
+          open={showEmailModal}
+          companyId={companyId}
+          onClose={() => setShowEmailModal(false)}
+          onMetricsSaved={() => router.refresh()}
+        />
+      </>
     );
   }
 
@@ -410,6 +428,14 @@ export function FounderDashboardClient({
           <DateRangeSelector value={dateRange} onChange={setDateRange} />
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowEmailModal(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10"
+          >
+            <Mail className="h-3 w-3" />
+            Import from Email
+          </button>
           <button
             type="button"
             onClick={handleExport}
@@ -481,6 +507,13 @@ export function FounderDashboardClient({
           onValueUpdated={() => router.refresh()}
         />
       )}
+
+      <EmailPasteModal
+        open={showEmailModal}
+        companyId={companyId}
+        onClose={() => setShowEmailModal(false)}
+        onMetricsSaved={() => router.refresh()}
+      />
     </div>
   );
 }

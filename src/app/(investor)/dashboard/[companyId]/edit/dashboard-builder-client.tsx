@@ -82,9 +82,20 @@ export function DashboardBuilderClient({
   const [showTemplateDropdown, setShowTemplateDropdown] = React.useState(false);
   const [saveAsName, setSaveAsName] = React.useState("");
   const [showSaveAs, setShowSaveAs] = React.useState(false);
+  const [isDirty, setIsDirty] = React.useState(false);
 
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const templateDropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Warn before unloading with unsaved changes
+  React.useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
 
   // Close dropdowns when clicking outside
   React.useEffect(() => {
@@ -119,6 +130,7 @@ export function DashboardBuilderClient({
 
     setWidgets([...widgets, newWidget]);
     setSelectedWidgetId(newWidget.id);
+    setIsDirty(true);
   }
 
   function getDefaultConfig(
@@ -149,12 +161,14 @@ export function DashboardBuilderClient({
 
   function handleWidgetChange(updatedWidget: Widget) {
     setWidgets(widgets.map((w) => (w.id === updatedWidget.id ? updatedWidget : w)));
+    setIsDirty(true);
   }
 
   function handleDeleteWidget() {
     if (!selectedWidgetId) return;
     setWidgets(widgets.filter((w) => w.id !== selectedWidgetId));
     setSelectedWidgetId(null);
+    setIsDirty(true);
   }
 
   function handleApplyTemplate(template: DashboardTemplate) {
@@ -162,6 +176,7 @@ export function DashboardBuilderClient({
     setWidgets(templateWidgets);
     setSelectedWidgetId(null);
     setShowTemplateDropdown(false);
+    setIsDirty(true);
   }
 
   function handleViewChange(viewId: string) {
@@ -204,6 +219,7 @@ export function DashboardBuilderClient({
         if (!res.ok) throw new Error(json.error ?? "Failed to save");
       }
 
+      setIsDirty(false);
       router.push(`/dashboard/${companyId}`);
       router.refresh();
     } catch (err) {
@@ -233,6 +249,7 @@ export function DashboardBuilderClient({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to save");
 
+      setIsDirty(false);
       router.push(`/dashboard/${companyId}`);
       router.refresh();
     } catch (err) {
@@ -343,7 +360,10 @@ export function DashboardBuilderClient({
         {/* Canvas */}
         <DashboardCanvas
           widgets={widgets}
-          onLayoutChange={setWidgets}
+          onLayoutChange={(w) => {
+            setWidgets(w);
+            setIsDirty(true);
+          }}
           onSelectWidget={setSelectedWidgetId}
           selectedWidgetId={selectedWidgetId}
         />

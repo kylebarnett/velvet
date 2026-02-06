@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatPeriodRange, formatDate } from "@/lib/utils/format-date";
+import { useDebounce } from "@/lib/hooks/use-debounce";
 
 type Request = {
   id: string;
@@ -28,26 +30,68 @@ type Company = {
   name: string;
 };
 
+type StatusCounts = {
+  total: number;
+  pending: number;
+  submitted: number;
+};
+
+const PAGE_SIZE = 50;
+
 export function RequestsTabContent({
-  requests,
   companies,
 }: {
-  requests: Request[];
+  requests?: Request[];
   companies: Company[];
 }) {
-  const searchParams = useSearchParams();
-  const initialStatus = searchParams.get("status") ?? "";
-  const [statusFilter, setStatusFilter] = React.useState(initialStatus);
-  const [companyFilter, setCompanyFilter] = React.useState("");
-
-  const filteredRequests = requests.filter((req) => {
-    if (statusFilter && req.status !== statusFilter) return false;
-    if (companyFilter && req.company_id !== companyFilter) return false;
-    return true;
+  const [requests, setRequests] = React.useState<Request[]>([]);
+  const [statusCounts, setStatusCounts] = React.useState<StatusCounts>({
+    total: 0,
+    pending: 0,
+    submitted: 0,
   });
+  const [total, setTotal] = React.useState(0);
+  const [page, setPage] = React.useState(0);
+  const [loading, setLoading] = React.useState(true);
+  const [statusFilter, setStatusFilter] = React.useState("");
+  const [companyFilter, setCompanyFilter] = React.useState("");
+  const [searchInput, setSearchInput] = React.useState("");
+  const debouncedSearch = useDebounce(searchInput, 300);
 
-  const pendingCount = requests.filter((r) => r.status === "pending").length;
-  const submittedCount = requests.filter((r) => r.status === "submitted").length;
+  const fetchRequests = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set("limit", String(PAGE_SIZE));
+      params.set("offset", String(page * PAGE_SIZE));
+      if (statusFilter) params.set("status", statusFilter);
+      if (companyFilter) params.set("companyId", companyFilter);
+      if (debouncedSearch) params.set("search", debouncedSearch);
+
+      const res = await fetch(`/api/investors/requests?${params}`);
+      const json = await res.json();
+      if (res.ok) {
+        setRequests(json.requests ?? []);
+        setTotal(json.total ?? 0);
+        if (json.statusCounts) setStatusCounts(json.statusCounts);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [page, statusFilter, companyFilter, debouncedSearch]);
+
+  React.useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
+  // Reset to page 0 when filters change
+  React.useEffect(() => {
+    setPage(0);
+  }, [statusFilter, companyFilter, debouncedSearch]);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const showingStart = total === 0 ? 0 : page * PAGE_SIZE + 1;
+  const showingEnd = Math.min((page + 1) * PAGE_SIZE, total);
 
   const statusStyles: Record<string, string> = {
     pending: "bg-amber-500/20 text-amber-200",
@@ -67,7 +111,7 @@ export function RequestsTabContent({
           type="button"
         >
           <div className="text-xs sm:text-sm text-white/60">Total</div>
-          <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold">{requests.length}</div>
+          <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold">{statusCounts.total}</div>
         </button>
         <button
           onClick={() => setStatusFilter("pending")}
@@ -77,7 +121,7 @@ export function RequestsTabContent({
           type="button"
         >
           <div className="text-xs sm:text-sm text-white/60">Pending</div>
-          <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold">{pendingCount}</div>
+          <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold">{statusCounts.pending}</div>
         </button>
         <button
           onClick={() => setStatusFilter("submitted")}
@@ -87,12 +131,33 @@ export function RequestsTabContent({
           type="button"
         >
           <div className="text-xs sm:text-sm text-white/60">Submitted</div>
-          <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold">{submittedCount}</div>
+          <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold">{statusCounts.submitted}</div>
         </button>
       </div>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
+        {/* Search input */}
+        <div className="relative flex-1 sm:flex-none sm:min-w-[200px]">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search metrics..."
+            className="h-10 w-full rounded-md border border-white/10 bg-black/30 pl-9 pr-8 text-sm placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+          />
+          {searchInput && (
+            <button
+              type="button"
+              onClick={() => setSearchInput("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-white/40 hover:text-white/70"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
         <div className="flex gap-2">
           <Select value={statusFilter || "__all__"} onValueChange={(v) => setStatusFilter(v === "__all__" ? "" : v)}>
             <SelectTrigger size="sm" className="w-auto min-w-[130px] flex-1 sm:flex-none">
@@ -122,11 +187,12 @@ export function RequestsTabContent({
         </div>
 
         <div className="flex items-center justify-between sm:justify-start gap-3">
-          {(statusFilter || companyFilter) && (
+          {(statusFilter || companyFilter || searchInput) && (
             <button
               onClick={() => {
                 setStatusFilter("");
                 setCompanyFilter("");
+                setSearchInput("");
               }}
               className="h-10 rounded-md border border-white/10 px-3 text-sm text-white/60 hover:bg-white/5"
               type="button"
@@ -134,15 +200,17 @@ export function RequestsTabContent({
               Clear filters
             </button>
           )}
-
-          <span className="text-sm text-white/60">
-            {filteredRequests.length} of {requests.length}
-          </span>
         </div>
       </div>
 
-      {/* Empty state */}
-      {requests.length === 0 ? (
+      {/* Loading state */}
+      {loading ? (
+        <div className="space-y-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-14 animate-pulse rounded-lg bg-white/5" />
+          ))}
+        </div>
+      ) : requests.length === 0 && !statusFilter && !companyFilter && !debouncedSearch ? (
         <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
           <div className="text-sm text-white/60">No requests yet.</div>
           <div className="mt-2">
@@ -154,7 +222,7 @@ export function RequestsTabContent({
             </Link>
           </div>
         </div>
-      ) : filteredRequests.length === 0 ? (
+      ) : requests.length === 0 ? (
         <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
           <div className="text-sm text-white/60">No requests match the selected filters.</div>
         </div>
@@ -162,7 +230,7 @@ export function RequestsTabContent({
         <>
           {/* Mobile Card View */}
           <div className="space-y-3 sm:hidden">
-            {filteredRequests.map((req) => {
+            {requests.map((req) => {
               const defRaw = req.metric_definitions;
               const def = (Array.isArray(defRaw) ? defRaw[0] : defRaw) as {
                 name: string;
@@ -191,7 +259,7 @@ export function RequestsTabContent({
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <div className="text-xs text-white/40">Company</div>
+                      <div className="text-xs text-white/60">Company</div>
                       {company ? (
                         <Link
                           href={`/dashboard/${company.id}`}
@@ -200,16 +268,18 @@ export function RequestsTabContent({
                           {company.name}
                         </Link>
                       ) : (
-                        <span className="text-white/50">—</span>
+                        <span className="text-white/60">—</span>
                       )}
                     </div>
                     <div>
-                      <div className="text-xs text-white/40">Due date</div>
-                      <div className="text-white/70">{req.due_date ?? "—"}</div>
+                      <div className="text-xs text-white/60">Due date</div>
+                      <div className="text-white/70">
+                        {req.due_date ? formatDate(req.due_date) : "—"}
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-2 text-xs text-white/40">
-                    Period: {req.period_start} to {req.period_end}
+                  <div className="mt-2 text-xs text-white/60">
+                    {formatPeriodRange(req.period_start, req.period_end, def?.period_type)}
                   </div>
                 </div>
               );
@@ -230,7 +300,7 @@ export function RequestsTabContent({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredRequests.map((req) => {
+                  {requests.map((req) => {
                     const defRaw = req.metric_definitions;
                     const def = (Array.isArray(defRaw) ? defRaw[0] : defRaw) as {
                       name: string;
@@ -258,13 +328,15 @@ export function RequestsTabContent({
                               {company.name}
                             </Link>
                           ) : (
-                            <span className="text-white/50">—</span>
+                            <span className="text-white/60">—</span>
                           )}
                         </td>
                         <td className="px-4 py-3 text-white/70 whitespace-nowrap">
-                          {req.period_start} to {req.period_end}
+                          {formatPeriodRange(req.period_start, req.period_end, def?.period_type)}
                         </td>
-                        <td className="px-4 py-3 text-white/60">{req.due_date ?? "—"}</td>
+                        <td className="px-4 py-3 text-white/60">
+                          {req.due_date ? formatDate(req.due_date) : "—"}
+                        </td>
                         <td className="px-4 py-3">
                           <span className={`rounded-full px-2 py-0.5 text-xs ${statusStyle}`}>
                             {req.status}
@@ -277,6 +349,36 @@ export function RequestsTabContent({
               </table>
             </div>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-white/60">
+                Showing {showingStart}–{showingEnd} of {total}
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-white/60 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="px-2 text-sm text-white/60">
+                  {page + 1} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={page >= totalPages - 1}
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-white/60 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
