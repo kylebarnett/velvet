@@ -52,7 +52,6 @@ export default async function InvestorLayout({
           { href: "/documents", label: "Documents", icon: "file-text" },
           { href: "/lp-reports", label: "LP Reports", icon: "landmark" },
           { href: "/team", label: "Team", icon: "user-plus" },
-          { href: "/query", label: "Ask AI", icon: "sparkles" },
         ]}
         user={userInfo}
       >

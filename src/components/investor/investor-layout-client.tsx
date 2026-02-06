@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { OnboardingProvider } from "@/contexts/onboarding-context";
 import { OnboardingOverlay } from "@/components/onboarding/onboarding-provider";
+import { ChatbotWidget } from "@/components/investor/chatbot-widget";
 
 type InvestorLayoutClientProps = {
   children: React.ReactNode;
@@ -23,6 +24,7 @@ export function InvestorLayoutClient({
     >
       {children}
       <OnboardingOverlay />
+      <ChatbotWidget />
     </OnboardingProvider>
   );
 }
