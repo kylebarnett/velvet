@@ -18,6 +18,7 @@ import {
 import { DateRange } from "@/components/dashboard/date-range-selector";
 import { CompanyDocumentsTab } from "@/components/investor/company-documents-tab";
 import { CompanyTearSheetsTab } from "@/components/investor/company-tear-sheets-tab";
+import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 
 type DashboardView = {
@@ -245,6 +246,10 @@ function MetricsTabContent({
     initialViews.find((v) => v.is_default)?.id ?? initialViews[0]?.id ?? null
   );
   const { periodType, setPeriodType, dateRange, setDateRange } = useDashboardPreferences();
+  const [detailSelection, setDetailSelection] = React.useState<{
+    metricName: string;
+    periodStart?: string;
+  } | null>(null);
 
   async function handleDeleteView(viewId: string) {
     try {
@@ -360,6 +365,9 @@ function MetricsTabContent({
                 metrics={filteredMetrics}
                 periodTypeOverride={periodType}
                 companyId={companyId}
+                onMetricClick={(name, period) =>
+                  setDetailSelection({ metricName: name, periodStart: period })
+                }
               />
             </div>
           );
@@ -373,6 +381,15 @@ function MetricsTabContent({
             Click "Edit Dashboard" to add charts and metrics.
           </p>
         </div>
+      )}
+
+      {detailSelection && (
+        <MetricDetailPanel
+          companyId={companyId}
+          metricName={detailSelection.metricName}
+          initialPeriod={detailSelection.periodStart}
+          onClose={() => setDetailSelection(null)}
+        />
       )}
     </div>
   );
