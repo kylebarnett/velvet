@@ -36,7 +36,10 @@ export async function GET(req: Request) {
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to fetch companies:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   const companies = (relationships ?? []).map((r) => {
     const company = Array.isArray(r.companies) ? r.companies[0] : r.companies;

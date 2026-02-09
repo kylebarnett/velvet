@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 
 const createSchema = z.object({
   name: z.string().min(1).max(200),
@@ -24,7 +25,10 @@ export async function GET() {
     .eq("investor_id", user.id)
     .order("vintage_year", { ascending: false });
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to list funds:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ funds: funds ?? [] });
 }
@@ -36,6 +40,14 @@ export async function POST(req: Request) {
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
+
+  // Rate limit: 10 fund creations per minute per user
+  const { allowed, retryAfter } = checkRateLimit(`fund-create:${user.id}`, 10, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
 
   const parsed = createSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
@@ -56,7 +68,10 @@ export async function POST(req: Request) {
     .select("*")
     .single();
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to create fund:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ fund, ok: true }, { status: 201 });
 }

@@ -35,7 +35,10 @@ export async function GET(req: Request) {
   }
 
   const { data, error } = await query;
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to fetch reports:", error.message);
+    return jsonError("Failed to fetch reports.", 500);
+  }
 
   return NextResponse.json({ reports: data ?? [] });
 }
@@ -79,7 +82,10 @@ export async function POST(req: Request) {
     .select("id")
     .single();
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to create report:", error.message);
+    return jsonError("Failed to create report.", 500);
+  }
 
   return NextResponse.json({ id: data.id, ok: true });
 }

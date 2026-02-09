@@ -17,7 +17,10 @@ export async function GET() {
     .eq("is_system", true)
     .order("name", { ascending: true });
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to fetch dashboard templates:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({
     templates: templates ?? [],

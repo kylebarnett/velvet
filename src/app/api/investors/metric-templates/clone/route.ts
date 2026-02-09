@@ -61,7 +61,8 @@ export async function POST(req: Request) {
     .single();
 
   if (createError) {
-    return jsonError(createError.message, 500);
+    console.error("Failed to clone template:", createError.message);
+    return jsonError("Failed to process request.", 500);
   }
 
   // Copy all template items
@@ -82,7 +83,8 @@ export async function POST(req: Request) {
     if (itemsError) {
       // Cleanup template on item insert failure
       await supabase.from("metric_templates").delete().eq("id", newTemplate.id);
-      return jsonError(itemsError.message, 500);
+      console.error("Failed to clone template items:", itemsError.message);
+      return jsonError("Failed to process request.", 500);
     }
   }
 

@@ -67,7 +67,8 @@ export async function GET(
     if (error.code === "PGRST116") {
       return jsonError("Schedule not found.", 404);
     }
-    return jsonError(error.message, 500);
+    console.error("Failed to fetch schedule:", error.message);
+    return jsonError("Failed to fetch schedule.", 500);
   }
 
   const template = Array.isArray(schedule.metric_templates)
@@ -239,7 +240,8 @@ export async function PUT(
     .eq("id", id);
 
   if (updateError) {
-    return jsonError(updateError.message, 400);
+    console.error("Failed to update schedule:", updateError.message);
+    return jsonError("Failed to update schedule.", 500);
   }
 
   return NextResponse.json({ ok: true });
@@ -275,7 +277,8 @@ export async function DELETE(
     .eq("id", id);
 
   if (deleteError) {
-    return jsonError(deleteError.message, 500);
+    console.error("Failed to delete schedule:", deleteError.message);
+    return jsonError("Failed to delete schedule.", 500);
   }
 
   return NextResponse.json({ ok: true });

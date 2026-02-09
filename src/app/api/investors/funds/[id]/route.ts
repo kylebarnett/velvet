@@ -85,7 +85,10 @@ export async function PUT(
     .select("*")
     .single();
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to update fund:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ fund, ok: true });
 }
@@ -121,7 +124,10 @@ export async function DELETE(
     .eq("id", id)
     .eq("investor_id", user.id);
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to delete fund:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ ok: true });
 }

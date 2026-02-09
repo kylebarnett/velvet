@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -11,6 +12,14 @@ export async function POST(req: Request) {
 
   const role = (user.user_metadata?.role as string | undefined) ?? null;
   if (role !== "founder") return jsonError("Forbidden", 403);
+
+  // Rate limit: 10 uploads per minute per user
+  const { allowed, retryAfter } = checkRateLimit(`upload:${user.id}`, 10, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
 
   const form = await req.formData().catch(() => null);
   if (!form) return jsonError("Invalid form data.", 400);
@@ -116,7 +125,10 @@ export async function POST(req: Request) {
     .from("documents")
     .upload(filePath, file, { upsert: false });
 
-  if (uploadError) return jsonError(uploadError.message, 400);
+  if (uploadError) {
+    console.error("Failed to upload document:", uploadError.message);
+    return jsonError("Failed to upload document.", 400);
+  }
 
   // Use admin client to insert the document record — ownership already
   // verified above, and the founder's client may be blocked by RLS if
@@ -138,7 +150,10 @@ export async function POST(req: Request) {
     .select("id")
     .single();
 
-  if (docErr) return jsonError(docErr.message, 400);
+  if (docErr) {
+    console.error("Failed to save document record:", docErr.message);
+    return jsonError("Failed to save document.", 400);
+  }
 
   // TODO: queue ingestion (Edge Function) for AI extraction.
 

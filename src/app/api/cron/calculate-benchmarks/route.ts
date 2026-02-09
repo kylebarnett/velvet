@@ -32,7 +32,7 @@ async function handler(req: Request) {
   const cronSecret = process.env.CRON_SECRET;
   const authHeader = req.headers.get("authorization");
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -45,8 +45,9 @@ async function handler(req: Request) {
     .select("id, industry, stage");
 
   if (companyError) {
+    console.error("Failed to fetch companies:", companyError.message);
     return NextResponse.json(
-      { error: `Failed to fetch companies: ${companyError.message}` },
+      { error: "Failed to fetch companies." },
       { status: 500 },
     );
   }
@@ -56,23 +57,36 @@ async function handler(req: Request) {
     companyMap.set(c.id, c);
   }
 
-  // Fetch all metric values — we take the most recent value per company per metric
-  // to avoid double-counting historical values
-  const { data: metricValues, error: mvError } = await adminClient
-    .from("company_metric_values")
-    .select("metric_name, period_type, value, company_id")
-    .order("period_start", { ascending: false });
+  // Fetch all metric values in batches to prevent memory exhaustion at scale.
+  // We take the most recent value per company per metric to avoid double-counting.
+  const FETCH_BATCH_SIZE = 5000;
+  let fetchOffset = 0;
+  const metricValues: MetricValueRow[] = [];
 
-  if (mvError) {
-    return NextResponse.json(
-      { error: `Failed to fetch metric values: ${mvError.message}` },
-      { status: 500 },
-    );
+  while (true) {
+    const { data: batch, error: mvError } = await adminClient
+      .from("company_metric_values")
+      .select("metric_name, period_type, value, company_id")
+      .order("period_start", { ascending: false })
+      .range(fetchOffset, fetchOffset + FETCH_BATCH_SIZE - 1);
+
+    if (mvError) {
+      console.error("Failed to fetch metric values:", mvError.message);
+      return NextResponse.json(
+        { error: "Failed to fetch metric values." },
+        { status: 500 },
+      );
+    }
+
+    if (!batch || batch.length === 0) break;
+    metricValues.push(...(batch as MetricValueRow[]));
+    fetchOffset += FETCH_BATCH_SIZE;
+    if (batch.length < FETCH_BATCH_SIZE) break;
   }
 
   // Deduplicate: keep only the most recent value per company per metric+periodType
   const latestValues = new Map<string, MetricValueRow>();
-  for (const row of (metricValues ?? []) as MetricValueRow[]) {
+  for (const row of metricValues) {
     const key = `${row.company_id}|${row.metric_name.toLowerCase()}|${row.period_type}`;
     if (!latestValues.has(key)) {
       latestValues.set(key, row);
@@ -193,9 +207,10 @@ async function handler(req: Request) {
       });
 
     if (upsertError) {
+      console.error("Failed to upsert benchmarks:", upsertError.message);
       return NextResponse.json(
         {
-          error: `Failed to upsert benchmarks: ${upsertError.message}`,
+          error: "Failed to upsert benchmarks.",
           benchmarksUpdated,
         },
         { status: 500 },

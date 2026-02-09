@@ -52,7 +52,10 @@ export async function PUT(
     .update({ role: parsed.data.role })
     .eq("id", target.id);
 
-  if (error) return jsonError(error.message, 400);
+  if (error) {
+    console.error("Failed to update member role:", error.message);
+    return jsonError("Failed to process request.", 400);
+  }
 
   return NextResponse.json({ ok: true });
 }
@@ -98,7 +101,10 @@ export async function DELETE(
     .eq("organization_id", orgId)
     .eq("user_id", targetUserId);
 
-  if (error) return jsonError(error.message, 400);
+  if (error) {
+    console.error("Failed to remove member:", error.message);
+    return jsonError("Failed to process request.", 400);
+  }
 
   return NextResponse.json({ ok: true });
 }

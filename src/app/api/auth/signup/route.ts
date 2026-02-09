@@ -66,7 +66,10 @@ export async function POST(request: NextRequest) {
       data: { role, full_name: fullName },
     },
   });
-  if (error) return jsonError(error.message, 400);
+  if (error) {
+    console.error("Failed to create account:", error.message);
+    return jsonError("Failed to create account.", 400);
+  }
 
   // Check for duplicate email (Supabase returns empty identities array for existing emails)
   if (data.user && data.user.identities?.length === 0) {

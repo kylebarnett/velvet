@@ -83,7 +83,10 @@ export async function POST(req: Request) {
       invited_by: invitation.invited_by,
     });
 
-  if (memberErr) return jsonError(memberErr.message, 400);
+  if (memberErr) {
+    console.error("Failed to join organization:", memberErr.message);
+    return jsonError("Failed to process request.", 400);
+  }
 
   // Mark invitation as accepted
   await admin

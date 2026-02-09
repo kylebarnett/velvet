@@ -40,7 +40,10 @@ export async function GET(req: Request) {
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to fetch templates:", error.message);
+    return jsonError("Failed to fetch templates.", 500);
+  }
 
   // Sort items within each template and add isSystem flag
   const templates = (data ?? []).map((t) => ({
@@ -104,7 +107,10 @@ export async function POST(req: Request) {
     .select("id")
     .single();
 
-  if (templateError) return jsonError(templateError.message, 400);
+  if (templateError) {
+    console.error("Failed to create template:", templateError.message);
+    return jsonError("Failed to create template.", 500);
+  }
 
   // Create items
   const { error: itemsError } = await supabase
@@ -122,7 +128,8 @@ export async function POST(req: Request) {
   if (itemsError) {
     // Cleanup template on item insert failure
     await supabase.from("metric_templates").delete().eq("id", template.id);
-    return jsonError(itemsError.message, 400);
+    console.error("Failed to create template items:", itemsError.message);
+    return jsonError("Failed to create template.", 500);
   }
 
   return NextResponse.json({ id: template.id, ok: true });

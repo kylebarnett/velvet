@@ -66,7 +66,10 @@ export async function PUT(
     .update({ name: parsed.data.name, updated_at: new Date().toISOString() })
     .eq("id", id);
 
-  if (error) return jsonError(error.message, 400);
+  if (error) {
+    console.error("Failed to update organization:", error.message);
+    return jsonError("Failed to process request.", 400);
+  }
 
   return NextResponse.json({ ok: true });
 }
@@ -110,7 +113,10 @@ export async function DELETE(
     .delete()
     .eq("id", id);
 
-  if (error) return jsonError(error.message, 400);
+  if (error) {
+    console.error("Failed to delete organization:", error.message);
+    return jsonError("Failed to process request.", 400);
+  }
 
   return NextResponse.json({ ok: true });
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 const batchSchema = z.object({
@@ -36,6 +37,14 @@ export async function POST(req: Request) {
 
   const role = user.user_metadata?.role;
   if (role !== "founder") return jsonError("Forbidden.", 403);
+
+  // Rate limit: 10 batch submissions per minute per user
+  const { allowed, retryAfter } = checkRateLimit(`submit-batch:${user.id}`, 10, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
 
   const { companyId, submissions, fulfillRequestIds } = parsed.data;
 

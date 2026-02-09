@@ -70,7 +70,10 @@ export async function PUT(
     .update(updateData)
     .eq("id", companyId);
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to update tags:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ ok: true });
 }

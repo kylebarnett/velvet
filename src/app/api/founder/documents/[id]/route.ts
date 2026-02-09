@@ -71,7 +71,8 @@ export async function DELETE(
     .eq("id", id);
 
   if (deleteError) {
-    return jsonError(deleteError.message, 500);
+    console.error("Failed to delete document:", deleteError.message);
+    return jsonError("Failed to process request.", 500);
   }
 
   return NextResponse.json({ ok: true });

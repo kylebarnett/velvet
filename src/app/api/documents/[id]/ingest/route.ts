@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createExtractor } from "@/lib/ai/extractor";
 import { normalizeMetricPeriods } from "@/lib/utils/period-normalization";
@@ -15,6 +16,14 @@ export async function POST(
 
   const role = user.user_metadata?.role as string | undefined;
   if (role !== "founder") return jsonError("Founders only.", 403);
+
+  // Rate limit: 5 ingestions per minute per user
+  const { allowed, retryAfter } = checkRateLimit(`ingest:${user.id}`, 5, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
 
   // Verify founder owns the document's company
   const { data: doc } = await supabase
@@ -46,7 +55,10 @@ export async function POST(
     .select("id")
     .maybeSingle();
 
-  if (updateError) return jsonError(updateError.message, 400);
+  if (updateError) {
+    console.error("Failed to update document status:", updateError.message);
+    return jsonError("Failed to process document.", 400);
+  }
   if (!updated) {
     return jsonError("Document is already being processed.", 409);
   }
@@ -140,6 +152,6 @@ export async function POST(
 
     const message = err instanceof Error ? err.message : "Extraction failed.";
     console.error("[ingest] Extraction error:", message);
-    return jsonError(message, 500);
+    return jsonError("Extraction failed.", 500);
   }
 }

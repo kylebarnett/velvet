@@ -41,7 +41,10 @@ export async function GET(
     .eq("fund_id", id)
     .order("investment_date", { ascending: false });
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to list investments:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   // Normalize joined companies (may come as array from Supabase)
   const normalized = (investments ?? []).map((inv) => {
@@ -113,7 +116,10 @@ export async function POST(
     .select("*")
     .single();
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to create investment:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ investment, ok: true }, { status: 201 });
 }

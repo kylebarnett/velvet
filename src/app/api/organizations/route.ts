@@ -69,7 +69,10 @@ export async function POST(req: Request) {
     .select("id")
     .single();
 
-  if (orgErr) return jsonError(orgErr.message, 400);
+  if (orgErr) {
+    console.error("Failed to create organization:", orgErr.message);
+    return jsonError("Failed to process request.", 400);
+  }
 
   // Add creator as admin member
   await admin.from("organization_members").insert({

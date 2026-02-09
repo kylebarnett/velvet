@@ -33,7 +33,10 @@ export async function DELETE(
     .eq("organization_id", orgId)
     .eq("status", "pending");
 
-  if (error) return jsonError(error.message, 400);
+  if (error) {
+    console.error("Failed to cancel invitation:", error.message);
+    return jsonError("Failed to process request.", 400);
+  }
 
   return NextResponse.json({ ok: true });
 }

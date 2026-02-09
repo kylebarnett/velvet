@@ -48,6 +48,9 @@ export async function GET(req: Request) {
   const periodsParam = url.searchParams.get("periods");
   const periods = periodsParam ? Math.min(Math.max(parseInt(periodsParam, 10) || 8, 1), 24) : 8;
 
+  // Escape ILIKE wildcards to prevent injection
+  const escapedMetric = metric ? metric.replace(/[%_]/g, "\\$&") : null;
+
   if (!metric || metric.trim().length === 0) {
     return jsonError("Missing required query parameter: metric", 400);
   }
@@ -70,7 +73,10 @@ export async function GET(req: Request) {
     .eq("investor_id", user.id)
     .in("approval_status", ["auto_approved", "approved"]);
 
-  if (relError) return jsonError(relError.message, 500);
+  if (relError) {
+    console.error("Failed to fetch investor relationships:", relError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   const companyMap = new Map<string, string>();
   const companyIds: string[] = [];
@@ -101,10 +107,13 @@ export async function GET(req: Request) {
     .select("id, company_id, metric_name, period_type, period_start, period_end, value")
     .in("company_id", companyIds)
     .eq("period_type", periodType)
-    .ilike("metric_name", metric.trim())
+    .ilike("metric_name", escapedMetric!.trim())
     .order("period_start", { ascending: true });
 
-  if (mvError) return jsonError(mvError.message, 500);
+  if (mvError) {
+    console.error("Failed to fetch metric values:", mvError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   const values = (metricValues ?? []) as MetricValue[];
 

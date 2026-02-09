@@ -53,7 +53,10 @@ export async function PUT(
     .update({ approval_status: parsed.data.status })
     .eq("id", relationshipId);
 
-  if (updateError) return jsonError(updateError.message, 500);
+  if (updateError) {
+    console.error("Failed to update approval:", updateError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ ok: true });
 }

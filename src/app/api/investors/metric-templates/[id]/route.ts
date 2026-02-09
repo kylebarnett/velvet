@@ -116,7 +116,8 @@ export async function PUT(
     .eq("id", id);
 
   if (updateError) {
-    return jsonError(updateError.message, 500);
+    console.error("Failed to update template:", updateError.message);
+    return jsonError("Failed to update template.", 500);
   }
 
   // Delete existing items
@@ -126,7 +127,8 @@ export async function PUT(
     .eq("template_id", id);
 
   if (deleteError) {
-    return jsonError(deleteError.message, 500);
+    console.error("Failed to delete template items:", deleteError.message);
+    return jsonError("Failed to update template.", 500);
   }
 
   // Insert new items
@@ -144,7 +146,8 @@ export async function PUT(
     .select();
 
   if (itemsError) {
-    return jsonError(itemsError.message, 500);
+    console.error("Failed to insert template items:", itemsError.message);
+    return jsonError("Failed to update template.", 500);
   }
 
   return NextResponse.json({ ok: true, itemsInserted: insertedItems?.length ?? 0 });
@@ -179,7 +182,10 @@ export async function DELETE(
     .eq("id", id)
     .eq("investor_id", user.id);
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to delete template:", error.message);
+    return jsonError("Failed to delete template.", 500);
+  }
 
   return NextResponse.json({ ok: true });
 }

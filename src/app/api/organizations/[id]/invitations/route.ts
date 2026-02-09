@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { escapeHtml } from "@/lib/utils/html";
 
@@ -58,6 +59,14 @@ export async function POST(
 
   if (!membership || membership.role !== "admin") {
     return jsonError("Only admins can send invitations.", 403);
+  }
+
+  // Rate limit: 10 invitations per minute per user
+  const { allowed, retryAfter } = checkRateLimit(`org-invite:${user.id}`, 10, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
   }
 
   const { email, role } = parsed.data;
@@ -121,7 +130,10 @@ export async function POST(
     .select("id, token")
     .single();
 
-  if (error) return jsonError(error.message, 400);
+  if (error) {
+    console.error("Failed to create invitation:", error.message);
+    return jsonError("Failed to process request.", 400);
+  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001";
   const inviteUrl = `${appUrl}/signup?org_invite=${invitation.token}`;

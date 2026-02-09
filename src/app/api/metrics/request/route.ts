@@ -83,7 +83,10 @@ export async function POST(req: Request) {
     .select("id")
     .single();
 
-  if (defError) return jsonError(defError.message, 400);
+  if (defError) {
+    console.error("Failed to create metric definition:", defError.message);
+    return jsonError("Failed to process request.", 400);
+  }
 
   const { data: requestRow, error: reqError } = await supabase
     .from("metric_requests")
@@ -99,7 +102,10 @@ export async function POST(req: Request) {
     .select("id")
     .single();
 
-  if (reqError) return jsonError(reqError.message, 400);
+  if (reqError) {
+    console.error("Failed to create metric request:", reqError.message);
+    return jsonError("Failed to process request.", 400);
+  }
 
   // TODO: trigger email notification (Edge Function) for founder.
 

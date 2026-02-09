@@ -64,7 +64,8 @@ export async function GET(req: Request) {
   const { data: documents, error, count } = await query;
 
   if (error) {
-    return jsonError(error.message, 500);
+    console.error("Failed to fetch founder documents:", error.message);
+    return jsonError("Failed to process request.", 500);
   }
 
   return NextResponse.json({

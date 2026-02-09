@@ -89,7 +89,10 @@ export async function PUT(
     .eq("id", id)
     .eq("investor_id", user.id);
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to update report:", error.message);
+    return jsonError("Failed to update report.", 500);
+  }
 
   return NextResponse.json({ ok: true });
 }
@@ -111,7 +114,10 @@ export async function DELETE(
     .eq("id", id)
     .eq("investor_id", user.id);
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to delete report:", error.message);
+    return jsonError("Failed to delete report.", 500);
+  }
 
   return NextResponse.json({ ok: true });
 }

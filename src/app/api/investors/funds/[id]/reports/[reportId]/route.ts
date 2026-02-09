@@ -103,7 +103,10 @@ export async function PUT(
     .select("*")
     .single();
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to update LP report:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ report, ok: true });
 }
@@ -147,7 +150,10 @@ export async function DELETE(
     .eq("id", reportId)
     .eq("fund_id", id);
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to delete LP report:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ ok: true });
 }

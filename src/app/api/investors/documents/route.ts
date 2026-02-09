@@ -76,7 +76,10 @@ export async function GET(req: Request) {
 
   const { data: documents, error, count } = await query;
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to fetch documents:", error.message);
+    return jsonError("Failed to fetch documents.", 500);
+  }
 
   // Transform response
   const result = (documents ?? []).map((doc) => {

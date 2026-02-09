@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import type { ExtractionResult, ExtractedMetric } from "@/lib/ai/types";
 import {
   EMAIL_EXTRACTION_SYSTEM_PROMPT,
@@ -198,6 +199,14 @@ export async function POST(req: Request) {
     const role = user.user_metadata?.role;
     if (role !== "founder") return jsonError("Forbidden.", 403);
 
+    // Rate limit: 5 email extractions per minute per user
+    const { allowed, retryAfter } = checkRateLimit(`email-ingest:${user.id}`, 5, 60_000);
+    if (!allowed) {
+      return jsonError("Too many requests. Try again later.", 429, {
+        "Retry-After": String(retryAfter),
+      });
+    }
+
     const { content, companyId, targetMetrics } = parsed.data;
 
     // Verify founder owns this company
@@ -222,6 +231,7 @@ export async function POST(req: Request) {
   } catch (e: unknown) {
     const message =
       e instanceof Error ? e.message : "Email extraction failed.";
-    return jsonError(message, 500);
+    console.error("Email extraction error:", message);
+    return jsonError("Email extraction failed.", 500);
   }
 }

@@ -25,7 +25,8 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return jsonError(error.message, 500);
+    console.error("Failed to export portfolio:", error.message);
+    return jsonError("Failed to process request.", 500);
   }
 
   // Build CSV content

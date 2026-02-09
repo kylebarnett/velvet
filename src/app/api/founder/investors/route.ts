@@ -37,7 +37,10 @@ export async function GET() {
     .eq("company_id", company.id)
     .order("created_at", { ascending: false });
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to fetch founder investors:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ investors: relationships ?? [] });
 }

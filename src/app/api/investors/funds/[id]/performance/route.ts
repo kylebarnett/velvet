@@ -40,7 +40,10 @@ export async function GET(
     .select("invested_amount, current_value, realized_value, investment_date")
     .eq("fund_id", id);
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to fetch fund performance:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   const rows = rawInvestments ?? [];
 

@@ -17,7 +17,10 @@ export async function GET() {
     .eq("investor_id", user.id)
     .in("approval_status", ["auto_approved", "approved"]);
 
-  if (relError) return jsonError(relError.message, 500);
+  if (relError) {
+    console.error("Failed to fetch relationships:", relError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   const companyIds = (relationships ?? []).map((r) => r.company_id);
 
@@ -31,7 +34,10 @@ export async function GET() {
     .select("metric_name")
     .in("company_id", companyIds);
 
-  if (mvError) return jsonError(mvError.message, 500);
+  if (mvError) {
+    console.error("Failed to fetch metric values:", mvError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   // Deduplicate and sort metric names (case-insensitive, preserve original casing)
   const nameMap = new Map<string, string>();

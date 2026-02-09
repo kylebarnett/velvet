@@ -46,7 +46,8 @@ export async function POST(
     .eq("id", id);
 
   if (updateError) {
-    return jsonError(updateError.message, 500);
+    console.error("Failed to resume schedule:", updateError.message);
+    return jsonError("Failed to process request.", 500);
   }
 
   return NextResponse.json({

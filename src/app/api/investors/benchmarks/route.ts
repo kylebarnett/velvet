@@ -34,11 +34,14 @@ export async function GET(req: Request) {
 
   const { metric, periodType, industry, stage } = parseResult.data;
 
+  // Escape ILIKE wildcards to prevent injection
+  const escapedMetric = metric.replace(/[%_]/g, "\\$&");
+
   // Fetch benchmark data from metric_benchmarks
   let benchmarkQuery = supabase
     .from("metric_benchmarks")
     .select("p25, p50, p75, p90, sample_size, calculated_at")
-    .ilike("metric_name", metric)
+    .ilike("metric_name", escapedMetric)
     .eq("period_type", periodType);
 
   if (industry) {
@@ -56,7 +59,10 @@ export async function GET(req: Request) {
   const { data: benchmarkRows, error: benchmarkError } =
     await benchmarkQuery.limit(1);
 
-  if (benchmarkError) return jsonError(benchmarkError.message, 500);
+  if (benchmarkError) {
+    console.error("Failed to fetch benchmarks:", benchmarkError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   const benchmark =
     benchmarkRows && benchmarkRows.length > 0 ? benchmarkRows[0] : null;
@@ -78,7 +84,10 @@ export async function GET(req: Request) {
     .eq("investor_id", user.id)
     .in("approval_status", ["auto_approved", "approved"]);
 
-  if (relError) return jsonError(relError.message, 500);
+  if (relError) {
+    console.error("Failed to fetch investor relationships:", relError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   const companyMap = new Map<
     string,
@@ -130,11 +139,14 @@ export async function GET(req: Request) {
       .from("company_metric_values")
       .select("company_id, value, period_start")
       .in("company_id", companyIds)
-      .ilike("metric_name", metric)
+      .ilike("metric_name", escapedMetric)
       .eq("period_type", periodType)
       .order("period_start", { ascending: false });
 
-    if (metricError) return jsonError(metricError.message, 500);
+    if (metricError) {
+      console.error("Failed to fetch metric values:", metricError.message);
+      return jsonError("Failed to process request.", 500);
+    }
 
     // Take the most recent value per company
     const latestByCompany = new Map<string, MetricRow>();

@@ -108,7 +108,8 @@ export async function PUT(
     if (error.code === "23505") {
       return jsonError("A view with this name already exists.", 409);
     }
-    return jsonError(error.message, 500);
+    console.error("Failed to update dashboard view:", error.message);
+    return jsonError("Failed to process request.", 500);
   }
 
   return NextResponse.json({ view, ok: true });
@@ -145,7 +146,10 @@ export async function DELETE(
     .eq("id", id)
     .eq("founder_id", user.id);
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to delete dashboard view:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ ok: true });
 }

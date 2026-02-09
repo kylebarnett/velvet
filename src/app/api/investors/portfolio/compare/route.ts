@@ -71,7 +71,10 @@ export async function GET(req: Request) {
     .in("approval_status", ["auto_approved", "approved"])
     .in("company_id", companyIds);
 
-  if (relError) return jsonError(relError.message, 500);
+  if (relError) {
+    console.error("Failed to fetch relationships:", relError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   // Build a map of verified company IDs to names
   const verifiedCompanies = new Map<string, string>();
@@ -108,7 +111,10 @@ export async function GET(req: Request) {
   }
 
   const { data: metricValues, error: mvError } = await query;
-  if (mvError) return jsonError(mvError.message, 500);
+  if (mvError) {
+    console.error("Failed to fetch metric values:", mvError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   const rows = (metricValues ?? []) as MetricValueRow[];
 

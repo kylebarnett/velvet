@@ -69,7 +69,10 @@ export async function GET(req: Request) {
 
   const { data: documents, error } = await query;
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to fetch documents for download:", error.message);
+    return jsonError("Failed to fetch documents.", 500);
+  }
 
   if (!documents || documents.length === 0) {
     return jsonError("No documents found.", 404);

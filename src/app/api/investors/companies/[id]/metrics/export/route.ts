@@ -62,7 +62,10 @@ export async function GET(
 
   const { data: metrics, error } = await query;
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to export metrics:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   // Generate CSV
   const csvRows: string[] = [

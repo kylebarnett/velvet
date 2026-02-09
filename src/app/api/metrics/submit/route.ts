@@ -87,7 +87,10 @@ export async function POST(req: Request) {
     .select("id")
     .single();
 
-  if (error) return jsonError(error.message, 400);
+  if (error) {
+    console.error("Failed to submit metric:", error.message);
+    return jsonError("Failed to submit metric.", 400);
+  }
 
   // Create history entry if this was an update
   if (existing) {

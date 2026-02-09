@@ -86,7 +86,8 @@ export async function PUT(
     .eq("id", relationship.id);
 
   if (error) {
-    return jsonError(error.message, 500);
+    console.error("Failed to update tile metrics:", error.message);
+    return jsonError("Failed to update tile metrics.", 500);
   }
 
   return NextResponse.json({ ok: true });

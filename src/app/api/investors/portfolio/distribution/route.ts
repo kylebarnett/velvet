@@ -54,7 +54,10 @@ export async function GET(_req: Request) {
     .eq("investor_id", user.id)
     .in("approval_status", ["auto_approved", "approved"]);
 
-  if (relError) return jsonError(relError.message, 500);
+  if (relError) {
+    console.error("Failed to fetch relationships:", relError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   // Count companies by each dimension
   const industryCounts = new Map<string, number>();

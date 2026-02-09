@@ -84,7 +84,8 @@ export async function GET(req: Request) {
   // Get total count
   const { count: totalCount, error: countError } = await countQuery;
   if (countError) {
-    return jsonError(countError.message, 500);
+    console.error("Failed to count contacts:", countError.message);
+    return jsonError("Failed to process request.", 500);
   }
 
   // Apply database-level sorting
@@ -112,7 +113,8 @@ export async function GET(req: Request) {
   const { data, error } = await dataQuery;
 
   if (error) {
-    return jsonError(error.message, 500);
+    console.error("Failed to fetch contacts:", error.message);
+    return jsonError("Failed to process request.", 500);
   }
 
   const total = totalCount ?? 0;
@@ -165,7 +167,8 @@ export async function PUT(req: Request) {
     .single();
 
   if (error) {
-    return jsonError(error.message, 500);
+    console.error("Failed to update contact:", error.message);
+    return jsonError("Failed to process request.", 500);
   }
 
   return NextResponse.json({ contact: data });

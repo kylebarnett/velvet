@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 
 const createSchema = z.object({
   title: z.string().min(1).max(200),
@@ -40,7 +41,10 @@ export async function GET(
     .eq("fund_id", id)
     .order("report_date", { ascending: false });
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to list LP reports:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ reports: reports ?? [] });
 }
@@ -55,6 +59,14 @@ export async function POST(
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
+
+  // Rate limit: 10 report creations per minute per user
+  const { allowed, retryAfter } = checkRateLimit(`report-create:${user.id}`, 10, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
 
   const { id } = await params;
 
@@ -88,7 +100,10 @@ export async function POST(
     .select("*")
     .single();
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to create LP report:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({ report, ok: true }, { status: 201 });
 }

@@ -61,7 +61,10 @@ export async function GET(req: Request) {
     .eq("investor_id", user.id)
     .in("approval_status", ["auto_approved", "approved"]);
 
-  if (relError) return jsonError(relError.message, 500);
+  if (relError) {
+    console.error("Failed to fetch relationships:", relError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   // Extract company info, applying filters
   const companies: CompanyInfo[] = [];
@@ -121,7 +124,10 @@ export async function GET(req: Request) {
   query = query.range(offset, offset + limit - 1);
 
   const { data: metricValues, error: mvError, count: metricCount } = await query;
-  if (mvError) return jsonError(mvError.message, 500);
+  if (mvError) {
+    console.error("Failed to fetch metric values:", mvError.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   const values = (metricValues ?? []) as MetricValue[];
 

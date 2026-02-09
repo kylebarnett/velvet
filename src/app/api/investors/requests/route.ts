@@ -61,7 +61,10 @@ export async function GET(req: Request) {
 
   const { data: requests, error, count } = await query;
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to fetch requests:", error.message);
+    return jsonError("Failed to fetch requests.", 500);
+  }
 
   // Also get counts by status for summary cards
   const { data: allRequests } = await supabase

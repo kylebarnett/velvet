@@ -46,7 +46,10 @@ export async function GET(
     .eq("company_id", companyId)
     .order("period_start", { ascending: false });
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to fetch company metrics:", error.message);
+    return jsonError("Failed to process request.", 500);
+  }
 
   return NextResponse.json({
     metrics: metrics ?? [],

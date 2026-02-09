@@ -59,7 +59,8 @@ export async function POST(req: Request) {
   const { data: invitations, error: fetchError } = await query;
 
   if (fetchError) {
-    return jsonError(fetchError.message, 500);
+    console.error("Failed to fetch invitations:", fetchError.message);
+    return jsonError("Failed to process request.", 500);
   }
 
   if (!invitations || invitations.length === 0) {

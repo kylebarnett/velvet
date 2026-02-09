@@ -156,7 +156,10 @@ export async function POST(
       })
       .eq("id", existing.id);
 
-    if (updateErr) return jsonError(updateErr.message, 400);
+    if (updateErr) {
+      console.error("Failed to update extraction value:", updateErr.message);
+      return jsonError("Failed to process request.", 400);
+    }
     metricValueId = existing.id;
   } else {
     // Insert new value
@@ -178,7 +181,10 @@ export async function POST(
       .select("id")
       .single();
 
-    if (insertErr) return jsonError(insertErr.message, 400);
+    if (insertErr) {
+      console.error("Failed to insert extraction value:", insertErr.message);
+      return jsonError("Failed to process request.", 400);
+    }
     metricValueId = inserted.id;
   }
 

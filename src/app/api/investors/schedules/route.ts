@@ -45,7 +45,10 @@ export async function GET() {
     .eq("investor_id", user.id)
     .order("created_at", { ascending: false });
 
-  if (error) return jsonError(error.message, 500);
+  if (error) {
+    console.error("Failed to fetch schedules:", error.message);
+    return jsonError("Failed to fetch schedules.", 500);
+  }
 
   // Format response
   const schedules = (data ?? []).map((s) => {
@@ -178,7 +181,8 @@ export async function POST(req: Request) {
     .single();
 
   if (createError) {
-    return jsonError(createError.message, 400);
+    console.error("Failed to create schedule:", createError.message);
+    return jsonError("Failed to create schedule.", 500);
   }
 
   return NextResponse.json({
