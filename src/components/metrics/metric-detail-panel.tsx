@@ -268,16 +268,16 @@ export function MetricDetailPanel({
 
   const changeBadgeColor =
     percentChange != null && percentChange > 0
-      ? "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20"
+      ? "bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/25"
       : percentChange != null && percentChange < 0
-        ? "bg-red-500/10 text-red-400 ring-1 ring-red-500/20"
-        : "bg-white/5 text-white/40 ring-1 ring-white/10";
+        ? "bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/25"
+        : "bg-white/5 text-white/40 ring-1 ring-inset ring-white/10";
 
   return (
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-md transition-opacity duration-300 ${
+        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-xl transition-opacity duration-300 ${
           isVisible ? "opacity-100" : "opacity-0"
         }`}
         onClick={handleClose}
@@ -286,35 +286,36 @@ export function MetricDetailPanel({
 
       {/* Panel */}
       <div
-        className={`fixed right-0 top-0 z-50 flex h-full w-full flex-col bg-zinc-950 shadow-2xl transition-transform duration-300 ease-out sm:w-[500px] ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full flex-col bg-zinc-950 shadow-[0_0_80px_rgba(0,0,0,0.8)] transition-transform duration-300 ease-out sm:w-[500px] ${
           isVisible ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="metric-detail-title"
       >
-        {/* Left edge glow line */}
-        <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-blue-500/40 via-blue-500/10 to-transparent" />
+        {/* Left edge glow */}
+        <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-blue-500/20 via-blue-400/5 to-transparent blur-sm" />
+        <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-blue-400/50 via-blue-500/15 to-transparent" />
 
         {/* Header */}
-        <div className="relative px-7 pt-7 pb-6">
+        <div className="relative px-7 pt-8 pb-7">
           {/* Close button */}
           <button
             onClick={handleClose}
-            className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-all duration-150 hover:bg-white/10 hover:text-white"
+            className="absolute right-6 top-6 flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.03] text-white/40 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.08] hover:text-white/90"
             aria-label="Close panel"
           >
             <X className="h-4 w-4" />
           </button>
 
           {/* Metric label */}
-          <span className="text-[11px] font-medium uppercase tracking-widest text-white/40">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/35">
             Metric Detail
           </span>
 
           <h2
             id="metric-detail-title"
-            className="mt-2 text-xl font-semibold tracking-tight text-white"
+            className="mt-2.5 text-[22px] font-semibold leading-tight tracking-tight text-white"
           >
             {metricName}
           </h2>
@@ -325,7 +326,7 @@ export function MetricDetailPanel({
               <button
                 type="button"
                 onClick={() => setPeriodDropdownOpen((p) => !p)}
-                className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-sm text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2 text-sm text-white/70 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.06] hover:text-white"
               >
                 <Calendar className="h-3.5 w-3.5 text-white/40" />
                 <span className="tabular-nums">{selectedPeriodLabel}</span>
@@ -334,7 +335,7 @@ export function MetricDetailPanel({
                 />
               </button>
               {periodDropdownOpen && (
-                <div className="absolute left-0 top-full z-50 mt-1.5 max-h-64 w-48 overflow-y-auto rounded-xl border border-white/[0.08] bg-zinc-900 py-1 shadow-xl">
+                <div className="absolute left-0 top-full z-50 mt-2 max-h-64 w-52 overflow-y-auto rounded-xl border border-white/[0.08] bg-zinc-900/95 py-1.5 shadow-[0_8px_40px_rgba(0,0,0,0.5)] backdrop-blur-sm">
                   {[...values].reverse().map((v, revIdx) => {
                     const realIdx = values.length - 1 - revIdx;
                     const label = formatPeriod(v.period_start, v.period_type);
@@ -369,8 +370,8 @@ export function MetricDetailPanel({
           )}
 
           {currentNum != null && (
-            <div className="mt-3 flex items-baseline gap-3">
-              <span className="text-3xl font-bold tabular-nums tracking-tight text-white">
+            <div className="mt-4 flex items-baseline gap-3.5">
+              <span className="text-[32px] font-bold leading-none tabular-nums tracking-tight text-white">
                 {formatValue(currentNum, metricName)}
               </span>
               {percentChange != null && (
@@ -392,39 +393,39 @@ export function MetricDetailPanel({
           )}
 
           {/* Accent line under header */}
-          <div className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-white/[0.08] via-white/[0.04] to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
         </div>
 
         {/* Scrollable content */}
         <div ref={contentRef} className="flex-1 overflow-y-auto">
           {loading && (
-            <div className="flex flex-col items-center justify-center gap-3 py-20">
-              <Loader2 className="h-5 w-5 animate-spin text-white/30" />
+            <div className="flex flex-col items-center justify-center gap-3 py-24">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-400/40" />
               <span className="text-xs text-white/30">Loading details</span>
             </div>
           )}
 
           {error && (
-            <div className="mx-7 mt-6 rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-300">
+            <div className="mx-7 mt-6 rounded-xl border border-red-500/15 bg-red-500/5 px-4 py-3 text-sm text-red-300">
               {error}
             </div>
           )}
 
           {!loading && values.length === 0 && (
-            <div className="px-7 py-16 text-center text-sm text-white/40">
+            <div className="px-7 py-20 text-center text-sm text-white/35">
               No data available for this metric.
             </div>
           )}
 
           {!loading && values.length > 0 && (
-            <div className="space-y-8 px-7 py-6">
+            <div className="space-y-7 px-7 pt-7 pb-10">
               {/* Trend Chart */}
               {chartData.length > 1 && (
                 <section>
-                  <h3 className="mb-4 text-[11px] font-medium uppercase tracking-widest text-white/40">
+                  <h3 className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/35">
                     Trend
                   </h3>
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                  <div className="rounded-xl border border-white/[0.06] bg-gradient-to-b from-white/[0.03] to-white/[0.01] p-5">
                     <ResponsiveContainer width="100%" height={180}>
                       <RechartsLineChart
                         data={chartData}
@@ -438,17 +439,17 @@ export function MetricDetailPanel({
                         </defs>
                         <CartesianGrid
                           strokeDasharray="3 3"
-                          stroke="rgba(255,255,255,0.04)"
+                          stroke="rgba(255,255,255,0.03)"
                           vertical={false}
                         />
                         <XAxis
                           dataKey="period"
-                          tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }}
+                          tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }}
                           tickLine={false}
                           axisLine={false}
                         />
                         <YAxis
-                          tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }}
+                          tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }}
                           tickLine={false}
                           axisLine={false}
                           tickFormatter={(v) => formatValue(v)}
@@ -458,11 +459,11 @@ export function MetricDetailPanel({
                           contentStyle={{
                             backgroundColor: "rgba(9, 9, 11, 0.95)",
                             border: "1px solid rgba(255,255,255,0.08)",
-                            borderRadius: "10px",
+                            borderRadius: "12px",
                             color: "white",
-                            padding: "8px 12px",
+                            padding: "10px 14px",
                             fontSize: "12px",
-                            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                            boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
                           }}
                           formatter={(v) => [
                             formatValue(v as number, metricName),
@@ -474,8 +475,8 @@ export function MetricDetailPanel({
                           dataKey="value"
                           stroke="url(#metricLine)"
                           strokeWidth={2}
-                          dot={{ fill: "#3b82f6", strokeWidth: 0, r: 3 }}
-                          activeDot={{ r: 5, fill: "#3b82f6", stroke: "#1d4ed8", strokeWidth: 2 }}
+                          dot={{ fill: "#3b82f6", strokeWidth: 0, r: 2.5 }}
+                          activeDot={{ r: 6, fill: "#3b82f6", stroke: "rgba(59,130,246,0.3)", strokeWidth: 3 }}
                           connectNulls
                         />
                       </RechartsLineChart>
@@ -487,16 +488,16 @@ export function MetricDetailPanel({
               {/* Source Info */}
               {current && (
                 <section>
-                  <h3 className="mb-4 text-[11px] font-medium uppercase tracking-widest text-white/40">
+                  <h3 className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/35">
                     Source
                   </h3>
-                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                  <div className="rounded-xl border border-white/[0.06] bg-gradient-to-b from-white/[0.03] to-white/[0.01] p-4">
                     <div className="flex items-center justify-between">
                       <SourceBadge
                         source={current.source}
                         confidence={current.ai_confidence}
                       />
-                      <span className="text-[11px] tabular-nums text-white/35">
+                      <span className="text-[11px] tabular-nums text-white/40">
                         {new Date(current.submitted_at).toLocaleDateString(
                           "en-US",
                           {
@@ -508,7 +509,7 @@ export function MetricDetailPanel({
                       </span>
                     </div>
                     {current.source_document_id && (
-                      <div className="mt-3 flex items-center gap-2 rounded-lg bg-white/[0.03] px-3 py-2 text-xs text-white/50">
+                      <div className="mt-3 flex items-center gap-2.5 rounded-lg border border-white/[0.04] bg-white/[0.03] px-3 py-2.5 text-xs text-white/50 transition-colors hover:bg-white/[0.05]">
                         <FileText className="h-3.5 w-3.5 shrink-0 text-white/30" />
                         <span className="truncate">
                           {documents.find(
@@ -529,12 +530,12 @@ export function MetricDetailPanel({
               {/* AI Resolution (founder only, when source is ai_extracted) */}
               {editable && current && current.source === "ai_extracted" && (
                 <section>
-                  <h3 className="mb-4 text-[11px] font-medium uppercase tracking-widest text-white/40">
+                  <h3 className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/35">
                     Review AI Extraction
                   </h3>
-                  <div className="rounded-xl border border-violet-500/15 bg-violet-500/[0.04] p-5">
+                  <div className="rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-violet-500/[0.02] p-5">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-500/15">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 ring-1 ring-inset ring-violet-500/15">
                         <Sparkles className="h-4 w-4 text-violet-400" />
                       </div>
                       <div>
@@ -597,7 +598,7 @@ export function MetricDetailPanel({
                           }
                         }}
                         disabled={confirming || submitting}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 text-xs font-medium text-white transition-colors hover:bg-emerald-500 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:ring-offset-1 focus:ring-offset-zinc-950"
+                        className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-emerald-600 px-4 text-xs font-medium text-white shadow-sm shadow-emerald-900/30 transition-all duration-200 hover:bg-emerald-500 hover:shadow-emerald-900/40 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:ring-offset-1 focus:ring-offset-zinc-950"
                       >
                         <Check className="h-3.5 w-3.5" />
                         {confirming ? "Confirming..." : "Confirm value"}
@@ -622,7 +623,7 @@ export function MetricDetailPanel({
               {/* Edit (founder only) */}
               {editable && current && (
                 <section>
-                  <h3 className="mb-4 text-[11px] font-medium uppercase tracking-widest text-white/40">
+                  <h3 className="mb-3.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/35">
                     Edit Value
                   </h3>
                   {!editing ? (
@@ -638,7 +639,7 @@ export function MetricDetailPanel({
                       Override current value
                     </button>
                   ) : (
-                    <div className="space-y-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                    <div className="space-y-4 rounded-xl border border-white/[0.06] bg-gradient-to-b from-white/[0.03] to-white/[0.01] p-5">
                       <div>
                         <label className="text-[10px] font-medium uppercase tracking-widest text-white/40">
                           New Value
@@ -647,7 +648,7 @@ export function MetricDetailPanel({
                           type="text"
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
-                          className="mt-1.5 h-10 w-full rounded-lg border border-white/[0.08] bg-black/40 px-3 text-sm font-mono text-white outline-none transition-colors focus:border-white/20 focus:ring-1 focus:ring-white/10"
+                          className="mt-1.5 h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm font-mono text-white outline-none transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
                         />
                       </div>
                       <div>
@@ -659,7 +660,7 @@ export function MetricDetailPanel({
                           value={editReason}
                           onChange={(e) => setEditReason(e.target.value)}
                           placeholder="e.g., Corrected from Q4 report"
-                          className="mt-1.5 h-10 w-full rounded-lg border border-white/[0.08] bg-black/40 px-3 text-sm text-white outline-none transition-colors placeholder:text-white/25 focus:border-white/20 focus:ring-1 focus:ring-white/10"
+                          className="mt-1.5 h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none transition-colors placeholder:text-white/25 hover:border-white/15 focus:border-white/20 focus:outline-none"
                         />
                       </div>
                       <div className="flex gap-2 pt-1">
@@ -674,7 +675,7 @@ export function MetricDetailPanel({
                           type="button"
                           onClick={handleSubmitOverride}
                           disabled={submitting || !editValue.trim()}
-                          className="h-8 rounded-lg bg-white px-3.5 text-xs font-medium text-zinc-950 transition-colors hover:bg-white/90 disabled:opacity-50"
+                          className="h-9 rounded-lg bg-white px-4 text-xs font-medium text-zinc-950 shadow-sm transition-all duration-200 hover:bg-white/90 hover:shadow-md disabled:opacity-50"
                         >
                           {submitting ? "Saving..." : "Save override"}
                         </button>
@@ -689,10 +690,10 @@ export function MetricDetailPanel({
                 <button
                   type="button"
                   onClick={() => setHistoryExpanded((p) => !p)}
-                  className="flex w-full items-center justify-between py-1 text-[11px] font-medium uppercase tracking-widest text-white/40 transition-colors hover:text-white/60"
+                  className="group flex w-full items-center justify-between py-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/35 transition-colors hover:text-white/60"
                 >
                   <span>Activity Log ({history.length})</span>
-                  <div className="flex h-5 w-5 items-center justify-center rounded-md bg-white/5">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-white/[0.04] transition-colors duration-200 group-hover:bg-white/[0.08]">
                     {historyExpanded ? (
                       <ChevronUp className="h-3 w-3" />
                     ) : (
