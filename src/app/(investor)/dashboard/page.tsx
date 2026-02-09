@@ -3,6 +3,7 @@ import { Building2, Clock, CheckCircle2 } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { PortfolioCompletionCard } from "@/components/investor/portfolio-completion-card";
 import { DashboardContent } from "./dashboard-content";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,7 @@ type MetricValue = {
   value: unknown;
   period_start: string;
   company_id: string;
+  submitted_at?: string;
 };
 
 // Priority metrics to show as snapshot (first match wins)
@@ -115,12 +117,14 @@ export default async function InvestorDashboardPage() {
     string,
     { name: string; value: number | null; previousValue: number | null; percentChange: number | null }
   > = {};
+  // Track most recent submission date per company for freshness indicator
+  const lastSubmittedAt: Record<string, string> = {};
 
   if (approvedCompanyIds.length > 0) {
     // Get recent metric values
     const { data: metricValues } = await supabase
       .from("company_metric_values")
-      .select("company_id, metric_name, value, period_start")
+      .select("company_id, metric_name, value, period_start, submitted_at")
       .in("company_id", approvedCompanyIds)
       .order("period_start", { ascending: false });
 
@@ -132,6 +136,13 @@ export default async function InvestorDashboardPage() {
           byCompany.set(mv.company_id, []);
         }
         byCompany.get(mv.company_id)!.push(mv);
+
+        // Track most recent submitted_at per company
+        if (mv.submitted_at) {
+          if (!lastSubmittedAt[mv.company_id] || mv.submitted_at > lastSubmittedAt[mv.company_id]) {
+            lastSubmittedAt[mv.company_id] = mv.submitted_at;
+          }
+        }
       }
 
       // Helper to find metric by name and calculate values
@@ -236,7 +247,7 @@ export default async function InvestorDashboardPage() {
     }
   }
 
-  // Count pending requests
+  // Count pending requests and total requests for response rate
   const { count: pendingRequests } = await supabase
     .from("metric_requests")
     .select("id", { count: "exact", head: true })
@@ -252,6 +263,105 @@ export default async function InvestorDashboardPage() {
     .eq("investor_id", user.id)
     .eq("status", "submitted")
     .gte("updated_at", weekAgo.toISOString());
+
+  // Portfolio completion: current quarter requests grouped by company
+  const currentQuarterStart = new Date();
+  const currentQuarter = Math.floor(currentQuarterStart.getMonth() / 3) + 1;
+  const currentYear = currentQuarterStart.getFullYear();
+  currentQuarterStart.setMonth(Math.floor(currentQuarterStart.getMonth() / 3) * 3, 1);
+  currentQuarterStart.setHours(0, 0, 0, 0);
+
+  const { data: quarterRequests } = await supabase
+    .from("metric_requests")
+    .select(
+      "id, status, company_id, due_date, period_start, period_end, companies!inner(id, name), metric_definitions!inner(name)"
+    )
+    .eq("investor_id", user.id)
+    .gte("period_start", currentQuarterStart.toISOString());
+
+  type MetricDetail = {
+    id: string;
+    metricName: string;
+    status: string;
+    dueDate: string | null;
+    periodStart: string;
+    periodEnd: string;
+  };
+
+  type CompanyCompletion = {
+    id: string;
+    name: string;
+    total: number;
+    submitted: number;
+    metrics: MetricDetail[];
+  };
+
+  const companyMap = new Map<string, CompanyCompletion>();
+  let completionTotal = 0;
+  let completionSubmitted = 0;
+
+  if (quarterRequests) {
+    for (const req of quarterRequests) {
+      const companyRaw = req.companies;
+      const company = Array.isArray(companyRaw)
+        ? (companyRaw[0] as { id: string; name: string } | undefined)
+        : (companyRaw as { id: string; name: string } | null);
+      if (!company) continue;
+
+      const defRaw = req.metric_definitions;
+      const def = Array.isArray(defRaw)
+        ? (defRaw[0] as { name: string } | undefined)
+        : (defRaw as { name: string } | null);
+
+      const detail: MetricDetail = {
+        id: req.id,
+        metricName: def?.name ?? "Unknown metric",
+        status: req.status,
+        dueDate: req.due_date,
+        periodStart: req.period_start,
+        periodEnd: req.period_end,
+      };
+
+      completionTotal++;
+      if (req.status === "submitted") completionSubmitted++;
+
+      const existing = companyMap.get(company.id);
+      if (existing) {
+        existing.total++;
+        if (req.status === "submitted") existing.submitted++;
+        existing.metrics.push(detail);
+      } else {
+        companyMap.set(company.id, {
+          id: company.id,
+          name: company.name,
+          total: 1,
+          submitted: req.status === "submitted" ? 1 : 0,
+          metrics: [detail],
+        });
+      }
+    }
+  }
+
+  // Sort metrics within each company: pending first (by due date asc), then submitted
+  for (const company of companyMap.values()) {
+    company.metrics.sort((a, b) => {
+      if (a.status !== b.status) {
+        return a.status === "submitted" ? 1 : -1;
+      }
+      if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+      if (a.dueDate) return -1;
+      return 1;
+    });
+  }
+
+  // Sort worst completion first (ascending by %)
+  const completionCompanies = Array.from(companyMap.values()).sort((a, b) => {
+    const pctA = a.total > 0 ? a.submitted / a.total : 0;
+    const pctB = b.total > 0 ? b.submitted / b.total : 0;
+    return pctA - pctB;
+  });
+
+  const quarterLabel = `Q${currentQuarter} ${currentYear}`;
 
   return (
     <div className="space-y-8">
@@ -282,6 +392,16 @@ export default async function InvestorDashboardPage() {
         ))}
       </div>
 
+      {/* Portfolio Completion */}
+      {completionTotal > 0 && (
+        <PortfolioCompletionCard
+          companies={completionCompanies}
+          totalRequests={completionTotal}
+          submittedRequests={completionSubmitted}
+          quarterLabel={quarterLabel}
+        />
+      )}
+
       {companies.length === 0 ? (
         <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
           <p className="text-white/60">No companies in your portfolio yet.</p>
@@ -293,7 +413,7 @@ export default async function InvestorDashboardPage() {
           </Link>
         </div>
       ) : (
-        <DashboardContent companies={companies} latestMetrics={latestMetrics} secondaryMetrics={secondaryMetrics} />
+        <DashboardContent companies={companies} latestMetrics={latestMetrics} secondaryMetrics={secondaryMetrics} lastSubmittedAt={lastSubmittedAt} />
       )}
     </div>
   );
