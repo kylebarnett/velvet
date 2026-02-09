@@ -58,70 +58,119 @@ export async function POST(req: Request) {
 
   if (!company) return jsonError("Not authorized for this company.", 403);
 
-  let submitted = 0;
   const errors: string[] = [];
 
-  for (const sub of submissions) {
-    const { error } = await supabase
-      .from("company_metric_values")
-      .upsert(
-        {
-          company_id: companyId,
-          metric_name: sub.metricName,
-          period_type: sub.periodType,
-          period_start: sub.periodStart,
-          period_end: sub.periodEnd,
-          value: { raw: sub.value },
-          notes: sub.notes || null,
-          submitted_by: user.id,
-          source: sub.source ?? "manual",
-          source_document_id: sub.sourceDocumentId ?? null,
-        },
-        {
-          onConflict:
-            "company_id,metric_name,period_type,period_start,period_end",
-        },
-      );
+  // Build all rows at once for a single batch upsert (1 round-trip instead of N)
+  const now = new Date().toISOString();
+  const rows = submissions.map((sub) => ({
+    company_id: companyId,
+    metric_name: sub.metricName,
+    period_type: sub.periodType,
+    period_start: sub.periodStart,
+    period_end: sub.periodEnd,
+    value: { raw: sub.value },
+    notes: sub.notes || null,
+    submitted_by: user.id,
+    source: sub.source ?? "manual",
+    source_document_id: sub.sourceDocumentId ?? null,
+    submitted_at: now,
+  }));
 
-    if (error) {
-      errors.push(`${sub.metricName}: Failed to submit.`);
-    } else {
-      submitted++;
-    }
+  const { error: upsertError } = await supabase
+    .from("company_metric_values")
+    .upsert(rows, {
+      onConflict: "company_id,metric_name,period_type,period_start,period_end",
+    });
+
+  let submitted: number;
+
+  if (upsertError) {
+    // If batch fails, report all as failed
+    errors.push(`Batch upsert failed: ${upsertError.message}`);
+    submitted = 0;
+  } else {
+    submitted = submissions.length;
   }
 
-  // Directly mark the specified requests as fulfilled.
-  // The UI passes the exact request IDs that correspond to the submitted
-  // metrics, so no fragile name/date matching is needed.
-  if (submitted > 0 && fulfillRequestIds && fulfillRequestIds.length > 0) {
+  // Fulfill matching metric requests.
+  // Uses explicit fulfillRequestIds from the UI when available,
+  // otherwise falls back to matching by metric name and period.
+  if (submitted > 0) {
     try {
       const admin = createSupabaseAdminClient();
 
-      // Verify these requests belong to this company before updating
-      const { data: validRequests } = await admin
-        .from("metric_requests")
-        .select("id")
-        .eq("company_id", companyId)
-        .eq("status", "pending")
-        .in("id", fulfillRequestIds);
-
-      const validIds = (validRequests ?? []).map((r) => r.id);
-
-      if (validIds.length > 0) {
-        const { error: updateError } = await admin
+      if (fulfillRequestIds && fulfillRequestIds.length > 0) {
+        // Directly mark the specified requests as fulfilled.
+        // The UI passes the exact request IDs that correspond to the submitted
+        // metrics, so no fragile name/date matching is needed.
+        // Verify these requests belong to this company before updating.
+        const { data: validRequests } = await admin
           .from("metric_requests")
-          .update({
-            status: "submitted",
-            updated_at: new Date().toISOString(),
-          })
-          .in("id", validIds);
+          .select("id")
+          .eq("company_id", companyId)
+          .eq("status", "pending")
+          .in("id", fulfillRequestIds);
 
-        if (updateError) {
-          console.error("Failed to fulfill requests:", updateError);
+        const validIds = (validRequests ?? []).map((r) => r.id);
+
+        if (validIds.length > 0) {
+          const { error: updateError } = await admin
+            .from("metric_requests")
+            .update({
+              status: "submitted",
+              updated_at: now,
+            })
+            .in("id", validIds);
+
+          if (updateError) {
+            console.error("Failed to fulfill requests:", updateError);
+          }
+        }
+      } else {
+        // Batch fulfill by matching metric name + period in a single query.
+        // Build OR filter for all submitted metric/period combinations.
+        const metricNames = submissions.map((s) => s.metricName.toLowerCase());
+
+        const { data: matchingRequests } = await admin
+          .from("metric_requests")
+          .select("id, metric_name, period_start, period_end, period_type")
+          .eq("company_id", companyId)
+          .eq("status", "pending")
+          .in("metric_name", metricNames);
+
+        if (matchingRequests && matchingRequests.length > 0) {
+          // Build a lookup set of submitted metric keys for O(1) matching
+          const submittedKeys = new Set(
+            submissions.map(
+              (s) =>
+                `${s.metricName.toLowerCase()}|${s.periodType}|${s.periodStart}|${s.periodEnd}`,
+            ),
+          );
+
+          const idsToFulfill = matchingRequests
+            .filter((r) => {
+              const key = `${(r.metric_name ?? "").toLowerCase()}|${r.period_type}|${r.period_start}|${r.period_end}`;
+              return submittedKeys.has(key);
+            })
+            .map((r) => r.id);
+
+          if (idsToFulfill.length > 0) {
+            const { error: updateError } = await admin
+              .from("metric_requests")
+              .update({
+                status: "submitted",
+                updated_at: now,
+              })
+              .in("id", idsToFulfill);
+
+            if (updateError) {
+              console.error("Failed to fulfill requests:", updateError);
+            }
+          }
         }
       }
-    } catch (e) {
-      // Non-fatal — the values were submitted successfully
+    } catch (e: unknown) {
+      // Non-fatal — the metric values were submitted successfully
       console.error("Failed to auto-fulfill requests:", e);
     }
   }

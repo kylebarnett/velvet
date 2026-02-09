@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle2, Info } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+import { getMetricDefinition } from "@/lib/metric-definitions";
 
 type PeriodTypeValue = "quarterly" | "annual";
 
@@ -65,9 +66,9 @@ function generateQuarterlyPeriods(
     date = new Date(y, mo - 1, d);
   } else {
     const now = new Date();
-    // Start from the previous completed quarter
+    // Start from the current quarter so founders can submit for it
     const currentQ = Math.floor(now.getMonth() / 3);
-    date = new Date(now.getFullYear(), (currentQ - 1) * 3, 1);
+    date = new Date(now.getFullYear(), currentQ * 3, 1);
   }
 
   for (let i = 0; i < count; i++) {
@@ -104,7 +105,7 @@ function generateAnnualPeriods(
   if (requestedStart) {
     year = parseInt(requestedStart.split("-")[0], 10);
   } else {
-    year = new Date().getFullYear() - 1;
+    year = new Date().getFullYear();
   }
 
   for (let i = 0; i < count; i++) {
@@ -158,6 +159,61 @@ function generateMonthlyPeriods(
   }
 
   return periods;
+}
+
+/** Return a placeholder hint appropriate for the metric type. */
+function getFormatHint(metricName: string): string {
+  const lower = metricName.toLowerCase();
+  // Currency / absolute-dollar metrics
+  if (
+    /revenue|mrr|arr|burn|cost|expense|spend|salary|cogs|gmv|aov|arpu|ltv|cac|cash|invested|valuation/.test(
+      lower,
+    )
+  ) {
+    return "e.g. 50000";
+  }
+  // Percentage / rate metrics
+  if (
+    /rate|margin|retention|churn|conversion|ratio|nrr|grr|nps|score|percent|utilization/.test(
+      lower,
+    )
+  ) {
+    return "e.g. 45.2";
+  }
+  return "e.g. 1000";
+}
+
+function MetricInfoTooltip({ metricName }: { metricName: string }) {
+  const [show, setShow] = React.useState(false);
+  const info = getMetricDefinition(metricName);
+  if (!info) return null;
+
+  return (
+    <div className="relative inline-block">
+      <button
+        type="button"
+        className="mt-0.5 text-white/30 hover:text-white/60 transition-colors"
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        onClick={(e) => { e.stopPropagation(); setShow(!show); }}
+        aria-label={`Info about ${metricName}`}
+      >
+        <Info className="h-3.5 w-3.5" />
+      </button>
+      {show && (
+        <div className="absolute bottom-full left-0 z-50 mb-2 w-64 rounded-lg border border-white/10 bg-zinc-900 p-3 shadow-xl">
+          <p className="text-xs font-medium text-white">{metricName}</p>
+          <p className="mt-1 text-xs text-white/60">{info.description}</p>
+          {info.formula && (
+            <div className="mt-2 rounded bg-white/5 px-2 py-1.5">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-white/40">Formula</p>
+              <p className="mt-0.5 text-xs text-emerald-400">{info.formula}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function LoadingSkeleton() {
@@ -498,12 +554,16 @@ export function BatchSubmissionTable({
         return next;
       });
 
+      const submittedCount = json.submitted ?? submissions.length;
+      const failedCount = json.failed ?? 0;
+
       if (remaining.length === 0) {
-        // All metrics submitted — go back to pending view
-        onBack();
+        setSuccess(
+          `all_done:${submittedCount}:${periodType}`,
+        );
       } else {
         setSuccess(
-          `Submitted ${json.submitted} metric${json.submitted !== 1 ? "s" : ""} successfully.${json.failed > 0 ? ` ${json.failed} failed.` : ""}`,
+          `partial:${submittedCount}:${failedCount}:${remaining.length}`,
         );
       }
     } catch (e: unknown) {
@@ -549,6 +609,13 @@ export function BatchSubmissionTable({
           </p>
         </div>
       ) : (
+        <>
+        {cellErrors.size > 0 && (
+          <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm text-red-200">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>{cellErrors.size} value{cellErrors.size !== 1 ? "s" : ""} need attention — fix errors before submitting</span>
+          </div>
+        )}
         <div className="overflow-x-auto rounded-xl border border-white/10">
           <table className="w-full text-sm">
             <thead>
@@ -575,13 +642,16 @@ export function BatchSubmissionTable({
               {rows.map((row) => (
                 <tr key={row.metricName} className="border-b border-white/5">
                   <td className="sticky left-0 z-10 bg-zinc-950 px-4 py-2">
-                    <button
-                      type="button"
-                      onClick={() => setDetailMetric(row.metricName)}
-                      className="font-medium text-white/90 hover:text-white hover:underline underline-offset-2 text-left"
-                    >
-                      {row.metricName}
-                    </button>
+                    <div className="flex items-start gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setDetailMetric(row.metricName)}
+                        className="font-medium text-white/90 hover:text-white hover:underline underline-offset-2 text-left"
+                      >
+                        {row.metricName}
+                      </button>
+                      <MetricInfoTooltip metricName={row.metricName} />
+                    </div>
                     {row.investorNames.length > 0 && (
                       <div className="text-[10px] text-white/40">
                         {row.investorNames.join(", ")}
@@ -610,7 +680,7 @@ export function BatchSubmissionTable({
                                 e.target.value,
                               )
                             }
-                            placeholder={hasExisting ? existing : "\u2014"}
+                            placeholder={hasExisting ? existing : getFormatHint(row.metricName)}
                             className={`h-9 w-full rounded-md border bg-black/30 px-2 text-center text-sm font-mono focus:outline-none focus:ring-2 ${
                               cellError
                                 ? "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20"
@@ -644,6 +714,7 @@ export function BatchSubmissionTable({
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       {error && (
@@ -652,11 +723,47 @@ export function BatchSubmissionTable({
         </div>
       )}
 
-      {success && (
-        <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
-          {success}
-        </div>
-      )}
+      {success && (() => {
+        const parts = success.split(":");
+        const isAllDone = parts[0] === "all_done";
+        const count = parseInt(parts[1], 10) || 0;
+        const failedCount = isAllDone ? 0 : parseInt(parts[2], 10) || 0;
+        const remainingCount = isAllDone ? 0 : parseInt(parts[3], 10) || 0;
+
+        return (
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-medium text-emerald-200">
+                  {count} metric{count !== 1 ? "s" : ""} submitted for {periodType === "quarterly" ? "this quarter" : "this period"}
+                </p>
+                <p className="text-xs text-emerald-200/70">
+                  Your investors will see these immediately.
+                </p>
+                {failedCount > 0 && (
+                  <p className="text-xs text-amber-200">
+                    {failedCount} value{failedCount !== 1 ? "s" : ""} failed to submit.
+                  </p>
+                )}
+                {isAllDone ? (
+                  <button
+                    type="button"
+                    onClick={onBack}
+                    className="mt-2 inline-flex h-8 items-center rounded-md bg-emerald-500/20 px-3 text-xs font-medium text-emerald-200 hover:bg-emerald-500/30 transition-colors"
+                  >
+                    Back to requests
+                  </button>
+                ) : remainingCount > 0 ? (
+                  <p className="text-xs text-white/50">
+                    You still have {remainingCount} pending metric{remainingCount !== 1 ? "s" : ""} to submit.
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {rows.length > 0 && (
         <div className="flex justify-end">
@@ -664,6 +771,7 @@ export function BatchSubmissionTable({
             type="button"
             onClick={prepareSubmissions}
             disabled={submitting || cellErrors.size > 0}
+            title={cellErrors.size > 0 ? `Fix ${cellErrors.size} invalid value${cellErrors.size !== 1 ? "s" : ""} before submitting` : undefined}
             className="inline-flex h-10 items-center justify-center rounded-md bg-white px-5 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             {submitting

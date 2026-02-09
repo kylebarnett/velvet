@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -98,6 +98,8 @@ type Frequency = "one-time" | "recurring" | null;
 
 export function UnifiedRequestWizard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const preselectedCompanyId = searchParams.get("companyId");
   const [step, setStep] = React.useState<1 | 2 | 3>(1);
 
   // Data
@@ -122,7 +124,11 @@ export function UnifiedRequestWizard() {
   const [selectedQuarter, setSelectedQuarter] = React.useState<1 | 2 | 3 | 4>(
     availableQuarters[0]?.quarter ?? 1
   );
-  const [dueDate, setDueDate] = React.useState("");
+  const [dueDate, setDueDate] = React.useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 14);
+    return d.toISOString().split("T")[0];
+  });
 
   // Custom metric
   const [useCustomMetric, setUseCustomMetric] = React.useState(false);
@@ -155,9 +161,13 @@ export function UnifiedRequestWizard() {
 
   const selectedTemplate = templates.find((t) => t.id === selectedTemplateId);
 
+  // Last-used template tracking
+  const [lastTemplateId, setLastTemplateId] = React.useState<string | null>(null);
+
   // Filter templates
   const systemTemplates = templates.filter((t) => t.isSystem && !hiddenTemplateIds.includes(t.id));
   const userTemplates = templates.filter((t) => !t.isSystem);
+  const recentTemplate = lastTemplateId ? templates.find((t) => t.id === lastTemplateId) : null;
 
   const sortedCompanies = React.useMemo(
     () => [...companies].sort((a, b) => a.name.localeCompare(b.name)),
@@ -187,8 +197,26 @@ export function UnifiedRequestWizard() {
         const hiddenJson = await hiddenRes.json().catch(() => null);
 
         setTemplates(templatesJson?.templates ?? []);
-        setCompanies(companiesJson?.companies ?? []);
+        const loadedCompanies = companiesJson?.companies ?? [];
+        setCompanies(loadedCompanies);
         setHiddenTemplateIds(hiddenJson?.hiddenTemplates ?? []);
+
+        // Load last-used template preference
+        try {
+          const prefRes = await fetch("/api/user/preferences?key=last_template_id");
+          const prefJson = await prefRes.json().catch(() => null);
+          if (prefJson?.value) setLastTemplateId(prefJson.value);
+        } catch {
+          // Non-critical, ignore
+        }
+
+        // Pre-select company from URL params (e.g., from company dashboard "Request Metrics" button)
+        if (preselectedCompanyId) {
+          const match = loadedCompanies.find((c: Company) => c.id === preselectedCompanyId);
+          if (match) {
+            setSelectedCompanyIds(new Set([preselectedCompanyId]));
+          }
+        }
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "Failed to load data.";
         setError(msg);
@@ -203,6 +231,13 @@ export function UnifiedRequestWizard() {
     setSelectedTemplateId(templateId);
     setUseCustomMetric(false);
     setStep(2);
+    // Persist last-used template (fire and forget)
+    setLastTemplateId(templateId);
+    fetch("/api/user/preferences", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "last_template_id", value: templateId }),
+    }).catch(() => {});
   }
 
   function selectCustomMetric() {
@@ -547,6 +582,16 @@ export function UnifiedRequestWizard() {
               <ArrowLeft className="h-4 w-4 rotate-180 text-white/40" />
             </div>
           </button>
+
+          {/* Recently used template */}
+          {recentTemplate && (
+            <div className="space-y-3">
+              <h2 className="text-sm font-medium text-white/80">Recently Used</h2>
+              <div className="space-y-2">
+                {renderTemplateCard(recentTemplate, recentTemplate.isSystem)}
+              </div>
+            </div>
+          )}
 
           {/* User templates */}
           {userTemplates.length > 0 && (

@@ -1,6 +1,7 @@
 import { AppShell, type CompanyInfo } from "@/components/layouts/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { MetricDefinitionsProvider } from "@/contexts/metric-definitions-context";
 
 export const dynamic = "force-dynamic";
 
@@ -43,18 +44,21 @@ export default async function FounderLayout({
   };
 
   return (
-    <AppShell
-      title="Founder"
-      nav={[
-        { href: "/portal", label: "Dashboard", icon: "layout-dashboard" },
-        { href: "/portal/requests", label: "Requests", icon: "inbox", badge: pendingCount },
-        { href: "/portal/investors", label: "Investors", icon: "shield" },
-        { href: "/portal/team", label: "Team", icon: "user-plus" },
-      ]}
-      company={company}
-      user={userInfo}
-    >
-      {children}
-    </AppShell>
+    <MetricDefinitionsProvider>
+      <AppShell
+        title="Founder"
+        nav={[
+          { href: "/portal", label: "Dashboard", icon: "layout-dashboard" },
+          { href: "/portal/company", label: "Company", icon: "building2" },
+          { href: "/portal/requests", label: "Requests", icon: "inbox", badge: pendingCount },
+          { href: "/portal/investors", label: "Investors", icon: "shield" },
+          { href: "/portal/team", label: "Team", icon: "user-plus" },
+        ]}
+        company={company}
+        user={userInfo}
+      >
+        {children}
+      </AppShell>
+    </MetricDefinitionsProvider>
   );
 }

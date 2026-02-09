@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Settings } from "lucide-react";
+import { Settings, Send } from "lucide-react";
 import {
   DashboardWidget,
   ViewSelector,
@@ -328,6 +328,13 @@ function MetricsTabContent({
         </div>
         <div className="flex items-center gap-2">
           <Link
+            href={`/requests/new?companyId=${companyId}`}
+            className="flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 sm:py-1.5 text-xs font-medium text-black hover:bg-white/90 transition-colors"
+          >
+            <Send className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Request Metrics</span>
+          </Link>
+          <Link
             href={`/dashboard/${companyId}/edit`}
             className="flex items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 sm:py-1.5 text-xs font-medium text-white/60 hover:border-white/15 hover:text-white/80 transition-colors"
           >
@@ -358,7 +365,8 @@ function MetricsTabContent({
               className={`rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 sm:p-4 ${colSpanClass}`}
               style={{
                 minHeight: `${widget.h * 80}px`,
-              }}
+                "--table-bg": "#0c0c0e",
+              } as React.CSSProperties}
             >
               <DashboardWidget
                 widget={widget}

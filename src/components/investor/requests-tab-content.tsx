@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Search, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, X, ChevronLeft, ChevronRight, Bell } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -38,6 +38,143 @@ type StatusCounts = {
 
 const PAGE_SIZE = 50;
 
+function getStatusContext(req: Request): { label: string; className: string } | null {
+  if (req.status === "pending") {
+    const created = new Date(req.created_at);
+    const now = new Date();
+    const daysSinceCreated = Math.floor(
+      (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (req.due_date) {
+      const due = new Date(req.due_date);
+      const daysOverdue = Math.floor(
+        (now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      if (daysOverdue > 0) {
+        return {
+          label: `Overdue by ${daysOverdue}d`,
+          className: "text-red-300",
+        };
+      }
+      const daysUntilDue = Math.floor(
+        (due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      if (daysUntilDue <= 3 && daysUntilDue >= 0) {
+        return {
+          label: `Due in ${daysUntilDue}d`,
+          className: "text-amber-300",
+        };
+      }
+    }
+
+    if (daysSinceCreated > 0) {
+      return {
+        label: `Sent ${daysSinceCreated}d ago`,
+        className: "text-white/40",
+      };
+    }
+    return { label: "Sent today", className: "text-white/40" };
+  }
+  return null;
+}
+
+type PeriodGroup = {
+  label: string;
+  key: string;
+  total: number;
+  submitted: number;
+  percentage: number;
+};
+
+function PeriodProgress({ requests }: { requests: Request[] }) {
+  const periodGroups = React.useMemo(() => {
+    const groups = new Map<string, { label: string; total: number; submitted: number }>();
+
+    for (const req of requests) {
+      const defRaw = req.metric_definitions;
+      const def = Array.isArray(defRaw) ? defRaw[0] : defRaw;
+      const periodType = def?.period_type ?? "quarterly";
+
+      const start = new Date(req.period_start);
+      let label = "";
+      let key = "";
+
+      if (periodType === "quarterly") {
+        const q = Math.floor(start.getMonth() / 3) + 1;
+        label = `Q${q} ${start.getFullYear()}`;
+        key = `${start.getFullYear()}-Q${q}`;
+      } else if (periodType === "monthly") {
+        label = start.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        key = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}`;
+      } else {
+        label = String(start.getFullYear());
+        key = String(start.getFullYear());
+      }
+
+      const existing = groups.get(key);
+      if (existing) {
+        existing.total++;
+        if (req.status === "submitted") existing.submitted++;
+      } else {
+        groups.set(key, {
+          label,
+          total: 1,
+          submitted: req.status === "submitted" ? 1 : 0,
+        });
+      }
+    }
+
+    return Array.from(groups.entries())
+      .map(([key, g]) => ({
+        key,
+        label: g.label,
+        total: g.total,
+        submitted: g.submitted,
+        percentage: g.total > 0 ? Math.round((g.submitted / g.total) * 100) : 0,
+      }))
+      .sort((a, b) => b.key.localeCompare(a.key))
+      .slice(0, 3);
+  }, [requests]);
+
+  if (periodGroups.length === 0) return null;
+
+  return (
+    <div className="flex gap-3 overflow-x-auto pb-1">
+      {periodGroups.map((period) => {
+        const barColor =
+          period.percentage >= 80
+            ? "bg-emerald-500"
+            : period.percentage >= 40
+              ? "bg-amber-500"
+              : "bg-red-500";
+        return (
+          <div
+            key={period.key}
+            className="min-w-[160px] flex-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-3"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-white/70">{period.label}</span>
+              <span className="text-xs text-white/40">
+                {period.submitted}/{period.total}
+              </span>
+            </div>
+            <div className="mt-2 h-1.5 w-full rounded-full bg-white/10">
+              <div
+                className={`h-1.5 rounded-full transition-all ${barColor}`}
+                style={{ width: `${period.percentage}%` }}
+              />
+            </div>
+            <div className="mt-1 text-[10px] text-white/40">
+              {period.percentage}% complete
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function RequestsTabContent({
   companies,
 }: {
@@ -57,6 +194,64 @@ export function RequestsTabContent({
   const [companyFilter, setCompanyFilter] = React.useState("");
   const [searchInput, setSearchInput] = React.useState("");
   const debouncedSearch = useDebounce(searchInput, 300);
+
+  // Bulk remind state
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+  const [reminding, setReminding] = React.useState(false);
+  const [remindResult, setRemindResult] = React.useState<{ sent: number; failed: number; devMode?: boolean } | null>(null);
+
+  // Auto-dismiss remind result
+  React.useEffect(() => {
+    if (remindResult) {
+      const timer = setTimeout(() => setRemindResult(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [remindResult]);
+
+  const pendingRequests = React.useMemo(
+    () => requests.filter((r) => r.status === "pending"),
+    [requests],
+  );
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAllPending() {
+    if (pendingRequests.every((r) => selectedIds.has(r.id))) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(pendingRequests.map((r) => r.id)));
+    }
+  }
+
+  async function handleBulkRemind() {
+    if (selectedIds.size === 0) return;
+    setReminding(true);
+    try {
+      const res = await fetch("/api/investors/requests/remind", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestIds: Array.from(selectedIds) }),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        setRemindResult({ sent: json.sent ?? 0, failed: json.failed ?? 0, devMode: json.devMode });
+        setSelectedIds(new Set());
+      } else {
+        setRemindResult({ sent: 0, failed: selectedIds.size });
+      }
+    } catch {
+      setRemindResult({ sent: 0, failed: selectedIds.size });
+    } finally {
+      setReminding(false);
+    }
+  }
 
   const fetchRequests = React.useCallback(async () => {
     setLoading(true);
@@ -134,6 +329,36 @@ export function RequestsTabContent({
           <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold">{statusCounts.submitted}</div>
         </button>
       </div>
+
+      {/* Period progress */}
+      <PeriodProgress requests={requests} />
+
+      {/* Remind result banner */}
+      {remindResult && (
+        <div
+          className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm ${
+            remindResult.failed > 0 && remindResult.sent === 0
+              ? "border-red-500/20 bg-red-500/10 text-red-200"
+              : "border-emerald-500/20 bg-emerald-500/10 text-emerald-200"
+          }`}
+          role="alert"
+        >
+          <span>
+            {remindResult.devMode
+              ? `Dev mode: Would send ${remindResult.sent} reminder email(s)`
+              : remindResult.sent > 0
+                ? `Sent ${remindResult.sent} reminder${remindResult.sent > 1 ? "s" : ""}${remindResult.failed > 0 ? `, ${remindResult.failed} failed` : ""}`
+                : "Failed to send reminders"}
+          </span>
+          <button
+            type="button"
+            onClick={() => setRemindResult(null)}
+            className="ml-3 rounded p-0.5 hover:bg-white/10"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
@@ -253,9 +478,20 @@ export function RequestsTabContent({
                       <div className="font-medium truncate">{def?.name ?? "Unknown"}</div>
                       <div className="mt-0.5 text-xs text-white/60">{def?.period_type}</div>
                     </div>
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${statusStyle}`}>
-                      {req.status}
-                    </span>
+                    <div className="shrink-0 text-right">
+                      <span className={`rounded-full px-2 py-0.5 text-xs ${statusStyle}`}>
+                        {req.status}
+                      </span>
+                      {(() => {
+                        const ctx = getStatusContext(req);
+                        if (!ctx) return null;
+                        return (
+                          <div className={`mt-0.5 text-[10px] ${ctx.className}`}>
+                            {ctx.label}
+                          </div>
+                        );
+                      })()}
+                    </div>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <div>
@@ -292,6 +528,17 @@ export function RequestsTabContent({
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-white/10 bg-white/5">
+                    <th className="w-10 px-3 py-3">
+                      {pendingRequests.length > 0 && (
+                        <input
+                          type="checkbox"
+                          checked={pendingRequests.length > 0 && pendingRequests.every((r) => selectedIds.has(r.id))}
+                          onChange={toggleSelectAllPending}
+                          className="h-4 w-4 rounded border-white/20 bg-white/5 accent-white"
+                          title="Select all pending"
+                        />
+                      )}
+                    </th>
                     <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Metric</th>
                     <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Company</th>
                     <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Period</th>
@@ -315,6 +562,18 @@ export function RequestsTabContent({
 
                     return (
                       <tr key={req.id} className="border-b border-white/5">
+                        <td className="w-10 px-3 py-3">
+                          {req.status === "pending" ? (
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(req.id)}
+                              onChange={() => toggleSelected(req.id)}
+                              className="h-4 w-4 rounded border-white/20 bg-white/5 accent-white"
+                            />
+                          ) : (
+                            <span className="block h-4 w-4" />
+                          )}
+                        </td>
                         <td className="px-4 py-3">
                           <div className="font-medium">{def?.name ?? "Unknown"}</div>
                           <div className="text-xs text-white/60">{def?.period_type}</div>
@@ -341,6 +600,15 @@ export function RequestsTabContent({
                           <span className={`rounded-full px-2 py-0.5 text-xs ${statusStyle}`}>
                             {req.status}
                           </span>
+                          {(() => {
+                            const ctx = getStatusContext(req);
+                            if (!ctx) return null;
+                            return (
+                              <div className={`mt-0.5 text-[10px] ${ctx.className}`}>
+                                {ctx.label}
+                              </div>
+                            );
+                          })()}
                         </td>
                       </tr>
                     );
@@ -380,6 +648,33 @@ export function RequestsTabContent({
             </div>
           )}
         </>
+      )}
+
+      {/* Floating bulk action bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 animate-fade-in">
+          <div className="flex items-center gap-3 rounded-xl border border-white/15 bg-zinc-900/95 px-5 py-3 shadow-2xl backdrop-blur-sm">
+            <span className="text-sm text-white/70">
+              {selectedIds.size} selected
+            </span>
+            <button
+              type="button"
+              onClick={handleBulkRemind}
+              disabled={reminding}
+              className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-white/90 disabled:opacity-60"
+            >
+              <Bell className="h-3.5 w-3.5" />
+              {reminding ? "Sending..." : `Remind founder${selectedIds.size > 1 ? "s" : ""}`}
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedIds(new Set())}
+              className="rounded-md p-1.5 text-white/50 hover:text-white/80 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

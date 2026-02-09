@@ -32,6 +32,7 @@ type DashboardContentProps = {
   companies: Company[];
   latestMetrics: Record<string, MetricSnapshot>;
   secondaryMetrics?: Record<string, MetricSnapshot>;
+  lastSubmittedAt?: Record<string, string>;
 };
 
 type ViewMode = "grid" | "list";
@@ -209,7 +210,7 @@ function CompanyListRow({
   );
 }
 
-export function DashboardContent({ companies, latestMetrics, secondaryMetrics = {} }: DashboardContentProps) {
+export function DashboardContent({ companies, latestMetrics, secondaryMetrics = {}, lastSubmittedAt = {} }: DashboardContentProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [viewMode, setViewMode] = React.useState<ViewMode>("grid");
 
@@ -293,6 +294,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
               approvalStatus={company.approvalStatus}
               latestMetric={latestMetrics[company.id] ?? null}
               secondaryMetric={secondaryMetrics[company.id] ?? null}
+              lastSubmittedAt={lastSubmittedAt[company.id] ?? null}
             />
           ))}
         </div>

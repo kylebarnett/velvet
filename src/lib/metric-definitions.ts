@@ -262,3 +262,104 @@ export function getMetricDefinition(metricName: string): MetricInfo | null {
 
   return null;
 }
+
+// Value type classification for display
+export type MetricValueType = "currency" | "percent" | "number" | "ratio" | "time";
+
+/**
+ * Infer the value type of a metric from its name.
+ * Centralizes the logic used by formatValue() in charts/types.ts.
+ */
+export function inferMetricValueType(metricName: string): MetricValueType {
+  const lower = metricName.toLowerCase();
+
+  // Percentage metrics
+  if (
+    lower.includes("rate") ||
+    lower.includes("margin") ||
+    lower.includes("retention") ||
+    lower.includes("churn") ||
+    lower.includes("conversion") ||
+    lower.includes("nrr") ||
+    lower.includes("grr")
+  ) {
+    return "percent";
+  }
+
+  // Ratio metrics
+  if (lower.includes("ratio") || lower.includes("ltv:cac") || lower.includes("multiple")) {
+    return "ratio";
+  }
+
+  // Time metrics
+  if (
+    lower.includes("runway") ||
+    lower.includes("latency") ||
+    lower.includes("processing time")
+  ) {
+    return "time";
+  }
+
+  // Currency metrics
+  if (
+    lower.includes("revenue") ||
+    lower.includes("mrr") ||
+    lower.includes("arr") ||
+    lower.includes("cac") ||
+    lower.includes("ltv") ||
+    lower.includes("burn") ||
+    lower.includes("cost") ||
+    lower.includes("expense") ||
+    lower.includes("gmv") ||
+    lower.includes("aov") ||
+    lower.includes("arpu") ||
+    lower.includes("spend") ||
+    lower.includes("income") ||
+    lower.includes("cogs") ||
+    lower.includes("opex") ||
+    lower.includes("salary") ||
+    lower.includes("payroll")
+  ) {
+    return "currency";
+  }
+
+  return "number";
+}
+
+// Custom definition stored in user preferences
+export type CustomMetricDefinition = {
+  description: string;
+  formula?: string;
+  updatedAt: string;
+};
+
+/**
+ * Resolve a metric definition with fallback chain:
+ * 1. User's custom definition (if provided)
+ * 2. System definition from METRIC_DEFINITIONS
+ * 3. null
+ */
+export function resolveMetricDefinition(
+  metricName: string,
+  customDefs?: Record<string, CustomMetricDefinition>,
+): { info: MetricInfo | null; isCustom: boolean } {
+  // Normalize key: lowercase, spaces → underscores
+  const normalizedKey = metricName.toLowerCase().replace(/\s+/g, "_");
+
+  // Check custom definitions first
+  if (customDefs && customDefs[normalizedKey]) {
+    const custom = customDefs[normalizedKey];
+    return {
+      info: { description: custom.description, formula: custom.formula },
+      isCustom: true,
+    };
+  }
+
+  // Fall back to system definition
+  const systemDef = getMetricDefinition(metricName);
+  if (systemDef) {
+    return { info: systemDef, isCustom: false };
+  }
+
+  return { info: null, isCustom: false };
+}

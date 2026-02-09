@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
 
 type MetricSnapshot = {
@@ -22,7 +22,22 @@ type CompanyCardProps = {
   approvalStatus: string;
   latestMetric?: MetricSnapshot | null;
   secondaryMetric?: MetricSnapshot | null;
+  lastSubmittedAt?: string | null;
 };
+
+function formatFreshness(dateStr: string): { label: string; isStale: boolean } {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return { label: "Updated today", isStale: false };
+  if (diffDays === 1) return { label: "Updated yesterday", isStale: false };
+  if (diffDays < 7) return { label: `Updated ${diffDays}d ago`, isStale: false };
+  if (diffDays < 30) return { label: `Updated ${Math.floor(diffDays / 7)}w ago`, isStale: false };
+  if (diffDays < 90) return { label: `Updated ${Math.floor(diffDays / 30)}mo ago`, isStale: false };
+  return { label: "Stale", isStale: true };
+}
 
 function formatValue(value: number | null, metricName?: string): string {
   if (value == null) return "-";
@@ -139,6 +154,7 @@ export function CompanyCard({
   approvalStatus,
   latestMetric,
   secondaryMetric,
+  lastSubmittedAt,
 }: CompanyCardProps) {
   const isApproved = ["auto_approved", "approved"].includes(approvalStatus);
   const hasFounder = !!founderId;
@@ -191,6 +207,22 @@ export function CompanyCard({
               <TrendIndicator percentChange={secondaryMetric.percentChange} />
             </div>
           )}
+        </div>
+      )}
+
+      {hasAnyMetric && lastSubmittedAt && (
+        <div className="mt-1 flex items-center gap-1">
+          {(() => {
+            const { label, isStale } = formatFreshness(lastSubmittedAt);
+            return isStale ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] text-amber-300">
+                <AlertCircle className="h-3 w-3" />
+                {label}
+              </span>
+            ) : (
+              <span className="text-[10px] text-white/30">{label}</span>
+            );
+          })()}
         </div>
       )}
 

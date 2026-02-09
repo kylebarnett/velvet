@@ -98,6 +98,7 @@ export function DashboardWidget({
         title={config.title}
         onMetricClick={onMetricClick}
         storageKey={storageKey}
+        showTotals={config.showTotals !== false}
       />
     );
   }

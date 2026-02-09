@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 
 type Investor = {
   id: string;
@@ -84,10 +85,16 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
           <div className="mt-0.5 text-xs text-white/40">
             Connected {formatConnectionDate(investor.created_at)}
           </div>
-          <div className="mt-2">
+          <div className="mt-2 flex items-center gap-1.5">
             <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge}`}>
               {statusLabel}
             </span>
+            {status === "auto_approved" && (
+              <HelpTooltip text="This investor invited you to Velvet. They were automatically approved." />
+            )}
+            {status === "pending" && (
+              <HelpTooltip text="This investor has imported your company but hasn't been approved yet. They can't see your metrics until you approve." />
+            )}
           </div>
         </div>
 

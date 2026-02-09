@@ -21,6 +21,7 @@ export type TableConfig = {
   periodType: PeriodType;
   title?: string;
   showAllMetrics?: boolean;
+  showTotals?: boolean;
 };
 
 export type Widget = {

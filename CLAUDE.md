@@ -48,6 +48,7 @@ Velvet is a portfolio metrics platform connecting investors with founders. Inves
 
 **Founders:**
 - `/portal` - Dashboard with tabs (Metrics, Documents, Tear Sheets)
+- `/portal/company` - Company profile (view/edit website, stage, industry, business model)
 - `/portal/requests` - Pending metric requests
 - `/portal/investors` - Manage investor access (approve/deny)
 - `/portal/documents` - Document upload and management
@@ -405,6 +406,8 @@ When deleting a contact, the company is only deleted if:
 ### API Routes
 - `GET /api/founder/investors` - List investors with approval status
 - `PUT /api/founder/investors/[relationshipId]/approval` - Approve or deny (cannot change auto_approved)
+- `GET /api/founder/company` - Get founder's company details (name, website, stage, industry, business_model)
+- `PUT /api/founder/company` - Update company details (website, stage, industry, business_model; name is locked)
 
 ## Metric Submission Model
 
@@ -449,6 +452,7 @@ The batch submission table (`src/components/founder/batch-submission-table.tsx`)
   - Returns all historical values with `metric_value_history` joined
   - Resolves `changed_by` UUIDs to user names
 - `POST /api/metrics/request` - Create a metric request (investor)
+- `POST /api/investors/requests/remind` - Bulk remind founders about pending requests (accepts `requestIds` UUID array, sends grouped emails per founder)
 - `GET /api/founder/metric-requests` - Deduplicated requests view
 - `GET /api/founder/company-metrics` - Submission history
 - `GET /api/founder/metrics/export` - Export metrics as CSV
@@ -1944,6 +1948,23 @@ Modal for configuring which metrics appear on company dashboard cards:
 
 **TileSettingsMenu/Button** (`src/components/investor/tile-settings-*.tsx`)
 Dropdown menu and trigger button for tile actions (configure, delete, reset).
+
+### Founder Company Profile
+**CompanyProfile** (`src/components/founder/company-profile.tsx`)
+Editable company profile for founders:
+- Company name (read-only, locked)
+- Website (inline editable with save/cancel)
+- Stage, Industry, Business Model (select dropdowns with optimistic updates)
+- Tag badges with color coding matching investor-side patterns
+- Calls `PUT /api/founder/company` for all updates
+
+### Founder Onboarding Checklist
+**OnboardingChecklist** (`src/components/founder/onboarding-checklist.tsx`)
+Dismissible checklist card for new founders:
+- 4 items: Create account, Review investors, Submit metrics, Upload document
+- Progress bar with completion count
+- Persists dismissed state via `/api/user/preferences`
+- Auto-hides when all items complete or dismissed
 
 ### Founder Approval
 **InvestorApprovalCard** (`src/components/founder/investor-approval-card.tsx`)

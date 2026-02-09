@@ -27,6 +27,7 @@ import {
   getAggregationIndicator,
   type AggregationType,
 } from "@/lib/metrics/temporal-aggregation";
+import { MetricNameTooltip } from "@/components/dashboard/metric-name-tooltip";
 
 type PeriodData = {
   periodStart: string;
@@ -211,6 +212,12 @@ function CellTooltip({
   );
 }
 
+type MetricInfoTooltipState = {
+  metricName: string;
+  periodType: string;
+  rect: DOMRect;
+} | null;
+
 type SortableMetricRowProps = {
   metric: MetricRow;
   displayPeriods: string[];
@@ -220,6 +227,8 @@ type SortableMetricRowProps = {
   hoveredCell: HoveredCell;
   onCellMouseEnter: (metricName: string, periodStart: string, cellEl: HTMLTableCellElement) => void;
   onCellMouseLeave: () => void;
+  onMetricInfoHover: (metricName: string, periodType: string, rect: DOMRect) => void;
+  onMetricInfoLeave: () => void;
 };
 
 function SortableMetricRow({
@@ -231,6 +240,8 @@ function SortableMetricRow({
   hoveredCell,
   onCellMouseEnter,
   onCellMouseLeave,
+  onMetricInfoHover,
+  onMetricInfoLeave,
 }: SortableMetricRowProps) {
   const {
     attributes,
@@ -240,6 +251,7 @@ function SortableMetricRow({
     transition,
     isDragging,
   } = useSortable({ id: metric.metricName });
+  const infoBtnRef = useRef<HTMLButtonElement>(null);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -253,14 +265,21 @@ function SortableMetricRow({
   const aggregationType = metric.aggregationType ?? getDefaultAggregationType(metric.metricName);
   const { symbol: aggSymbol } = getAggregationIndicator(aggregationType);
 
+  const handleInfoClick = useCallback(() => {
+    if (infoBtnRef.current) {
+      const rect = infoBtnRef.current.getBoundingClientRect();
+      onMetricInfoHover(metric.metricName, metric.periodType, rect);
+    }
+  }, [metric.metricName, metric.periodType, onMetricInfoHover]);
+
   return (
     <tr
       ref={setNodeRef}
       style={style}
-      className={`border-b border-white/5 ${isDragging ? "bg-white/5" : ""}`}
+      className={`group border-b border-white/[0.04] transition-colors ${isDragging ? "bg-white/5" : "hover:bg-white/[0.02]"}`}
     >
       {isReorderMode && (
-        <td className="sticky left-0 z-10 w-8 bg-zinc-950 py-2">
+        <td className="sticky left-0 z-10 w-8 bg-[var(--table-bg,#09090b)] py-2.5">
           <button
             type="button"
             className="flex h-6 w-6 cursor-grab items-center justify-center rounded text-white/40 hover:bg-white/10 hover:text-white/60 active:cursor-grabbing"
@@ -272,14 +291,22 @@ function SortableMetricRow({
         </td>
       )}
       <td
-        className={`sticky ${isReorderMode ? "left-8" : "left-0"} z-10 overflow-hidden bg-zinc-950 py-2 pr-4`}
-        style={{ boxShadow: "4px 0 8px -4px rgba(0,0,0,0.4)" }}
+        className={`sticky ${isReorderMode ? "left-8" : "left-0"} z-10 overflow-hidden bg-[var(--table-bg,#09090b)] py-2.5 pr-4`}
+        style={{ boxShadow: "4px 0 6px -4px rgba(0,0,0,0.2)" }}
       >
         <span className="inline-flex max-w-full items-center gap-1.5 text-white/80" title={metric.metricName}>
           {isAiExtracted && (
             <Sparkles className="h-3.5 w-3.5 shrink-0 text-violet-400" />
           )}
           <span className="truncate">{metric.metricName}</span>
+          <button
+            ref={infoBtnRef}
+            type="button"
+            onClick={handleInfoClick}
+            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-white/25 hover:text-white/50"
+          >
+            <Info className="h-3 w-3" />
+          </button>
         </span>
       </td>
       {displayPeriods.map((period) => {
@@ -302,11 +329,11 @@ function SortableMetricRow({
         return (
           <td
             key={period}
-            className={`overflow-hidden px-3 py-2 text-right font-mono ${cellBgColor} ${
+            className={`overflow-hidden px-3 py-2.5 text-right font-mono text-[13px] ${cellBgColor} ${
               hasData
-                ? "cursor-default rounded transition-colors hover:bg-white/10"
+                ? "cursor-default rounded transition-colors hover:bg-white/[0.06]"
                 : ""
-            } ${isHovered ? "bg-white/10" : ""}`}
+            } ${isHovered ? "bg-white/[0.06]" : ""}`}
             onMouseEnter={
               hasData && !isReorderMode
                 ? (e) =>
@@ -338,8 +365,8 @@ function SortableMetricRow({
 
         return (
           <td
-            className="sticky right-0 z-10 overflow-hidden bg-zinc-950 py-2 px-2 text-right font-mono"
-            style={{ boxShadow: "-4px 0 8px -4px rgba(0,0,0,0.4)" }}
+            className="sticky right-0 z-10 overflow-hidden bg-[var(--table-bg,#09090b)] py-2.5 px-2 text-right font-mono text-[13px]"
+            style={{ boxShadow: "-4px 0 6px -4px rgba(0,0,0,0.2)" }}
           >
             {total !== null ? (
               <span className="block truncate whitespace-nowrap text-white/90" title={`${aggSymbol} ${aggregationType === "sum" ? "Sum" : "Latest"}: ${formatValue(total, metric.metricName)}`}>
@@ -439,7 +466,10 @@ export function MetricsTable({
   storageKey,
 }: MetricsTableProps) {
   const [hoveredCell, setHoveredCell] = useState<HoveredCell>(null);
+  const [metricInfoTooltip, setMetricInfoTooltip] = useState<MetricInfoTooltipState>(null);
   const [mounted, setMounted] = useState(false);
+  const metricInfoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isOverMetricInfoRef = useRef(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [orderedData, setOrderedData] = useState<MetricRow[]>(data); // Initialize with data
   const [savedOrder, setSavedOrder] = useState<string[] | null>(null);
@@ -452,9 +482,91 @@ export function MetricsTable({
   const [visiblePeriodSet, setVisiblePeriodSet] = useState<string[]>([]);
   const periodHeaderRefs = useRef<Map<string, HTMLTableCellElement>>(new Map());
 
-  const METRIC_COL_WIDTH = 170;
+  // Resizable metric column
+  const DEFAULT_METRIC_COL_WIDTH = 170;
+  const MIN_METRIC_COL_WIDTH = 120;
+  const MAX_METRIC_COL_WIDTH = 400;
+  const [metricColWidth, setMetricColWidth] = useState(DEFAULT_METRIC_COL_WIDTH);
+  const [metricColLoaded, setMetricColLoaded] = useState(!storageKey);
+  const resizingRef = useRef(false);
+  const resizeStartXRef = useRef(0);
+  const resizeStartWidthRef = useRef(0);
+  const colWidthSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const METRIC_COL_WIDTH = metricColWidth;
   const TOTAL_COL_WIDTH = showTotals ? 110 : 0;
   const GRIP_COL_WIDTH = isReorderMode ? 32 : 0;
+
+  // Load saved metric column width from preferences
+  useEffect(() => {
+    if (!storageKey) return;
+    const prefKey = `metric_col_width.${storageKey}`;
+    fetch(`/api/user/preferences?key=${encodeURIComponent(prefKey)}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.value && typeof json.value === "number") {
+          setMetricColWidth(Math.min(MAX_METRIC_COL_WIDTH, Math.max(MIN_METRIC_COL_WIDTH, json.value)));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setMetricColLoaded(true));
+  }, [storageKey]);
+
+  // Save metric column width to preferences (debounced)
+  const saveMetricColWidth = useCallback((width: number) => {
+    if (!storageKey) return;
+    if (colWidthSaveRef.current) clearTimeout(colWidthSaveRef.current);
+    colWidthSaveRef.current = setTimeout(() => {
+      const prefKey = `metric_col_width.${storageKey}`;
+      fetch("/api/user/preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: prefKey, value: width }),
+      }).catch(() => {});
+    }, 500);
+  }, [storageKey]);
+
+  useEffect(() => {
+    return () => { if (colWidthSaveRef.current) clearTimeout(colWidthSaveRef.current); };
+  }, []);
+
+  // Column resize handler
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    resizingRef.current = true;
+    resizeStartXRef.current = e.clientX;
+    resizeStartWidthRef.current = metricColWidth;
+
+    function onMouseMove(ev: MouseEvent) {
+      if (!resizingRef.current) return;
+      const delta = ev.clientX - resizeStartXRef.current;
+      setMetricColWidth(Math.min(MAX_METRIC_COL_WIDTH, Math.max(MIN_METRIC_COL_WIDTH, resizeStartWidthRef.current + delta)));
+    }
+
+    function onMouseUp() {
+      resizingRef.current = false;
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }, [metricColWidth]);
+
+  // Save width whenever it changes (after load) via a separate effect
+  const metricColWidthPrevRef = useRef(metricColWidth);
+  useEffect(() => {
+    if (!metricColLoaded) return;
+    if (metricColWidth !== metricColWidthPrevRef.current) {
+      metricColWidthPrevRef.current = metricColWidth;
+      saveMetricColWidth(metricColWidth);
+    }
+  }, [metricColWidth, metricColLoaded, saveMetricColWidth]);
 
   // Measure container and compute period column width so exactly 4 fit
   useEffect(() => {
@@ -473,38 +585,55 @@ export function MetricsTable({
     const observer = new ResizeObserver(() => measure());
     observer.observe(scrollEl);
     return () => observer.disconnect();
-  }, [showTotals, TOTAL_COL_WIDTH, GRIP_COL_WIDTH]);
+  }, [showTotals, TOTAL_COL_WIDTH, GRIP_COL_WIDTH, METRIC_COL_WIDTH]);
 
-  // Determine which period headers are actually visible between the sticky columns
-  const updateVisiblePeriods = useCallback(() => {
-    if (!scrollRef.current) return;
-    const scrollRect = scrollRef.current.getBoundingClientRect();
-
-    // The visible period area is between the two sticky columns
-    const visibleLeft = scrollRect.left + METRIC_COL_WIDTH + GRIP_COL_WIDTH;
-    const visibleRight = scrollRect.right - TOTAL_COL_WIDTH;
-
-    const visible: string[] = [];
-    periodHeaderRefs.current.forEach((el, period) => {
-      const rect = el.getBoundingClientRect();
-      const center = rect.left + rect.width / 2;
-      if (center >= visibleLeft && center <= visibleRight) {
-        visible.push(period);
-      }
-    });
-
-    // Sort chronologically
-    visible.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-    setVisiblePeriodSet(visible);
-  }, [METRIC_COL_WIDTH, GRIP_COL_WIDTH, TOTAL_COL_WIDTH]);
+  // Track which period columns are visible using IntersectionObserver
+  // This is more reliable than scroll-event + getBoundingClientRect
+  const visibleMapRef = useRef(new Map<string, boolean>());
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
     const scrollEl = scrollRef.current;
     if (!scrollEl) return;
 
-    scrollEl.addEventListener("scroll", updateVisiblePeriods, { passive: true });
-    return () => scrollEl.removeEventListener("scroll", updateVisiblePeriods);
-  }, [updateVisiblePeriods]);
+    const leftMargin = METRIC_COL_WIDTH + GRIP_COL_WIDTH;
+    const rightMargin = TOTAL_COL_WIDTH;
+
+    // Disconnect previous observer
+    observerRef.current?.disconnect();
+    visibleMapRef.current.clear();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const period = (entry.target as HTMLElement).dataset.period;
+          if (period) {
+            visibleMapRef.current.set(period, entry.isIntersecting);
+          }
+        });
+
+        const visible = Array.from(visibleMapRef.current.entries())
+          .filter(([, v]) => v)
+          .map(([p]) => p)
+          .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+        setVisiblePeriodSet(visible);
+      },
+      {
+        root: scrollEl,
+        // Shrink observable area to exclude the sticky columns
+        rootMargin: `0px -${rightMargin}px 0px -${leftMargin}px`,
+        threshold: 0.5,
+      },
+    );
+
+    // Observe all period header elements currently in the DOM
+    periodHeaderRefs.current.forEach((el) => {
+      observerRef.current?.observe(el);
+    });
+
+    return () => observerRef.current?.disconnect();
+  }, [METRIC_COL_WIDTH, GRIP_COL_WIDTH, TOTAL_COL_WIDTH, periodColWidth, data]);
 
   // Load saved order from API on mount
   useEffect(() => {
@@ -644,10 +773,8 @@ export function MetricsTable({
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
-      // Update visible periods after scrolling settles
-      requestAnimationFrame(() => updateVisiblePeriods());
     }
-  }, [displayData, updateVisiblePeriods]);
+  }, [displayData]);
 
   const clearHoverTimeout = useCallback(() => {
     if (hoverTimeoutRef.current) {
@@ -695,9 +822,62 @@ export function MetricsTable({
     return () => clearHoverTimeout();
   }, [clearHoverTimeout]);
 
+  // Metric info tooltip handlers
+  const handleMetricInfoHover = useCallback(
+    (metricName: string, periodType: string, rect: DOMRect) => {
+      if (metricInfoTimeoutRef.current) {
+        clearTimeout(metricInfoTimeoutRef.current);
+        metricInfoTimeoutRef.current = null;
+      }
+      setMetricInfoTooltip({ metricName, periodType, rect });
+    },
+    [],
+  );
+
+  const scheduleMetricInfoHide = useCallback(() => {
+    if (metricInfoTimeoutRef.current) {
+      clearTimeout(metricInfoTimeoutRef.current);
+    }
+    metricInfoTimeoutRef.current = setTimeout(() => {
+      if (!isOverMetricInfoRef.current) {
+        setMetricInfoTooltip(null);
+      }
+    }, 150);
+  }, []);
+
+  const handleMetricInfoLeave = useCallback(() => {
+    scheduleMetricInfoHide();
+  }, [scheduleMetricInfoHide]);
+
+  const handleMetricTooltipMouseEnter = useCallback(() => {
+    isOverMetricInfoRef.current = true;
+    if (metricInfoTimeoutRef.current) {
+      clearTimeout(metricInfoTimeoutRef.current);
+      metricInfoTimeoutRef.current = null;
+    }
+  }, []);
+
+  const handleMetricTooltipMouseLeave = useCallback(() => {
+    isOverMetricInfoRef.current = false;
+    scheduleMetricInfoHide();
+  }, [scheduleMetricInfoHide]);
+
+  const handleMetricTooltipClose = useCallback(() => {
+    isOverMetricInfoRef.current = false;
+    setMetricInfoTooltip(null);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (metricInfoTimeoutRef.current) {
+        clearTimeout(metricInfoTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Show loading state while preferences are being fetched
   // This prevents flash of unsorted content on page load
-  if (savedOrder === null && storageKey) {
+  if ((savedOrder === null || !metricColLoaded) && storageKey) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
@@ -856,24 +1036,38 @@ export function MetricsTable({
                 {showTotals && <col style={{ width: TOTAL_COL_WIDTH }} />}
               </colgroup>
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b border-white/[0.06]">
                   {isReorderMode && (
-                    <th className="sticky left-0 z-10 w-8 bg-zinc-950 pb-2" />
+                    <th className="sticky left-0 z-10 w-8 bg-[var(--table-bg,#09090b)] pb-2.5" />
                   )}
                   <th
-                    className={`sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-zinc-950 pb-2 pr-4 text-left font-medium text-white/60`}
-                    style={{ boxShadow: "4px 0 8px -4px rgba(0,0,0,0.4)" }}
+                    className={`group/header relative sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-[var(--table-bg,#09090b)] pb-2.5 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider text-white/40`}
+                    style={{ boxShadow: "4px 0 6px -4px rgba(0,0,0,0.2)" }}
                   >
                     Metric
+                    {/* Resize handle */}
+                    <div
+                      onMouseDown={handleResizeStart}
+                      className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize opacity-0 transition-opacity group-hover/header:opacity-100 hover:!opacity-100"
+                    >
+                      <div className="absolute right-0 top-0 bottom-0 w-px bg-white/20" />
+                    </div>
                   </th>
                   {displayPeriods.map((period) => (
                     <th
                       key={period}
+                      data-period={period}
                       ref={(el) => {
-                        if (el) periodHeaderRefs.current.set(period, el);
-                        else periodHeaderRefs.current.delete(period);
+                        if (el) {
+                          periodHeaderRefs.current.set(period, el);
+                          observerRef.current?.observe(el);
+                        } else {
+                          const prev = periodHeaderRefs.current.get(period);
+                          if (prev) observerRef.current?.unobserve(prev);
+                          periodHeaderRefs.current.delete(period);
+                        }
                       }}
-                      className="overflow-hidden px-3 pb-2 text-right font-medium text-white/60"
+                      className="overflow-hidden px-3 pb-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-white/40"
                     >
                       <span className="block truncate whitespace-nowrap">
                         {formatPeriod(period, displayData[0]?.periodType ?? "quarterly")}
@@ -882,8 +1076,8 @@ export function MetricsTable({
                   ))}
                   {showTotals && (
                     <th
-                      className="sticky right-0 z-10 bg-zinc-950 pb-2 px-2 text-right font-medium text-white/60"
-                      style={{ boxShadow: "-4px 0 8px -4px rgba(0,0,0,0.4)" }}
+                      className="sticky right-0 z-10 bg-[var(--table-bg,#09090b)] pb-2.5 px-2 text-right text-[11px] font-semibold uppercase tracking-wider text-white/40"
+                      style={{ boxShadow: "-4px 0 6px -4px rgba(0,0,0,0.2)" }}
                     >
                       <span className="inline-flex items-center justify-end gap-1">
                         Total
@@ -908,6 +1102,8 @@ export function MetricsTable({
                     hoveredCell={hoveredCell}
                     onCellMouseEnter={handleCellMouseEnter}
                     onCellMouseLeave={handleCellMouseLeave}
+                    onMetricInfoHover={handleMetricInfoHover}
+                    onMetricInfoLeave={handleMetricInfoLeave}
                   />
                 ))}
               </tbody>
@@ -916,7 +1112,7 @@ export function MetricsTable({
         </SortableContext>
       </DndContext>
 
-      {/* Render tooltip via portal */}
+      {/* Render cell tooltip via portal */}
       {mounted && hoveredCell && hoveredPeriodData && (
         <CellTooltip
           periodData={hoveredPeriodData}
@@ -928,6 +1124,18 @@ export function MetricsTable({
           }}
           onMouseEnter={handleTooltipMouseEnter}
           onMouseLeave={handleTooltipMouseLeave}
+        />
+      )}
+
+      {/* Render metric definition tooltip via portal */}
+      {mounted && metricInfoTooltip && (
+        <MetricNameTooltip
+          metricName={metricInfoTooltip.metricName}
+          periodType={metricInfoTooltip.periodType}
+          triggerRect={metricInfoTooltip.rect}
+          onClose={handleMetricTooltipClose}
+          onMouseEnter={handleMetricTooltipMouseEnter}
+          onMouseLeave={handleMetricTooltipMouseLeave}
         />
       )}
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Mail, CheckCircle2, X, Sparkles } from "lucide-react";
+import { Loader2, Mail, CheckCircle2, X, Sparkles, Pencil, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { formatValue } from "@/components/charts/types";
 
@@ -63,6 +63,10 @@ export function EmailPasteModal({
   const [error, setError] = React.useState<string | null>(null);
   const [savedCount, setSavedCount] = React.useState(0);
   const [providerInfo, setProviderInfo] = React.useState<string | null>(null);
+  const [showExample, setShowExample] = React.useState(false);
+  const [elapsedMs, setElapsedMs] = React.useState(0);
+  const [editingIndex, setEditingIndex] = React.useState<number | null>(null);
+  const [editedValues, setEditedValues] = React.useState<Record<number, string>>({});
 
   // Escape key handler
   React.useEffect(() => {
@@ -77,6 +81,15 @@ export function EmailPasteModal({
     }
   }, [open, state]);
 
+  // Elapsed time counter for extracting state
+  React.useEffect(() => {
+    if (state === "extracting") {
+      setElapsedMs(0);
+      const interval = setInterval(() => setElapsedMs((p) => p + 100), 100);
+      return () => clearInterval(interval);
+    }
+  }, [state]);
+
   function handleClose() {
     setState("idle");
     setEmailContent("");
@@ -85,6 +98,10 @@ export function EmailPasteModal({
     setError(null);
     setSavedCount(0);
     setProviderInfo(null);
+    setShowExample(false);
+    setElapsedMs(0);
+    setEditingIndex(null);
+    setEditedValues({});
     onClose();
   }
 
@@ -144,14 +161,18 @@ export function EmailPasteModal({
     setError(null);
 
     try {
-      const submissions = selectedMetrics.map((m) => ({
-        metricName: m.name,
-        periodType: m.period_type as "monthly" | "quarterly" | "annual",
-        periodStart: m.period_start,
-        periodEnd: m.period_end,
-        value: String(m.value),
-        source: "ai_extracted" as const,
-      }));
+      const submissions = selectedMetrics.map((m) => {
+        const originalIndex = metrics.indexOf(m);
+        const editedVal = editedValues[originalIndex];
+        return {
+          metricName: m.name,
+          periodType: m.period_type as "monthly" | "quarterly" | "annual",
+          periodStart: m.period_start,
+          periodEnd: m.period_end,
+          value: editedVal !== undefined ? editedVal : String(m.value),
+          source: "ai_extracted" as const,
+        };
+      });
 
       const res = await fetch("/api/metrics/submit-batch", {
         method: "POST",
@@ -253,6 +274,26 @@ export function EmailPasteModal({
         {state === "idle" && (
           <div className="space-y-4">
             <div>
+              <button
+                type="button"
+                onClick={() => setShowExample((prev) => !prev)}
+                className="mb-3 flex items-center gap-1.5 text-xs text-white/50 hover:text-white/70 transition-colors"
+              >
+                <ChevronDown
+                  className={cn(
+                    "h-3.5 w-3.5 transition-transform duration-200",
+                    showExample && "rotate-180",
+                  )}
+                />
+                What should I paste?
+              </button>
+              {showExample && (
+                <div className="mb-3 rounded-lg bg-white/5 p-3 text-xs text-white/50 font-mono whitespace-pre-line">
+                  {`Paste the body of an investor update email. For example:\n\nQ4 2025 Update:\nRevenue: $1.2M (+15% QoQ)\nMRR: $100K\nBurn Rate: $85K/month\nRunway: 14 months`}
+                </div>
+              )}
+            </div>
+            <div>
               <textarea
                 value={emailContent}
                 onChange={(e) => setEmailContent(e.target.value)}
@@ -292,7 +333,7 @@ export function EmailPasteModal({
               Extracting metrics from email...
             </p>
             <p className="mt-1 text-xs text-white/40">
-              This may take a few seconds.
+              Processing... {(elapsedMs / 1000).toFixed(1)}s
             </p>
           </div>
         )}
@@ -324,6 +365,19 @@ export function EmailPasteModal({
               </button>
             </div>
 
+            {/* Confidence legend */}
+            <div className="flex items-center gap-4 text-[11px] text-white/50">
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" /> High (&ge;80%)
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-amber-400" /> Verify (50-80%)
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-red-400" /> Check (&lt;50%)
+              </span>
+            </div>
+
             {/* Metrics list */}
             <div className="max-h-[360px] space-y-1 overflow-y-auto rounded-lg border border-white/10 bg-black/20 p-1">
               {metrics.map((metric, index) => (
@@ -347,14 +401,70 @@ export function EmailPasteModal({
                       <span className="text-sm font-medium text-zinc-50">
                         {metric.name}
                       </span>
-                      <span className="whitespace-nowrap text-sm font-semibold text-zinc-50">
-                        {formatValue(
-                          typeof metric.value === "string"
-                            ? parseFloat(metric.value)
-                            : metric.value,
-                          metric.name,
+                      <div className="flex items-center gap-1.5">
+                        {editingIndex === index ? (
+                          <input
+                            type="text"
+                            autoFocus
+                            defaultValue={
+                              editedValues[index] !== undefined
+                                ? editedValues[index]
+                                : String(metric.value)
+                            }
+                            onBlur={(e) => {
+                              const val = e.target.value.trim();
+                              if (val && !isNaN(Number(val)) && val !== String(metric.value)) {
+                                setEditedValues((prev) => ({ ...prev, [index]: val }));
+                              } else if (!val || val === String(metric.value)) {
+                                setEditedValues((prev) => {
+                                  const next = { ...prev };
+                                  delete next[index];
+                                  return next;
+                                });
+                              }
+                              setEditingIndex(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                (e.target as HTMLInputElement).blur();
+                              }
+                              if (e.key === "Escape") {
+                                setEditingIndex(null);
+                              }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="h-7 w-28 rounded border border-white/20 bg-black/40 px-2 text-right text-sm font-semibold text-zinc-50 focus:border-white/30 focus:outline-none"
+                          />
+                        ) : (
+                          <>
+                            <span className="whitespace-nowrap text-sm font-semibold text-zinc-50">
+                              {editedValues[index] !== undefined
+                                ? formatValue(
+                                    parseFloat(editedValues[index]),
+                                    metric.name,
+                                  )
+                                : formatValue(
+                                    typeof metric.value === "string"
+                                      ? parseFloat(metric.value)
+                                      : metric.value,
+                                    metric.name,
+                                  )}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setEditingIndex(index);
+                              }}
+                              className="rounded p-0.5 text-white/30 hover:text-white/60 transition-colors"
+                              aria-label={`Edit ${metric.name} value`}
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                          </>
                         )}
-                      </span>
+                      </div>
                     </div>
                     <div className="mt-1 flex items-center gap-2 text-xs text-white/50">
                       <span>
@@ -385,6 +495,8 @@ export function EmailPasteModal({
                   setState("idle");
                   setMetrics([]);
                   setSelected(new Set());
+                  setEditingIndex(null);
+                  setEditedValues({});
                 }}
                 className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/10"
               >

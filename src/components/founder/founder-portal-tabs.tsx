@@ -8,6 +8,7 @@ import { DocumentsTab } from "@/components/founder/documents-tab";
 import { TearSheetsTab } from "@/components/founder/tear-sheets-tab";
 import { MetricValue } from "@/components/dashboard";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+import { OnboardingChecklist } from "@/components/founder/onboarding-checklist";
 
 type Tab = "metrics" | "documents" | "tear-sheets";
 
@@ -80,6 +81,13 @@ export function FounderPortalTabs({
 
   return (
     <div className="space-y-6">
+      {/* Onboarding checklist */}
+      <OnboardingChecklist
+        hasSubmittedMetrics={metrics.length > 0}
+        hasUploadedDocuments={(documentCount ?? 0) > 0}
+        hasReviewedInvestors={true}
+      />
+
       {/* Header section */}
       <div className="space-y-4">
         {/* Title row */}

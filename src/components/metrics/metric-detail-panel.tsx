@@ -452,8 +452,8 @@ export function MetricDetailPanel({
                           tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }}
                           tickLine={false}
                           axisLine={false}
-                          tickFormatter={(v) => formatValue(v)}
-                          width={60}
+                          tickFormatter={(v) => formatValue(v, metricName)}
+                          width={65}
                         />
                         <Tooltip
                           contentStyle={{
