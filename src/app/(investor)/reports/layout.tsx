@@ -15,8 +15,8 @@ export default function ReportsLayout({
           </svg>
         </div>
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-white">Portfolio Summary</h1>
-          <p className="text-sm text-white/60">
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary" data-onboarding="reports-title">Portfolio Summary</h1>
+          <p className="text-sm text-text-tertiary">
             Aggregated metrics across your portfolio
           </p>
         </div>
@@ -26,10 +26,10 @@ export default function ReportsLayout({
       <Suspense
         fallback={
           <div className="space-y-4">
-            <div className="h-12 w-full animate-pulse rounded-2xl bg-white/[0.03]" />
+            <div className="h-12 w-full animate-pulse rounded-2xl bg-bg-raised" />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-32 animate-pulse rounded-2xl bg-white/[0.03]" />
+                <div key={i} className="h-32 animate-pulse rounded-2xl bg-bg-raised" />
               ))}
             </div>
           </div>

@@ -23,18 +23,18 @@ function LoadingSkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="animate-pulse rounded-xl border border-white/10 bg-white/5 p-4"
+          className="animate-pulse rounded-xl border border-border-default bg-bg-elevated p-4"
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-2">
               <div className="flex gap-2">
-                <div className="h-4 w-32 rounded bg-white/10" />
-                <div className="h-5 w-20 rounded-full bg-white/5" />
+                <div className="h-4 w-32 rounded bg-bg-hover" />
+                <div className="h-5 w-20 rounded-full bg-bg-elevated" />
               </div>
-              <div className="h-3 w-44 rounded bg-white/5" />
-              <div className="h-5 w-16 rounded-full bg-white/10" />
+              <div className="h-3 w-44 rounded bg-bg-elevated" />
+              <div className="h-5 w-16 rounded-full bg-bg-hover" />
             </div>
-            <div className="h-8 w-20 rounded-md bg-white/10" />
+            <div className="h-8 w-20 rounded-md bg-bg-hover" />
           </div>
         </div>
       ))}
@@ -78,13 +78,13 @@ export default function FounderInvestorsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
+      <div className="space-y-1" data-onboarding="investors-title">
         <h1 className="text-xl font-semibold tracking-tight">Investors</h1>
-        <p className="text-sm text-white/60">
+        <p className="text-sm text-text-tertiary">
           Manage which investors can view your metrics. Approve or deny access
           for each investor.
         </p>
-        <p className="text-xs text-white/40">
+        <p className="text-xs text-text-muted">
           Approved investors can view your submitted metrics and documents.
         </p>
       </div>
@@ -92,14 +92,14 @@ export default function FounderInvestorsPage() {
       {loading && <LoadingSkeleton />}
 
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
 
       {!loading && !error && investors.length === 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="text-sm text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="text-sm text-text-tertiary">
             No investors have been linked to your company yet.
           </div>
         </div>
@@ -109,13 +109,13 @@ export default function FounderInvestorsPage() {
         <div className="space-y-4">
           {investors.length >= 4 && (
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search investors..."
-                className="h-9 w-full rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm outline-none placeholder:text-white/40 focus:border-white/20 sm:w-64"
+                className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default sm:w-64"
               />
             </div>
           )}
@@ -125,7 +125,7 @@ export default function FounderInvestorsPage() {
               <InvestorApprovalCard key={inv.id} investor={inv} />
             ))}
             {filteredInvestors.length === 0 && searchQuery && (
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white/60">
+              <div className="rounded-xl border border-border-default bg-bg-elevated p-4 text-sm text-text-tertiary">
                 No investors match your search.
               </div>
             )}

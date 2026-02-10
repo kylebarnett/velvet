@@ -22,6 +22,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DOCUMENT_TYPE_LABELS,
+  DOCUMENT_TYPE_SHORT_LABELS,
+  DOCUMENT_TYPE_COLORS,
+} from "@/lib/utils/document-colors";
 import { ExtractionStatusBadge } from "./extraction-status-badge";
 import { ExtractionReviewPanel } from "./extraction-review-panel";
 
@@ -38,48 +43,10 @@ type Document = {
   uploaded_at: string;
 };
 
-const documentTypeLabels: Record<string, string> = {
-  income_statement: "Income Statement",
-  balance_sheet: "Balance Sheet",
-  cash_flow_statement: "Cash Flow Statement",
-  consolidated_financial_statements: "Consolidated Financial Statements",
-  "409a_valuation": "409A Valuation",
-  investor_update: "Investor Update",
-  board_deck: "Board Deck",
-  cap_table: "Cap Table",
-  other: "Other",
-};
-
-// Shorter labels for compact sidebar
-const documentTypeShortLabels: Record<string, string> = {
-  income_statement: "Income Stmt",
-  balance_sheet: "Balance Sheet",
-  cash_flow_statement: "Cash Flow",
-  consolidated_financial_statements: "Consolidated",
-  "409a_valuation": "409A",
-  investor_update: "Update",
-  board_deck: "Board Deck",
-  cap_table: "Cap Table",
-  other: "Other",
-};
-
-// Color-coded badges per document type category
-const documentTypeColors: Record<string, string> = {
-  // Financial statements — emerald
-  income_statement: "bg-emerald-500/15 text-emerald-300",
-  balance_sheet: "bg-emerald-500/15 text-emerald-300",
-  cash_flow_statement: "bg-emerald-500/15 text-emerald-300",
-  consolidated_financial_statements: "bg-emerald-500/15 text-emerald-300",
-  // Valuation — amber
-  "409a_valuation": "bg-amber-500/15 text-amber-300",
-  // Communications — blue
-  investor_update: "bg-blue-500/15 text-blue-300",
-  board_deck: "bg-violet-500/15 text-violet-300",
-  // Ownership — pink
-  cap_table: "bg-pink-500/15 text-pink-300",
-  // Fallback
-  other: "bg-white/10 text-white/60",
-};
+// Aliases for brevity (imported from shared utility)
+const documentTypeLabels = DOCUMENT_TYPE_LABELS;
+const documentTypeShortLabels = DOCUMENT_TYPE_SHORT_LABELS;
+const documentTypeColors = DOCUMENT_TYPE_COLORS;
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -98,11 +65,11 @@ function formatDate(dateString: string): string {
 function LoadingSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="h-9 w-48 animate-pulse rounded-md bg-white/10" />
-      <div className="hidden sm:block overflow-hidden rounded-xl border border-white/10 bg-white/5">
+      <div className="h-9 w-48 animate-pulse rounded-md bg-bg-hover" />
+      <div className="hidden sm:block overflow-hidden rounded-xl border border-border-default bg-bg-elevated">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-white/60">
+            <tr className="border-b border-border-default text-left text-text-tertiary">
               <th className="p-3 font-medium">Name</th>
               <th className="p-3 font-medium">Type</th>
               <th className="p-3 font-medium">Size</th>
@@ -112,12 +79,12 @@ function LoadingSkeleton() {
           </thead>
           <tbody>
             {[0, 1, 2, 3].map((i) => (
-              <tr key={i} className="border-b border-white/5">
-                <td className="p-3"><div className="h-4 w-40 animate-pulse rounded bg-white/10" /></td>
-                <td className="p-3"><div className="h-5 w-24 animate-pulse rounded-full bg-white/10" /></td>
-                <td className="p-3"><div className="h-4 w-16 animate-pulse rounded bg-white/10" /></td>
-                <td className="p-3"><div className="h-4 w-24 animate-pulse rounded bg-white/10" /></td>
-                <td className="p-3"><div className="h-8 w-16 animate-pulse rounded bg-white/10" /></td>
+              <tr key={i} className="border-b border-border-subtle">
+                <td className="p-3"><div className="h-4 w-40 animate-pulse rounded bg-bg-hover" /></td>
+                <td className="p-3"><div className="h-5 w-24 animate-pulse rounded-full bg-bg-hover" /></td>
+                <td className="p-3"><div className="h-4 w-16 animate-pulse rounded bg-bg-hover" /></td>
+                <td className="p-3"><div className="h-4 w-24 animate-pulse rounded bg-bg-hover" /></td>
+                <td className="p-3"><div className="h-8 w-16 animate-pulse rounded bg-bg-hover" /></td>
               </tr>
             ))}
           </tbody>
@@ -189,12 +156,12 @@ function PreviewPane({
   return (
     <div className="flex h-full flex-col">
       {/* Header bar */}
-      <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
+      <div className="flex items-center gap-3 border-b border-border-default px-4 py-3">
         {/* Mobile back button */}
         <button
           type="button"
           onClick={onClose}
-          className="rounded-md p-1 text-white/40 hover:bg-white/5 hover:text-white/60 sm:hidden"
+          className="rounded-md p-1 text-text-muted hover:bg-bg-elevated hover:text-text-tertiary sm:hidden"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -202,20 +169,20 @@ function PreviewPane({
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium truncate">{doc.file_name}</div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
-            <span className="flex items-center gap-1 text-xs text-white/60">
+            <span className="flex items-center gap-1 text-xs text-text-tertiary">
               <Tag className="h-3 w-3 shrink-0" />
               {documentTypeLabels[doc.document_type] ?? doc.document_type}
             </span>
             {doc.period_label && (
-              <span className="flex items-center gap-1 text-xs text-white/60">
+              <span className="flex items-center gap-1 text-xs text-text-tertiary">
                 <Calendar className="h-3 w-3 shrink-0" />
                 {doc.period_label}
               </span>
             )}
-            <span className="text-xs text-white/60">
+            <span className="text-xs text-text-tertiary">
               {formatFileSize(doc.file_size)}
             </span>
-            <span className="text-xs text-white/60">
+            <span className="text-xs text-text-tertiary">
               {formatDate(doc.uploaded_at)}
             </span>
           </div>
@@ -225,7 +192,7 @@ function PreviewPane({
           <button
             type="button"
             onClick={() => onDownload(doc)}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs text-white/70 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs text-text-secondary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             <Download className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Download</span>
@@ -234,7 +201,7 @@ function PreviewPane({
             type="button"
             onClick={() => onDelete(doc)}
             disabled={deleting}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-red-400/60 hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-red-400/60 hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             title="Delete"
             aria-label="Delete document"
           >
@@ -244,7 +211,7 @@ function PreviewPane({
           <button
             type="button"
             onClick={onClose}
-            className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-md text-white/40 hover:bg-white/5 hover:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             aria-label="Close preview"
           >
             <X className="h-4 w-4" />
@@ -254,22 +221,22 @@ function PreviewPane({
 
       {/* Description if present */}
       {doc.description && (
-        <div className="border-b border-white/5 px-4 py-2">
-          <p className="text-xs text-white/60 leading-relaxed">
+        <div className="border-b border-border-subtle px-4 py-2">
+          <p className="text-xs text-text-tertiary leading-relaxed">
             {doc.description}
           </p>
         </div>
       )}
 
       {/* Content area */}
-      <div className="flex-1 overflow-auto bg-black/20">
+      <div className="flex-1 overflow-auto bg-bg-input">
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-border-default border-t-white/60" />
           </div>
         )}
         {error && (
-          <div className="flex items-center justify-center py-20 text-sm text-white/60">
+          <div className="flex items-center justify-center py-20 text-sm text-text-tertiary">
             {error}
           </div>
         )}
@@ -292,11 +259,11 @@ function PreviewPane({
         )}
         {!loading && !isPdf && !isImage && (
           <div className="flex flex-col items-center justify-center gap-3 py-20">
-            <FileText className="h-12 w-12 text-white/10" />
-            <p className="text-sm text-white/60">
+            <FileText className="h-12 w-12 text-text-faint" />
+            <p className="text-sm text-text-tertiary">
               Preview not available for this file type.
             </p>
-            <p className="text-xs text-white/30">
+            <p className="text-xs text-text-faint">
               Download the file to view its contents.
             </p>
           </div>
@@ -435,16 +402,16 @@ export function FounderDocumentList() {
       {/* Search + Filter bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search documents..."
-            className="h-9 w-full rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm outline-none placeholder:text-white/40 focus:border-white/20 sm:w-64"
+            className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default sm:w-64"
           />
         </div>
-        <div className="flex items-center gap-2 text-sm text-white/60">
+        <div className="flex items-center gap-2 text-sm text-text-tertiary">
           <Filter className="h-4 w-4" />
           <Select value={typeFilter} onValueChange={setTypeFilter}>
             <SelectTrigger size="sm" className="w-auto min-w-[150px]">
@@ -464,25 +431,25 @@ export function FounderDocumentList() {
 
       {/* Messages */}
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
+        <div className="rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-4 py-2 text-sm text-[var(--status-success-text)]">
           {success}
         </div>
       )}
 
       {/* Empty state */}
       {filteredDocuments.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8 text-center">
-          <FileText className="mx-auto h-10 w-10 text-white/40" />
-          <p className="mt-3 text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 sm:p-8 text-center">
+          <FileText className="mx-auto h-10 w-10 text-text-muted" />
+          <p className="mt-3 text-text-tertiary">
             {searchQuery ? "No documents match your search." : "No documents found."}
           </p>
           {!searchQuery && (
-            <p className="mt-1 text-sm text-white/60">
+            <p className="mt-1 text-sm text-text-tertiary">
               Upload your first document to get started.
             </p>
           )}
@@ -495,7 +462,7 @@ export function FounderDocumentList() {
           <div className="sm:hidden">
             {/* Full-screen mobile preview */}
             {previewDoc && (
-              <div className="fixed inset-0 z-50 bg-zinc-950">
+              <div className="fixed inset-0 z-50 bg-bg-primary">
                 <PreviewPane
                   doc={previewDoc}
                   companyName={companyName}
@@ -512,23 +479,23 @@ export function FounderDocumentList() {
               {filteredDocuments.map((doc) => (
                 <div
                   key={doc.id}
-                  className="cursor-pointer rounded-xl border border-white/10 bg-white/5 p-4 active:bg-white/10"
+                  className="cursor-pointer rounded-xl border border-border-default bg-bg-elevated p-4 active:bg-bg-hover"
                   onClick={() => setPreviewDoc(doc)}
                 >
                   <div className="flex items-start gap-3">
-                    <FileText className="h-5 w-5 shrink-0 text-white/40 mt-0.5" />
+                    <FileText className="h-5 w-5 shrink-0 text-text-muted mt-0.5" />
                     <div className="min-w-0 flex-1">
                       <div className="font-medium truncate text-sm">{doc.file_name}</div>
                       <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
+                        <span className="rounded-full bg-bg-hover px-2 py-0.5 text-xs">
                           {documentTypeLabels[doc.document_type] ?? doc.document_type}
                         </span>
                         {doc.period_label && (
-                          <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs text-blue-200">
+                          <span className="rounded-full bg-[var(--tag-blue-bg)] px-2 py-0.5 text-xs text-[var(--tag-blue-text)]">
                             {doc.period_label}
                           </span>
                         )}
-                        <span className="text-xs text-white/60">{formatFileSize(doc.file_size)}</span>
+                        <span className="text-xs text-text-tertiary">{formatFileSize(doc.file_size)}</span>
                       </div>
                       <div className="mt-1.5">
                         <ExtractionStatusBadge status={doc.ingestion_status} />
@@ -546,7 +513,7 @@ export function FounderDocumentList() {
           <div className="hidden sm:flex gap-4" style={{ height: "calc(100vh - 14rem)" }}>
             {/* Left pane — document list */}
             <div
-              className={`shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-all duration-200 ${
+              className={`shrink-0 overflow-hidden rounded-xl border border-border-default bg-bg-elevated transition-all duration-200 ${
                 hasPreview ? "w-80" : "flex-1"
               }`}
             >
@@ -564,27 +531,27 @@ export function FounderDocumentList() {
                           onClick={() => setPreviewDoc(doc)}
                           className={`group flex w-full items-start gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors ${
                             isSelected
-                              ? "bg-white/10 ring-1 ring-white/10"
-                              : "hover:bg-white/[0.04]"
+                              ? "bg-bg-hover ring-1 ring-border-default"
+                              : "hover:bg-bg-raised"
                           }`}
                         >
                           <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
-                            isSelected ? "bg-white/15" : "bg-white/[0.06] group-hover:bg-white/10"
+                            isSelected ? "bg-bg-hover" : "bg-bg-elevated group-hover:bg-bg-hover"
                           }`}>
-                            <FileText className={`h-3.5 w-3.5 ${isSelected ? "text-white/70" : "text-white/30"}`} />
+                            <FileText className={`h-3.5 w-3.5 ${isSelected ? "text-text-secondary" : "text-text-faint"}`} />
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className={`text-[13px] font-medium truncate leading-tight ${
-                              isSelected ? "text-white" : "text-white/80"
+                              isSelected ? "text-text-primary" : "text-text-primary"
                             }`}>
                               {doc.file_name}
                             </div>
                             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                              <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium leading-none tracking-wide ${typeColor}`}>
+                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium leading-none tracking-wide ${typeColor}`}>
                                 {documentTypeShortLabels[doc.document_type] ?? doc.document_type}
                               </span>
                               {doc.period_label && (
-                                <span className="inline-flex items-center gap-1 text-[11px] text-white/60">
+                                <span className="inline-flex items-center gap-1 text-[11px] text-text-tertiary">
                                   <Calendar className="h-2.5 w-2.5" />
                                   {doc.period_label}
                                 </span>
@@ -599,7 +566,7 @@ export function FounderDocumentList() {
                   /* ---- Full table ---- */
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-white/10 text-left text-white/60">
+                      <tr className="border-b border-border-default text-left text-text-tertiary">
                         <th className="p-3 font-medium">Name</th>
                         <th className="p-3 font-medium">Type</th>
                         <th className="p-3 font-medium">Period</th>
@@ -613,36 +580,36 @@ export function FounderDocumentList() {
                       {filteredDocuments.map((doc) => (
                         <tr
                           key={doc.id}
-                          className="cursor-pointer border-b border-white/5 hover:bg-white/5"
+                          className="cursor-pointer border-b border-border-subtle hover:bg-bg-elevated"
                           onClick={() => setPreviewDoc(doc)}
                         >
                           <td className="p-3">
                             <div className="flex items-center gap-2">
-                              <FileText className="h-4 w-4 shrink-0 text-white/40" />
+                              <FileText className="h-4 w-4 shrink-0 text-text-muted" />
                               <div className="min-w-0">
                                 <span className="font-medium">{doc.file_name}</span>
                                 {doc.description && (
-                                  <div className="text-xs text-white/60 truncate">{doc.description}</div>
+                                  <div className="text-xs text-text-tertiary truncate">{doc.description}</div>
                                 )}
                               </div>
                             </div>
                           </td>
                           <td className="p-3">
-                            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs whitespace-nowrap">
+                            <span className="rounded-full bg-bg-hover px-2 py-0.5 text-xs whitespace-nowrap">
                               {documentTypeLabels[doc.document_type] ?? doc.document_type}
                             </span>
                           </td>
                           <td className="p-3">
                             {doc.period_label ? (
-                              <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs text-blue-200">
+                              <span className="rounded-full bg-[var(--tag-blue-bg)] px-2 py-0.5 text-xs text-[var(--tag-blue-text)]">
                                 {doc.period_label}
                               </span>
                             ) : (
-                              <span className="text-white/30">&mdash;</span>
+                              <span className="text-text-faint">&mdash;</span>
                             )}
                           </td>
-                          <td className="p-3 text-white/60 whitespace-nowrap">{formatFileSize(doc.file_size)}</td>
-                          <td className="p-3 text-white/60 whitespace-nowrap">{formatDate(doc.uploaded_at)}</td>
+                          <td className="p-3 text-text-tertiary whitespace-nowrap">{formatFileSize(doc.file_size)}</td>
+                          <td className="p-3 text-text-tertiary whitespace-nowrap">{formatDate(doc.uploaded_at)}</td>
                           <td className="p-3">
                             <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                               <ExtractionStatusBadge status={doc.ingestion_status} />
@@ -650,7 +617,7 @@ export function FounderDocumentList() {
                                 <button
                                   type="button"
                                   onClick={() => setReviewDoc(doc)}
-                                  className="rounded-md border border-violet-500/20 bg-violet-500/10 px-2 py-0.5 text-[11px] font-medium text-violet-200 hover:bg-violet-500/20"
+                                  className="rounded-full border border-[var(--tag-violet-bg)] bg-[var(--tag-violet-bg)] px-2 py-0.5 text-[11px] font-medium text-[var(--tag-violet-text)] hover:opacity-80"
                                 >
                                   {doc.ingestion_status === "completed" ? "Review" : "Extract"}
                                 </button>
@@ -661,16 +628,16 @@ export function FounderDocumentList() {
                             <div className="flex items-center gap-1">
                               <button
                                 onClick={(e) => { e.stopPropagation(); downloadDocument(doc); }}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                                 title="Download"
                                 aria-label="Download document"
                               >
-                                <Download className="h-4 w-4 text-white/60" />
+                                <Download className="h-4 w-4 text-text-tertiary" />
                               </button>
                               <button
                                 onClick={(e) => { e.stopPropagation(); openDeleteModal(doc); }}
                                 disabled={deleting}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                                 title="Delete"
                                 aria-label="Delete document"
                               >
@@ -688,7 +655,7 @@ export function FounderDocumentList() {
 
             {/* Right pane — preview */}
             {hasPreview && (
-              <div className="flex-1 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+              <div className="flex-1 overflow-hidden rounded-xl border border-border-default bg-bg-elevated">
                 <PreviewPane
                   key={previewDoc.id}
                   doc={previewDoc}

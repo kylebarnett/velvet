@@ -41,7 +41,7 @@ export default function FounderRequestsPage() {
       <div className="space-y-6">
         <div className="space-y-1">
           <h1 className="text-xl font-semibold tracking-tight">Requests</h1>
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-text-tertiary">
             Submit metrics for the selected period.
           </p>
         </div>
@@ -57,9 +57,9 @@ export default function FounderRequestsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
+      <div className="space-y-1" data-onboarding="requests-title">
         <h1 className="text-xl font-semibold tracking-tight">Requests</h1>
-        <p className="text-sm text-white/60">
+        <p className="text-sm text-text-tertiary">
           View pending metric requests from your investors.
         </p>
       </div>

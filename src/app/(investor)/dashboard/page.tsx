@@ -366,8 +366,8 @@ export default async function InvestorDashboardPage() {
   return (
     <div className="space-y-8">
       <div className="space-y-1">
-        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-white/60">
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight" data-onboarding="dashboard-title">Dashboard</h1>
+        <p className="text-sm text-text-tertiary">
           Portfolio overview and recent metric activity.
         </p>
       </div>
@@ -381,11 +381,11 @@ export default async function InvestorDashboardPage() {
           <Link
             key={card.label}
             href={card.href}
-            className={`card-hover-lift group rounded-xl border border-white/[0.08] ${card.gradient} p-5 hover:border-white/15`}
+            className={`card-hover-lift group rounded-xl border border-border-subtle ${card.gradient} p-5 hover:border-border-default`}
           >
             <div className="flex items-start justify-between">
-              <div className="text-xs font-medium uppercase tracking-wider text-white/40 group-hover:text-white/50">{card.label}</div>
-              <card.icon className="h-4 w-4 text-white/20" />
+              <div className="text-xs font-medium uppercase tracking-wider text-text-muted group-hover:text-text-muted">{card.label}</div>
+              <card.icon className="h-4 w-4 text-text-faint" />
             </div>
             <div className="mt-3 text-3xl font-semibold tracking-tight">{card.value}</div>
           </Link>
@@ -403,11 +403,11 @@ export default async function InvestorDashboardPage() {
       )}
 
       {companies.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-white/60">No companies in your portfolio yet.</p>
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <p className="text-text-tertiary">No companies in your portfolio yet.</p>
           <Link
             href="/portfolio/import"
-            className="mt-2 inline-block text-sm underline underline-offset-4 hover:text-white"
+            className="mt-2 inline-block text-sm underline underline-offset-4 hover:text-text-primary"
           >
             Import contacts to get started
           </Link>

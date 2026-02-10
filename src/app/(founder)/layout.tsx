@@ -1,7 +1,9 @@
-import { AppShell, type CompanyInfo } from "@/components/layouts/app-shell";
+import { type CompanyInfo } from "@/components/layouts/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { MetricDefinitionsProvider } from "@/contexts/metric-definitions-context";
+import { FounderLayoutClient } from "@/components/founder/founder-layout-client";
+import { FounderAppShell } from "@/components/founder/founder-app-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +12,19 @@ export default async function FounderLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const user = await requireRole("founder");
   const supabase = await createSupabaseServerClient();
+
+  // Get fresh user data with metadata
+  const {
+    data: { user: freshUser },
+  } = await supabase.auth.getUser();
+
+  const onboardingStep = freshUser?.user_metadata?.founder_onboarding_step ?? null;
+  const onboardingComplete =
+    freshUser?.user_metadata?.founder_onboarding_complete ?? false;
+
+  // Auto-start tour for new users who haven't completed it
+  const shouldAutoStart = onboardingStep === null && !onboardingComplete;
+  const initialStep = shouldAutoStart ? 0 : onboardingStep;
 
   // Fetch the founder's company
   const { data: companyData } = await supabase
@@ -39,26 +54,30 @@ export default async function FounderLayout({
   }
 
   const userInfo = {
-    fullName: user.user_metadata?.full_name ?? null,
+    fullName: freshUser?.user_metadata?.full_name ?? user.user_metadata?.full_name ?? null,
     email: user.email ?? "",
   };
 
   return (
     <MetricDefinitionsProvider>
-      <AppShell
-        title="Founder"
-        nav={[
-          { href: "/portal", label: "Dashboard", icon: "layout-dashboard" },
-          { href: "/portal/company", label: "Company", icon: "building2" },
-          { href: "/portal/requests", label: "Requests", icon: "inbox", badge: pendingCount },
-          { href: "/portal/investors", label: "Investors", icon: "shield" },
-          { href: "/portal/team", label: "Team", icon: "user-plus" },
-        ]}
-        company={company}
-        user={userInfo}
+      <FounderLayoutClient
+        initialOnboardingStep={initialStep}
+        isOnboardingComplete={onboardingComplete}
       >
-        {children}
-      </AppShell>
+        <FounderAppShell
+          title="Founder"
+          nav={[
+            { href: "/portal", label: "Dashboard", icon: "layout-dashboard" },
+            { href: "/portal/requests", label: "Requests", icon: "inbox", badge: pendingCount },
+            { href: "/portal/investors", label: "Investors", icon: "shield" },
+            { href: "/portal/team", label: "Team", icon: "user-plus" },
+          ]}
+          company={company}
+          user={userInfo}
+        >
+          {children}
+        </FounderAppShell>
+      </FounderLayoutClient>
     </MetricDefinitionsProvider>
   );
 }

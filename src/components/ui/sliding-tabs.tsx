@@ -9,6 +9,8 @@ export type TabItem<T extends string = string> = {
   icon?: LucideIcon;
   /** Optional badge count to display */
   badge?: number;
+  /** Optional data-onboarding attribute for tour targeting */
+  dataOnboarding?: string;
 };
 
 interface SlidingTabsProps<T extends string = string> {
@@ -100,7 +102,7 @@ export function SlidingTabs<T extends string = string>({
         <div
           ref={containerRef}
           role="tablist"
-          className="relative flex items-center border-b border-white/[0.06]"
+          className="relative flex items-center border-b border-border-subtle"
         >
           {tabs.map((tab, index) => {
             const Icon = tab.icon;
@@ -120,23 +122,24 @@ export function SlidingTabs<T extends string = string>({
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 onMouseEnter={() => setHoveredTab(tab.value)}
                 onMouseLeave={() => setHoveredTab(null)}
+                data-onboarding={tab.dataOnboarding}
                 className={`
                   group relative z-10 flex items-center font-medium
                   transition-all duration-150 ease-out
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950 rounded-sm
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-focus)] focus-visible:ring-offset-1 focus-visible:ring-offset-bg-primary rounded-sm
                   ${sizeClasses[size]}
                   ${isActive
-                    ? "text-white"
+                    ? "text-text-primary"
                     : isHovered
-                      ? "text-white/70"
-                      : "text-white/40"
+                      ? "text-text-secondary"
+                      : "text-text-muted"
                   }
                 `}
               >
                 {/* Background hover effect */}
                 <span
                   className={`
-                    absolute inset-0 rounded-lg bg-white/[0.03]
+                    absolute inset-0 rounded-lg bg-bg-raised
                     transition-opacity duration-200
                     ${isHovered && !isActive ? "opacity-100" : "opacity-0"}
                   `}
@@ -165,8 +168,8 @@ export function SlidingTabs<T extends string = string>({
                       rounded-full px-1 text-[10px] font-semibold
                       transition-all duration-150
                       ${isActive
-                        ? "bg-white/20 text-white"
-                        : "bg-white/10 text-white/50"
+                        ? "bg-bg-hover text-text-primary"
+                        : "bg-bg-elevated text-text-muted"
                       }
                     `}
                   >
@@ -190,7 +193,7 @@ export function SlidingTabs<T extends string = string>({
             }}
           >
             {/* Main indicator line */}
-            <div className="h-full w-full rounded-full bg-white" />
+            <div className="h-full w-full rounded-full bg-text-primary" />
 
             {/* Glow effect */}
             <div
@@ -224,12 +227,13 @@ export function SlidingTabs<T extends string = string>({
               tabIndex={isActive ? 0 : -1}
               onClick={() => onChange(tab.value)}
               onKeyDown={(e) => handleKeyDown(e, index)}
+              data-onboarding={tab.dataOnboarding}
               className={`
                 relative z-10 flex items-center rounded-lg font-medium
                 transition-colors duration-200
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-focus)]
                 ${sizeClasses[size]}
-                ${isActive ? "text-white" : "text-white/50 hover:text-white/80"}
+                ${isActive ? "text-text-primary" : "text-text-muted hover:text-text-secondary"}
               `}
             >
               {showIcons && Icon && (
@@ -243,7 +247,7 @@ export function SlidingTabs<T extends string = string>({
         {/* Animated background indicator */}
         <div
           className={`
-            absolute top-0 h-full rounded-lg bg-white/10
+            absolute top-0 h-full rounded-lg bg-bg-hover
             ${isInitialized ? "transition-all duration-150 ease-out" : ""}
           `}
           style={{
@@ -258,7 +262,7 @@ export function SlidingTabs<T extends string = string>({
       <div
         className={`
           absolute -bottom-1 h-[2px] rounded-full
-          bg-gradient-to-r from-transparent via-white/40 to-transparent
+          bg-gradient-to-r from-transparent via-text-muted to-transparent
           ${isInitialized ? "transition-all duration-150 ease-out" : ""}
         `}
         style={{
@@ -349,8 +353,8 @@ export function SlidingIconTabs<T extends string = string>({
               className={`
                 relative z-10 rounded-md p-1.5
                 transition-colors duration-200
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40
-                ${isActive ? "text-white" : "text-white/40 hover:text-white/70"}
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-focus)]
+                ${isActive ? "text-text-primary" : "text-text-muted hover:text-text-secondary"}
               `}
             >
               <Icon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -362,7 +366,7 @@ export function SlidingIconTabs<T extends string = string>({
         {/* Animated background indicator */}
         <div
           className={`
-            absolute top-0 h-full rounded-md bg-white/10
+            absolute top-0 h-full rounded-md bg-bg-hover
             ${isInitialized ? "transition-all duration-150 ease-out" : ""}
           `}
           style={{

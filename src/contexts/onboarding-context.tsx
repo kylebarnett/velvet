@@ -4,10 +4,9 @@ import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import {
-  ONBOARDING_STEPS,
-  TOTAL_STEPS,
-  getStepByIndex,
+  getStepsForRole,
   type OnboardingStep,
+  type UserRole,
 } from "@/lib/onboarding/steps";
 
 type OnboardingState = {
@@ -15,6 +14,7 @@ type OnboardingState = {
   isActive: boolean;
   isCompleted: boolean;
   showCompletionModal: boolean;
+  role: UserRole;
 };
 
 type OnboardingContextValue = OnboardingState & {
@@ -39,28 +39,41 @@ export function useOnboarding() {
   return context;
 }
 
+/** Metadata keys differ by role so they don't collide. */
+function metaKeys(role: UserRole) {
+  if (role === "founder") {
+    return { step: "founder_onboarding_step", complete: "founder_onboarding_complete" };
+  }
+  return { step: "onboarding_step", complete: "onboarding_complete" };
+}
+
 export function OnboardingProvider({
   children,
   initialStep,
   isOnboardingComplete,
+  role = "investor",
 }: {
   children: React.ReactNode;
   initialStep: number | null;
   isOnboardingComplete: boolean;
+  role?: UserRole;
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const steps = React.useMemo(() => getStepsForRole(role), [role]);
+  const totalSteps = steps.length;
 
   const [state, setState] = React.useState<OnboardingState>({
     currentStepIndex: initialStep,
     isActive: initialStep !== null && !isOnboardingComplete,
     isCompleted: isOnboardingComplete,
     showCompletionModal: false,
+    role,
   });
 
   const currentStep =
     state.currentStepIndex !== null
-      ? (getStepByIndex(state.currentStepIndex) ?? null)
+      ? (steps[state.currentStepIndex] ?? null)
       : null;
 
   // Persist step to backend
@@ -73,13 +86,14 @@ export function OnboardingProvider({
           body: JSON.stringify({
             step: stepIndex,
             completed,
+            role,
           }),
         });
       } catch (err) {
         console.error("Failed to persist onboarding step:", err);
       }
     },
-    [],
+    [role],
   );
 
   const advance = React.useCallback(() => {
@@ -89,18 +103,19 @@ export function OnboardingProvider({
     const nextIndex = currentIndex + 1;
 
     // Tour completed
-    if (nextIndex >= TOTAL_STEPS) {
+    if (nextIndex >= totalSteps) {
       persistStep(null, true);
       setState({
         currentStepIndex: null,
         isActive: false,
         isCompleted: true,
         showCompletionModal: true,
+        role,
       });
       return;
     }
 
-    const nextStep = ONBOARDING_STEPS[nextIndex];
+    const nextStep = steps[nextIndex];
     persistStep(nextIndex, false);
 
     setState((prev) => ({
@@ -110,12 +125,11 @@ export function OnboardingProvider({
 
     // Navigate after state update
     if (nextStep && nextStep.page !== pathname) {
-      // Use setTimeout to ensure navigation happens after render
       setTimeout(() => {
         router.push(nextStep.page);
       }, 0);
     }
-  }, [state.currentStepIndex, pathname, router, persistStep]);
+  }, [state.currentStepIndex, pathname, router, persistStep, totalSteps, steps, role]);
 
   const skip = React.useCallback(() => {
     persistStep(null, true);
@@ -124,40 +138,43 @@ export function OnboardingProvider({
       isActive: false,
       isCompleted: true,
       showCompletionModal: false,
+      role,
     });
-  }, [persistStep]);
+  }, [persistStep, role]);
 
   const restart = React.useCallback(() => {
-    const firstStep = ONBOARDING_STEPS[0];
+    const firstStep = steps[0];
     persistStep(0, false);
     setState({
       currentStepIndex: 0,
       isActive: true,
       isCompleted: false,
       showCompletionModal: false,
+      role,
     });
     if (firstStep && pathname !== firstStep.page) {
       setTimeout(() => {
         router.push(firstStep.page);
       }, 0);
     }
-  }, [pathname, router, persistStep]);
+  }, [pathname, router, persistStep, steps, role]);
 
   const startTour = React.useCallback(() => {
-    const firstStep = ONBOARDING_STEPS[0];
+    const firstStep = steps[0];
     persistStep(0, false);
     setState({
       currentStepIndex: 0,
       isActive: true,
       isCompleted: false,
       showCompletionModal: false,
+      role,
     });
     if (firstStep && pathname !== firstStep.page) {
       setTimeout(() => {
         router.push(firstStep.page);
       }, 0);
     }
-  }, [pathname, router, persistStep]);
+  }, [pathname, router, persistStep, steps, role]);
 
   const closeCompletionModal = React.useCallback(() => {
     setState((prev) => ({
@@ -170,17 +187,16 @@ export function OnboardingProvider({
   React.useEffect(() => {
     if (!state.isActive || state.currentStepIndex === null) return;
 
-    const step = ONBOARDING_STEPS[state.currentStepIndex];
+    const step = steps[state.currentStepIndex];
     if (!step) return;
 
     // If we're on the correct page, nothing to do
     if (step.page === pathname) return;
 
     // Find if there's a step for the current page that comes after current step
-    const stepsForCurrentPage = ONBOARDING_STEPS.map((s, idx) => ({
-      ...s,
-      index: idx,
-    })).filter((s) => s.page === pathname && s.index > state.currentStepIndex!);
+    const stepsForCurrentPage = steps
+      .map((s, idx) => ({ ...s, index: idx }))
+      .filter((s) => s.page === pathname && s.index > state.currentStepIndex!);
 
     // If user navigated ahead, skip to the appropriate step
     if (stepsForCurrentPage.length > 0) {
@@ -191,12 +207,12 @@ export function OnboardingProvider({
       }));
       persistStep(nextStep.index, false);
     }
-  }, [pathname, state.isActive, state.currentStepIndex, persistStep]);
+  }, [pathname, state.isActive, state.currentStepIndex, persistStep, steps]);
 
   const value: OnboardingContextValue = {
     ...state,
     currentStep,
-    totalSteps: TOTAL_STEPS,
+    totalSteps,
     advance,
     skip,
     restart,

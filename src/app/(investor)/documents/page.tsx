@@ -10,6 +10,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+import {
+  DOCUMENT_TYPE_LABELS,
+  DOCUMENT_TYPES,
+  getDocumentTypeColor,
+} from "@/lib/utils/document-colors";
 
 type DateFilterValue = "all" | "7" | "30" | "90";
 
@@ -20,21 +25,7 @@ const DATE_FILTER_TABS: TabItem<DateFilterValue>[] = [
   { value: "90", label: "90d" },
 ];
 
-const DOCUMENT_TYPES = [
-  { value: "income_statement", label: "Income Statement" },
-  { value: "balance_sheet", label: "Balance Sheet" },
-  { value: "cash_flow_statement", label: "Cash Flow Statement" },
-  { value: "consolidated_financial_statements", label: "Consolidated Financial Statements" },
-  { value: "409a_valuation", label: "409A Valuation" },
-  { value: "investor_update", label: "Investor Update" },
-  { value: "board_deck", label: "Board Deck" },
-  { value: "cap_table", label: "Cap Table" },
-  { value: "other", label: "Other" },
-] as const;
-
-const TYPE_LABELS: Record<string, string> = Object.fromEntries(
-  DOCUMENT_TYPES.map((t) => [t.value, t.label])
-);
+const TYPE_LABELS = DOCUMENT_TYPE_LABELS;
 
 type Document = {
   id: string;
@@ -264,7 +255,7 @@ export default function DocumentsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl sm:text-2xl font-semibold">Documents</h1>
-        <p className="text-sm text-white/60">
+        <p className="text-sm text-text-tertiary">
           View and download documents from your portfolio companies.
         </p>
       </div>
@@ -273,21 +264,21 @@ export default function DocumentsPage() {
       <div className="space-y-3">
         {/* Search - full width on mobile */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder="Search by filename..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-10 w-full sm:w-64 rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm placeholder:text-white/40 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="h-10 w-full sm:w-64 rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm placeholder:text-text-muted focus:border-border-default focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-bg-hover rounded"
               type="button"
             >
-              <X className="h-3 w-3 text-white/40" />
+              <X className="h-3 w-3 text-text-muted" />
             </button>
           )}
         </div>
@@ -346,7 +337,7 @@ export default function DocumentsPage() {
             <button
               onClick={downloadAllForCompany}
               disabled={downloading}
-              className="inline-flex h-10 items-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-border-default bg-bg-elevated px-4 text-sm font-medium text-text-primary hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               <Download className="h-4 w-4" />
@@ -358,7 +349,7 @@ export default function DocumentsPage() {
             <button
               onClick={downloadSelected}
               disabled={downloading}
-              className="inline-flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+              className="inline-flex h-10 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               <Download className="h-4 w-4" />
@@ -372,25 +363,25 @@ export default function DocumentsPage() {
 
       {/* Error */}
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
 
       {/* Loading skeleton */}
       {loading && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
-                className="flex items-center gap-4 rounded-lg bg-white/5 p-3"
+                className="flex items-center gap-4 rounded-lg bg-bg-elevated p-3"
               >
-                <div className="h-5 w-5 animate-pulse rounded bg-white/10" />
-                <div className="h-4 w-48 animate-pulse rounded bg-white/10" />
-                <div className="h-4 w-24 animate-pulse rounded bg-white/10" />
-                <div className="h-4 w-20 animate-pulse rounded bg-white/10" />
-                <div className="ml-auto h-4 w-16 animate-pulse rounded bg-white/10" />
+                <div className="h-5 w-5 animate-pulse rounded bg-bg-hover" />
+                <div className="h-4 w-48 animate-pulse rounded bg-bg-hover" />
+                <div className="h-4 w-24 animate-pulse rounded bg-bg-hover" />
+                <div className="h-4 w-20 animate-pulse rounded bg-bg-hover" />
+                <div className="ml-auto h-4 w-16 animate-pulse rounded bg-bg-hover" />
               </div>
             ))}
           </div>
@@ -399,10 +390,10 @@ export default function DocumentsPage() {
 
       {/* Documents table */}
       {!loading && filteredDocuments.length === 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-          <FileText className="mx-auto h-8 w-8 text-white/30" />
-          <p className="mt-2 text-sm text-white/60">No documents found.</p>
-          <p className="mt-1 text-xs text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+          <FileText className="mx-auto h-8 w-8 text-text-faint" />
+          <p className="mt-2 text-sm text-text-tertiary">No documents found.</p>
+          <p className="mt-1 text-xs text-text-tertiary">
             {search || companyFilter || typeFilter || dateFilter !== "all"
               ? "Try adjusting your filters."
               : "Documents uploaded by founders will appear here."}
@@ -420,51 +411,51 @@ export default function DocumentsPage() {
                 type="checkbox"
                 checked={allSelected}
                 onChange={toggleSelectAll}
-                className="h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
+                className="h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
               />
-              <span className="text-xs text-white/60">Select all</span>
+              <span className="text-xs text-text-tertiary">Select all</span>
             </div>
 
             {filteredDocuments.map((doc) => (
               <div
                 key={doc.id}
-                className="rounded-xl border border-white/10 bg-white/5 p-4"
+                className="rounded-xl border border-border-default bg-bg-elevated p-4"
               >
                 <div className="flex items-start gap-3">
                   <input
                     type="checkbox"
                     checked={selectedIds.has(doc.id)}
                     onChange={() => toggleSelect(doc.id)}
-                    className="mt-1 h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
+                    className="mt-1 h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start gap-2">
-                      <FileText className="h-4 w-4 shrink-0 text-white/40 mt-0.5" />
+                      <FileText className="h-4 w-4 shrink-0 text-text-muted mt-0.5" />
                       <div className="min-w-0 flex-1">
                         <p className="font-medium truncate">{doc.file_name}</p>
                         {doc.description && (
-                          <p className="text-xs text-white/60 line-clamp-2 mt-0.5">{doc.description}</p>
+                          <p className="text-xs text-text-tertiary line-clamp-2 mt-0.5">{doc.description}</p>
                         )}
                       </div>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
+                      <span className={`rounded-full px-2 py-0.5 text-xs ${getDocumentTypeColor(doc.document_type)}`}>
                         {TYPE_LABELS[doc.document_type] ?? doc.document_type}
                       </span>
-                      <span className="text-xs text-white/60">{formatFileSize(doc.file_size)}</span>
+                      <span className="text-xs text-text-tertiary">{formatFileSize(doc.file_size)}</span>
                     </div>
-                    <div className="mt-1 text-xs text-white/60">
+                    <div className="mt-1 text-xs text-text-tertiary">
                       {doc.company?.name ?? "Unknown"} · {formatDate(doc.uploaded_at)}
                     </div>
                   </div>
                   <button
                     onClick={() => downloadSingle(doc)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                     type="button"
                     title="Download"
                     aria-label={`Download ${doc.file_name}`}
                   >
-                    <Download className="h-4 w-4 text-white/50" />
+                    <Download className="h-4 w-4 text-text-muted" />
                   </button>
                 </div>
               </div>
@@ -472,15 +463,15 @@ export default function DocumentsPage() {
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden sm:block rounded-xl border border-white/10 bg-white/5">
+          <div className="hidden sm:block rounded-xl border border-border-default bg-bg-elevated">
             {/* Table header */}
-            <div className="flex items-center gap-4 border-b border-white/10 px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">
+            <div className="flex items-center gap-4 border-b border-border-default px-4 py-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">
               <div className="w-6">
                 <input
                   type="checkbox"
                   checked={allSelected}
                   onChange={toggleSelectAll}
-                  className="h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
+                  className="h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
                 />
               </div>
               <div className="flex-1 min-w-0">Name</div>
@@ -492,49 +483,49 @@ export default function DocumentsPage() {
             </div>
 
             {/* Table rows */}
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-border-subtle">
               {filteredDocuments.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center gap-4 px-4 py-3 hover:bg-white/5"
+                  className="flex items-center gap-4 px-4 py-3 hover:bg-bg-elevated"
                 >
                   <div className="w-6">
                     <input
                       type="checkbox"
                       checked={selectedIds.has(doc.id)}
                       onChange={() => toggleSelect(doc.id)}
-                      className="h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
+                      className="h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="truncate text-sm font-medium">{doc.file_name}</p>
                     {doc.description && (
-                      <p className="truncate text-xs text-white/60">{doc.description}</p>
+                      <p className="truncate text-xs text-text-tertiary">{doc.description}</p>
                     )}
                   </div>
-                  <div className="w-32 truncate text-sm text-white/70">
+                  <div className="w-32 truncate text-sm text-text-secondary">
                     {doc.company?.name ?? "Unknown"}
                   </div>
                   <div className="w-28">
-                    <span className="inline-flex rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70">
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs ${getDocumentTypeColor(doc.document_type)}`}>
                       {TYPE_LABELS[doc.document_type] ?? doc.document_type}
                     </span>
                   </div>
-                  <div className="w-20 text-sm text-white/60">
+                  <div className="w-20 text-sm text-text-tertiary">
                     {formatFileSize(doc.file_size)}
                   </div>
-                  <div className="w-24 text-sm text-white/60">
+                  <div className="w-24 text-sm text-text-tertiary">
                     {formatDate(doc.uploaded_at)}
                   </div>
                   <div className="w-10">
                     <button
                       onClick={() => downloadSingle(doc)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                       type="button"
                       title="Download"
                       aria-label={`Download ${doc.file_name}`}
                     >
-                      <Download className="h-4 w-4 text-white/50" />
+                      <Download className="h-4 w-4 text-text-muted" />
                     </button>
                   </div>
                 </div>

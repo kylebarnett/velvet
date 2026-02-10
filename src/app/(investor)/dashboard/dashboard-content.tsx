@@ -90,7 +90,7 @@ function CompanyLogoSmall({
   const initial = name.charAt(0).toUpperCase();
 
   return (
-    <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5">
+    <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border border-border-default bg-bg-elevated">
       {displayUrl && !imgError ? (
         <img
           src={displayUrl}
@@ -99,7 +99,7 @@ function CompanyLogoSmall({
           onError={() => setImgError(true)}
         />
       ) : (
-        <span className="text-sm font-medium text-white/60">{initial}</span>
+        <span className="text-sm font-medium text-text-tertiary">{initial}</span>
       )}
     </div>
   );
@@ -129,7 +129,7 @@ function TrendBadge({ percentChange }: { percentChange: number | null }) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1 text-white/40">
+    <span className="inline-flex items-center gap-1 text-text-muted">
       <Minus className="h-3.5 w-3.5" />
       <span className="text-xs font-medium">0%</span>
     </span>
@@ -151,15 +151,15 @@ function CompanyListRow({
   return (
     <Link
       href={`/dashboard/${company.id}`}
-      className="card-hover-lift flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.03] px-5 py-3.5 hover:border-white/15"
+      className="card-hover-lift flex items-center gap-4 rounded-xl border border-border-subtle bg-bg-raised px-5 py-3.5 hover:border-border-default"
     >
       <CompanyLogoSmall name={company.name} logoUrl={company.logoUrl} />
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <h3 className="font-medium text-white truncate">{company.name}</h3>
+          <h3 className="font-medium text-text-primary truncate">{company.name}</h3>
           {!isApproved && (
-            <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200">
+            <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-[var(--status-warning-text)]">
               Pending
             </span>
           )}
@@ -178,7 +178,7 @@ function CompanyListRow({
         {latestMetric && latestMetric.value != null ? (
           <>
             <div className="text-right">
-              <div className="text-xs text-white/60">{latestMetric.name}</div>
+              <div className="text-xs text-text-tertiary">{latestMetric.name}</div>
               <div className="font-semibold">
                 {formatValue(latestMetric.value, latestMetric.name)}
               </div>
@@ -188,9 +188,9 @@ function CompanyListRow({
             </div>
             {secondaryMetric && secondaryMetric.value != null && (
               <>
-                <div className="text-right border-l border-white/[0.06] pl-6">
-                  <div className="text-xs text-white/60">{secondaryMetric.name}</div>
-                  <div className="text-sm font-medium text-white/80">
+                <div className="text-right border-l border-border-subtle pl-6">
+                  <div className="text-xs text-text-tertiary">{secondaryMetric.name}</div>
+                  <div className="text-sm font-medium text-text-primary">
                     {formatValue(secondaryMetric.value, secondaryMetric.name)}
                   </div>
                 </div>
@@ -201,9 +201,9 @@ function CompanyListRow({
             )}
           </>
         ) : !hasFounder ? (
-          <span className="text-xs text-amber-200/60">Awaiting founder signup</span>
+          <span className="text-xs text-[var(--status-warning-text)]/60">Awaiting founder signup</span>
         ) : isApproved ? (
-          <span className="text-xs text-white/60">No metrics yet</span>
+          <span className="text-xs text-text-tertiary">No metrics yet</span>
         ) : null}
       </div>
     </Link>
@@ -233,7 +233,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
           />
         </div>
         <div className="flex items-center justify-between gap-3 sm:justify-end">
-          <div className="rounded-full bg-white/5 px-2.5 py-1 text-xs text-white/60">
+          <div className="rounded-full bg-bg-elevated px-2.5 py-1 text-xs text-text-tertiary">
             {filteredCompanies.length} of {companies.length}
           </div>
           <TileSettingsMenu
@@ -247,14 +247,14 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
                 tileSecondaryMetric: c.tileSecondaryMetric,
               }))}
           />
-          <div className="flex items-center rounded-lg border border-white/[0.08] bg-black/20 p-1">
+          <div className="flex items-center rounded-lg border border-border-subtle bg-bg-input p-1">
             <button
               type="button"
               onClick={() => setViewMode("grid")}
               className={`rounded p-1.5 transition-colors ${
                 viewMode === "grid"
-                  ? "bg-white/10 text-white"
-                  : "text-white/40 hover:text-white/60"
+                  ? "bg-bg-hover text-text-primary"
+                  : "text-text-muted hover:text-text-tertiary"
               }`}
               title="Grid view"
             >
@@ -265,8 +265,8 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
               onClick={() => setViewMode("list")}
               className={`rounded p-1.5 transition-colors ${
                 viewMode === "list"
-                  ? "bg-white/10 text-white"
-                  : "text-white/40 hover:text-white/60"
+                  ? "bg-bg-hover text-text-primary"
+                  : "text-text-muted hover:text-text-tertiary"
               }`}
               title="List view"
             >
@@ -277,25 +277,26 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
       </div>
 
       {filteredCompanies.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-white/60">No companies match your search.</p>
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <p className="text-text-tertiary">No companies match your search.</p>
         </div>
       ) : viewMode === "grid" ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredCompanies.map((company) => (
-            <CompanyCard
-              key={company.id}
-              id={company.id}
-              name={company.name}
-              stage={company.stage}
-              industry={company.industry}
-              logoUrl={company.logoUrl}
-              founderId={company.founder_id}
-              approvalStatus={company.approvalStatus}
-              latestMetric={latestMetrics[company.id] ?? null}
-              secondaryMetric={secondaryMetrics[company.id] ?? null}
-              lastSubmittedAt={lastSubmittedAt[company.id] ?? null}
-            />
+          {filteredCompanies.map((company, index) => (
+            <div key={company.id} {...(index === 0 ? { "data-onboarding": "company-card" } : {})}>
+              <CompanyCard
+                id={company.id}
+                name={company.name}
+                stage={company.stage}
+                industry={company.industry}
+                logoUrl={company.logoUrl}
+                founderId={company.founder_id}
+                approvalStatus={company.approvalStatus}
+                latestMetric={latestMetrics[company.id] ?? null}
+                secondaryMetric={secondaryMetrics[company.id] ?? null}
+                lastSubmittedAt={lastSubmittedAt[company.id] ?? null}
+              />
+            </div>
           ))}
         </div>
       ) : (

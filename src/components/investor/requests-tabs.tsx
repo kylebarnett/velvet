@@ -19,8 +19,8 @@ type Tab = "requests" | "templates" | "schedules";
 
 const TABS: TabItem<Tab>[] = [
   { value: "requests", label: "Requests" },
-  { value: "templates", label: "Templates" },
-  { value: "schedules", label: "Schedules" },
+  { value: "templates", label: "Templates", dataOnboarding: "templates-tab" },
+  { value: "schedules", label: "Schedules", dataOnboarding: "schedules-tab" },
 ];
 
 export function RequestsTabs({
@@ -50,12 +50,12 @@ export function RequestsTabs({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1" data-onboarding="requests-title">
           <h1 className="text-xl font-semibold tracking-tight">Requests</h1>
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-text-tertiary">
             Create and track metric requests across your portfolio.
           </p>
         </div>
         <Link
-          className="inline-flex h-9 flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
+          className="inline-flex h-9 flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
           href="/requests/new"
           data-onboarding="new-request"
         >

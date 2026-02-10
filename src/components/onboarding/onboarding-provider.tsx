@@ -20,6 +20,7 @@ export function OnboardingOverlay() {
     showCompletionModal,
     closeCompletionModal,
     restart,
+    role,
   } = useOnboarding();
 
   // Don't render if tour is not active or no current step
@@ -27,7 +28,11 @@ export function OnboardingOverlay() {
     return (
       <>
         {showCompletionModal && (
-          <CompletionModal onClose={closeCompletionModal} onRestart={restart} />
+          <CompletionModal
+            onClose={closeCompletionModal}
+            onRestart={restart}
+            role={role}
+          />
         )}
       </>
     );
@@ -57,7 +62,11 @@ export function OnboardingOverlay() {
         isLastStep={isLastStep}
       />
       {showCompletionModal && (
-        <CompletionModal onClose={closeCompletionModal} onRestart={restart} />
+        <CompletionModal
+          onClose={closeCompletionModal}
+          onRestart={restart}
+          role={role}
+        />
       )}
     </>
   );

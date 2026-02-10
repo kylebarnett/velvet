@@ -8,9 +8,9 @@ export default async function FounderTeamPage() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
+      <div className="space-y-1" data-onboarding="team-title">
         <h1 className="text-xl font-semibold tracking-tight">Team</h1>
-        <p className="text-sm text-white/60">
+        <p className="text-sm text-text-tertiary">
           Manage your team members and their access to company data.
         </p>
       </div>

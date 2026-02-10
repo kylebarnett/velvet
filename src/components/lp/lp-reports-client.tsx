@@ -28,15 +28,15 @@ export function LPReportsClient({ funds: initialFunds }: LPReportsClientProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+        <div data-onboarding="funds-title">
           <h1 className="text-xl font-semibold tracking-tight">Funds</h1>
-          <p className="mt-0.5 text-sm text-white/60">
+          <p className="mt-0.5 text-sm text-text-tertiary">
             Manage funds, track performance, and generate LP reports.
           </p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
+          className="flex h-10 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
         >
           <Plus className="h-4 w-4" />
           Create Fund
@@ -45,15 +45,15 @@ export function LPReportsClient({ funds: initialFunds }: LPReportsClientProps) {
 
       {/* Fund list */}
       {initialFunds.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-white/10 py-16 text-center">
-          <Landmark className="h-10 w-10 text-white/20" />
-          <h3 className="mt-4 text-sm font-medium text-white/70">No funds yet</h3>
-          <p className="mt-1 max-w-sm text-sm text-white/40">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border-default py-16 text-center">
+          <Landmark className="h-10 w-10 text-text-faint" />
+          <h3 className="mt-4 text-sm font-medium text-text-secondary">No funds yet</h3>
+          <p className="mt-1 max-w-sm text-sm text-text-muted">
             Create your first fund to start tracking portfolio performance and generating LP reports.
           </p>
           <button
             onClick={() => setShowCreate(true)}
-            className="mt-4 flex h-9 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
+            className="mt-4 flex h-9 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
           >
             <Plus className="h-4 w-4" />
             Create Fund

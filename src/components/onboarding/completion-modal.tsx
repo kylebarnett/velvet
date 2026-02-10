@@ -2,13 +2,49 @@
 
 import * as React from "react";
 import { CheckCircle2, RotateCcw, X } from "lucide-react";
+import type { UserRole } from "@/lib/onboarding/steps";
 
 type CompletionModalProps = {
   onClose: () => void;
   onRestart: () => void;
+  role?: UserRole;
 };
 
-export function CompletionModal({ onClose, onRestart }: CompletionModalProps) {
+const INVESTOR_RECAP = [
+  {
+    title: "Portfolio",
+    desc: "Import or add founder contacts to build your portfolio",
+  },
+  {
+    title: "Dashboard",
+    desc: "View metrics, KPIs, and company insights at a glance",
+  },
+  {
+    title: "Requests & Schedules",
+    desc: "Send metric requests and automate recurring collections",
+  },
+  {
+    title: "Reports & Funds",
+    desc: "Analyze portfolio performance and generate LP reports",
+  },
+];
+
+const FOUNDER_RECAP = [
+  {
+    title: "Metrics",
+    desc: "Submit your key performance data for all approved investors",
+  },
+  {
+    title: "Documents",
+    desc: "Upload financial statements, board decks, and updates",
+  },
+  {
+    title: "Investors",
+    desc: "Control which investors can access your data",
+  },
+];
+
+export function CompletionModal({ onClose, onRestart, role = "investor" }: CompletionModalProps) {
   // Handle Escape key
   React.useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -21,20 +57,26 @@ export function CompletionModal({ onClose, onRestart }: CompletionModalProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
+  const recap = role === "founder" ? FOUNDER_RECAP : INVESTOR_RECAP;
+  const subtitle =
+    role === "founder"
+      ? "You're ready to share metrics with investors!"
+      : "You're ready to manage your portfolio!";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-bg-backdrop backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-xl border border-white/10 bg-zinc-900 p-6 shadow-xl">
+      <div className="relative w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 shadow-xl">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-md p-1 text-white/40 hover:bg-white/10 hover:text-white/60"
+          className="absolute right-4 top-4 rounded-md p-1 text-text-muted hover:bg-bg-hover hover:text-text-tertiary"
           type="button"
           aria-label="Close"
         >
@@ -47,46 +89,36 @@ export function CompletionModal({ onClose, onRestart }: CompletionModalProps) {
             <CheckCircle2 className="h-8 w-8 text-emerald-400" />
           </div>
 
-          <h2 className="mt-4 text-xl font-semibold text-white">
+          <h2 className="mt-4 text-xl font-semibold text-text-primary">
             You&apos;re all set!
           </h2>
 
-          <p className="mt-2 text-sm text-white/60">
-            You&apos;ve completed the Velvet tour. Here&apos;s a quick recap of what you learned:
+          <p className="mt-2 text-sm text-text-tertiary">
+            {subtitle}
           </p>
 
-          <ul className="mt-4 space-y-2 text-left text-sm text-white/70">
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-white/40" />
-              <span>
-                <strong className="text-white">Portfolio</strong> - Import or add founder contacts to build your portfolio
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-white/40" />
-              <span>
-                <strong className="text-white">Templates</strong> - Create reusable metric sets for consistent tracking
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-white/40" />
-              <span>
-                <strong className="text-white">Requests</strong> - Send metric requests and track submissions
-              </span>
-            </li>
+          <ul className="mt-4 space-y-2 text-left text-sm text-text-secondary">
+            {recap.map((item) => (
+              <li key={item.title} className="flex items-start gap-2">
+                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-text-muted" />
+                <span>
+                  <strong className="text-text-primary">{item.title}</strong> - {item.desc}
+                </span>
+              </li>
+            ))}
           </ul>
 
           <div className="mt-6 flex w-full flex-col gap-2">
             <button
               onClick={onClose}
-              className="w-full rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90"
+              className="w-full rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
               type="button"
             >
               Get started
             </button>
             <button
               onClick={onRestart}
-              className="flex w-full items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white hover:bg-white/10"
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-border-default bg-bg-elevated px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-hover"
               type="button"
             >
               <RotateCcw className="h-3.5 w-3.5" />
