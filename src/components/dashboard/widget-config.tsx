@@ -189,37 +189,43 @@ export function WidgetConfig({
         {/* Table config */}
         {isTableConfig(config) && (
           <>
-            <div>
-              <label className="block text-xs text-text-tertiary mb-1">Metrics</label>
-              <div className="space-y-1 max-h-40 overflow-y-auto">
-                {availableMetrics.length === 0 ? (
-                  <p className="text-xs text-text-muted">No metrics available</p>
-                ) : (
-                  availableMetrics.map((metric) => (
-                    <label
-                      key={metric}
-                      className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer hover:text-text-primary"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={config.metrics.includes(metric)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            updateConfig({ metrics: [...config.metrics, metric] });
-                          } else {
-                            updateConfig({
-                              metrics: config.metrics.filter((m) => m !== metric),
-                            });
-                          }
-                        }}
-                        className="rounded border-border-default"
-                      />
-                      {metric}
-                    </label>
-                  ))
-                )}
+            {config.showAllMetrics ? (
+              <p className="text-xs text-text-tertiary">
+                Automatically displays all submitted metrics.
+              </p>
+            ) : (
+              <div>
+                <label className="block text-xs text-text-tertiary mb-1">Metrics</label>
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {availableMetrics.length === 0 ? (
+                    <p className="text-xs text-text-muted">No metrics available</p>
+                  ) : (
+                    availableMetrics.map((metric) => (
+                      <label
+                        key={metric}
+                        className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer hover:text-text-primary"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={config.metrics.includes(metric)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              updateConfig({ metrics: [...config.metrics, metric] });
+                            } else {
+                              updateConfig({
+                                metrics: config.metrics.filter((m) => m !== metric),
+                              });
+                            }
+                          }}
+                          className="rounded border-border-default"
+                        />
+                        {metric}
+                      </label>
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             <div>
               <label className="block text-xs text-text-tertiary mb-1">Period</label>

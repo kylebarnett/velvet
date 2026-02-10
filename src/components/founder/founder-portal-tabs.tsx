@@ -242,14 +242,14 @@ function CompanyHeader({
   }
 
   async function handleWebsiteSave() {
-    const url = websiteInput.trim() || null;
+    let url = websiteInput.trim() || null;
     if (url && !/^https?:\/\//.test(url)) {
-      setToast({ type: "error", msg: "URL must start with http:// or https://" });
-      return;
+      url = `https://${url}`;
     }
     const ok = await saveField("website", url);
     if (ok) {
       setWebsite(url);
+      setWebsiteInput(url ?? "");
       setEditingWebsite(false);
     }
   }
@@ -350,10 +350,10 @@ function CompanyHeader({
             {editingWebsite ? (
               <div className="flex flex-1 items-center gap-2">
                 <input
-                  type="url"
+                  type="text"
                   value={websiteInput}
                   onChange={(e) => setWebsiteInput(e.target.value)}
-                  placeholder="https://example.com"
+                  placeholder="example.com"
                   className="h-8 flex-1 rounded-md border border-border-default bg-bg-input px-2.5 text-sm focus:border-border-default focus:outline-none"
                   autoFocus
                   onKeyDown={(e) => {

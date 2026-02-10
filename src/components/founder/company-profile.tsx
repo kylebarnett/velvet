@@ -98,14 +98,14 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
   }
 
   async function handleWebsiteSave() {
-    const url = websiteInput.trim() || null;
+    let url = websiteInput.trim() || null;
     if (url && !/^https?:\/\//.test(url)) {
-      setError("Website must start with http:// or https://");
-      return;
+      url = `https://${url}`;
     }
     const ok = await saveField("website", url);
     if (ok) {
       setData((prev) => ({ ...prev, website: url }));
+      setWebsiteInput(url ?? "");
       setEditingWebsite(false);
     }
   }
@@ -178,10 +178,10 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
               {editingWebsite ? (
                 <div className="mt-1 flex items-center gap-2">
                   <input
-                    type="url"
+                    type="text"
                     value={websiteInput}
                     onChange={(e) => setWebsiteInput(e.target.value)}
-                    placeholder="https://example.com"
+                    placeholder="example.com"
                     className="h-9 flex-1 rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
                     autoFocus
                     onKeyDown={(e) => {
