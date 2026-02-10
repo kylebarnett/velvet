@@ -132,13 +132,18 @@ export async function DELETE(
   // Verify ownership
   const { data: existing } = await supabase
     .from("dashboard_views")
-    .select("id")
+    .select("id, is_default")
     .eq("id", id)
     .eq("founder_id", user.id)
     .single();
 
   if (!existing) {
     return jsonError("View not found.", 404);
+  }
+
+  // Prevent deletion of the default view
+  if (existing.is_default) {
+    return jsonError("Cannot delete the default view.", 403);
   }
 
   const { error } = await supabase

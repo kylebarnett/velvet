@@ -109,7 +109,7 @@ export function ViewSelector({
                       <span className="text-[10px] text-text-muted">Default</span>
                     )}
                   </button>
-                  {onDelete && (
+                  {onDelete && !view.isDefault && (
                     <button
                       type="button"
                       onClick={(e) => handleDeleteClick(e, view)}
