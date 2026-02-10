@@ -60,7 +60,7 @@ export function DocumentUploadForm({ company }: Props) {
 
   return (
     <form
-      className="max-w-2xl rounded-xl border border-white/10 bg-white/5 p-5"
+      className="max-w-2xl rounded-xl border border-border-default bg-bg-elevated p-5"
       onSubmit={onSubmit}
     >
       <div className="grid gap-4">
@@ -68,7 +68,7 @@ export function DocumentUploadForm({ company }: Props) {
           <label className="text-sm font-medium">
             Company
           </label>
-          <div className="flex h-11 items-center rounded-md border border-white/10 bg-black/20 px-3 text-sm text-white/80">
+          <div className="flex h-11 items-center rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-secondary">
             {company.name}
           </div>
           <input type="hidden" name="companyId" value={company.id} />
@@ -83,7 +83,7 @@ export function DocumentUploadForm({ company }: Props) {
             <SelectTrigger>
               <SelectValue placeholder="Select type..." />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="[&_[role=option]]:py-2.5 [&_[role=option]]:pr-4">
               <SelectItem value="income_statement">Income Statement</SelectItem>
               <SelectItem value="balance_sheet">Balance Sheet</SelectItem>
               <SelectItem value="cash_flow_statement">Cash Flow Statement</SelectItem>
@@ -99,14 +99,14 @@ export function DocumentUploadForm({ company }: Props) {
 
         <div className="grid gap-2">
           <label className="text-sm font-medium" htmlFor="description">
-            Description <span className="font-normal text-white/60">(optional)</span>
+            Description <span className="font-normal text-text-tertiary">(optional)</span>
           </label>
           <textarea
             id="description"
             name="description"
             rows={2}
             placeholder="Add context about this document..."
-            className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
+            className="rounded-md border border-border-default bg-bg-input px-3 py-2 text-sm outline-none placeholder:text-text-muted focus:border-border-default"
           />
         </div>
 
@@ -114,16 +114,16 @@ export function DocumentUploadForm({ company }: Props) {
           <label className="text-sm font-medium" htmlFor="file">
             File
           </label>
-          <div className="rounded-xl border border-dashed border-white/15 bg-black/20 p-6">
+          <div className="rounded-xl border border-dashed border-border-default bg-bg-input p-6">
             <input
               id="file"
               name="file"
               type="file"
-              className="block w-full text-sm text-white/70 file:mr-4 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium file:text-black hover:file:bg-white/90"
+              className="block w-full text-sm text-text-secondary file:mr-4 file:rounded-md file:border-0 file:bg-btn-primary-bg file:px-3 file:py-2 file:text-sm file:font-medium file:text-btn-primary-text hover:file:bg-btn-primary-hover"
               accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt"
               required
             />
-            <p className="mt-3 text-sm text-white/60">
+            <p className="mt-3 text-sm text-text-tertiary">
               Upload PDFs, decks, spreadsheets, or text files.
             </p>
           </div>
@@ -131,19 +131,19 @@ export function DocumentUploadForm({ company }: Props) {
       </div>
 
       {error && (
-        <div className="mt-4 rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="mt-4 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
       {success && (
-        <div className="mt-4 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100">
+        <div className="mt-4 rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2 text-sm text-[var(--status-success-text)]">
           {success}
         </div>
       )}
 
       <div className="mt-4 flex justify-end">
         <button
-          className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+          className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           disabled={isUploading || !documentType}
           type="submit"
         >

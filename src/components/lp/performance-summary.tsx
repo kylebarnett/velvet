@@ -34,7 +34,7 @@ function formatCurrency(value: number, currency: string): string {
 }
 
 function getMultipleColor(value: number | null): string {
-  if (value == null) return "text-white/30";
+  if (value == null) return "text-text-faint";
   if (value >= 2) return "text-emerald-400";
   if (value >= 1) return "text-emerald-400/80";
   if (value >= 0.5) return "text-amber-400";
@@ -42,7 +42,7 @@ function getMultipleColor(value: number | null): string {
 }
 
 function getIRRColor(value: number | null): string {
-  if (value == null) return "text-white/30";
+  if (value == null) return "text-text-faint";
   if (value >= 0.25) return "text-emerald-400";
   if (value >= 0.1) return "text-emerald-400/80";
   if (value >= 0) return "text-amber-400";
@@ -105,25 +105,28 @@ export function PerformanceSummary({
         {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className="group relative rounded-xl border border-white/10 bg-white/5 p-4"
+            className="group relative rounded-xl border border-border-default bg-bg-elevated p-4"
           >
-            <p className="text-[10px] uppercase tracking-wider text-white/40">{kpi.label}</p>
+            <p className="text-[10px] uppercase tracking-wider text-text-muted">{kpi.label}</p>
             <p className={cn("mt-1 text-2xl font-semibold", kpi.color)}>
               {kpi.value}
             </p>
             {/* Hover tooltip */}
-            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-lg border border-white/10 bg-zinc-900 px-3 py-2.5 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
-              <p className="text-xs font-medium text-white/90">{kpi.tooltip}</p>
+            <div
+              className="pointer-events-none invisible absolute bottom-full left-1/2 z-50 mb-2 w-56 -translate-x-1/2 rounded-lg px-3 py-2.5 shadow-xl group-hover:visible"
+              style={{ backgroundColor: "#1c1c20", border: "1px solid rgba(255,255,255,0.12)" }}
+            >
+              <p className="text-xs font-medium text-white">{kpi.tooltip}</p>
               <p className="mt-1 font-mono text-[11px] text-white/50">{kpi.formula}</p>
               {/* Arrow */}
-              <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-zinc-900" />
+              <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent" style={{ borderTopColor: "#1c1c20" }} />
             </div>
           </div>
         ))}
       </div>
 
       {/* Summary bar */}
-      <div className="flex flex-wrap gap-6 rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+      <div className="flex flex-wrap gap-6 rounded-lg border border-border-subtle bg-bg-raised px-4 py-3">
         <SummaryItem label="Total Invested" value={formatCurrency(totalInvested, currency)} />
         <SummaryItem label="Current Value" value={formatCurrency(totalCurrentValue, currency)} />
         <SummaryItem label="Realized" value={formatCurrency(totalRealizedValue, currency)} />
@@ -139,8 +142,8 @@ export function PerformanceSummary({
 function SummaryItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wider text-white/40">{label}</p>
-      <p className="mt-0.5 text-sm font-medium text-white/80">{value}</p>
+      <p className="text-[10px] uppercase tracking-wider text-text-muted">{label}</p>
+      <p className="mt-0.5 text-sm font-medium text-text-primary">{value}</p>
     </div>
   );
 }

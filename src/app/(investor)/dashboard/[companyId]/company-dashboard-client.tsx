@@ -245,7 +245,13 @@ function MetricsTabContent({
   const [selectedViewId, setSelectedViewId] = React.useState<string | null>(
     initialViews.find((v) => v.is_default)?.id ?? initialViews[0]?.id ?? null
   );
-  const { periodType, setPeriodType, dateRange, setDateRange } = useDashboardPreferences();
+  const { periodType, setPeriodType, dateRange, setDateRange, resetPeriodType } = useDashboardPreferences();
+
+  // Reset to quarterly when switching between companies
+  React.useEffect(() => {
+    resetPeriodType();
+  }, [companyId, resetPeriodType]);
+
   const [detailSelection, setDetailSelection] = React.useState<{
     metricName: string;
     periodStart?: string;
@@ -297,9 +303,9 @@ function MetricsTabContent({
 
   if (!hasMetrics) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-        <p className="text-white/60">No metrics have been submitted for this company yet.</p>
-        <p className="mt-2 text-sm text-white/40">
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <p className="text-text-tertiary">No metrics have been submitted for this company yet.</p>
+        <p className="mt-2 text-sm text-text-muted">
           Metrics will appear here once the founder submits data.
         </p>
       </div>
@@ -321,22 +327,22 @@ function MetricsTabContent({
             onChange={setSelectedViewId}
             onDelete={handleDeleteView}
           />
-          <div className="hidden sm:block h-5 w-px bg-white/[0.06]" />
+          <div className="hidden sm:block h-5 w-px bg-bg-elevated" />
           <PeriodSelector value={periodType} onChange={setPeriodType} />
-          <div className="hidden sm:block h-5 w-px bg-white/[0.06]" />
+          <div className="hidden sm:block h-5 w-px bg-bg-elevated" />
           <DateRangeSelector value={dateRange} onChange={setDateRange} />
         </div>
         <div className="flex items-center gap-2">
           <Link
             href={`/requests/new?companyId=${companyId}`}
-            className="flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 sm:py-1.5 text-xs font-medium text-black hover:bg-white/90 transition-colors"
+            className="flex items-center justify-center gap-2 rounded-lg bg-btn-primary-bg px-3 py-2 sm:py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover transition-colors"
           >
             <Send className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Request Metrics</span>
           </Link>
           <Link
             href={`/dashboard/${companyId}/edit`}
-            className="flex items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 sm:py-1.5 text-xs font-medium text-white/60 hover:border-white/15 hover:text-white/80 transition-colors"
+            className="flex items-center justify-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-2 sm:py-1.5 text-xs font-medium text-text-tertiary hover:border-border-default hover:text-text-secondary transition-colors"
           >
             <Settings className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Edit Dashboard</span>
@@ -362,10 +368,9 @@ function MetricsTabContent({
           return (
             <div
               key={widget.id}
-              className={`rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 sm:p-4 ${colSpanClass}`}
+              className={`rounded-xl border border-border-subtle bg-bg-raised p-3 sm:p-4 ${colSpanClass}`}
               style={{
                 minHeight: `${widget.h * 80}px`,
-                "--table-bg": "#0c0c0e",
               } as React.CSSProperties}
             >
               <DashboardWidget
@@ -383,9 +388,9 @@ function MetricsTabContent({
       </div>
 
       {widgets.length === 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-white/60">No widgets configured for this dashboard.</p>
-          <p className="mt-2 text-sm text-white/40">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <p className="text-text-tertiary">No widgets configured for this dashboard.</p>
+          <p className="mt-2 text-sm text-text-muted">
             Click "Edit Dashboard" to add charts and metrics.
           </p>
         </div>

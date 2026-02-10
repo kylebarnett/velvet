@@ -104,7 +104,7 @@ export function DashboardWidget({
   }
 
   return (
-    <div className="flex h-full items-center justify-center text-white/40">
+    <div className="flex h-full items-center justify-center text-text-muted">
       Unknown widget type
     </div>
   );
@@ -193,9 +193,18 @@ function prepareTableData(
   periodType: PeriodType,
   showAllMetrics?: boolean
 ) {
-  // Filter to requested metrics and period type
-  // If showAllMetrics is true or metricNames is empty, show all metrics
   const shouldShowAll = showAllMetrics || metricNames.length === 0;
+
+  // Collect all unique metric names across ALL period types so metrics
+  // appear consistently regardless of which period view is selected.
+  const allMetricNames = new Set<string>();
+  for (const m of metrics) {
+    if (shouldShowAll || metricNames.some((n) => n.toLowerCase() === m.metric_name.toLowerCase())) {
+      allMetricNames.add(m.metric_name);
+    }
+  }
+
+  // Filter data to the selected period type only
   const filtered = metrics.filter((m) => {
     if (m.period_type !== periodType) return false;
     if (shouldShowAll) return true;
@@ -206,11 +215,10 @@ function prepareTableData(
 
   // Group by metric name
   const byMetric = new Map<string, MetricValue[]>();
-
+  for (const name of allMetricNames) {
+    byMetric.set(name, []);
+  }
   for (const metric of filtered) {
-    if (!byMetric.has(metric.metric_name)) {
-      byMetric.set(metric.metric_name, []);
-    }
     byMetric.get(metric.metric_name)!.push(metric);
   }
 
@@ -220,7 +228,6 @@ function prepareTableData(
       (a, b) =>
         new Date(b.period_start).getTime() - new Date(a.period_start).getTime()
     );
-    // Use the most recent value's source info
     const latest = sorted[0];
     return {
       metricName,

@@ -95,7 +95,7 @@ function CompanyLogoDisplay({
   const initial = name.charAt(0).toUpperCase();
 
   return (
-    <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border border-white/[0.08] bg-white/5">
+    <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border border-border-subtle bg-bg-elevated">
       {displayUrl && !imgError ? (
         <img
           src={displayUrl}
@@ -104,7 +104,7 @@ function CompanyLogoDisplay({
           onError={() => setImgError(true)}
         />
       ) : (
-        <span className="text-lg font-medium text-white/60">{initial}</span>
+        <span className="text-lg font-medium text-text-tertiary">{initial}</span>
       )}
     </div>
   );
@@ -112,7 +112,7 @@ function CompanyLogoDisplay({
 
 function TrendIndicator({ percentChange }: { percentChange: number | null }) {
   if (percentChange == null) {
-    return <Minus className="h-4 w-4 text-white/40" aria-hidden="true" />;
+    return <Minus className="h-4 w-4 text-text-muted" aria-hidden="true" />;
   }
 
   if (percentChange > 0) {
@@ -136,7 +136,7 @@ function TrendIndicator({ percentChange }: { percentChange: number | null }) {
   }
 
   return (
-    <div className="flex items-center gap-1 text-white/40" role="status">
+    <div className="flex items-center gap-1 text-text-muted" role="status">
       <Minus className="h-4 w-4" aria-hidden="true" />
       <span className="text-xs font-medium">0%</span>
       <span className="sr-only">No change</span>
@@ -163,31 +163,31 @@ export function CompanyCard({
   return (
     <Link
       href={`/dashboard/${id}`}
-      className="card-hover-lift flex flex-col rounded-xl border border-white/[0.08] bg-white/[0.03] p-5 hover:border-white/15"
+      className="card-hover-lift flex flex-col rounded-xl border border-border-subtle bg-bg-raised p-5 hover:border-border-default"
     >
       <div className="flex items-start justify-between">
         <CompanyLogoDisplay name={name} logoUrl={logoUrl} />
         {!isApproved && (
-          <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200">
+          <span className="rounded-full bg-[var(--status-warning-bg)] px-2 py-0.5 text-xs text-[var(--status-warning-text)]">
             Pending
           </span>
         )}
       </div>
 
-      <div className="mt-3">
-        <h3 className="font-medium text-white">{name}</h3>
+      <div className="mt-3 mb-2">
+        <h3 className="font-medium text-text-primary">{name}</h3>
         <div className="mt-1.5 flex items-center gap-1.5">
-          {industry && <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[11px] capitalize text-blue-300/70">{industry.replace(/_/g, " ")}</span>}
-          {stage && <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[11px] capitalize text-violet-300/70">{stage.replace(/_/g, " ")}</span>}
+          {industry && <span className="rounded-full bg-[var(--tag-blue-bg)] px-2.5 py-0.5 text-[11px] font-medium capitalize text-[var(--tag-blue-text)]">{industry.replace(/_/g, " ")}</span>}
+          {stage && <span className="rounded-full bg-[var(--tag-violet-bg)] px-2.5 py-0.5 text-[11px] font-medium capitalize text-[var(--tag-violet-text)]">{stage.replace(/_/g, " ")}</span>}
         </div>
       </div>
 
       {hasAnyMetric && (
-        <div className="mt-auto space-y-2 border-t border-white/[0.06] pt-3">
+        <div className="mt-auto space-y-2 border-t border-border-subtle pt-4">
           {/* Primary metric */}
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-white/60">{latestMetric.name}</div>
+              <div className="text-xs text-text-tertiary">{latestMetric.name}</div>
               <div className="mt-0.5 text-lg font-semibold">
                 {formatValue(latestMetric.value, latestMetric.name)}
               </div>
@@ -197,10 +197,10 @@ export function CompanyCard({
 
           {/* Secondary metric (smaller) */}
           {secondaryMetric && secondaryMetric.value != null && (
-            <div className="flex items-center justify-between border-t border-white/[0.06] pt-2">
+            <div className="flex items-center justify-between border-t border-border-subtle pt-2">
               <div>
-                <div className="text-xs text-white/40">{secondaryMetric.name}</div>
-                <div className="mt-0.5 text-sm font-medium text-white/80">
+                <div className="text-xs text-text-muted">{secondaryMetric.name}</div>
+                <div className="mt-0.5 text-sm font-medium text-text-primary">
                   {formatValue(secondaryMetric.value, secondaryMetric.name)}
                 </div>
               </div>
@@ -215,26 +215,26 @@ export function CompanyCard({
           {(() => {
             const { label, isStale } = formatFreshness(lastSubmittedAt);
             return isStale ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] text-amber-300">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--tag-amber-bg)] px-2 py-0.5 text-[10px] text-[var(--tag-amber-text)]">
                 <AlertCircle className="h-3 w-3" />
                 {label}
               </span>
             ) : (
-              <span className="text-[10px] text-white/30">{label}</span>
+              <span className="text-[10px] text-text-faint">{label}</span>
             );
           })()}
         </div>
       )}
 
       {!hasAnyMetric && hasFounder && isApproved && (
-        <div className="mt-auto flex items-center border-t border-white/[0.06] pt-3">
-          <span className="text-xs text-white/40">No metrics submitted yet</span>
+        <div className="mt-auto flex items-center border-t border-border-subtle pt-4">
+          <span className="text-xs text-text-muted">No metrics submitted yet</span>
         </div>
       )}
 
       {!hasFounder && (
-        <div className="mt-auto flex items-center border-t border-white/[0.06] pt-3">
-          <span className="text-xs text-amber-200/60">Awaiting founder signup</span>
+        <div className="mt-auto flex items-center border-t border-border-subtle pt-4">
+          <span className="text-xs text-[var(--status-warning-text)]/60">Awaiting founder signup</span>
         </div>
       )}
     </Link>

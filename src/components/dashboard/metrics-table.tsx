@@ -883,8 +883,27 @@ export function MetricsTable({
     (a, b) => new Date(a).getTime() - new Date(b).getTime(),
   );
 
-  // All periods are displayed — user scrolls horizontally
-  const displayPeriods = sortedPeriods;
+  // Ensure minimum columns so the table feels complete:
+  //   monthly  → 12 months
+  //   yearly   → 5 years
+  const periodType = displayData[0]?.periodType ?? "quarterly";
+  const minPeriods = periodType === "monthly" ? 12 : periodType === "yearly" ? 5 : 0;
+  let displayPeriods = sortedPeriods;
+
+  if (minPeriods > 0 && sortedPeriods.length < minPeriods && sortedPeriods.length > 0) {
+    const latest = new Date(sortedPeriods[sortedPeriods.length - 1]);
+    const periodsSet = new Set(sortedPeriods);
+    for (let i = 1; periodsSet.size < minPeriods; i++) {
+      const d = periodType === "monthly"
+        ? new Date(latest.getFullYear(), latest.getMonth() - i, 1)
+        : new Date(latest.getFullYear() - i, 0, 1);
+      const iso = d.toISOString().slice(0, 10);
+      periodsSet.add(iso);
+    }
+    displayPeriods = Array.from(periodsSet).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+    );
+  }
 
   // The periods currently visible in the scroll viewport (for totals)
   // Default to last 4 periods before scroll tracking kicks in (matches auto-scroll-right)

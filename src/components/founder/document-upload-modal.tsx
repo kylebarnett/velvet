@@ -129,14 +129,14 @@ export function DocumentUploadModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-xl border border-white/10 bg-zinc-900 p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-xl border border-border-default bg-bg-secondary p-6">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">Upload document</h3>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-white/40 hover:bg-white/5 hover:text-white/60"
+            className="rounded-md p-1 text-text-muted hover:bg-bg-elevated hover:text-text-tertiary"
           >
             <X className="h-5 w-5" />
           </button>
@@ -157,21 +157,13 @@ export function DocumentUploadModal({
               <SelectTrigger>
                 <SelectValue placeholder="Select type..." />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="income_statement">
-                  Income Statement
-                </SelectItem>
+              <SelectContent className="[&_[role=option]]:py-2.5 [&_[role=option]]:pr-4">
+                <SelectItem value="income_statement">Income Statement</SelectItem>
                 <SelectItem value="balance_sheet">Balance Sheet</SelectItem>
-                <SelectItem value="cash_flow_statement">
-                  Cash Flow Statement
-                </SelectItem>
-                <SelectItem value="consolidated_financial_statements">
-                  Consolidated Financial Statements
-                </SelectItem>
+                <SelectItem value="cash_flow_statement">Cash Flow Statement</SelectItem>
+                <SelectItem value="consolidated_financial_statements">Consolidated Financial Statements</SelectItem>
                 <SelectItem value="409a_valuation">409A Valuation</SelectItem>
-                <SelectItem value="investor_update">
-                  Investor Update
-                </SelectItem>
+                <SelectItem value="investor_update">Investor Update</SelectItem>
                 <SelectItem value="board_deck">Board Deck</SelectItem>
                 <SelectItem value="cap_table">Cap Table</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
@@ -211,7 +203,7 @@ export function DocumentUploadModal({
           <div className="grid gap-2">
             <label className="text-sm font-medium" htmlFor="modal-description">
               Description{" "}
-              <span className="font-normal text-white/60">(optional)</span>
+              <span className="font-normal text-text-tertiary">(optional)</span>
             </label>
             <textarea
               id="modal-description"
@@ -219,7 +211,7 @@ export function DocumentUploadModal({
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
               placeholder="Add context about this document..."
-              className="rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
+              className="rounded-md border border-border-default bg-bg-input px-3 py-2 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
             />
           </div>
 
@@ -229,17 +221,17 @@ export function DocumentUploadModal({
               {...getRootProps()}
               className={`cursor-pointer rounded-xl border-2 border-dashed p-6 text-center transition-colors ${
                 isDragActive
-                  ? "border-white/30 bg-white/5"
-                  : "border-white/15 bg-black/20 hover:border-white/25"
+                  ? "border-border-default bg-bg-elevated"
+                  : "border-border-default bg-bg-input hover:border-border-default"
               }`}
             >
               <input {...getInputProps()} />
               {selectedFile ? (
                 <div className="flex items-center justify-center gap-3">
-                  <Upload className="h-5 w-5 text-white/50" />
+                  <Upload className="h-5 w-5 text-text-muted" />
                   <div className="text-left">
                     <div className="text-sm font-medium">{selectedFile.name}</div>
-                    <div className="text-xs text-white/60">
+                    <div className="text-xs text-text-tertiary">
                       {formatFileSize(selectedFile.size)}
                     </div>
                   </div>
@@ -249,18 +241,18 @@ export function DocumentUploadModal({
                       e.stopPropagation();
                       setSelectedFile(null);
                     }}
-                    className="rounded p-1 text-white/40 hover:text-white/60"
+                    className="rounded p-1 text-text-muted hover:text-text-tertiary"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
               ) : (
                 <div>
-                  <Upload className="mx-auto h-8 w-8 text-white/30" />
-                  <p className="mt-2 text-sm text-white/60">
+                  <Upload className="mx-auto h-8 w-8 text-text-faint" />
+                  <p className="mt-2 text-sm text-text-tertiary">
                     Drag & drop a file here, or click to browse
                   </p>
-                  <p className="mt-1 text-xs text-white/40">
+                  <p className="mt-1 text-xs text-text-muted">
                     PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, CSV, TXT
                   </p>
                 </div>
@@ -271,11 +263,11 @@ export function DocumentUploadModal({
           {/* Upload progress bar */}
           {isUploading && (
             <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs text-white/60">
+              <div className="flex items-center justify-between text-xs text-text-tertiary">
                 <span>Uploading...</span>
                 <span>{uploadProgress}%</span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/20">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-bg-hover">
                 <div
                   className="h-full rounded-full bg-white transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
@@ -285,7 +277,7 @@ export function DocumentUploadModal({
           )}
 
           {error && (
-            <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
               {error}
             </div>
           )}
@@ -294,14 +286,14 @@ export function DocumentUploadModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10"
+              className="rounded-lg border border-border-default bg-bg-elevated px-4 py-2 text-sm hover:bg-bg-hover"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isUploading || !documentType || !selectedFile}
-              className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+              className="rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
             >
               {isUploading ? "Uploading..." : "Upload"}
             </button>

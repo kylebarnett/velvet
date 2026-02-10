@@ -29,15 +29,15 @@ const roleDescriptions: Record<string, string> = {
 export function MemberRoleSelector({ value, onChange, disabled }: Props) {
   return (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
-      <SelectTrigger size="sm" className="w-auto min-w-[110px]">
+      <SelectTrigger className="w-auto min-w-[140px]">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="min-w-[220px]">
         {Object.entries(roleLabels).map(([role, label]) => (
-          <SelectItem key={role} value={role}>
+          <SelectItem key={role} value={role} className="py-3 pl-9 pr-4">
             <div>
-              <div>{label}</div>
-              <div className="text-[10px] text-white/40">
+              <div className="font-medium text-text-primary">{label}</div>
+              <div className="mt-1 text-xs leading-snug text-text-muted">
                 {roleDescriptions[role]}
               </div>
             </div>

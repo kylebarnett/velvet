@@ -1,33 +1,65 @@
 @import "tailwindcss";
 
+/* Light theme (default) */
 :root {
   --background: #ffffff;
   --foreground: #171717;
 
+  --bg-primary: #fafafa;
+  --bg-secondary: #f5f5f7;
+  --bg-raised: rgba(0, 0, 0, 0.03);
+  --bg-elevated: rgba(0, 0, 0, 0.06);
+  --bg-hover: rgba(0, 0, 0, 0.09);
+  --bg-input: #f0f0f2;
+  --bg-backdrop: rgba(0, 0, 0, 0.3);
+  --bg-sidebar: #fafafa;
+  --bg-tooltip: #1a1a1e;
+  --text-primary: #0a0a0a;
+  --text-secondary: rgba(0, 0, 0, 0.65);
+  --text-tertiary: rgba(0, 0, 0, 0.55);
+  --text-muted: rgba(0, 0, 0, 0.5);
+  --text-faint: rgba(0, 0, 0, 0.35);
+  --border-default: rgba(0, 0, 0, 0.13);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --btn-primary-bg: #1a1a1e;
+  --btn-primary-text: #ffffff;
+  --btn-primary-hover: #2d2d31;
+  --chart-grid: rgba(0, 0, 0, 0.08);
+  --chart-tick: rgba(0, 0, 0, 0.4);
+  --chart-tooltip-bg: rgba(255, 255, 255, 0.97);
+  --chart-tooltip-border: rgba(0, 0, 0, 0.1);
+  --chart-tooltip-text: rgba(0, 0, 0, 0.8);
+  --chart-tooltip-label: rgba(0, 0, 0, 0.5);
+  --chart-tooltip-shadow: rgba(0, 0, 0, 0.1);
+  --chart-cursor: rgba(0, 0, 0, 0.03);
+  --chart-secondary-line: rgba(0, 0, 0, 0.3);
+  --ring-focus: rgba(0, 0, 0, 0.3);
+  --tag-blue-bg: rgba(59, 130, 246, 0.08);
+  --tag-blue-text: #2563eb;
+  --tag-violet-bg: rgba(139, 92, 246, 0.08);
+  --tag-violet-text: #7c3aed;
+  --tag-amber-bg: rgba(245, 158, 11, 0.08);
+  --tag-amber-text: #b45309;
+  --tag-emerald-bg: rgba(16, 185, 129, 0.08);
+  --tag-emerald-text: #047857;
+  --tag-pink-bg: rgba(236, 72, 153, 0.08);
+  --tag-pink-text: #be185d;
+  --status-success-bg: rgba(16, 185, 129, 0.12);
+  --status-success-text: #047857;
+  --status-warning-bg: rgba(245, 158, 11, 0.12);
+  --status-warning-text: #b45309;
+  --status-error-bg: rgba(239, 68, 68, 0.12);
+  --status-error-text: #dc2626;
+  --status-info-bg: rgba(59, 130, 246, 0.12);
+  --status-info-text: #2563eb;
+
   /* Surface colors */
-  --surface-primary: #0a0a0a;
-  --surface-raised: rgba(255, 255, 255, 0.05);
+  --surface-primary: #ffffff;
+  --surface-raised: rgba(0, 0, 0, 0.02);
   --surface-overlay: rgba(0, 0, 0, 0.3);
 
-  /* Border colors */
-  --border-default: rgba(255, 255, 255, 0.1);
-  --border-subtle: rgba(255, 255, 255, 0.06);
-
-  /* Text colors */
-  --text-primary: #fafafa;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --text-tertiary: rgba(255, 255, 255, 0.6);
-  --text-muted: rgba(255, 255, 255, 0.4);
-
-  /* Status colors */
-  --status-success-bg: rgba(16, 185, 129, 0.2);
-  --status-success-text: #a7f3d0;
-  --status-warning-bg: rgba(245, 158, 11, 0.2);
-  --status-warning-text: #fde68a;
-  --status-error-bg: rgba(239, 68, 68, 0.2);
-  --status-error-text: #fecaca;
-  --status-info-bg: rgba(59, 130, 246, 0.2);
-  --status-info-text: #bfdbfe;
+  /* Table */
+  --table-bg: #fafafa;
 
   /* Z-index scale */
   --z-dropdown: 30;
@@ -38,18 +70,92 @@
   --z-toast: 60;
 }
 
+/* Dark theme */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  --bg-primary: #09090b;
+  --bg-secondary: #18181b;
+  --bg-raised: rgba(255, 255, 255, 0.03);
+  --bg-elevated: rgba(255, 255, 255, 0.05);
+  --bg-hover: rgba(255, 255, 255, 0.1);
+  --bg-input: rgba(0, 0, 0, 0.3);
+  --bg-backdrop: rgba(0, 0, 0, 0.6);
+  --bg-sidebar: rgba(0, 0, 0, 0.4);
+  --bg-tooltip: #1c1c20;
+  --text-primary: #fafafa;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --text-faint: rgba(255, 255, 255, 0.3);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --btn-primary-bg: #ffffff;
+  --btn-primary-text: #000000;
+  --btn-primary-hover: rgba(255, 255, 255, 0.9);
+  --chart-grid: rgba(255, 255, 255, 0.06);
+  --chart-tick: rgba(255, 255, 255, 0.4);
+  --chart-tooltip-bg: rgba(9, 9, 11, 0.95);
+  --chart-tooltip-border: rgba(255, 255, 255, 0.1);
+  --chart-tooltip-text: rgba(255, 255, 255, 0.8);
+  --chart-tooltip-label: rgba(255, 255, 255, 0.5);
+  --chart-tooltip-shadow: rgba(0, 0, 0, 0.4);
+  --chart-cursor: rgba(255, 255, 255, 0.03);
+  --chart-secondary-line: rgba(255, 255, 255, 0.3);
+  --ring-focus: rgba(255, 255, 255, 0.4);
+  --tag-blue-bg: rgba(59, 130, 246, 0.15);
+  --tag-blue-text: #93c5fd;
+  --tag-violet-bg: rgba(139, 92, 246, 0.15);
+  --tag-violet-text: #c4b5fd;
+  --tag-amber-bg: rgba(245, 158, 11, 0.15);
+  --tag-amber-text: #fcd34d;
+  --tag-emerald-bg: rgba(16, 185, 129, 0.15);
+  --tag-emerald-text: #6ee7b7;
+  --tag-pink-bg: rgba(236, 72, 153, 0.15);
+  --tag-pink-text: #f9a8d4;
+  --status-success-bg: rgba(16, 185, 129, 0.2);
+  --status-success-text: #a7f3d0;
+  --status-warning-bg: rgba(245, 158, 11, 0.2);
+  --status-warning-text: #fde68a;
+  --status-error-bg: rgba(239, 68, 68, 0.2);
+  --status-error-text: #fecaca;
+  --status-info-bg: rgba(59, 130, 246, 0.2);
+  --status-info-text: #bfdbfe;
+
+  /* Surface colors */
+  --surface-primary: #0a0a0a;
+  --surface-raised: rgba(255, 255, 255, 0.05);
+  --surface-overlay: rgba(0, 0, 0, 0.3);
+
+  /* Table */
+  --table-bg: #09090b;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-raised: var(--bg-raised);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-hover: var(--bg-hover);
+  --color-bg-input: var(--bg-input);
+  --color-bg-backdrop: var(--bg-backdrop);
+  --color-bg-sidebar: var(--bg-sidebar);
+  --color-bg-tooltip: var(--bg-tooltip);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+  --color-border-default: var(--border-default);
+  --color-border-subtle: var(--border-subtle);
+  --color-btn-primary-bg: var(--btn-primary-bg);
+  --color-btn-primary-text: var(--btn-primary-text);
+  --color-btn-primary-hover: var(--btn-primary-hover);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {

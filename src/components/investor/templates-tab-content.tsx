@@ -43,19 +43,19 @@ function MetricChip({ name }: { name: string }) {
   return (
     <div className="relative inline-block">
       <span
-        className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70 cursor-default"
+        className="rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-secondary cursor-default"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
         {name}
       </span>
       {showTooltip && metricInfo && (
-        <div className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-lg border border-white/10 bg-zinc-900 p-3 shadow-xl">
-          <p className="text-xs font-medium text-white">{name}</p>
-          <p className="mt-1 text-xs text-white/60">{metricInfo.description}</p>
+        <div className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-lg border border-border-default bg-bg-secondary p-3 shadow-xl">
+          <p className="text-xs font-medium text-text-primary">{name}</p>
+          <p className="mt-1 text-xs text-text-tertiary">{metricInfo.description}</p>
           {metricInfo.formula && (
-            <div className="mt-2 rounded bg-white/5 px-2 py-1.5">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-white/60">Formula</p>
+            <div className="mt-2 rounded bg-bg-elevated px-2 py-1.5">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-text-tertiary">Formula</p>
               <p className="mt-0.5 text-xs text-emerald-400">{metricInfo.formula}</p>
             </div>
           )}
@@ -269,19 +269,19 @@ export function TemplatesTabContent() {
     return (
       <div
         key={tmpl.id}
-        className={`rounded-xl border border-white/10 bg-white/5 p-4 ${isHidden ? "opacity-60" : ""}`}
+        className={`rounded-xl border border-border-default bg-bg-elevated p-4 ${isHidden ? "opacity-60" : ""}`}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/20 px-2 py-0.5 text-xs text-violet-300">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--tag-violet-bg)] px-2 py-0.5 text-xs text-[var(--tag-violet-text)]">
                 <Sparkles className="h-3 w-3" />
                 {INDUSTRY_LABELS[tmpl.targetIndustry ?? ""] ?? "Industry"}
               </span>
               <span className="text-sm font-medium">{tmpl.name}</span>
             </div>
             {tmpl.description && (
-              <p className="mt-1 text-xs text-white/60">{tmpl.description}</p>
+              <p className="mt-1 text-xs text-text-tertiary">{tmpl.description}</p>
             )}
             <div className="mt-2 flex flex-wrap gap-1.5">
               {displayedMetrics.map((item) => (
@@ -291,7 +291,7 @@ export function TemplatesTabContent() {
             {hasMoreMetrics && (
               <button
                 onClick={() => toggleExpanded(tmpl.id)}
-                className="mt-2 inline-flex items-center gap-1 text-xs text-white/50 hover:text-white/70"
+                className="mt-2 inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary"
                 type="button"
               >
                 {isExpanded ? (
@@ -312,7 +312,7 @@ export function TemplatesTabContent() {
             {isHidden ? (
               <button
                 onClick={() => handleRestore(tmpl.id)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
+                className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover"
                 type="button"
               >
                 <Eye className="h-3.5 w-3.5" />
@@ -322,7 +322,7 @@ export function TemplatesTabContent() {
               <>
                 <button
                   onClick={() => setAssignModal({ open: true, template: tmpl })}
-                  className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover"
                   type="button"
                 >
                   Assign
@@ -330,7 +330,7 @@ export function TemplatesTabContent() {
                 <button
                   onClick={() => handleClone(tmpl)}
                   disabled={editingSystem === tmpl.id}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10 disabled:opacity-60"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs font-medium text-text-primary hover:bg-bg-hover disabled:opacity-60"
                   type="button"
                   title="Clone to My Templates"
                 >
@@ -339,12 +339,12 @@ export function TemplatesTabContent() {
                 </button>
                 <button
                   onClick={() => setHideModal({ open: true, template: tmpl })}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                   type="button"
                   title="Hide from view"
                   aria-label={`Hide ${tmpl.name} template`}
                 >
-                  <EyeOff className="h-4 w-4 text-white/40" />
+                  <EyeOff className="h-4 w-4 text-text-muted" />
                 </button>
               </>
             )}
@@ -367,8 +367,8 @@ export function TemplatesTabContent() {
         key={tmpl.id}
         className={`rounded-xl border p-4 transition-colors ${
           isSelected
-            ? "border-white/20 bg-white/[0.08]"
-            : "border-white/10 bg-white/5"
+            ? "border-border-default bg-bg-hover"
+            : "border-border-default bg-bg-elevated"
         }`}
       >
         <div className="flex items-start justify-between gap-4">
@@ -377,11 +377,11 @@ export function TemplatesTabContent() {
               <button
                 type="button"
                 onClick={() => toggleSelected(tmpl.id)}
-                className="shrink-0 text-white/40 hover:text-white/70"
+                className="shrink-0 text-text-muted hover:text-text-secondary"
                 title={isSelected ? "Deselect" : "Select"}
               >
                 {isSelected ? (
-                  <CheckSquare className="h-4 w-4 text-white/70" />
+                  <CheckSquare className="h-4 w-4 text-text-secondary" />
                 ) : (
                   <Square className="h-4 w-4" />
                 )}
@@ -395,7 +395,7 @@ export function TemplatesTabContent() {
               </button>
             </div>
             {tmpl.description && (
-              <p className="mt-1 text-xs text-white/60">{tmpl.description}</p>
+              <p className="mt-1 text-xs text-text-tertiary">{tmpl.description}</p>
             )}
             <div className="mt-2 flex flex-wrap gap-1.5">
               {displayedMetrics.map((item) => (
@@ -405,7 +405,7 @@ export function TemplatesTabContent() {
             {hasMoreMetrics && (
               <button
                 onClick={() => toggleExpanded(tmpl.id)}
-                className="mt-2 inline-flex items-center gap-1 text-xs text-white/50 hover:text-white/70"
+                className="mt-2 inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary"
                 type="button"
               >
                 {isExpanded ? (
@@ -425,7 +425,7 @@ export function TemplatesTabContent() {
           <div className="flex shrink-0 gap-1.5">
             <button
               onClick={() => setAssignModal({ open: true, template: tmpl })}
-              className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
+              className="inline-flex h-9 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover"
               type="button"
             >
               Assign
@@ -433,7 +433,7 @@ export function TemplatesTabContent() {
             <button
               type="button"
               onClick={() => setFormModal({ open: true, mode: "edit", template: tmpl })}
-              className="inline-flex h-9 items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10"
+              className="inline-flex h-9 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-3 text-xs font-medium text-text-primary hover:bg-bg-hover"
             >
               <Pencil className="h-3.5 w-3.5 sm:mr-1.5" />
               <span className="hidden sm:inline">Edit</span>
@@ -446,7 +446,7 @@ export function TemplatesTabContent() {
                   label: `"${tmpl.name}"`,
                 })
               }
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
               title="Delete template"
               aria-label={`Delete ${tmpl.name} template`}
@@ -463,13 +463,13 @@ export function TemplatesTabContent() {
     <div className="space-y-4 sm:space-y-6">
       {/* Header with new template button */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-white/60">
+        <p className="text-sm text-text-tertiary">
           Use industry templates or create your own custom metric sets.
         </p>
         <button
           type="button"
           onClick={() => setFormModal({ open: true, mode: "create", template: null })}
-          className="inline-flex h-10 items-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50"
+          className="inline-flex h-10 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           data-onboarding="new-template"
         >
           <Plus className="h-4 w-4" />
@@ -480,32 +480,32 @@ export function TemplatesTabContent() {
       {loading && (
         <div className="space-y-6">
           <div className="space-y-3">
-            <div className="h-5 w-40 animate-pulse rounded bg-white/10" />
+            <div className="h-5 w-40 animate-pulse rounded bg-bg-hover" />
             <div className="grid gap-3 md:grid-cols-2">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="rounded-xl border border-white/10 bg-white/5 p-4"
+                  className="rounded-xl border border-border-default bg-bg-elevated p-4"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-2">
                         <div className="h-5 w-16 animate-pulse rounded-full bg-violet-500/20" />
-                        <div className="h-4 w-32 animate-pulse rounded bg-white/10" />
+                        <div className="h-4 w-32 animate-pulse rounded bg-bg-hover" />
                       </div>
-                      <div className="h-3 w-48 animate-pulse rounded bg-white/10" />
+                      <div className="h-3 w-48 animate-pulse rounded bg-bg-hover" />
                       <div className="flex flex-wrap gap-1.5">
                         {[1, 2, 3, 4].map((j) => (
                           <div
                             key={j}
-                            className="h-5 w-16 animate-pulse rounded-full bg-white/10"
+                            className="h-5 w-16 animate-pulse rounded-full bg-bg-hover"
                           />
                         ))}
                       </div>
                     </div>
                     <div className="flex gap-1.5">
-                      <div className="h-8 w-16 animate-pulse rounded-md bg-white/20" />
-                      <div className="h-8 w-16 animate-pulse rounded-md bg-white/10" />
+                      <div className="h-8 w-16 animate-pulse rounded-md bg-bg-hover" />
+                      <div className="h-8 w-16 animate-pulse rounded-md bg-bg-hover" />
                     </div>
                   </div>
                 </div>
@@ -513,16 +513,16 @@ export function TemplatesTabContent() {
             </div>
           </div>
           <div className="space-y-3">
-            <div className="h-5 w-28 animate-pulse rounded bg-white/10" />
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <div className="h-4 w-40 animate-pulse rounded bg-white/10" />
+            <div className="h-5 w-28 animate-pulse rounded bg-bg-hover" />
+            <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+              <div className="h-4 w-40 animate-pulse rounded bg-bg-hover" />
             </div>
           </div>
         </div>
       )}
 
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
@@ -532,10 +532,10 @@ export function TemplatesTabContent() {
           {visibleSystemTemplates.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-medium text-white/80">
+                <h2 className="text-sm font-medium text-text-primary">
                   Industry Templates
                 </h2>
-                <span className="text-xs text-white/60">
+                <span className="text-xs text-text-tertiary">
                   Pre-built metrics by industry
                 </span>
               </div>
@@ -549,7 +549,7 @@ export function TemplatesTabContent() {
             <div className="space-y-3">
               <button
                 onClick={() => setShowHidden(!showHidden)}
-                className="flex items-center gap-2 text-sm text-white/50 hover:text-white/70"
+                className="flex items-center gap-2 text-sm text-text-muted hover:text-text-secondary"
                 type="button"
               >
                 {showHidden ? (
@@ -573,11 +573,11 @@ export function TemplatesTabContent() {
           <div ref={myTemplatesRef} className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-medium text-white/80">
+                <h2 className="text-sm font-medium text-text-primary">
                   My Templates
                 </h2>
                 {userTemplates.length > 0 && (
-                  <span className="text-xs text-white/60">
+                  <span className="text-xs text-text-tertiary">
                     {userTemplates.length}{" "}
                     {userTemplates.length === 1 ? "template" : "templates"}
                   </span>
@@ -587,13 +587,13 @@ export function TemplatesTabContent() {
                 <div className="flex items-center gap-2">
                   {selectedIds.size > 0 ? (
                     <>
-                      <span className="text-xs text-white/60">
+                      <span className="text-xs text-text-tertiary">
                         {selectedIds.size} selected
                       </span>
                       <button
                         type="button"
                         onClick={selectNone}
-                        className="inline-flex h-7 items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-white/60 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                        className="inline-flex h-7 items-center gap-1 rounded-md border border-border-default bg-bg-elevated px-2 text-xs text-text-tertiary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                         title="Clear selection"
                       >
                         <XSquare className="h-3.5 w-3.5" />
@@ -609,7 +609,7 @@ export function TemplatesTabContent() {
                             label: `${selectedIds.size} template${selectedIds.size > 1 ? "s" : ""}`,
                           })
                         }
-                        className="inline-flex h-7 items-center gap-1 rounded-md border border-red-500/20 bg-red-500/10 px-2 text-xs text-red-200 hover:bg-red-500/20 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                        className="inline-flex h-7 items-center gap-1 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-2 text-xs text-[var(--status-error-text)] hover:bg-red-500/20 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-red-500/50"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         {bulkDeleting ? "Deleting..." : "Delete selected"}
@@ -619,7 +619,7 @@ export function TemplatesTabContent() {
                     <button
                       type="button"
                       onClick={selectAll}
-                      className="inline-flex h-7 items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-white/50 hover:bg-white/10 hover:text-white/70 focus:outline-none focus:ring-2 focus:ring-white/20"
+                      className="inline-flex h-7 items-center gap-1 rounded-md border border-border-default bg-bg-elevated px-2 text-xs text-text-muted hover:bg-bg-hover hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                     >
                       <CheckSquare className="h-3.5 w-3.5" />
                       Select all
@@ -629,16 +629,16 @@ export function TemplatesTabContent() {
               )}
             </div>
             {userTemplates.length === 0 ? (
-              <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-                <div className="text-sm text-white/60">
+              <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+                <div className="text-sm text-text-tertiary">
                   No custom templates yet.
                 </div>
-                <div className="mt-2 text-xs text-white/60">
+                <div className="mt-2 text-xs text-text-tertiary">
                   Clone an industry template above or{" "}
                   <button
                     type="button"
                     onClick={() => setFormModal({ open: true, mode: "create", template: null })}
-                    className="text-white underline underline-offset-4 hover:text-white/80"
+                    className="text-text-primary underline underline-offset-4 hover:text-text-secondary"
                   >
                     create your own
                   </button>

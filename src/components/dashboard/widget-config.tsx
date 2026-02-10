@@ -44,13 +44,13 @@ export function WidgetConfig({
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+    <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-white/80">Configure Widget</h3>
+        <h3 className="text-sm font-medium text-text-secondary">Configure Widget</h3>
         <button
           type="button"
           onClick={onClose}
-          className="text-white/40 hover:text-white/60"
+          className="text-text-muted hover:text-text-tertiary"
           aria-label="Close widget configuration"
         >
           <X className="h-4 w-4" />
@@ -60,7 +60,7 @@ export function WidgetConfig({
       <div className="space-y-4">
         {/* Title field (common to all) */}
         <div>
-          <label className="block text-xs text-white/60 mb-1">Title</label>
+          <label className="block text-xs text-text-tertiary mb-1">Title</label>
           <input
             type="text"
             value={
@@ -74,7 +74,7 @@ export function WidgetConfig({
             }
             onChange={(e) => updateConfig({ title: e.target.value || undefined })}
             placeholder="Widget title"
-            className="h-9 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+            className="h-9 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm placeholder:text-text-muted focus:border-[var(--border-default)] focus:outline-none"
           />
         </div>
 
@@ -82,7 +82,7 @@ export function WidgetConfig({
         {isChartConfig(config) && (
           <>
             <div>
-              <label className="block text-xs text-white/60 mb-1">Chart Type</label>
+              <label className="block text-xs text-text-tertiary mb-1">Chart Type</label>
               <Select value={config.chartType} onValueChange={(v) => updateConfig({ chartType: v as ChartConfig["chartType"] })}>
                 <SelectTrigger size="sm">
                   <SelectValue />
@@ -97,15 +97,15 @@ export function WidgetConfig({
             </div>
 
             <div>
-              <label className="block text-xs text-white/60 mb-1">Metrics</label>
+              <label className="block text-xs text-text-tertiary mb-1">Metrics</label>
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {availableMetrics.length === 0 ? (
-                  <p className="text-xs text-white/40">No metrics available</p>
+                  <p className="text-xs text-text-muted">No metrics available</p>
                 ) : (
                   availableMetrics.map((metric) => (
                     <label
                       key={metric}
-                      className="flex items-center gap-2 text-sm text-white/70 cursor-pointer hover:text-white/90"
+                      className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer hover:text-text-primary"
                     >
                       <input
                         type="checkbox"
@@ -119,7 +119,7 @@ export function WidgetConfig({
                             });
                           }
                         }}
-                        className="rounded border-white/20"
+                        className="rounded border-border-default"
                       />
                       {metric}
                     </label>
@@ -129,7 +129,7 @@ export function WidgetConfig({
             </div>
 
             <div>
-              <label className="block text-xs text-white/60 mb-1">Period</label>
+              <label className="block text-xs text-text-tertiary mb-1">Period</label>
               <Select value={config.periodType} onValueChange={(v) => updateConfig({ periodType: v as ChartConfig["periodType"] })}>
                 <SelectTrigger size="sm">
                   <SelectValue />
@@ -142,12 +142,12 @@ export function WidgetConfig({
               </Select>
             </div>
 
-            <label className="flex items-center gap-2 text-sm text-white/70 cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
               <input
                 type="checkbox"
                 checked={config.showLegend}
                 onChange={(e) => updateConfig({ showLegend: e.target.checked })}
-                className="rounded border-white/20"
+                className="rounded border-border-default"
               />
               Show legend
             </label>
@@ -158,7 +158,7 @@ export function WidgetConfig({
         {isMetricCardConfig(config) && (
           <>
             <div>
-              <label className="block text-xs text-white/60 mb-1">Metric</label>
+              <label className="block text-xs text-text-tertiary mb-1">Metric</label>
               <Select value={config.metric || "__none__"} onValueChange={(v) => updateConfig({ metric: v === "__none__" ? "" : v })}>
                 <SelectTrigger size="sm">
                   <SelectValue placeholder="Select a metric..." />
@@ -174,12 +174,12 @@ export function WidgetConfig({
               </Select>
             </div>
 
-            <label className="flex items-center gap-2 text-sm text-white/70 cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
               <input
                 type="checkbox"
                 checked={config.showTrend}
                 onChange={(e) => updateConfig({ showTrend: e.target.checked })}
-                className="rounded border-white/20"
+                className="rounded border-border-default"
               />
               Show trend indicator
             </label>
@@ -190,15 +190,15 @@ export function WidgetConfig({
         {isTableConfig(config) && (
           <>
             <div>
-              <label className="block text-xs text-white/60 mb-1">Metrics</label>
+              <label className="block text-xs text-text-tertiary mb-1">Metrics</label>
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {availableMetrics.length === 0 ? (
-                  <p className="text-xs text-white/40">No metrics available</p>
+                  <p className="text-xs text-text-muted">No metrics available</p>
                 ) : (
                   availableMetrics.map((metric) => (
                     <label
                       key={metric}
-                      className="flex items-center gap-2 text-sm text-white/70 cursor-pointer hover:text-white/90"
+                      className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer hover:text-text-primary"
                     >
                       <input
                         type="checkbox"
@@ -212,7 +212,7 @@ export function WidgetConfig({
                             });
                           }
                         }}
-                        className="rounded border-white/20"
+                        className="rounded border-border-default"
                       />
                       {metric}
                     </label>
@@ -222,7 +222,7 @@ export function WidgetConfig({
             </div>
 
             <div>
-              <label className="block text-xs text-white/60 mb-1">Period</label>
+              <label className="block text-xs text-text-tertiary mb-1">Period</label>
               <Select value={config.periodType} onValueChange={(v) => updateConfig({ periodType: v as TableConfig["periodType"] })}>
                 <SelectTrigger size="sm">
                   <SelectValue />
@@ -237,15 +237,17 @@ export function WidgetConfig({
           </>
         )}
 
-        {/* Delete button */}
-        <button
-          type="button"
-          onClick={onDelete}
-          className="flex w-full items-center justify-center gap-2 rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300 hover:bg-red-500/20"
-        >
-          <Trash2 className="h-4 w-4" />
-          Delete Widget
-        </button>
+        {/* Delete button — hidden for the All Metrics table */}
+        {!(isTableConfig(config) && config.showAllMetrics) && (
+          <button
+            type="button"
+            onClick={onDelete}
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)] hover:bg-red-500/20"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete Widget
+          </button>
+        )}
       </div>
     </div>
   );

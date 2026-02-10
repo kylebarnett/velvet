@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Save, ChevronDown } from "lucide-react";
-import { Widget, ChartConfig, MetricCardConfig, TableConfig, DashboardLayout } from "@/components/dashboard/types";
+import { Widget, ChartConfig, MetricCardConfig, TableConfig, DashboardLayout, isTableConfig } from "@/components/dashboard/types";
 import { WidgetLibrary, WidgetTemplate } from "@/components/dashboard/widget-library";
 import { WidgetConfig } from "@/components/dashboard/widget-config";
 import { DashboardCanvas } from "@/components/dashboard/dashboard-canvas";
@@ -166,6 +166,8 @@ export function DashboardBuilderClient({
 
   function handleDeleteWidget() {
     if (!selectedWidgetId) return;
+    const target = widgets.find((w) => w.id === selectedWidgetId);
+    if (target && isTableConfig(target.config) && target.config.showAllMetrics) return;
     setWidgets(widgets.filter((w) => w.id !== selectedWidgetId));
     setSelectedWidgetId(null);
     setIsDirty(true);
@@ -272,13 +274,13 @@ export function DashboardBuilderClient({
               <button
                 type="button"
                 onClick={() => setShowViewDropdown(!showViewDropdown)}
-                className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
+                className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
               >
                 <span>{currentView?.name ?? "New View"}</span>
                 <ChevronDown className="h-3 w-3" />
               </button>
               {showViewDropdown && (
-                <div className="absolute left-0 top-full z-50 mt-1 min-w-[160px] overflow-hidden rounded-lg border border-white/10 bg-zinc-900 shadow-xl">
+                <div className="absolute left-0 top-full z-50 mt-1 min-w-[160px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary shadow-xl">
                   {views.map((view) => (
                     <button
                       key={view.id}
@@ -286,14 +288,14 @@ export function DashboardBuilderClient({
                       onClick={() => handleViewChange(view.id)}
                       className={`
                         block w-full px-3 py-2 text-left text-xs
-                        ${selectedViewId === view.id ? "bg-white/10 text-white" : "text-white/70 hover:bg-white/5"}
+                        ${selectedViewId === view.id ? "bg-bg-hover text-text-primary" : "text-text-secondary hover:bg-bg-elevated"}
                       `}
                     >
                       {view.name}
                     </button>
                   ))}
                   {views.length === 0 && (
-                    <div className="px-3 py-2 text-xs text-white/40">No saved views</div>
+                    <div className="px-3 py-2 text-xs text-text-muted">No saved views</div>
                   )}
                 </div>
               )}
@@ -304,23 +306,23 @@ export function DashboardBuilderClient({
               <button
                 type="button"
                 onClick={() => setShowTemplateDropdown(!showTemplateDropdown)}
-                className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
+                className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
               >
                 <span>Use Template</span>
                 <ChevronDown className="h-3 w-3" />
               </button>
               {showTemplateDropdown && (
-                <div className="absolute left-0 top-full z-50 mt-1 min-w-[200px] max-h-[300px] overflow-y-auto rounded-lg border border-white/10 bg-zinc-900 shadow-xl">
+                <div className="absolute left-0 top-full z-50 mt-1 min-w-[200px] max-h-[300px] overflow-y-auto rounded-lg border border-border-default bg-bg-secondary shadow-xl">
                   {templates.map((template) => (
                     <button
                       key={template.id}
                       type="button"
                       onClick={() => handleApplyTemplate(template)}
-                      className="block w-full px-3 py-2 text-left text-xs text-white/70 hover:bg-white/5 hover:text-white"
+                      className="block w-full px-3 py-2 text-left text-xs text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                     >
                       <div className="font-medium">{template.name}</div>
                       {template.description && (
-                        <div className="mt-0.5 text-white/40 line-clamp-1">
+                        <div className="mt-0.5 text-text-muted line-clamp-1">
                           {template.description}
                         </div>
                       )}
@@ -335,7 +337,7 @@ export function DashboardBuilderClient({
             <button
               type="button"
               onClick={() => setShowSaveAs(true)}
-              className="rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
+              className="rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
             >
               Save As
             </button>
@@ -343,7 +345,7 @@ export function DashboardBuilderClient({
               type="button"
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg bg-btn-primary-bg px-3 py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
             >
               <Save className="h-3.5 w-3.5" />
               {isSaving ? "Saving..." : "Save"}
@@ -352,7 +354,7 @@ export function DashboardBuilderClient({
         </div>
 
         {error && (
-          <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+          <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
             {error}
           </div>
         )}
@@ -386,10 +388,10 @@ export function DashboardBuilderClient({
 
       {/* Save As Modal */}
       {showSaveAs && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl border border-white/10 bg-zinc-900 p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6">
             <h3 className="text-lg font-medium">Save View As</h3>
-            <p className="mt-1 text-sm text-white/60">
+            <p className="mt-1 text-sm text-text-tertiary">
               Enter a name for your new dashboard view.
             </p>
             <input
@@ -397,7 +399,7 @@ export function DashboardBuilderClient({
               value={saveAsName}
               onChange={(e) => setSaveAsName(e.target.value)}
               placeholder="View name"
-              className="mt-4 h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+              className="mt-4 h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm placeholder:text-text-faint focus:border-border-default focus:outline-none"
               autoFocus
             />
             <div className="mt-4 flex justify-end gap-3">
@@ -407,7 +409,7 @@ export function DashboardBuilderClient({
                   setShowSaveAs(false);
                   setSaveAsName("");
                 }}
-                className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10"
+                className="rounded-lg border border-border-default bg-bg-elevated px-4 py-2 text-sm hover:bg-bg-hover"
               >
                 Cancel
               </button>
@@ -415,7 +417,7 @@ export function DashboardBuilderClient({
                 type="button"
                 onClick={handleSaveAs}
                 disabled={!saveAsName.trim() || isSaving}
-                className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50"
+                className="rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
               >
                 {isSaving ? "Saving..." : "Save"}
               </button>

@@ -38,6 +38,13 @@ import {
   DEFAULT_THEME_ID,
   type ReportThemeId,
 } from "@/lib/lp/report-themes";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils/cn";
 
 /* ---------- Types ---------- */
@@ -519,10 +526,9 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
       if (!res.ok) throw new Error(json?.error ?? "Failed to save report.");
 
       resetInitialRef();
-      setSuccess("Report saved successfully.");
+      router.push("/lp-reports/reports");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred.");
-    } finally {
       setSaving(false);
     }
   }
@@ -675,7 +681,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
       <button
         type="button"
         onClick={() => router.push(`/lp-reports/${fund.id}?tab=reports`)}
-        className="flex items-center gap-1 text-xs text-white/40 hover:text-white"
+        className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to {fund.name}
@@ -686,7 +692,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-semibold tracking-tight">{title || "Untitled Report"}</h1>
           {status === "published" && (
-            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-200">
+            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-[var(--status-success-text)]">
               Published
             </span>
           )}
@@ -697,7 +703,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         <div className="flex items-center gap-2" data-no-print>
           <button
             onClick={() => setShowPreviewModal(true)}
-            className="flex h-9 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white/70 hover:bg-white/10 hover:text-white"
+            className="flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
           >
             <Eye className="h-3.5 w-3.5" />
             Preview
@@ -705,14 +711,14 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           <button
             onClick={() => setShowDeleteConfirm(true)}
             disabled={deleting}
-            className="flex h-9 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200 disabled:opacity-60"
+            className="flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-[var(--status-error-text)] hover:bg-red-500/10 hover:text-[var(--status-error-text)] disabled:opacity-60"
           >
             <Trash2 className="h-3.5 w-3.5" />
             Delete
           </button>
           <button
             onClick={handleExportPdf}
-            className="flex h-9 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white/70 hover:bg-white/10 hover:text-white"
+            className="flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
           >
             <Download className="h-3.5 w-3.5" />
             PDF
@@ -721,7 +727,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             <button
               onClick={() => setShowPublishConfirm(true)}
               disabled={publishing}
-              className="flex h-9 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-60"
+              className="flex h-9 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-sm font-medium text-text-primary hover:bg-emerald-500 disabled:opacity-60"
             >
               <Send className="h-3.5 w-3.5" />
               Publish
@@ -730,7 +736,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             <button
               onClick={() => setShowUnpublishConfirm(true)}
               disabled={publishing}
-              className="flex h-9 items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 text-sm font-medium text-amber-200 hover:bg-amber-500/20 disabled:opacity-60"
+              className="flex h-9 items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 text-sm font-medium text-[var(--status-warning-text)] hover:bg-amber-500/20 disabled:opacity-60"
             >
               Unpublish
             </button>
@@ -738,7 +744,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex h-9 items-center gap-1.5 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+            className="flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
           >
             {saving ? (
               "Saving..."
@@ -754,12 +760,12 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
 
       {/* Messages */}
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200" role="alert">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]" role="alert">
           {error}
         </div>
       )}
       {success && (
-        <div className="flex items-center gap-2 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200" role="alert">
+        <div className="flex items-center gap-2 rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2 text-sm text-[var(--status-success-text)]" role="alert">
           <Check className="h-4 w-4" />
           {success}
         </div>
@@ -781,70 +787,71 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           data-no-print
         >
           {/* Metadata */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
               Report Details
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-sm text-white/70">Title</label>
+                <label className="mb-1 block text-sm text-text-secondary">Title</label>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+                  className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
                   placeholder="e.g. Q4 2025 LP Report"
                 />
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-sm text-white/70">Date</label>
+                  <label className="mb-1 block text-sm text-text-secondary">Date</label>
                   <input
                     type="date"
                     value={reportDate}
                     onChange={(e) => setReportDate(e.target.value)}
-                    className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+                    className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-white/70">Type</label>
-                  <select
-                    value={reportType}
-                    onChange={(e) => setReportType(e.target.value)}
-                    className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
-                  >
-                    <option value="quarterly">Quarterly</option>
-                    <option value="annual">Annual</option>
-                    <option value="ad_hoc">Ad Hoc</option>
-                  </select>
+                  <label className="mb-1 block text-sm text-text-secondary">Type</label>
+                  <Select value={reportType} onValueChange={setReportType}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="quarterly">Quarterly</SelectItem>
+                      <SelectItem value="annual">Annual</SelectItem>
+                      <SelectItem value="ad_hoc">Ad Hoc</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Report Theme */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
               Report Theme
             </h3>
             <ThemeSelector value={themeId} onChange={setThemeId} />
           </div>
 
           {/* Investment Selection */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-xs font-medium uppercase tracking-wider text-white/40">
+              <h3 className="text-xs font-medium uppercase tracking-wider text-text-muted">
                 Investments ({selectedIds.size}/{investments.length})
               </h3>
               <button
                 type="button"
                 onClick={toggleAll}
-                className="text-xs text-white/50 hover:text-white"
+                className="text-xs text-text-muted hover:text-text-primary"
               >
                 {selectedIds.size === investments.length ? "Deselect All" : "Select All"}
               </button>
             </div>
             {investments.length === 0 ? (
-              <p className="text-sm text-white/40">No investments in this fund yet.</p>
+              <p className="text-sm text-text-muted">No investments in this fund yet.</p>
             ) : (
               <div className="space-y-1">
                 {investments.map((inv) => {
@@ -862,20 +869,20 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
                         className={cn(
                           "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors",
                           checked
-                            ? "bg-white/[0.04]"
-                            : "hover:bg-white/[0.02]",
+                            ? "bg-bg-raised"
+                            : "hover:bg-bg-raised",
                         )}
                       >
                         <input
                           type="checkbox"
                           checked={checked}
                           onChange={() => toggleInvestment(inv.id)}
-                          className="h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
+                          className="h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
                         />
                         <div className="min-w-0 flex-1">
-                          <span className="text-sm text-white/80">{inv.company_name}</span>
+                          <span className="text-sm text-text-primary">{inv.company_name}</span>
                         </div>
-                        <div className="flex items-center gap-4 text-xs tabular-nums text-white/50">
+                        <div className="flex items-center gap-4 text-xs tabular-nums text-text-muted">
                           <span>{formatCurrency(inv.invested_amount, fund.currency)}</span>
                           <span>{formatCurrency(inv.current_value, fund.currency)}</span>
                           <span className="w-12 text-right">{moic}x</span>
@@ -890,8 +897,8 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
                             className={cn(
                               "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
                               hasMetricPage
-                                ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                                : "border border-white/10 text-white/50 hover:bg-white/5 hover:text-white/70",
+                                ? "border border-emerald-500/30 bg-emerald-500/10 text-[var(--status-success-text)]"
+                                : "border border-border-default text-text-muted hover:bg-bg-elevated hover:text-text-secondary",
                             )}
                           >
                             {isFetching ? (
@@ -934,8 +941,8 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           </div>
 
           {/* Live Performance KPIs */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
               Live Performance
             </h3>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -945,15 +952,15 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
               <MiniKPI label="IRR" value="-" />
               <MiniKPI label="MOIC" value={fmtMultiple(performance.moic)} />
             </div>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/50">
+            <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-text-muted">
               <span>Invested: {formatCurrency(performance.totalInvested, fund.currency)}</span>
               <span>Current: {formatCurrency(performance.totalCurrentValue, fund.currency)}</span>
             </div>
           </div>
 
           {/* Quarterly Summary - Rich Text */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
               Quarterly Summary
             </h3>
             <RichTextEditor
@@ -971,10 +978,10 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             mobileTab === "edit" && "hidden lg:block",
           )}
         >
-          <p className="mb-2 hidden text-[11px] font-medium uppercase tracking-wider text-white/30 lg:block">
+          <p className="mb-2 hidden text-[11px] font-medium uppercase tracking-wider text-text-faint lg:block">
             PDF Preview
           </p>
-          <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black/10">
+          <ScaledPreview>
             <ReportPreview
               ref={previewRef}
               fundName={fund.name}
@@ -988,7 +995,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
               theme={getReportTheme(themeId).colors}
               companyMetrics={previewCompanyMetrics}
             />
-          </div>
+          </ScaledPreview>
         </div>
       </div>
 
@@ -1027,21 +1034,21 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
 
       {/* Full-screen preview modal */}
       {showPreviewModal && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex flex-col bg-bg-backdrop backdrop-blur-sm">
           {/* Modal header */}
-          <div className="flex items-center justify-between border-b border-white/10 bg-zinc-900 px-6 py-3">
-            <h2 className="text-sm font-medium text-white/70">Report Preview</h2>
+          <div className="flex items-center justify-between border-b border-border-default bg-bg-secondary px-6 py-3">
+            <h2 className="text-sm font-medium text-text-secondary">Report Preview</h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleExportPdf}
-                className="flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs text-white/70 hover:bg-white/10 hover:text-white"
+                className="flex h-8 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary"
               >
                 <Download className="h-3.5 w-3.5" />
                 Export PDF
               </button>
               <button
                 onClick={() => setShowPreviewModal(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-md text-white/40 hover:bg-white/5 hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-primary"
                 aria-label="Close preview"
               >
                 <X className="h-4 w-4" />
@@ -1071,11 +1078,60 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   );
 }
 
+const PREVIEW_NATURAL_WIDTH = 794; // A4-ish width in px
+
+function ScaledPreview({ children }: { children: React.ReactNode }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [contentHeight, setContentHeight] = useState<number | null>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const inner = innerRef.current;
+    if (!container || !inner) return;
+
+    function measure() {
+      if (!containerRef.current || !innerRef.current) return;
+      const containerWidth = containerRef.current.clientWidth;
+      const newScale = Math.min(1, containerWidth / PREVIEW_NATURAL_WIDTH);
+      setScale(newScale);
+      setContentHeight(innerRef.current.scrollHeight);
+    }
+
+    measure();
+
+    const observer = new ResizeObserver(() => measure());
+    observer.observe(container);
+    observer.observe(inner);
+    return () => observer.disconnect();
+  }, [children]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black/10"
+      style={{ height: contentHeight ? contentHeight * scale : "auto" }}
+    >
+      <div
+        ref={innerRef}
+        style={{
+          width: PREVIEW_NATURAL_WIDTH,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function MiniKPI({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-2 py-1.5 text-center">
-      <p className="text-[10px] uppercase tracking-wider text-white/40">{label}</p>
-      <p className="mt-0.5 text-sm font-medium text-white/80">{value}</p>
+    <div className="rounded-lg border border-border-subtle bg-bg-raised px-2 py-1.5 text-center">
+      <p className="text-[10px] uppercase tracking-wider text-text-muted">{label}</p>
+      <p className="mt-0.5 text-sm font-medium text-text-primary">{value}</p>
     </div>
   );
 }
@@ -1120,7 +1176,7 @@ function QuarterPicker({
       <button
         type="button"
         onClick={() => setOpen((p) => !p)}
-        className="flex items-center gap-1 text-[11px] text-white/50 hover:text-white/70"
+        className="flex items-center gap-1 text-[11px] text-text-muted hover:text-text-secondary"
       >
         <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
         {selected.length === 0
@@ -1128,7 +1184,7 @@ function QuarterPicker({
           : `${selected.length} quarter${selected.length !== 1 ? "s" : ""} selected`}
       </button>
       {open && (
-        <div className="mt-1.5 rounded-lg border border-white/10 bg-black/40 p-2">
+        <div className="mt-1.5 rounded-lg border border-border-default bg-bg-sidebar p-2">
           <div className="mb-2 flex items-center gap-1.5">
             <button
               type="button"
@@ -1136,8 +1192,8 @@ function QuarterPicker({
               className={cn(
                 "rounded px-2 py-0.5 text-[10px] font-medium transition-colors",
                 selected.length === 4 && setsEqual(new Set(selected), new Set(available.slice(0, 4)))
-                  ? "bg-white/15 text-white"
-                  : "text-white/50 hover:bg-white/5 hover:text-white/70",
+                  ? "bg-bg-hover text-text-primary"
+                  : "text-text-muted hover:bg-bg-elevated hover:text-text-secondary",
               )}
             >
               Last 4
@@ -1148,8 +1204,8 @@ function QuarterPicker({
               className={cn(
                 "rounded px-2 py-0.5 text-[10px] font-medium transition-colors",
                 selected.length === 8 && setsEqual(new Set(selected), new Set(available.slice(0, 8)))
-                  ? "bg-white/15 text-white"
-                  : "text-white/50 hover:bg-white/5 hover:text-white/70",
+                  ? "bg-bg-hover text-text-primary"
+                  : "text-text-muted hover:bg-bg-elevated hover:text-text-secondary",
               )}
             >
               Last 8
@@ -1160,8 +1216,8 @@ function QuarterPicker({
               className={cn(
                 "rounded px-2 py-0.5 text-[10px] font-medium transition-colors",
                 selected.length === available.length
-                  ? "bg-white/15 text-white"
-                  : "text-white/50 hover:bg-white/5 hover:text-white/70",
+                  ? "bg-bg-hover text-text-primary"
+                  : "text-text-muted hover:bg-bg-elevated hover:text-text-secondary",
               )}
             >
               All
@@ -1176,8 +1232,8 @@ function QuarterPicker({
                 className={cn(
                   "rounded px-2 py-0.5 text-[10px] font-medium transition-colors",
                   selectedSet.has(q)
-                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                    : "bg-white/5 text-white/50 border border-transparent hover:bg-white/10 hover:text-white/70",
+                    ? "bg-emerald-500/20 text-[var(--status-success-text)] border border-emerald-500/30"
+                    : "bg-bg-elevated text-text-muted border border-transparent hover:bg-bg-hover hover:text-text-secondary",
                 )}
               >
                 {q}
@@ -1221,13 +1277,13 @@ function MetricOrderList({
       <button
         type="button"
         onClick={() => setOpen((p) => !p)}
-        className="flex items-center gap-1 text-[11px] text-white/50 hover:text-white/70"
+        className="flex items-center gap-1 text-[11px] text-text-muted hover:text-text-secondary"
       >
         <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
         Reorder metrics ({order.length})
       </button>
       {open && (
-        <div className="mt-1.5 rounded-lg border border-white/10 bg-black/40 p-1.5">
+        <div className="mt-1.5 rounded-lg border border-border-default bg-bg-sidebar p-1.5">
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={order} strategy={verticalListSortingStrategy}>
               {order.map((name) => (
@@ -1263,18 +1319,18 @@ function SortableMetricItem({ name }: { name: string }) {
       style={style}
       className={cn(
         "flex items-center gap-1.5 rounded px-1.5 py-1",
-        isDragging && "bg-white/5",
+        isDragging && "bg-bg-elevated",
       )}
     >
       <button
         type="button"
-        className="flex h-5 w-5 shrink-0 cursor-grab items-center justify-center rounded text-white/30 hover:bg-white/10 hover:text-white/50 active:cursor-grabbing"
+        className="flex h-5 w-5 shrink-0 cursor-grab items-center justify-center rounded text-text-faint hover:bg-bg-hover hover:text-text-muted active:cursor-grabbing"
         {...attributes}
         {...listeners}
       >
         <GripVertical className="h-3 w-3" />
       </button>
-      <span className="text-[11px] text-white/70">{name}</span>
+      <span className="text-[11px] text-text-secondary">{name}</span>
     </div>
   );
 }

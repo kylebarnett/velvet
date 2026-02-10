@@ -87,11 +87,17 @@ export function useDashboardPreferences() {
     savePreferences({ dateRange: value });
   }, [savePreferences]);
 
+  // Reset period type to default without persisting (used when navigating between companies)
+  const resetPeriodType = useCallback(() => {
+    setPeriodTypeState(DEFAULT_PREFERENCES.periodType);
+  }, []);
+
   return {
     periodType,
     setPeriodType,
     dateRange,
     setDateRange,
+    resetPeriodType,
     isLoaded,
   };
 }

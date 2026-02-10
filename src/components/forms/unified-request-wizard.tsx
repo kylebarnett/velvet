@@ -72,19 +72,19 @@ function MetricChip({ name }: { name: string }) {
   return (
     <div className="relative inline-block">
       <span
-        className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70 cursor-default"
+        className="rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-secondary cursor-default"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
         {name}
       </span>
       {showTooltip && metricInfo && (
-        <div className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-lg border border-white/10 bg-zinc-900 p-3 shadow-xl">
-          <p className="text-xs font-medium text-white">{name}</p>
-          <p className="mt-1 text-xs text-white/60">{metricInfo.description}</p>
+        <div className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-lg border border-border-default bg-bg-secondary p-3 shadow-xl">
+          <p className="text-xs font-medium text-text-primary">{name}</p>
+          <p className="mt-1 text-xs text-text-tertiary">{metricInfo.description}</p>
           {metricInfo.formula && (
-            <div className="mt-2 rounded bg-white/5 px-2 py-1.5">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-white/60">Formula</p>
+            <div className="mt-2 rounded bg-bg-elevated px-2 py-1.5">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-text-tertiary">Formula</p>
               <p className="mt-0.5 text-xs text-emerald-400">{metricInfo.formula}</p>
             </div>
           )}
@@ -372,13 +372,13 @@ export function UnifiedRequestWizard() {
         key={tmpl.id}
         type="button"
         onClick={() => selectTemplate(tmpl.id)}
-        className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-left transition-colors hover:border-white/20 hover:bg-white/10"
+        className="w-full rounded-xl border border-border-default bg-bg-elevated p-4 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               {isSystem && tmpl.targetIndustry && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/20 px-2 py-0.5 text-xs text-violet-300">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--tag-violet-bg)] px-2 py-0.5 text-xs text-[var(--tag-violet-text)]">
                   <Sparkles className="h-3 w-3" />
                   {INDUSTRY_LABELS[tmpl.targetIndustry] ?? tmpl.targetIndustry}
                 </span>
@@ -386,7 +386,7 @@ export function UnifiedRequestWizard() {
               <span className="text-sm font-medium">{tmpl.name}</span>
             </div>
             {tmpl.description && (
-              <p className="mt-1 text-xs text-white/60">{tmpl.description}</p>
+              <p className="mt-1 text-xs text-text-tertiary">{tmpl.description}</p>
             )}
             <div className="mt-2 flex flex-wrap gap-1.5">
               {displayedMetrics.map((item) => (
@@ -408,7 +408,7 @@ export function UnifiedRequestWizard() {
                     toggleExpanded(tmpl.id);
                   }
                 }}
-                className="mt-2 inline-flex cursor-pointer items-center gap-1 text-xs text-white/50 hover:text-white/70"
+                className="mt-2 inline-flex cursor-pointer items-center gap-1 text-xs text-text-muted hover:text-text-secondary"
               >
                 {isExpanded ? (
                   <>
@@ -424,7 +424,7 @@ export function UnifiedRequestWizard() {
               </span>
             )}
           </div>
-          <div className="shrink-0 text-white/40">
+          <div className="shrink-0 text-text-muted">
             <ArrowLeft className="h-4 w-4 rotate-180" />
           </div>
         </div>
@@ -436,19 +436,19 @@ export function UnifiedRequestWizard() {
     return (
       <div className="space-y-6">
         <div className="space-y-1">
-          <div className="h-6 w-48 animate-pulse rounded bg-white/10" />
-          <div className="h-4 w-72 animate-pulse rounded bg-white/5" />
+          <div className="h-6 w-48 animate-pulse rounded bg-bg-hover" />
+          <div className="h-4 w-72 animate-pulse rounded bg-bg-elevated" />
         </div>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="rounded-xl border border-white/10 bg-white/5 p-4"
+              className="rounded-xl border border-border-default bg-bg-elevated p-4"
             >
-              <div className="h-4 w-40 animate-pulse rounded bg-white/10" />
+              <div className="h-4 w-40 animate-pulse rounded bg-bg-hover" />
               <div className="mt-2 flex gap-2">
                 {[1, 2, 3].map((j) => (
-                  <div key={j} className="h-5 w-16 animate-pulse rounded-full bg-white/10" />
+                  <div key={j} className="h-5 w-16 animate-pulse rounded-full bg-bg-hover" />
                 ))}
               </div>
             </div>
@@ -462,14 +462,14 @@ export function UnifiedRequestWizard() {
   if (result) {
     return (
       <div className="space-y-6">
-        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-6 text-center">
+        <div className="rounded-xl border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] p-6 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
             <Check className="h-6 w-6 text-emerald-400" />
           </div>
           {result.type === "one-time" ? (
             <>
               <h2 className="mt-4 text-lg font-semibold">Requests Created</h2>
-              <p className="mt-1 text-sm text-white/60">
+              <p className="mt-1 text-sm text-text-tertiary">
                 Created {result.requestsCreated} request{result.requestsCreated !== 1 ? "s" : ""}.
                 {(result.skipped ?? 0) > 0 && ` ${result.skipped} skipped (already exist).`}
               </p>
@@ -477,7 +477,7 @@ export function UnifiedRequestWizard() {
           ) : (
             <>
               <h2 className="mt-4 text-lg font-semibold">Schedule Created</h2>
-              <p className="mt-1 text-sm text-white/60">
+              <p className="mt-1 text-sm text-text-tertiary">
                 Your recurring schedule is now active and will automatically create requests.
               </p>
             </>
@@ -485,7 +485,7 @@ export function UnifiedRequestWizard() {
           <div className="mt-6 flex items-center justify-center gap-3">
             <button
               onClick={() => router.push(result.type === "recurring" ? "/requests?tab=schedules" : "/requests")}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               {result.type === "recurring" ? "View Schedules" : "View Requests"}
@@ -512,7 +512,7 @@ export function UnifiedRequestWizard() {
                 setReminderDays([3, 1]);
                 setAllCompanies(false);
               }}
-              className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-4 text-sm text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               Create More
@@ -527,21 +527,21 @@ export function UnifiedRequestWizard() {
     <div className="space-y-4 sm:space-y-6">
       {/* Progress indicator */}
       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
-        <span className={step === 1 ? "text-white" : "text-white/60"}>
+        <span className={step === 1 ? "text-text-primary" : "text-text-tertiary"}>
           1. Template
         </span>
-        <span className="text-white/20">/</span>
-        <span className={step === 2 ? "text-white" : "text-white/60"}>
+        <span className="text-text-faint">/</span>
+        <span className={step === 2 ? "text-text-primary" : "text-text-tertiary"}>
           2. Companies
         </span>
-        <span className="text-white/20">/</span>
-        <span className={step === 3 ? "text-white" : "text-white/60"}>
+        <span className="text-text-faint">/</span>
+        <span className={step === 3 ? "text-text-primary" : "text-text-tertiary"}>
           3. Frequency
         </span>
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
@@ -552,7 +552,7 @@ export function UnifiedRequestWizard() {
           <div className="flex items-center gap-4">
             <Link
               href="/requests"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
@@ -560,7 +560,7 @@ export function UnifiedRequestWizard() {
               <h1 className="text-xl font-semibold tracking-tight">
                 Select a template
               </h1>
-              <p className="text-sm text-white/60">
+              <p className="text-sm text-text-tertiary">
                 Choose a metric template to send to your portfolio companies.
               </p>
             </div>
@@ -570,23 +570,23 @@ export function UnifiedRequestWizard() {
           <button
             type="button"
             onClick={selectCustomMetric}
-            className="w-full rounded-xl border border-dashed border-white/20 bg-white/5 p-4 text-left transition-colors hover:border-white/30 hover:bg-white/10"
+            className="w-full rounded-xl border border-dashed border-border-default bg-bg-elevated p-4 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
           >
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium">Custom metric</span>
-                <p className="mt-0.5 text-xs text-white/60">
+                <p className="mt-0.5 text-xs text-text-tertiary">
                   Request a single metric without using a template
                 </p>
               </div>
-              <ArrowLeft className="h-4 w-4 rotate-180 text-white/40" />
+              <ArrowLeft className="h-4 w-4 rotate-180 text-text-muted" />
             </div>
           </button>
 
           {/* Recently used template */}
           {recentTemplate && (
             <div className="space-y-3">
-              <h2 className="text-sm font-medium text-white/80">Recently Used</h2>
+              <h2 className="text-sm font-medium text-text-secondary">Recently Used</h2>
               <div className="space-y-2">
                 {renderTemplateCard(recentTemplate, recentTemplate.isSystem)}
               </div>
@@ -597,10 +597,10 @@ export function UnifiedRequestWizard() {
           {userTemplates.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-medium text-white/80">My Templates</h2>
+                <h2 className="text-sm font-medium text-text-secondary">My Templates</h2>
                 <Link
                   href="/requests?tab=templates"
-                  className="text-xs text-white/50 hover:text-white/70"
+                  className="text-xs text-text-muted hover:text-text-secondary"
                 >
                   Manage templates
                 </Link>
@@ -614,7 +614,7 @@ export function UnifiedRequestWizard() {
           {/* System templates */}
           {systemTemplates.length > 0 && (
             <div className="space-y-3">
-              <h2 className="text-sm font-medium text-white/80">Industry Templates</h2>
+              <h2 className="text-sm font-medium text-text-secondary">Industry Templates</h2>
               <div className="grid gap-2 md:grid-cols-2">
                 {systemTemplates.map((t) => renderTemplateCard(t, true))}
               </div>
@@ -629,7 +629,7 @@ export function UnifiedRequestWizard() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setStep(1)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -638,7 +638,7 @@ export function UnifiedRequestWizard() {
               <h1 className="text-xl font-semibold tracking-tight">
                 Select companies
               </h1>
-              <p className="text-sm text-white/60">
+              <p className="text-sm text-text-tertiary">
                 {useCustomMetric
                   ? `Send "${customMetricName || "custom metric"}" request to selected companies.`
                   : `Send "${selectedTemplate?.name}" to selected companies.`}
@@ -648,22 +648,22 @@ export function UnifiedRequestWizard() {
 
           {/* Custom metric form */}
           {useCustomMetric && (
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
-                  <label className="text-sm text-white/70" htmlFor="customMetricName">
+                  <label className="text-sm text-text-secondary" htmlFor="customMetricName">
                     Metric name
                   </label>
                   <input
                     id="customMetricName"
-                    className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+                    className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
                     placeholder="Monthly Recurring Revenue"
                     value={customMetricName}
                     onChange={(e) => setCustomMetricName(e.target.value)}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <label className="text-sm text-white/70" htmlFor="customPeriodType">
+                  <label className="text-sm text-text-secondary" htmlFor="customPeriodType">
                     Period type
                   </label>
                   <Select value={customPeriodType} onValueChange={(v) => setCustomPeriodType(v as PeriodType)}>
@@ -683,51 +683,51 @@ export function UnifiedRequestWizard() {
           {/* Company selection */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white/70">
+              <span className="text-sm text-text-secondary">
                 {selectedCompanyIds.size} of {companies.length} selected
               </span>
               <button
                 type="button"
                 onClick={selectAllCompanies}
-                className="text-xs text-white/50 hover:text-white/70"
+                className="text-xs text-text-muted hover:text-text-secondary"
               >
                 {selectedCompanyIds.size === companies.length ? "Deselect all" : "Select all"}
               </button>
             </div>
 
             {sortedCompanies.length === 0 ? (
-              <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-                <p className="text-sm text-white/60">No companies in your portfolio.</p>
+              <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+                <p className="text-sm text-text-tertiary">No companies in your portfolio.</p>
                 <Link
                   href="/portfolio"
-                  className="mt-2 inline-block text-sm text-white underline underline-offset-4 hover:text-white/80"
+                  className="mt-2 inline-block text-sm text-text-primary underline underline-offset-4 hover:text-text-secondary"
                 >
                   Add companies
                 </Link>
               </div>
             ) : (
-              <div className="max-h-80 space-y-1 overflow-y-auto rounded-xl border border-white/10 bg-white/5 p-2">
+              <div className="max-h-80 space-y-1 overflow-y-auto rounded-xl border border-border-default bg-bg-elevated p-2">
                 {sortedCompanies.map((c) => (
                   <label
                     key={c.id}
-                    className="flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5"
+                    className="flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-bg-elevated"
                   >
                     <input
                       type="checkbox"
                       checked={selectedCompanyIds.has(c.id)}
                       onChange={() => toggleCompany(c.id)}
-                      className="mt-0.5 rounded border-white/20"
+                      className="mt-0.5 rounded border-border-default"
                     />
                     <div className="min-w-0 flex-1">
                       <span className="font-medium">{c.name}</span>
                       <div className="mt-1 flex flex-wrap gap-1.5">
                         {c.stage && (
-                          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">
+                          <span className="rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-tertiary">
                             {c.stage.replace(/_/g, " ")}
                           </span>
                         )}
                         {c.industry && (
-                          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">
+                          <span className="rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-tertiary">
                             {INDUSTRY_LABELS[c.industry] ?? c.industry}
                           </span>
                         )}
@@ -743,7 +743,7 @@ export function UnifiedRequestWizard() {
             <button
               onClick={() => setStep(3)}
               disabled={selectedCompanyIds.size === 0 || (useCustomMetric && !customMetricName.trim())}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               Continue
@@ -758,7 +758,7 @@ export function UnifiedRequestWizard() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => { setStep(2); setFrequency(null); }}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -771,7 +771,7 @@ export function UnifiedRequestWizard() {
                     ? "Set period and due date"
                     : "Configure schedule"}
               </h1>
-              <p className="text-sm text-white/60">
+              <p className="text-sm text-text-tertiary">
                 {frequency === null
                   ? `Configure how ${useCustomMetric ? "this metric" : `"${selectedTemplate?.name}"`} will be requested from ${selectedCompanyIds.size} compan${selectedCompanyIds.size === 1 ? "y" : "ies"}.`
                   : frequency === "one-time"
@@ -787,13 +787,13 @@ export function UnifiedRequestWizard() {
               <button
                 type="button"
                 onClick={() => setFrequency("one-time")}
-                className="flex flex-col items-start rounded-xl border border-white/10 bg-white/5 p-5 text-left transition-colors hover:border-white/20 hover:bg-white/10"
+                className="flex flex-col items-start rounded-xl border border-border-default bg-bg-elevated p-5 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
                   <Send className="h-5 w-5 text-blue-300" />
                 </div>
                 <h3 className="mt-3 font-medium">One-time request</h3>
-                <p className="mt-1 text-sm text-white/60">
+                <p className="mt-1 text-sm text-text-tertiary">
                   Request metrics for a specific period. Good for ad-hoc data collection.
                 </p>
               </button>
@@ -802,13 +802,13 @@ export function UnifiedRequestWizard() {
                 <button
                   type="button"
                   onClick={() => setFrequency("recurring")}
-                  className="flex flex-col items-start rounded-xl border border-white/10 bg-white/5 p-5 text-left transition-colors hover:border-white/20 hover:bg-white/10"
+                  className="flex flex-col items-start rounded-xl border border-border-default bg-bg-elevated p-5 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/20">
-                    <CalendarClock className="h-5 w-5 text-violet-300" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--tag-violet-bg)]">
+                    <CalendarClock className="h-5 w-5 text-[var(--tag-violet-text)]" />
                   </div>
                   <h3 className="mt-3 font-medium">Recurring schedule</h3>
-                  <p className="mt-1 text-sm text-white/60">
+                  <p className="mt-1 text-sm text-text-tertiary">
                     Automatically request metrics on a regular cadence with email reminders.
                   </p>
                 </button>
@@ -819,11 +819,11 @@ export function UnifiedRequestWizard() {
           {/* One-time: period and due date */}
           {frequency === "one-time" && (
             <>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-5">
+              <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-5">
                 <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {/* Period type selector */}
                   <div className="grid gap-1.5 sm:gap-2">
-                    <label className="text-sm text-white/70" htmlFor="periodType">
+                    <label className="text-sm text-text-secondary" htmlFor="periodType">
                       Period type
                     </label>
                     <Select
@@ -848,7 +848,7 @@ export function UnifiedRequestWizard() {
 
                   {periodType === "quarterly" ? (
                     <div className="grid gap-1.5 sm:gap-2">
-                      <label className="text-sm text-white/70">
+                      <label className="text-sm text-text-secondary">
                         Quarter
                       </label>
                       <Select
@@ -873,7 +873,7 @@ export function UnifiedRequestWizard() {
                     </div>
                   ) : (
                     <div className="grid gap-1.5 sm:gap-2">
-                      <label className="text-sm text-white/70">
+                      <label className="text-sm text-text-secondary">
                         Year
                       </label>
                       <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(Number(v))}>
@@ -892,13 +892,13 @@ export function UnifiedRequestWizard() {
                   )}
 
                   <div className="grid gap-1.5 sm:gap-2">
-                    <label className="text-sm text-white/70" htmlFor="dueDate">
+                    <label className="text-sm text-text-secondary" htmlFor="dueDate">
                       Due date (optional)
                     </label>
                     <input
                       id="dueDate"
                       type="date"
-                      className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+                      className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none focus:border-border-default"
                       value={dueDate}
                       onChange={(e) => setDueDate(e.target.value)}
                     />
@@ -906,19 +906,19 @@ export function UnifiedRequestWizard() {
                 </div>
 
                 {/* Summary */}
-                <div className="mt-6 rounded-lg border border-white/10 bg-black/20 p-4">
-                  <h3 className="text-sm font-medium text-white/80">Summary</h3>
-                  <div className="mt-2 space-y-1 text-sm text-white/60">
+                <div className="mt-6 rounded-lg border border-border-default bg-bg-input p-4">
+                  <h3 className="text-sm font-medium text-text-secondary">Summary</h3>
+                  <div className="mt-2 space-y-1 text-sm text-text-tertiary">
                     <p>
-                      <span className="text-white/60">Template:</span>{" "}
+                      <span className="text-text-tertiary">Template:</span>{" "}
                       {useCustomMetric ? `Custom: ${customMetricName}` : selectedTemplate?.name}
                     </p>
                     <p>
-                      <span className="text-white/60">Companies:</span>{" "}
+                      <span className="text-text-tertiary">Companies:</span>{" "}
                       {selectedCompanyIds.size} selected
                     </p>
                     <p>
-                      <span className="text-white/60">Period:</span>{" "}
+                      <span className="text-text-tertiary">Period:</span>{" "}
                       {getPeriodLabel(
                         periodType === "quarterly"
                           ? { type: "quarterly", year: selectedYear, quarter: selectedQuarter }
@@ -927,12 +927,12 @@ export function UnifiedRequestWizard() {
                     </p>
                     {!useCustomMetric && selectedTemplate && (
                       <p>
-                        <span className="text-white/60">Metrics:</span>{" "}
+                        <span className="text-text-tertiary">Metrics:</span>{" "}
                         {selectedTemplate.metric_template_items.length} per company
                       </p>
                     )}
                     <p>
-                      <span className="text-white/60">Total requests:</span>{" "}
+                      <span className="text-text-tertiary">Total requests:</span>{" "}
                       {useCustomMetric
                         ? selectedCompanyIds.size
                         : selectedCompanyIds.size * (selectedTemplate?.metric_template_items.length ?? 0)}
@@ -944,7 +944,7 @@ export function UnifiedRequestWizard() {
               <div className="flex items-center justify-end gap-3">
                 <button
                   onClick={() => setFrequency(null)}
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="inline-flex h-10 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-4 text-sm text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                   type="button"
                 >
                   Back
@@ -952,7 +952,7 @@ export function UnifiedRequestWizard() {
                 <button
                   onClick={handleSubmitOneTime}
                   disabled={submitting}
-                  className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+                  className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                   type="button"
                 >
                   {submitting ? "Creating..." : "Create Requests"}
@@ -964,10 +964,10 @@ export function UnifiedRequestWizard() {
           {/* Recurring: schedule configuration */}
           {frequency === "recurring" && (
             <>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-6 space-y-6">
+              <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-6 space-y-6">
                 {/* Schedule name */}
                 <div>
-                  <label className="text-sm font-medium text-white/70">
+                  <label className="text-sm font-medium text-text-secondary">
                     Schedule Name
                   </label>
                   <input
@@ -975,21 +975,21 @@ export function UnifiedRequestWizard() {
                     value={scheduleName}
                     onChange={(e) => setScheduleName(e.target.value)}
                     placeholder={`${selectedTemplate?.name ?? "Metrics"} - ${cadence}`}
-                    className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+                    className="mt-2 h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none focus:border-border-default"
                   />
-                  <p className="mt-1 text-xs text-white/60">
+                  <p className="mt-1 text-xs text-text-tertiary">
                     A descriptive name to identify this schedule
                   </p>
                 </div>
 
                 {/* All companies toggle */}
-                <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
                   <input
                     type="checkbox"
                     id="all-companies-recurring"
                     checked={allCompanies}
                     onChange={(e) => setAllCompanies(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-white/20 bg-black/30"
+                    className="mt-1 h-4 w-4 rounded border-border-default bg-bg-input"
                   />
                   <div>
                     <label
@@ -998,20 +998,20 @@ export function UnifiedRequestWizard() {
                     >
                       Include all portfolio companies
                     </label>
-                    <p className="mt-0.5 text-xs text-white/60">
+                    <p className="mt-0.5 text-xs text-text-tertiary">
                       Override company selection and include all companies (current: {selectedCompanyIds.size} selected)
                     </p>
                   </div>
                 </div>
 
                 {allCompanies && (
-                  <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                  <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
                     <input
                       type="checkbox"
                       id="include-future"
                       checked={includeFutureCompanies}
                       onChange={(e) => setIncludeFutureCompanies(e.target.checked)}
-                      className="mt-1 h-4 w-4 rounded border-white/20 bg-black/30"
+                      className="mt-1 h-4 w-4 rounded border-border-default bg-bg-input"
                     />
                     <div>
                       <label
@@ -1020,7 +1020,7 @@ export function UnifiedRequestWizard() {
                       >
                         Include future companies
                       </label>
-                      <p className="mt-0.5 text-xs text-white/60">
+                      <p className="mt-0.5 text-xs text-text-tertiary">
                         Companies added to your portfolio later will automatically be included
                       </p>
                     </div>
@@ -1037,10 +1037,10 @@ export function UnifiedRequestWizard() {
 
                 {/* Due date offset */}
                 <div>
-                  <label className="text-sm font-medium text-white/70">
+                  <label className="text-sm font-medium text-text-secondary">
                     Days until due date
                   </label>
-                  <p className="mt-1 text-xs text-white/60">
+                  <p className="mt-1 text-xs text-text-tertiary">
                     How many days founders have to submit after the request is created
                   </p>
                   <Select value={String(dueDaysOffset)} onValueChange={(v) => setDueDaysOffset(Number(v))}>
@@ -1059,13 +1059,13 @@ export function UnifiedRequestWizard() {
                 </div>
 
                 {/* Reminders */}
-                <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
                   <input
                     type="checkbox"
                     id="reminder-enabled"
                     checked={reminderEnabled}
                     onChange={(e) => setReminderEnabled(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-white/20 bg-black/30"
+                    className="mt-1 h-4 w-4 rounded border-border-default bg-bg-input"
                   />
                   <div>
                     <label
@@ -1074,7 +1074,7 @@ export function UnifiedRequestWizard() {
                     >
                       Send reminder emails
                     </label>
-                    <p className="mt-0.5 text-xs text-white/60">
+                    <p className="mt-0.5 text-xs text-text-tertiary">
                       Automatically remind founders before the due date
                     </p>
                   </div>
@@ -1082,7 +1082,7 @@ export function UnifiedRequestWizard() {
 
                 {reminderEnabled && (
                   <div>
-                    <label className="text-sm font-medium text-white/70">
+                    <label className="text-sm font-medium text-text-secondary">
                       Remind founders
                     </label>
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -1099,49 +1099,49 @@ export function UnifiedRequestWizard() {
                           }}
                           className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
                             reminderDays.includes(day)
-                              ? "bg-white/20 text-white"
-                              : "bg-white/5 text-white/50 hover:bg-white/10"
+                              ? "bg-bg-hover text-text-primary"
+                              : "bg-bg-elevated text-text-muted hover:bg-bg-hover"
                           }`}
                         >
                           {day} day{day !== 1 ? "s" : ""} before
                         </button>
                       ))}
                     </div>
-                    <p className="mt-2 text-xs text-white/60">
+                    <p className="mt-2 text-xs text-text-tertiary">
                       Reminders are automatically cancelled when metrics are submitted
                     </p>
                   </div>
                 )}
 
                 {/* Summary */}
-                <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-                  <h3 className="text-sm font-medium text-white/70">Summary</h3>
+                <div className="rounded-xl border border-border-default bg-bg-input p-4">
+                  <h3 className="text-sm font-medium text-text-secondary">Summary</h3>
                   <div className="mt-3 space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-white/60">Template</span>
-                      <span className="text-white">{selectedTemplate?.name}</span>
+                      <span className="text-text-tertiary">Template</span>
+                      <span className="text-text-primary">{selectedTemplate?.name}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-white/60">Companies</span>
-                      <span className="text-white">
+                      <span className="text-text-tertiary">Companies</span>
+                      <span className="text-text-primary">
                         {allCompanies
                           ? `All (${companies.length})`
                           : `${selectedCompanyIds.size} selected`}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-white/60">Frequency</span>
-                      <span className="text-white capitalize">
+                      <span className="text-text-tertiary">Frequency</span>
+                      <span className="text-text-primary capitalize">
                         {cadence} on day {dayOfMonth}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-white/60">Due in</span>
-                      <span className="text-white">{dueDaysOffset} days</span>
+                      <span className="text-text-tertiary">Due in</span>
+                      <span className="text-text-primary">{dueDaysOffset} days</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-white/60">Reminders</span>
-                      <span className="text-white">
+                      <span className="text-text-tertiary">Reminders</span>
+                      <span className="text-text-primary">
                         {reminderEnabled
                           ? reminderDays.map((d) => `${d}d`).join(", ")
                           : "Disabled"}
@@ -1154,7 +1154,7 @@ export function UnifiedRequestWizard() {
               <div className="flex items-center justify-end gap-3">
                 <button
                   onClick={() => setFrequency(null)}
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="inline-flex h-10 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-4 text-sm text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                   type="button"
                 >
                   Back
@@ -1162,7 +1162,7 @@ export function UnifiedRequestWizard() {
                 <button
                   onClick={handleSubmitRecurring}
                   disabled={submitting || !scheduleName.trim()}
-                  className="flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/50"
+                  className="flex h-10 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                   type="button"
                 >
                   {submitting ? (

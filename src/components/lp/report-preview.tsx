@@ -314,7 +314,7 @@ function CompanyPageContent({
         }}
       >
         {/* Investment KPI row */}
-        <div className="grid grid-cols-4 gap-3" style={{ marginBottom: "16px" }}>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" style={{ marginBottom: "16px" }}>
           <CurrencyCard label="Invested" value={fmtCurrency(investment.invested, currency)} colors={colors} />
           <CurrencyCard label="Current Value" value={fmtCurrency(investment.current, currency)} colors={colors} />
           <CurrencyCard label="Realized" value={fmtCurrency(investment.realized, currency)} colors={colors} />
@@ -326,7 +326,7 @@ function CompanyPageContent({
           <>
             <SectionDivider colors={colors} />
 
-            <div style={{ marginTop: "16px" }}>
+            <div style={{ marginTop: "16px", overflowX: "auto" }}>
               <h3
                 style={{
                   fontSize: "11px",
@@ -614,7 +614,7 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
               </h2>
 
               <div
-                className="grid grid-cols-5 gap-3"
+                className="grid grid-cols-3 gap-3 sm:grid-cols-5"
                 style={{ marginBottom: "12px" }}
               >
                 <KPICard label="TVPI" value={fmtMultiple(performance.tvpi)} colors={colors} />
@@ -624,7 +624,7 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
                 <KPICard label="MOIC" value={fmtMultiple(performance.moic)} colors={colors} />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <CurrencyCard
                   label="Total Invested"
                   value={fmtCurrency(performance.totalInvested, currency)}
@@ -680,7 +680,7 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
 
             {/* Portfolio Overview Table */}
             {investments.length > 0 && (
-              <div style={{ marginTop: "24px" }}>
+              <div style={{ marginTop: "24px", overflowX: "auto" }}>
                 <h2
                   style={{
                     fontSize: "11px",
@@ -699,6 +699,7 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
                 <table
                   style={{
                     width: "100%",
+                    minWidth: "480px",
                     borderCollapse: "collapse",
                     fontSize: "13px",
                     border: `1px solid ${colors.tableBorder}`,
