@@ -9,6 +9,7 @@ import {
   MetricCardConfig,
   TableConfig,
   DashboardLayout,
+  isTableConfig,
 } from "@/components/dashboard/types";
 import {
   WidgetLibrary,
@@ -165,6 +166,8 @@ export function FounderDashboardBuilder({
 
   function handleDeleteWidget() {
     if (!selectedWidgetId) return;
+    const target = widgets.find((w) => w.id === selectedWidgetId);
+    if (target && isTableConfig(target.config) && target.config.showAllMetrics) return;
     setWidgets(widgets.filter((w) => w.id !== selectedWidgetId));
     setSelectedWidgetId(null);
   }
