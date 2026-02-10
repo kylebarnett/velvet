@@ -11,8 +11,6 @@ import {
   Pencil,
   Check,
   X,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import {
   Select,
@@ -290,6 +288,15 @@ function CompanyHeader({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h1 className="text-base font-semibold tracking-tight truncate">{name}</h1>
+            <button
+              type="button"
+              onClick={() => setExpanded((p) => !p)}
+              className="shrink-0 rounded-md p-1 text-text-faint hover:text-text-tertiary hover:bg-bg-elevated transition-colors"
+              aria-label="Edit company details"
+              title="Edit company details"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
             {website && !expanded && (
               <a
                 href={website}
@@ -324,21 +331,6 @@ function CompanyHeader({
             {toast.msg}
           </span>
         )}
-
-        {/* Expand toggle */}
-        <button
-          type="button"
-          onClick={() => setExpanded((p) => !p)}
-          className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs text-text-muted hover:text-text-tertiary hover:bg-bg-raised transition-colors"
-        >
-          <Pencil className="h-3 w-3" />
-          <span className="hidden sm:inline">Edit</span>
-          {expanded ? (
-            <ChevronUp className="h-3.5 w-3.5" />
-          ) : (
-            <ChevronDown className="h-3.5 w-3.5" />
-          )}
-        </button>
       </div>
 
       {/* Expanded edit section */}
