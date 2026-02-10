@@ -11,7 +11,7 @@ export default async function FounderDashboardPage() {
   // Get founder's company
   const { data: company } = await supabase
     .from("companies")
-    .select("id, name, industry")
+    .select("id, name, industry, website, stage, business_model")
     .eq("founder_id", user.id)
     .single();
 
@@ -21,9 +21,9 @@ export default async function FounderDashboardPage() {
         <div className="space-y-1">
           <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-white/60">No company linked to your account yet.</p>
-          <p className="mt-2 text-sm text-white/40">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <p className="text-text-tertiary">No company linked to your account yet.</p>
+          <p className="mt-2 text-sm text-text-muted">
             Ask an investor to invite you to get started.
           </p>
         </div>
@@ -71,6 +71,9 @@ export default async function FounderDashboardPage() {
       companyId={company.id}
       companyName={company.name}
       companyIndustry={company.industry}
+      companyWebsite={company.website}
+      companyStage={company.stage}
+      companyBusinessModel={company.business_model}
       metrics={metricValues ?? []}
       views={views ?? []}
       templates={templates ?? []}

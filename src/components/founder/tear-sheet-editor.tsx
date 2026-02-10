@@ -69,7 +69,7 @@ const TrendIcon = ({ trend }: { trend: "up" | "down" | "flat" }) => {
     return <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />;
   if (trend === "down")
     return <TrendingDown className="h-3.5 w-3.5 text-red-400" />;
-  return <Minus className="h-3.5 w-3.5 text-white/40" />;
+  return <Minus className="h-3.5 w-3.5 text-text-muted" />;
 };
 
 export function TearSheetEditor({
@@ -167,15 +167,15 @@ export function TearSheetEditor({
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-5">
+      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
         <h2 className="text-sm font-medium">Key Metrics</h2>
-        <p className="mt-1 text-xs text-white/60">
+        <p className="mt-1 text-xs text-text-tertiary">
           Auto-populated from your {tearSheet.quarter} {tearSheet.year}{" "}
           submissions. Toggle which metrics to include.
         </p>
 
         {metrics.length === 0 ? (
-          <div className="mt-4 rounded-md border border-white/10 bg-black/20 px-3 py-4 text-center text-sm text-white/50">
+          <div className="mt-4 rounded-md border border-border-default bg-bg-input px-3 py-4 text-center text-sm text-text-muted">
             No metrics submitted for this period yet.
           </div>
         ) : (
@@ -189,12 +189,12 @@ export function TearSheetEditor({
                   onClick={() => toggleMetric(metric.metricName)}
                   className={`rounded-lg border p-3 text-left transition-colors ${
                     visible
-                      ? "border-white/15 bg-white/[0.08]"
-                      : "border-white/5 bg-black/20 opacity-50"
+                      ? "border-border-default bg-bg-hover"
+                      : "border-border-subtle bg-bg-input opacity-50"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-white/70">
+                    <span className="text-xs font-medium text-text-secondary">
                       {metric.metricName}
                     </span>
                     <TrendIcon trend={metric.trend} />
@@ -203,7 +203,7 @@ export function TearSheetEditor({
                     {formatMetricValue(metric.currentValue, metric.metricName)}
                   </div>
                   {metric.previousValue && (
-                    <div className="mt-0.5 text-xs text-white/40">
+                    <div className="mt-0.5 text-xs text-text-muted">
                       prev: {formatMetricValue(metric.previousValue, metric.metricName)}
                     </div>
                   )}
@@ -215,11 +215,11 @@ export function TearSheetEditor({
       </section>
 
       {/* Highlights */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-5">
+      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
         <label className="text-sm font-medium">
           Highlights
         </label>
-        <p className="mt-1 text-xs text-white/60">
+        <p className="mt-1 text-xs text-text-tertiary">
           Key wins and accomplishments this quarter.
         </p>
         <div className="mt-3">
@@ -232,18 +232,18 @@ export function TearSheetEditor({
       </section>
 
       {/* Milestones */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-5">
+      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-medium">Milestones</h2>
-            <p className="mt-1 text-xs text-white/60">
+            <p className="mt-1 text-xs text-text-tertiary">
               Notable achievements and progress markers.
             </p>
           </div>
           <button
             type="button"
             onClick={addMilestone}
-            className="flex items-center gap-1 rounded-md border border-white/10 bg-black/20 px-2 py-1 text-xs text-white/70 hover:border-white/20"
+            className="flex items-center gap-1 rounded-md border border-border-default bg-bg-input px-2 py-1 text-xs text-text-secondary hover:border-border-default"
           >
             <Plus className="h-3 w-3" />
             Add
@@ -251,7 +251,7 @@ export function TearSheetEditor({
         </div>
 
         {milestones.length === 0 && (
-          <div className="mt-4 rounded-md border border-white/10 bg-black/20 px-3 py-4 text-center text-sm text-white/50">
+          <div className="mt-4 rounded-md border border-border-default bg-bg-input px-3 py-4 text-center text-sm text-text-muted">
             No milestones added yet.
           </div>
         )}
@@ -260,7 +260,7 @@ export function TearSheetEditor({
           {milestones.map((milestone, i) => (
             <div
               key={i}
-              className="rounded-lg border border-white/10 bg-black/20 p-3"
+              className="rounded-lg border border-border-default bg-bg-input p-3"
             >
               <div className="flex items-start gap-2">
                 <div className="flex-1 space-y-2">
@@ -269,7 +269,7 @@ export function TearSheetEditor({
                     value={milestone.title}
                     onChange={(e) => updateMilestone(i, "title", e.target.value)}
                     placeholder="Milestone title"
-                    className="h-9 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
+                    className="h-9 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
                   />
                   <RichTextEditor
                     content={milestone.description}
@@ -280,7 +280,7 @@ export function TearSheetEditor({
                 <button
                   type="button"
                   onClick={() => removeMilestone(i)}
-                  className="shrink-0 rounded-md p-1 text-white/30 hover:bg-white/5 hover:text-red-300"
+                  className="shrink-0 rounded-md p-1 text-text-faint hover:bg-bg-elevated hover:text-[var(--status-error-text)]"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -291,11 +291,11 @@ export function TearSheetEditor({
       </section>
 
       {/* Challenges */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-5">
+      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
         <label className="text-sm font-medium">
           Challenges
         </label>
-        <p className="mt-1 text-xs text-white/60">
+        <p className="mt-1 text-xs text-text-tertiary">
           Issues faced and how you&apos;re addressing them.
         </p>
         <div className="mt-3">
@@ -308,11 +308,11 @@ export function TearSheetEditor({
       </section>
 
       {/* Team Updates */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-5">
+      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
         <label className="text-sm font-medium">
           Team Updates
         </label>
-        <p className="mt-1 text-xs text-white/60">
+        <p className="mt-1 text-xs text-text-tertiary">
           Hires, departures, and organizational changes.
         </p>
         <div className="mt-3">
@@ -325,11 +325,11 @@ export function TearSheetEditor({
       </section>
 
       {/* Outlook */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-5">
+      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
         <label className="text-sm font-medium">
           Outlook
         </label>
-        <p className="mt-1 text-xs text-white/60">
+        <p className="mt-1 text-xs text-text-tertiary">
           Goals and expectations for next quarter.
         </p>
         <div className="mt-3">
@@ -342,11 +342,11 @@ export function TearSheetEditor({
       </section>
 
       {/* Ask of Investors */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-5">
+      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
         <label className="text-sm font-medium">
           Ask of Investors
         </label>
-        <p className="mt-1 text-xs text-white/60">
+        <p className="mt-1 text-xs text-text-tertiary">
           How can your investors help right now?
         </p>
         <div className="mt-3">
@@ -361,13 +361,13 @@ export function TearSheetEditor({
       {/* Save */}
       <div className="flex items-center justify-end gap-3">
         {isDirty && (
-          <span className="text-xs text-amber-200/70">Unsaved changes</span>
+          <span className="text-xs text-[var(--status-warning-text)]/70">Unsaved changes</span>
         )}
         <button
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50"
+          className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save Draft"}
         </button>

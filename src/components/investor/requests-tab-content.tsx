@@ -54,7 +54,7 @@ function getStatusContext(req: Request): { label: string; className: string } | 
       if (daysOverdue > 0) {
         return {
           label: `Overdue by ${daysOverdue}d`,
-          className: "text-red-300",
+          className: "text-[var(--status-error-text)]",
         };
       }
       const daysUntilDue = Math.floor(
@@ -63,7 +63,7 @@ function getStatusContext(req: Request): { label: string; className: string } | 
       if (daysUntilDue <= 3 && daysUntilDue >= 0) {
         return {
           label: `Due in ${daysUntilDue}d`,
-          className: "text-amber-300",
+          className: "text-[var(--tag-amber-text)]",
         };
       }
     }
@@ -71,10 +71,10 @@ function getStatusContext(req: Request): { label: string; className: string } | 
     if (daysSinceCreated > 0) {
       return {
         label: `Sent ${daysSinceCreated}d ago`,
-        className: "text-white/40",
+        className: "text-text-muted",
       };
     }
-    return { label: "Sent today", className: "text-white/40" };
+    return { label: "Sent today", className: "text-text-muted" };
   }
   return null;
 }
@@ -151,21 +151,21 @@ function PeriodProgress({ requests }: { requests: Request[] }) {
         return (
           <div
             key={period.key}
-            className="min-w-[160px] flex-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-3"
+            className="min-w-[160px] flex-1 rounded-lg border border-border-subtle bg-bg-raised p-3"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-white/70">{period.label}</span>
-              <span className="text-xs text-white/40">
+              <span className="text-xs font-medium text-text-secondary">{period.label}</span>
+              <span className="text-xs text-text-muted">
                 {period.submitted}/{period.total}
               </span>
             </div>
-            <div className="mt-2 h-1.5 w-full rounded-full bg-white/10">
+            <div className="mt-2 h-1.5 w-full rounded-full bg-bg-hover">
               <div
                 className={`h-1.5 rounded-full transition-all ${barColor}`}
                 style={{ width: `${period.percentage}%` }}
               />
             </div>
-            <div className="mt-1 text-[10px] text-white/40">
+            <div className="mt-1 text-[10px] text-text-muted">
               {period.percentage}% complete
             </div>
           </div>
@@ -289,9 +289,9 @@ export function RequestsTabContent({
   const showingEnd = Math.min((page + 1) * PAGE_SIZE, total);
 
   const statusStyles: Record<string, string> = {
-    pending: "bg-amber-500/20 text-amber-200",
-    submitted: "bg-emerald-500/20 text-emerald-200",
-    overdue: "bg-red-500/20 text-red-200",
+    pending: "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]",
+    submitted: "bg-[var(--status-success-bg)] text-[var(--status-success-text)]",
+    overdue: "bg-[var(--status-error-bg)] text-[var(--status-error-text)]",
   };
 
   return (
@@ -300,32 +300,32 @@ export function RequestsTabContent({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
         <button
           onClick={() => setStatusFilter("")}
-          className={`rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 text-left hover:bg-white/10 transition-colors ${
-            statusFilter === "" ? "ring-1 ring-white/20" : ""
+          className={`rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 text-left hover:bg-bg-hover transition-colors ${
+            statusFilter === "" ? "ring-1 ring-border-default" : ""
           }`}
           type="button"
         >
-          <div className="text-xs sm:text-sm text-white/60">Total</div>
+          <div className="text-xs sm:text-sm text-text-tertiary">Total</div>
           <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold">{statusCounts.total}</div>
         </button>
         <button
           onClick={() => setStatusFilter("pending")}
-          className={`rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 text-left hover:bg-white/10 transition-colors ${
+          className={`rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 text-left hover:bg-bg-hover transition-colors ${
             statusFilter === "pending" ? "ring-1 ring-amber-500/50" : ""
           }`}
           type="button"
         >
-          <div className="text-xs sm:text-sm text-white/60">Pending</div>
+          <div className="text-xs sm:text-sm text-text-tertiary">Pending</div>
           <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold">{statusCounts.pending}</div>
         </button>
         <button
           onClick={() => setStatusFilter("submitted")}
-          className={`rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 text-left hover:bg-white/10 transition-colors ${
+          className={`rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 text-left hover:bg-bg-hover transition-colors ${
             statusFilter === "submitted" ? "ring-1 ring-emerald-500/50" : ""
           }`}
           type="button"
         >
-          <div className="text-xs sm:text-sm text-white/60">Submitted</div>
+          <div className="text-xs sm:text-sm text-text-tertiary">Submitted</div>
           <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold">{statusCounts.submitted}</div>
         </button>
       </div>
@@ -338,8 +338,8 @@ export function RequestsTabContent({
         <div
           className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm ${
             remindResult.failed > 0 && remindResult.sent === 0
-              ? "border-red-500/20 bg-red-500/10 text-red-200"
-              : "border-emerald-500/20 bg-emerald-500/10 text-emerald-200"
+              ? "border-[var(--status-error-bg)] bg-[var(--status-error-bg)] text-[var(--status-error-text)]"
+              : "border-[var(--status-success-bg)] bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
           }`}
           role="alert"
         >
@@ -353,7 +353,7 @@ export function RequestsTabContent({
           <button
             type="button"
             onClick={() => setRemindResult(null)}
-            className="ml-3 rounded p-0.5 hover:bg-white/10"
+            className="ml-3 rounded p-0.5 hover:bg-bg-hover"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -364,19 +364,19 @@ export function RequestsTabContent({
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
         {/* Search input */}
         <div className="relative flex-1 sm:flex-none sm:min-w-[200px]">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search metrics..."
-            className="h-10 w-full rounded-md border border-white/10 bg-black/30 pl-9 pr-8 text-sm placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+            className="h-10 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-8 text-sm placeholder:text-text-faint focus:border-border-default focus:outline-none"
           />
           {searchInput && (
             <button
               type="button"
               onClick={() => setSearchInput("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-white/40 hover:text-white/70"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-text-muted hover:text-text-secondary"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -419,7 +419,7 @@ export function RequestsTabContent({
                 setCompanyFilter("");
                 setSearchInput("");
               }}
-              className="h-10 rounded-md border border-white/10 px-3 text-sm text-white/60 hover:bg-white/5"
+              className="h-10 rounded-md border border-border-default px-3 text-sm text-text-tertiary hover:bg-bg-elevated"
               type="button"
             >
               Clear filters
@@ -432,24 +432,24 @@ export function RequestsTabContent({
       {loading ? (
         <div className="space-y-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-14 animate-pulse rounded-lg bg-white/5" />
+            <div key={i} className="h-14 animate-pulse rounded-lg bg-bg-elevated" />
           ))}
         </div>
       ) : requests.length === 0 && !statusFilter && !companyFilter && !debouncedSearch ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <div className="text-sm text-white/60">No requests yet.</div>
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <div className="text-sm text-text-tertiary">No requests yet.</div>
           <div className="mt-2">
             <Link
               href="/requests/new"
-              className="text-sm text-white underline underline-offset-4 hover:text-white/80"
+              className="text-sm text-text-primary underline underline-offset-4 hover:text-text-secondary"
             >
               Create your first request
             </Link>
           </div>
         </div>
       ) : requests.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <div className="text-sm text-white/60">No requests match the selected filters.</div>
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <div className="text-sm text-text-tertiary">No requests match the selected filters.</div>
         </div>
       ) : (
         <>
@@ -466,17 +466,17 @@ export function RequestsTabContent({
                 id: string;
                 name: string;
               } | null;
-              const statusStyle = statusStyles[req.status] ?? "bg-white/10 text-white/60";
+              const statusStyle = statusStyles[req.status] ?? "bg-bg-hover text-text-tertiary";
 
               return (
                 <div
                   key={req.id}
-                  className="rounded-xl border border-white/10 bg-white/5 p-4"
+                  className="rounded-xl border border-border-default bg-bg-elevated p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="font-medium truncate">{def?.name ?? "Unknown"}</div>
-                      <div className="mt-0.5 text-xs text-white/60">{def?.period_type}</div>
+                      <div className="mt-0.5 text-xs text-text-tertiary">{def?.period_type}</div>
                     </div>
                     <div className="shrink-0 text-right">
                       <span className={`rounded-full px-2 py-0.5 text-xs ${statusStyle}`}>
@@ -495,26 +495,26 @@ export function RequestsTabContent({
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <div className="text-xs text-white/60">Company</div>
+                      <div className="text-xs text-text-tertiary">Company</div>
                       {company ? (
                         <Link
                           href={`/dashboard/${company.id}`}
-                          className="text-white/70 hover:text-white hover:underline"
+                          className="text-text-secondary hover:text-text-primary hover:underline"
                         >
                           {company.name}
                         </Link>
                       ) : (
-                        <span className="text-white/60">—</span>
+                        <span className="text-text-tertiary">—</span>
                       )}
                     </div>
                     <div>
-                      <div className="text-xs text-white/60">Due date</div>
-                      <div className="text-white/70">
+                      <div className="text-xs text-text-tertiary">Due date</div>
+                      <div className="text-text-secondary">
                         {req.due_date ? formatDate(req.due_date) : "—"}
                       </div>
                     </div>
                   </div>
-                  <div className="mt-2 text-xs text-white/60">
+                  <div className="mt-2 text-xs text-text-tertiary">
                     {formatPeriodRange(req.period_start, req.period_end, def?.period_type)}
                   </div>
                 </div>
@@ -523,27 +523,27 @@ export function RequestsTabContent({
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden sm:block overflow-hidden rounded-xl border border-white/10">
+          <div className="hidden sm:block overflow-hidden rounded-xl border border-border-default">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/5">
+                  <tr className="border-b border-border-default bg-bg-elevated">
                     <th className="w-10 px-3 py-3">
                       {pendingRequests.length > 0 && (
                         <input
                           type="checkbox"
                           checked={pendingRequests.length > 0 && pendingRequests.every((r) => selectedIds.has(r.id))}
                           onChange={toggleSelectAllPending}
-                          className="h-4 w-4 rounded border-white/20 bg-white/5 accent-white"
+                          className="h-4 w-4 rounded border-border-default bg-bg-elevated accent-white"
                           title="Select all pending"
                         />
                       )}
                     </th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Metric</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Company</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Period</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Due date</th>
-                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-white/60">Status</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">Metric</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">Company</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">Period</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">Due date</th>
+                    <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -558,17 +558,17 @@ export function RequestsTabContent({
                       id: string;
                       name: string;
                     } | null;
-                    const statusStyle = statusStyles[req.status] ?? "bg-white/10 text-white/60";
+                    const statusStyle = statusStyles[req.status] ?? "bg-bg-hover text-text-tertiary";
 
                     return (
-                      <tr key={req.id} className="border-b border-white/5">
+                      <tr key={req.id} className="border-b border-border-subtle">
                         <td className="w-10 px-3 py-3">
                           {req.status === "pending" ? (
                             <input
                               type="checkbox"
                               checked={selectedIds.has(req.id)}
                               onChange={() => toggleSelected(req.id)}
-                              className="h-4 w-4 rounded border-white/20 bg-white/5 accent-white"
+                              className="h-4 w-4 rounded border-border-default bg-bg-elevated accent-white"
                             />
                           ) : (
                             <span className="block h-4 w-4" />
@@ -576,24 +576,24 @@ export function RequestsTabContent({
                         </td>
                         <td className="px-4 py-3">
                           <div className="font-medium">{def?.name ?? "Unknown"}</div>
-                          <div className="text-xs text-white/60">{def?.period_type}</div>
+                          <div className="text-xs text-text-tertiary">{def?.period_type}</div>
                         </td>
                         <td className="px-4 py-3">
                           {company ? (
                             <Link
                               href={`/dashboard/${company.id}`}
-                              className="text-white/70 hover:text-white hover:underline"
+                              className="text-text-secondary hover:text-text-primary hover:underline"
                             >
                               {company.name}
                             </Link>
                           ) : (
-                            <span className="text-white/60">—</span>
+                            <span className="text-text-tertiary">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-white/70 whitespace-nowrap">
+                        <td className="px-4 py-3 text-text-secondary whitespace-nowrap">
                           {formatPeriodRange(req.period_start, req.period_end, def?.period_type)}
                         </td>
-                        <td className="px-4 py-3 text-white/60">
+                        <td className="px-4 py-3 text-text-tertiary">
                           {req.due_date ? formatDate(req.due_date) : "—"}
                         </td>
                         <td className="px-4 py-3">
@@ -621,7 +621,7 @@ export function RequestsTabContent({
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white/60">
+              <span className="text-sm text-text-tertiary">
                 Showing {showingStart}–{showingEnd} of {total}
               </span>
               <div className="flex items-center gap-1">
@@ -629,18 +629,18 @@ export function RequestsTabContent({
                   type="button"
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-white/60 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
-                <span className="px-2 text-sm text-white/60">
+                <span className="px-2 text-sm text-text-tertiary">
                   {page + 1} / {totalPages}
                 </span>
                 <button
                   type="button"
                   onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                   disabled={page >= totalPages - 1}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-white/60 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -653,15 +653,15 @@ export function RequestsTabContent({
       {/* Floating bulk action bar */}
       {selectedIds.size > 0 && (
         <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 animate-fade-in">
-          <div className="flex items-center gap-3 rounded-xl border border-white/15 bg-zinc-900/95 px-5 py-3 shadow-2xl backdrop-blur-sm">
-            <span className="text-sm text-white/70">
+          <div className="flex items-center gap-3 rounded-xl border border-border-default bg-bg-secondary/95 px-5 py-3 shadow-2xl backdrop-blur-sm">
+            <span className="text-sm text-text-secondary">
               {selectedIds.size} selected
             </span>
             <button
               type="button"
               onClick={handleBulkRemind}
               disabled={reminding}
-              className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-white/90 disabled:opacity-60"
+              className="flex items-center gap-2 rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text transition-colors hover:bg-btn-primary-hover disabled:opacity-60"
             >
               <Bell className="h-3.5 w-3.5" />
               {reminding ? "Sending..." : `Remind founder${selectedIds.size > 1 ? "s" : ""}`}
@@ -669,7 +669,7 @@ export function RequestsTabContent({
             <button
               type="button"
               onClick={() => setSelectedIds(new Set())}
-              className="rounded-md p-1.5 text-white/50 hover:text-white/80 transition-colors"
+              className="rounded-md p-1.5 text-text-muted hover:text-text-secondary transition-colors"
             >
               <X className="h-4 w-4" />
             </button>

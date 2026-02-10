@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 // Note: SVG intentionally excluded - can contain embedded JavaScript (XSS risk)
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"];
@@ -71,7 +72,7 @@ export async function POST(
     });
 
   if (uploadError) {
-    console.error("Upload error:", uploadError);
+    logger.error("Upload error:", uploadError);
     return jsonError("Failed to upload logo.", 500);
   }
 
@@ -91,7 +92,7 @@ export async function POST(
     .eq("company_id", companyId);
 
   if (updateError) {
-    console.error("Update error:", updateError);
+    logger.error("Update error:", updateError);
     return jsonError("Failed to save logo URL.", 500);
   }
 
@@ -144,7 +145,7 @@ export async function DELETE(
     .eq("company_id", companyId);
 
   if (updateError) {
-    console.error("Update error:", updateError);
+    logger.error("Update error:", updateError);
     return jsonError("Failed to remove logo.", 500);
   }
 

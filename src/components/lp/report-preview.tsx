@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, useMemo } from "react";
 import DOMPurify from "dompurify";
 import { getReportTheme, type ReportThemeColors } from "@/lib/lp/report-themes";
 
@@ -508,10 +508,16 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
     ref,
   ) {
     const colors = theme ?? getReportTheme().colors;
-    const totalInvested = investments.reduce((sum, inv) => sum + inv.invested, 0);
-    const totalCurrent = investments.reduce((sum, inv) => sum + inv.current, 0);
-    const totalRealized = investments.reduce((sum, inv) => sum + inv.realized, 0);
-    const totalMOIC = totalInvested > 0 ? ((totalCurrent + totalRealized) / totalInvested).toFixed(2) + "x" : "-";
+
+    const investmentTotals = useMemo(() => {
+      const totalInvested = investments.reduce((sum, inv) => sum + inv.invested, 0);
+      const totalCurrent = investments.reduce((sum, inv) => sum + inv.current, 0);
+      const totalRealized = investments.reduce((sum, inv) => sum + inv.realized, 0);
+      const totalMOIC = totalInvested > 0 ? ((totalCurrent + totalRealized) / totalInvested).toFixed(2) + "x" : "-";
+      return { totalInvested, totalCurrent, totalRealized, totalMOIC };
+    }, [investments]);
+
+    const { totalInvested, totalCurrent, totalRealized, totalMOIC } = investmentTotals;
 
     const reportTypeBadge = reportType.replace("_", " ");
 

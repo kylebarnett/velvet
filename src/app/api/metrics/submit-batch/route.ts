@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 const batchSchema = z.object({
   companyId: z.string().uuid(),
@@ -123,7 +124,7 @@ export async function POST(req: Request) {
             .in("id", validIds);
 
           if (updateError) {
-            console.error("Failed to fulfill requests:", updateError);
+            logger.error("Failed to fulfill requests:", updateError);
           }
         }
       } else {
@@ -164,14 +165,14 @@ export async function POST(req: Request) {
               .in("id", idsToFulfill);
 
             if (updateError) {
-              console.error("Failed to fulfill requests:", updateError);
+              logger.error("Failed to fulfill requests:", updateError);
             }
           }
         }
       }
     } catch (e: unknown) {
       // Non-fatal — the metric values were submitted successfully
-      console.error("Failed to auto-fulfill requests:", e);
+      logger.error("Failed to auto-fulfill requests:", e);
     }
   }
 

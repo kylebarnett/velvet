@@ -4,6 +4,14 @@ import * as React from "react";
 import { FileSpreadsheet, ChevronRight, Download, X, ArrowLeft } from "lucide-react";
 import { TearSheetPreview } from "@/components/founder/tear-sheet-preview";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import { logger } from "@/lib/logger";
 
 type QuarterFilter = "All" | "Q1" | "Q2" | "Q3" | "Q4";
 
@@ -60,25 +68,25 @@ function TearSheetCard({
     <button
       type="button"
       onClick={onClick}
-      className="w-full text-left rounded-xl border border-white/10 bg-white/5 p-4 hover:border-white/20 hover:bg-white/[0.07] transition-colors group"
+      className="w-full text-left rounded-xl border border-border-default bg-bg-elevated p-4 hover:border-border-default hover:bg-bg-elevated transition-colors group"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="font-medium text-white truncate group-hover:text-white/90">
+          <h3 className="font-medium text-text-primary truncate group-hover:text-text-primary">
             {tearSheet.title}
           </h3>
           <div className="mt-1 flex items-center gap-2">
-            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
+            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-[var(--status-success-text)]">
               Published
             </span>
-            <span className="text-xs text-white/60">
+            <span className="text-xs text-text-tertiary">
               {tearSheet.quarter} {tearSheet.year}
             </span>
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 text-white/30 group-hover:text-white/50 shrink-0 transition-colors" />
+        <ChevronRight className="h-5 w-5 text-text-faint group-hover:text-text-muted shrink-0 transition-colors" />
       </div>
-      <div className="mt-3 text-xs text-white/40">
+      <div className="mt-3 text-xs text-text-muted">
         Updated {formatDate(tearSheet.updated_at)}
       </div>
     </button>
@@ -109,21 +117,21 @@ function TearSheetViewer({
         previewRef.current,
         `${tearSheet.title}.pdf`
       );
-    } catch (e) {
-      console.error("PDF export failed:", e);
+    } catch (e: unknown) {
+      logger.error("PDF export failed:", e);
     } finally {
       setExporting(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-zinc-950">
+    <div className="fixed inset-0 z-50 flex flex-col bg-bg-primary">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-6">
+      <div className="flex items-center justify-between border-b border-border-default px-4 py-3 sm:px-6">
         <button
           type="button"
           onClick={onClose}
-          className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors"
+          className="flex items-center gap-2 text-sm text-text-tertiary hover:text-text-primary transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Back to tear sheets</span>
@@ -134,7 +142,7 @@ function TearSheetViewer({
             type="button"
             onClick={handleExportPdf}
             disabled={exporting}
-            className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" />
             {exporting ? "Generating..." : "Download PDF"}
@@ -142,7 +150,7 @@ function TearSheetViewer({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-2 text-white/40 hover:bg-white/10 hover:text-white sm:hidden"
+            className="rounded-md p-2 text-text-muted hover:bg-bg-hover hover:text-text-primary sm:hidden"
           >
             <X className="h-5 w-5" />
           </button>
@@ -191,7 +199,7 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
         }
 
         setTearSheets(json.tearSheets ?? []);
-      } catch (e) {
+      } catch (e: unknown) {
         setError(e instanceof Error ? e.message : "Something went wrong.");
       } finally {
         setLoading(false);
@@ -214,8 +222,8 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
       if (res.ok) {
         setSelectedMetrics(json.metrics ?? []);
       }
-    } catch (e) {
-      console.error("Failed to load metrics:", e);
+    } catch (e: unknown) {
+      logger.error("Failed to load metrics:", e);
     } finally {
       setLoadingMetrics(false);
     }
@@ -280,21 +288,22 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
           />
 
           {availableYears.length > 1 && (
-            <select
-              value={filterYear}
-              onChange={(e) => setFilterYear(e.target.value)}
-              className="h-8 rounded-md border border-white/10 bg-black/20 px-2 text-xs text-white/80 outline-none"
-            >
-              <option value="All">All years</option>
-              {availableYears.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
+            <Select value={filterYear} onValueChange={setFilterYear}>
+              <SelectTrigger size="sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All years</SelectItem>
+                {availableYears.map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
 
-          <span className="text-sm text-white/60">
+          <span className="text-sm text-text-tertiary">
             {filteredTearSheets.length} tear sheet{filteredTearSheets.length !== 1 ? "s" : ""}
           </span>
         </div>
@@ -302,7 +311,7 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
 
       {/* Error */}
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
@@ -313,19 +322,19 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
           {[1, 2].map((i) => (
             <div
               key={i}
-              className="animate-pulse rounded-xl border border-white/10 bg-white/5 p-4"
+              className="animate-pulse rounded-xl border border-border-default bg-bg-elevated p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-48 rounded bg-white/10" />
+                  <div className="h-4 w-48 rounded bg-bg-hover" />
                   <div className="flex gap-2">
-                    <div className="h-5 w-16 rounded-full bg-white/10" />
-                    <div className="h-5 w-14 rounded bg-white/5" />
+                    <div className="h-5 w-16 rounded-full bg-bg-hover" />
+                    <div className="h-5 w-14 rounded bg-bg-elevated" />
                   </div>
                 </div>
-                <div className="h-5 w-5 rounded bg-white/5" />
+                <div className="h-5 w-5 rounded bg-bg-elevated" />
               </div>
-              <div className="mt-3 h-3 w-28 rounded bg-white/5" />
+              <div className="mt-3 h-3 w-28 rounded bg-bg-elevated" />
             </div>
           ))}
         </div>
@@ -333,10 +342,10 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
 
       {/* Empty state */}
       {!loading && tearSheets.length === 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-          <FileSpreadsheet className="mx-auto h-8 w-8 text-white/30" />
-          <p className="mt-2 text-sm text-white/60">No tear sheets available.</p>
-          <p className="mt-1 text-xs text-white/40">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+          <FileSpreadsheet className="mx-auto h-8 w-8 text-text-faint" />
+          <p className="mt-2 text-sm text-text-tertiary">No tear sheets available.</p>
+          <p className="mt-1 text-xs text-text-muted">
             Published tear sheets from the founder will appear here.
           </p>
         </div>
@@ -344,8 +353,8 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
 
       {/* No results after filter */}
       {!loading && filteredTearSheets.length === 0 && tearSheets.length > 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-sm text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <p className="text-sm text-text-tertiary">
             No tear sheets match the selected filters.
           </p>
         </div>

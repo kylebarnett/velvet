@@ -18,6 +18,7 @@ import { Download, Settings, Mail, BarChart3, Clock, FileUp } from "lucide-react
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 import { EmailPasteModal } from "@/components/founder/email-paste-modal";
+import { logger } from "@/lib/logger";
 
 type DashboardView = {
   id: string;
@@ -311,23 +312,23 @@ function EmptyMetricsState({
 
   if (pendingRequests.length > 0) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-6">
         <div className="flex flex-col items-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10">
-            <BarChart3 className="h-6 w-6 text-blue-400" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--tag-blue-bg)]">
+            <BarChart3 className="h-6 w-6 text-[var(--tag-blue-text)]" />
           </div>
           <h3 className="mt-4 text-base font-medium">Welcome to your metrics dashboard</h3>
-          <p className="mt-1 text-sm text-white/60">Your investors have requested the following metrics:</p>
+          <p className="mt-1 text-sm text-text-tertiary">Your investors have requested the following metrics:</p>
         </div>
         <div className="mt-4 space-y-2">
           {pendingRequests.map((req, i) => (
-            <div key={i} className="flex items-center justify-between rounded-lg bg-black/20 px-3 py-2">
+            <div key={i} className="flex items-center justify-between rounded-lg bg-bg-input px-3 py-2">
               <div className="flex items-center gap-2">
-                <Clock className="h-3.5 w-3.5 text-amber-400" />
-                <span className="text-sm text-white/80">{req.metricName}</span>
+                <Clock className="h-3.5 w-3.5 text-[var(--tag-amber-text)]" />
+                <span className="text-sm text-text-primary">{req.metricName}</span>
               </div>
               {req.dueDate && (
-                <span className="text-xs text-white/40">
+                <span className="text-xs text-text-muted">
                   Due {new Date(req.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </span>
               )}
@@ -337,14 +338,14 @@ function EmptyMetricsState({
         <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/portal/requests"
-            className="inline-flex h-10 items-center gap-2 rounded-lg bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
           >
             Submit Metrics
           </Link>
           <button
             type="button"
             onClick={onImportEmail}
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 text-sm font-medium text-white/70 hover:bg-white/10"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-border-default bg-bg-elevated px-4 text-sm font-medium text-text-secondary hover:bg-bg-hover"
           >
             <Mail className="h-4 w-4" />
             Import from Email
@@ -355,13 +356,13 @@ function EmptyMetricsState({
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+    <div className="rounded-xl border border-border-default bg-bg-elevated p-6">
       <div className="flex flex-col items-center text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5">
-          <Clock className="h-6 w-6 text-white/40" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated">
+          <Clock className="h-6 w-6 text-text-muted" />
         </div>
         <h3 className="mt-4 text-base font-medium">No metric requests yet</h3>
-        <p className="mt-1 text-sm text-white/60">
+        <p className="mt-1 text-sm text-text-tertiary">
           When your investors request metrics, they&apos;ll appear here.
           You can also submit metrics proactively:
         </p>
@@ -369,7 +370,7 @@ function EmptyMetricsState({
       <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
         <Link
           href="/portal/requests"
-          className="inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 text-sm font-medium text-white/70 hover:bg-white/10"
+          className="inline-flex h-10 items-center gap-2 rounded-lg border border-border-default bg-bg-elevated px-4 text-sm font-medium text-text-secondary hover:bg-bg-hover"
         >
           <FileUp className="h-4 w-4" />
           Add Metrics Manually
@@ -377,7 +378,7 @@ function EmptyMetricsState({
         <button
           type="button"
           onClick={onImportEmail}
-          className="inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 text-sm font-medium text-white/70 hover:bg-white/10"
+          className="inline-flex h-10 items-center gap-2 rounded-lg border border-border-default bg-bg-elevated px-4 text-sm font-medium text-text-secondary hover:bg-bg-hover"
         >
           <Mail className="h-4 w-4" />
           Import from Email
@@ -436,8 +437,8 @@ export function FounderDashboardClient({
         setSelectedViewId(remaining[0]?.id ?? null);
       }
       router.refresh();
-    } catch (err) {
-      console.error("Failed to delete view:", err);
+    } catch (err: unknown) {
+      logger.error("Failed to delete view:", err);
     }
   }
 
@@ -461,8 +462,8 @@ export function FounderDashboardClient({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Export error:", err);
+    } catch (err: unknown) {
+      logger.error("Export error:", err);
     } finally {
       setIsExporting(false);
     }
@@ -530,7 +531,7 @@ export function FounderDashboardClient({
           <button
             type="button"
             onClick={() => setShowEmailModal(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10"
+            className="flex items-center gap-1.5 rounded-lg border border-border-default bg-bg-elevated px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-bg-hover"
           >
             <Mail className="h-3 w-3" />
             Import from Email
@@ -539,14 +540,14 @@ export function FounderDashboardClient({
             type="button"
             onClick={handleExport}
             disabled={isExporting}
-            className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" />
             {isExporting ? "Exporting..." : "Export CSV"}
           </button>
           <Link
             href="/portal/dashboard/edit"
-            className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
+            className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
           >
             <Settings className="h-3.5 w-3.5" />
             Edit Dashboard
@@ -570,8 +571,8 @@ export function FounderDashboardClient({
           return (
             <div
               key={widget.id}
-              className={`rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 ${colSpanClass}`}
-              style={{ minHeight: `${widget.h * 80}px`, "--table-bg": "#111113" } as React.CSSProperties}
+              className={`rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 ${colSpanClass}`}
+              style={{ minHeight: `${widget.h * 80}px` } as React.CSSProperties}
             >
               <DashboardWidget
                 widget={widget}
@@ -588,9 +589,9 @@ export function FounderDashboardClient({
       </div>
 
       {widgets.length === 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-white/60">No widgets configured for this dashboard.</p>
-          <p className="mt-2 text-sm text-white/40">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <p className="text-text-tertiary">No widgets configured for this dashboard.</p>
+          <p className="mt-2 text-sm text-text-muted">
             Click &quot;Edit Dashboard&quot; to add charts and metrics.
           </p>
         </div>

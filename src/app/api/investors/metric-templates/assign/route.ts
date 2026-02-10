@@ -105,13 +105,15 @@ export async function POST(req: Request) {
 
   for (const companyId of companyIds) {
     for (const item of items) {
-      // Upsert metric definition for this investor
+      // Upsert metric definition for this investor.
+      // Use the investor's selected periodType (not the template item's period_type)
+      // so the definition matches the actual request period.
       const { data: metricDef, error: defError } = await supabase
         .from("metric_definitions")
         .insert({
           investor_id: user.id,
           name: item.metric_name,
-          period_type: item.period_type,
+          period_type: periodType,
           data_type: item.data_type,
         })
         .select("id")

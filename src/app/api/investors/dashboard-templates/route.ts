@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 // GET - List dashboard templates
 export async function GET() {
@@ -18,7 +19,7 @@ export async function GET() {
     .order("name", { ascending: true });
 
   if (error) {
-    console.error("Failed to fetch dashboard templates:", error.message);
+    logger.error("Failed to fetch dashboard templates:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

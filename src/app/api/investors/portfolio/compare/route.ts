@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { extractNumericValue } from "@/lib/reports/aggregation";
+import { logger } from "@/lib/logger";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -72,7 +73,7 @@ export async function GET(req: Request) {
     .in("company_id", companyIds);
 
   if (relError) {
-    console.error("Failed to fetch relationships:", relError.message);
+    logger.error("Failed to fetch relationships:", relError.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -112,7 +113,7 @@ export async function GET(req: Request) {
 
   const { data: metricValues, error: mvError } = await query;
   if (mvError) {
-    console.error("Failed to fetch metric values:", mvError.message);
+    logger.error("Failed to fetch metric values:", mvError.message);
     return jsonError("Failed to process request.", 500);
   }
 

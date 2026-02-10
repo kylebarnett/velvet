@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -47,6 +48,268 @@ type Props = {
   initialContacts: Contact[];
   initialPagination: Pagination;
 };
+
+/** Virtualization threshold — only virtualize when row count exceeds this */
+const CONTACTS_VIRTUALIZE_THRESHOLD = 30;
+/** Estimated row height in pixels for the virtualizer */
+const CONTACTS_ESTIMATED_ROW_HEIGHT = 52;
+/** Number of columns in the contacts table (checkbox + company + contact + email + status + actions) */
+const CONTACTS_COL_COUNT = 6;
+
+type ContactsDesktopTableProps = {
+  sortedContacts: Contact[];
+  contacts: Contact[];
+  selectedIds: Set<string>;
+  toggleSelectAll: () => void;
+  toggleSelect: (id: string) => void;
+  toggleSort: (field: SortField) => void;
+  sortIcon: (field: SortField) => React.ReactNode;
+  editingId: string | null;
+  editForm: { first_name: string; last_name: string; email: string };
+  setEditForm: React.Dispatch<React.SetStateAction<{ first_name: string; last_name: string; email: string }>>;
+  saveEdit: () => void;
+  setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
+  startEdit: (contact: Contact) => void;
+  openDeleteModal: (contact: Contact) => void;
+  sendInvite: (ids: string[]) => Promise<void>;
+  loading: boolean;
+  fetching: boolean;
+  getCompanyName: (contact: Contact) => string;
+  statusBadge: (status: string) => React.ReactNode;
+};
+
+function ContactsDesktopTable({
+  sortedContacts,
+  contacts,
+  selectedIds,
+  toggleSelectAll,
+  toggleSelect,
+  toggleSort,
+  sortIcon,
+  editingId,
+  editForm,
+  setEditForm,
+  saveEdit,
+  setEditingId,
+  startEdit,
+  openDeleteModal,
+  sendInvite,
+  loading,
+  fetching,
+  getCompanyName,
+  statusBadge,
+}: ContactsDesktopTableProps) {
+  const parentRef = React.useRef<HTMLDivElement>(null);
+  const shouldVirtualize = sortedContacts.length > CONTACTS_VIRTUALIZE_THRESHOLD;
+
+  const virtualizer = useVirtualizer({
+    count: sortedContacts.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => CONTACTS_ESTIMATED_ROW_HEIGHT,
+    overscan: 10,
+    enabled: shouldVirtualize,
+  });
+
+  const renderRow = (contact: Contact) => (
+    <>
+      <td className="p-3">
+        <input
+          type="checkbox"
+          checked={selectedIds.has(contact.id)}
+          onChange={() => toggleSelect(contact.id)}
+          className="rounded border-border-default"
+        />
+      </td>
+      <td className="p-3 font-medium">{getCompanyName(contact)}</td>
+      <td className="p-3">
+        {editingId === contact.id ? (
+          <div className="flex gap-2">
+            <input
+              value={editForm.first_name}
+              onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
+              className="h-8 w-24 rounded border border-border-default bg-bg-input px-2 text-sm"
+              placeholder="First"
+            />
+            <input
+              value={editForm.last_name}
+              onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+              className="h-8 w-24 rounded border border-border-default bg-bg-input px-2 text-sm"
+              placeholder="Last"
+            />
+          </div>
+        ) : (
+          `${contact.first_name} ${contact.last_name}`
+        )}
+      </td>
+      <td className="p-3 text-text-tertiary">
+        {editingId === contact.id ? (
+          <input
+            type="email"
+            value={editForm.email}
+            onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+            className="h-8 w-48 rounded border border-border-default bg-bg-input px-2 text-sm"
+            placeholder="Email"
+          />
+        ) : (
+          contact.email
+        )}
+      </td>
+      <td className="p-3">{statusBadge(contact.status)}</td>
+      <td className="p-3">
+        {editingId === contact.id ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={saveEdit}
+              disabled={loading}
+              className="text-sm text-emerald-400 hover:text-[var(--status-success-text)]"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => setEditingId(null)}
+              className="text-sm text-text-muted hover:text-text-tertiary"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1">
+            {contact.status !== "accepted" && (
+              <button
+                onClick={() => sendInvite([contact.id])}
+                disabled={loading}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                title={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
+                aria-label={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
+              >
+                <Mail className="h-4 w-4 text-text-tertiary" />
+              </button>
+            )}
+            <button
+              onClick={() => startEdit(contact)}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+              title="Edit contact"
+              aria-label="Edit contact"
+            >
+              <Pencil className="h-4 w-4 text-text-tertiary" />
+            </button>
+            <button
+              onClick={() => openDeleteModal(contact)}
+              disabled={loading}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+              title="Delete contact"
+              aria-label="Delete contact"
+            >
+              <Trash2 className="h-4 w-4 text-red-400/60" />
+            </button>
+          </div>
+        )}
+      </td>
+    </>
+  );
+
+  const theadContent = (
+    <tr className="border-b border-border-default text-left text-text-tertiary">
+      <th className="p-3">
+        <input
+          type="checkbox"
+          checked={selectedIds.size === contacts.length && contacts.length > 0}
+          onChange={toggleSelectAll}
+          className="rounded border-border-default"
+          aria-label="Select all contacts"
+        />
+      </th>
+      {([
+        ["company", "Company"],
+        ["contact", "Contact"],
+        ["email", "Email"],
+        ["status", "Status"],
+      ] as const).map(([field, label]) => (
+        <th key={field} className="p-3 font-medium">
+          <button
+            type="button"
+            onClick={() => toggleSort(field)}
+            className="inline-flex items-center gap-1.5 hover:text-text-primary transition-colors"
+          >
+            {label}
+            {sortIcon(field)}
+          </button>
+        </th>
+      ))}
+      <th className="p-3 font-medium">Actions</th>
+    </tr>
+  );
+
+  if (!shouldVirtualize) {
+    return (
+      <div className={`hidden sm:block overflow-x-auto rounded-xl border border-border-default bg-bg-elevated ${fetching ? "opacity-60" : ""}`}>
+        <table className="w-full text-sm">
+          <thead>{theadContent}</thead>
+          <tbody>
+            {sortedContacts.map((contact) => (
+              <tr key={contact.id} className="border-b border-border-subtle hover:bg-bg-elevated">
+                {renderRow(contact)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  // Virtualized rendering
+  const virtualItems = virtualizer.getVirtualItems();
+
+  return (
+    <div
+      ref={parentRef}
+      className={`hidden sm:block max-h-[600px] overflow-auto rounded-xl border border-border-default bg-bg-elevated ${fetching ? "opacity-60" : ""}`}
+    >
+      <table className="w-full text-sm">
+        <thead className="sticky top-0 z-10 bg-bg-elevated">
+          {theadContent}
+        </thead>
+        <tbody>
+          {/* Top spacer */}
+          {virtualItems.length > 0 && virtualItems[0].start > 0 && (
+            <tr>
+              <td
+                colSpan={CONTACTS_COL_COUNT}
+                style={{ height: virtualItems[0].start, padding: 0, border: 0 }}
+              />
+            </tr>
+          )}
+          {virtualItems.map((virtualRow) => {
+            const contact = sortedContacts[virtualRow.index];
+            return (
+              <tr
+                key={virtualRow.key}
+                data-index={virtualRow.index}
+                ref={virtualizer.measureElement}
+                className="border-b border-border-subtle hover:bg-bg-elevated"
+              >
+                {renderRow(contact)}
+              </tr>
+            );
+          })}
+          {/* Bottom spacer */}
+          {virtualItems.length > 0 && (
+            <tr>
+              <td
+                colSpan={CONTACTS_COL_COUNT}
+                style={{
+                  height: virtualizer.getTotalSize() - (virtualItems.at(-1)?.end ?? 0),
+                  padding: 0,
+                  border: 0,
+                }}
+              />
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export function ContactsTable({ initialContacts, initialPagination }: Props) {
   const [contacts, setContacts] = React.useState(initialContacts);
@@ -112,7 +375,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
         setContacts(json.contacts);
         setPagination(json.pagination);
         setSelectedIds(new Set()); // Clear selection on page change
-      } catch (err) {
+      } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
       } finally {
         setFetching(false);
@@ -141,10 +404,10 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
   }
 
   function sortIcon(field: SortField) {
-    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 text-white/30" />;
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 text-text-faint" />;
     return sortDir === "asc"
-      ? <ArrowUp className="h-3 w-3 text-white/60" />
-      : <ArrowDown className="h-3 w-3 text-white/60" />;
+      ? <ArrowUp className="h-3 w-3 text-text-tertiary" />
+      : <ArrowDown className="h-3 w-3 text-text-tertiary" />;
   }
 
   const sortedContacts = React.useMemo(() => {
@@ -170,30 +433,38 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
     return arr;
   }, [contacts, sortField, sortDir]);
 
-  const pendingCount = contacts.filter((c) => c.status === "pending").length;
+  const pendingCount = React.useMemo(
+    () => contacts.filter((c) => c.status === "pending").length,
+    [contacts],
+  );
 
-  function toggleSelect(id: string) {
-    const newSelected = new Set(selectedIds);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedIds(newSelected);
-  }
+  const toggleSelect = React.useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(id)) {
+        newSelected.delete(id);
+      } else {
+        newSelected.add(id);
+      }
+      return newSelected;
+    });
+  }, []);
 
-  function toggleSelectAll() {
-    if (selectedIds.size === contacts.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(contacts.map((c) => c.id)));
-    }
-  }
+  const toggleSelectAll = React.useCallback(() => {
+    setSelectedIds((prev) => {
+      if (prev.size === contacts.length) {
+        return new Set();
+      }
+      return new Set(contacts.map((c) => c.id));
+    });
+  }, [contacts]);
 
-  function goToPage(page: number) {
-    if (page < 1 || page > pagination.totalPages) return;
-    setPagination((prev) => ({ ...prev, page }));
-  }
+  const goToPage = React.useCallback((page: number) => {
+    setPagination((prev) => {
+      if (page < 1 || page > prev.totalPages) return prev;
+      return { ...prev, page };
+    });
+  }, []);
 
   async function sendInvite(ids: string[]) {
     setLoading(true);
@@ -228,7 +499,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
         )
       );
       setSelectedIds(new Set());
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
@@ -261,21 +532,21 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
           c.status === "pending" ? { ...c, status: "sent" as const, sent_at: new Date().toISOString() } : c
         )
       );
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
   }
 
-  function startEdit(contact: Contact) {
+  const startEdit = React.useCallback((contact: Contact) => {
     setEditingId(contact.id);
     setEditForm({
       first_name: contact.first_name,
       last_name: contact.last_name,
       email: contact.email,
     });
-  }
+  }, []);
 
   async function saveEdit() {
     if (!editingId) return;
@@ -301,20 +572,20 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
       );
       setEditingId(null);
       setSuccess("Contact updated.");
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
   }
 
-  function openDeleteModal(contact: Contact) {
+  const openDeleteModal = React.useCallback((contact: Contact) => {
     setDeleteModal({ open: true, contact });
-  }
+  }, []);
 
-  function closeDeleteModal() {
+  const closeDeleteModal = React.useCallback(() => {
     setDeleteModal({ open: false, contact: null });
-  }
+  }, []);
 
   async function confirmDelete() {
     const contact = deleteModal.contact;
@@ -341,7 +612,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
       setContacts((prev) => prev.filter((c) => c.id !== id));
       setPagination((prev) => ({ ...prev, total: prev.total - 1 }));
       setSuccess("Contact deleted.");
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
@@ -393,12 +664,12 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
 
   const statusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      pending: "bg-amber-500/20 text-amber-200",
-      sent: "bg-blue-500/20 text-blue-200",
-      accepted: "bg-emerald-500/20 text-emerald-200",
+      pending: "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]",
+      sent: "bg-[var(--status-info-bg)] text-[var(--status-info-text)]",
+      accepted: "bg-[var(--status-success-bg)] text-[var(--status-success-text)]",
     };
     return (
-      <span className={`rounded-full px-2 py-0.5 text-xs ${styles[status] ?? "bg-white/10 text-white/60"}`}>
+      <span className={`rounded-full px-2 py-0.5 text-xs ${styles[status] ?? "bg-bg-hover text-text-tertiary"}`}>
         {status}
       </span>
     );
@@ -409,7 +680,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
       {/* Filters and actions */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-[260px]">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40" />
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder="Search contacts..."
@@ -418,7 +689,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
               setSearch(e.target.value);
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
-            className="h-9 w-full rounded-md border border-white/10 bg-black/30 pl-8 pr-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+            className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-8 pr-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
           />
         </div>
         <div className="flex gap-2">
@@ -443,7 +714,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
             <button
               onClick={sendAllPending}
               disabled={loading}
-              className="hidden sm:inline-flex h-9 items-center gap-2 rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+              className="hidden sm:inline-flex h-9 items-center gap-2 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
             >
               <Send className="h-4 w-4" />
               Send All ({pendingCount})
@@ -457,7 +728,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
         <button
           onClick={sendAllPending}
           disabled={loading}
-          className="flex sm:hidden w-full h-10 items-center justify-center gap-2 rounded-md bg-white text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+          className="flex sm:hidden w-full h-10 items-center justify-center gap-2 rounded-md bg-btn-primary-bg text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
         >
           <Send className="h-4 w-4" />
           Send All Pending ({pendingCount})
@@ -466,13 +737,13 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
 
       {/* Bulk actions */}
       {selectedIds.size > 0 && (
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2">
-          <span className="text-sm text-white/60">{selectedIds.size} selected</span>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 rounded-lg border border-border-default bg-bg-elevated px-3 sm:px-4 py-2">
+          <span className="text-sm text-text-tertiary">{selectedIds.size} selected</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => sendInvite(Array.from(selectedIds))}
               disabled={loading}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-white/10 px-3 text-sm hover:bg-white/20 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-bg-hover px-3 text-sm hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             >
               <Mail className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Send Invitations</span>
@@ -481,14 +752,14 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
             <button
               onClick={bulkDelete}
               disabled={loading}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-red-500/20 px-3 text-sm text-red-200 hover:bg-red-500/30 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-red-500/20 px-3 text-sm text-[var(--status-error-text)] hover:bg-red-500/30 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-red-500/50"
             >
               <Trash2 className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Delete</span>
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}
-              className="text-sm text-white/40 hover:text-white/60"
+              className="text-sm text-text-muted hover:text-text-tertiary"
             >
               Clear
             </button>
@@ -498,33 +769,33 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
 
       {/* Messages */}
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
+        <div className="rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-4 py-2 text-sm text-[var(--status-success-text)]">
           {success}
         </div>
       )}
       {inviteLinks && inviteLinks.length > 0 && (
-        <div className="rounded-md border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-sm">
-          <div className="font-medium text-blue-200">Dev Mode: Invite Links</div>
+        <div className="rounded-md border border-[var(--status-info-bg)] bg-[var(--status-info-bg)] px-4 py-3 text-sm">
+          <div className="font-medium text-[var(--status-info-text)]">Dev Mode: Invite Links</div>
           <div className="mt-2 space-y-2">
             {inviteLinks.map((link, i) => (
               <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <span className="text-white/60 text-xs sm:text-sm truncate">{link.email}:</span>
+                <span className="text-text-tertiary text-xs sm:text-sm truncate">{link.email}:</span>
                 <div className="flex flex-1 items-center gap-2">
                   <input
                     type="text"
                     value={link.url}
                     readOnly
-                    className="flex-1 min-w-0 rounded border border-white/10 bg-black/30 px-2 py-1 text-xs text-white/80"
+                    className="flex-1 min-w-0 rounded border border-border-default bg-bg-input px-2 py-1 text-xs text-text-primary"
                     onClick={(e) => (e.target as HTMLInputElement).select()}
                   />
                   <button
                     onClick={() => navigator.clipboard.writeText(link.url)}
-                    className="shrink-0 rounded bg-white/10 px-2 py-1 text-xs hover:bg-white/20"
+                    className="shrink-0 rounded bg-bg-hover px-2 py-1 text-xs hover:bg-bg-hover"
                   >
                     Copy
                   </button>
@@ -537,10 +808,10 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
 
       {/* Empty state */}
       {contacts.length === 0 && !fetching ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-          <p className="text-white/60">No contacts found.</p>
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+          <p className="text-text-tertiary">No contacts found.</p>
           {pagination.total === 0 && (
-            <p className="mt-1 text-sm text-white/40">
+            <p className="mt-1 text-sm text-text-muted">
               Import a CSV to add portfolio companies.
             </p>
           )}
@@ -552,7 +823,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
             {sortedContacts.map((contact) => (
               <div
                 key={contact.id}
-                className="rounded-xl border border-white/10 bg-white/5 p-4"
+                className="rounded-xl border border-border-default bg-bg-elevated p-4"
               >
                 {editingId === contact.id ? (
                   /* Mobile Edit Form */
@@ -561,13 +832,13 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                       <input
                         value={editForm.first_name}
                         onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
-                        className="h-10 rounded border border-white/10 bg-black/30 px-3 text-sm"
+                        className="h-10 rounded border border-border-default bg-bg-input px-3 text-sm"
                         placeholder="First name"
                       />
                       <input
                         value={editForm.last_name}
                         onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
-                        className="h-10 rounded border border-white/10 bg-black/30 px-3 text-sm"
+                        className="h-10 rounded border border-border-default bg-bg-input px-3 text-sm"
                         placeholder="Last name"
                       />
                     </div>
@@ -575,13 +846,13 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                       type="email"
                       value={editForm.email}
                       onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                      className="h-10 w-full rounded border border-white/10 bg-black/30 px-3 text-sm"
+                      className="h-10 w-full rounded border border-border-default bg-bg-input px-3 text-sm"
                       placeholder="Email"
                     />
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => setEditingId(null)}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-md border border-white/10 px-3 text-sm text-white/60"
+                        className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border-default px-3 text-sm text-text-tertiary"
                       >
                         <X className="h-4 w-4" />
                         Cancel
@@ -589,7 +860,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                       <button
                         onClick={saveEdit}
                         disabled={loading}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium text-black disabled:opacity-60"
+                        className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text disabled:opacity-60"
                       >
                         <Check className="h-4 w-4" />
                         Save
@@ -604,7 +875,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                         type="checkbox"
                         checked={selectedIds.has(contact.id)}
                         onChange={() => toggleSelect(contact.id)}
-                        className="mt-1 rounded border-white/20"
+                        className="mt-1 rounded border-border-default"
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
@@ -612,39 +883,39 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                             <div className="font-medium truncate">
                               {contact.first_name} {contact.last_name}
                             </div>
-                            <div className="text-sm text-white/60 truncate">{contact.email}</div>
+                            <div className="text-sm text-text-tertiary truncate">{contact.email}</div>
                           </div>
                           {statusBadge(contact.status)}
                         </div>
-                        <div className="mt-2 text-sm text-white/60 truncate">
+                        <div className="mt-2 text-sm text-text-tertiary truncate">
                           {getCompanyName(contact)}
                         </div>
                       </div>
                     </div>
-                    <div className="mt-3 flex items-center justify-end gap-1 border-t border-white/5 pt-3">
+                    <div className="mt-3 flex items-center justify-end gap-1 border-t border-border-subtle pt-3">
                       {contact.status !== "accepted" && (
                         <button
                           onClick={() => sendInvite([contact.id])}
                           disabled={loading}
-                          className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm hover:bg-white/10 disabled:opacity-60"
+                          className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm hover:bg-bg-hover disabled:opacity-60"
                           title={contact.status === "sent" ? "Resend" : "Send"}
                         >
-                          <Mail className="h-4 w-4 text-white/60" />
-                          <span className="text-white/60">{contact.status === "sent" ? "Resend" : "Send"}</span>
+                          <Mail className="h-4 w-4 text-text-tertiary" />
+                          <span className="text-text-tertiary">{contact.status === "sent" ? "Resend" : "Send"}</span>
                         </button>
                       )}
                       <button
                         onClick={() => startEdit(contact)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                         title="Edit"
                         aria-label="Edit contact"
                       >
-                        <Pencil className="h-4 w-4 text-white/60" />
+                        <Pencil className="h-4 w-4 text-text-tertiary" />
                       </button>
                       <button
                         onClick={() => openDeleteModal(contact)}
                         disabled={loading}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                         title="Delete"
                         aria-label="Delete contact"
                       >
@@ -658,154 +929,41 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
           </div>
 
           {/* Desktop Table View */}
-          <div className={`hidden sm:block overflow-x-auto rounded-xl border border-white/10 bg-white/5 ${fetching ? "opacity-60" : ""}`}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/10 text-left text-white/60">
-                  <th className="p-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.size === contacts.length && contacts.length > 0}
-                      onChange={toggleSelectAll}
-                      className="rounded border-white/20"
-                      aria-label="Select all contacts"
-                    />
-                  </th>
-                  {([
-                    ["company", "Company"],
-                    ["contact", "Contact"],
-                    ["email", "Email"],
-                    ["status", "Status"],
-                  ] as const).map(([field, label]) => (
-                    <th key={field} className="p-3 font-medium">
-                      <button
-                        type="button"
-                        onClick={() => toggleSort(field)}
-                        className="inline-flex items-center gap-1.5 hover:text-white transition-colors"
-                      >
-                        {label}
-                        {sortIcon(field)}
-                      </button>
-                    </th>
-                  ))}
-                  <th className="p-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedContacts.map((contact) => (
-                  <tr key={contact.id} className="border-b border-white/5 hover:bg-white/5">
-                    <td className="p-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(contact.id)}
-                        onChange={() => toggleSelect(contact.id)}
-                        className="rounded border-white/20"
-                      />
-                    </td>
-                    <td className="p-3 font-medium">{getCompanyName(contact)}</td>
-                    <td className="p-3">
-                      {editingId === contact.id ? (
-                        <div className="flex gap-2">
-                          <input
-                            value={editForm.first_name}
-                            onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
-                            className="h-8 w-24 rounded border border-white/10 bg-black/30 px-2 text-sm"
-                            placeholder="First"
-                          />
-                          <input
-                            value={editForm.last_name}
-                            onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
-                            className="h-8 w-24 rounded border border-white/10 bg-black/30 px-2 text-sm"
-                            placeholder="Last"
-                          />
-                        </div>
-                      ) : (
-                        `${contact.first_name} ${contact.last_name}`
-                      )}
-                    </td>
-                    <td className="p-3 text-white/60">
-                      {editingId === contact.id ? (
-                        <input
-                          type="email"
-                          value={editForm.email}
-                          onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                          className="h-8 w-48 rounded border border-white/10 bg-black/30 px-2 text-sm"
-                          placeholder="Email"
-                        />
-                      ) : (
-                        contact.email
-                      )}
-                    </td>
-                    <td className="p-3">{statusBadge(contact.status)}</td>
-                    <td className="p-3">
-                      {editingId === contact.id ? (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={saveEdit}
-                            disabled={loading}
-                            className="text-sm text-emerald-400 hover:text-emerald-300"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="text-sm text-white/40 hover:text-white/60"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          {contact.status !== "accepted" && (
-                            <button
-                              onClick={() => sendInvite([contact.id])}
-                              disabled={loading}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
-                              title={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
-                              aria-label={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
-                            >
-                              <Mail className="h-4 w-4 text-white/60" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => startEdit(contact)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-                            title="Edit contact"
-                            aria-label="Edit contact"
-                          >
-                            <Pencil className="h-4 w-4 text-white/60" />
-                          </button>
-                          <button
-                            onClick={() => openDeleteModal(contact)}
-                            disabled={loading}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/20"
-                            title="Delete contact"
-                            aria-label="Delete contact"
-                          >
-                            <Trash2 className="h-4 w-4 text-red-400/60" />
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ContactsDesktopTable
+            sortedContacts={sortedContacts}
+            contacts={contacts}
+            selectedIds={selectedIds}
+            toggleSelectAll={toggleSelectAll}
+            toggleSelect={toggleSelect}
+            toggleSort={toggleSort}
+            sortIcon={sortIcon}
+            editingId={editingId}
+            editForm={editForm}
+            setEditForm={setEditForm}
+            saveEdit={saveEdit}
+            setEditingId={setEditingId}
+            startEdit={startEdit}
+            openDeleteModal={openDeleteModal}
+            sendInvite={sendInvite}
+            loading={loading}
+            fetching={fetching}
+            getCompanyName={getCompanyName}
+            statusBadge={statusBadge}
+          />
         </>
       )}
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-sm text-white/60 text-center sm:text-left">
+          <div className="text-sm text-text-tertiary text-center sm:text-left">
             {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => goToPage(pagination.page - 1)}
               disabled={pagination.page === 1 || fetching}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border-default bg-bg-elevated hover:bg-bg-hover disabled:opacity-40 disabled:cursor-not-allowed"
               aria-label="Previous page"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -829,8 +987,8 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
                     disabled={fetching}
                     className={`inline-flex h-9 w-9 items-center justify-center rounded-md text-sm ${
                       pageNum === pagination.page
-                        ? "bg-white text-black"
-                        : "border border-white/10 bg-white/5 hover:bg-white/10"
+                        ? "bg-btn-primary-bg text-btn-primary-text"
+                        : "border border-border-default bg-bg-elevated hover:bg-bg-hover"
                     }`}
                   >
                     {pageNum}
@@ -841,7 +999,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
             <button
               onClick={() => goToPage(pagination.page + 1)}
               disabled={pagination.page === pagination.totalPages || fetching}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border-default bg-bg-elevated hover:bg-bg-hover disabled:opacity-40 disabled:cursor-not-allowed"
               aria-label="Next page"
             >
               <ChevronRight className="h-4 w-4" />

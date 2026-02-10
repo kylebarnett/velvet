@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { parsePagination } from "@/lib/api/pagination";
+import { logger } from "@/lib/logger";
 
 // GET - List all companies in investor's portfolio with tags
 export async function GET(req: Request) {
@@ -37,7 +38,7 @@ export async function GET(req: Request) {
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error("Failed to fetch companies:", error.message);
+    logger.error("Failed to fetch companies:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

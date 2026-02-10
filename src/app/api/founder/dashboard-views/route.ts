@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
   companyId: z.string().uuid(),
@@ -50,7 +51,7 @@ export async function GET(req: Request) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("Failed to fetch dashboard views:", error.message);
+    logger.error("Failed to fetch dashboard views:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -108,7 +109,7 @@ export async function POST(req: Request) {
     if (error.code === "23505") {
       return jsonError("A view with this name already exists.", 409);
     }
-    console.error("Failed to create dashboard view:", error.message);
+    logger.error("Failed to create dashboard view:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

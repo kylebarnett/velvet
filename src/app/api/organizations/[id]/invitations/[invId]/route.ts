@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 export async function DELETE(
   _req: Request,
@@ -34,7 +35,7 @@ export async function DELETE(
     .eq("status", "pending");
 
   if (error) {
-    console.error("Failed to cancel invitation:", error.message);
+    logger.error("Failed to cancel invitation:", error.message);
     return jsonError("Failed to process request.", 400);
   }
 

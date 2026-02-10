@@ -3,6 +3,15 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Calendar, ChevronRight } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+
+const NONE = "__none__";
 
 type FundOption = { id: string; name: string };
 
@@ -104,55 +113,63 @@ export function AllReportsClient({ funds }: { funds: FundOption[] }) {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
-        <select
-          value={fundFilter}
-          onChange={(e) => setFundFilter(e.target.value)}
-          className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+        <Select
+          value={fundFilter || NONE}
+          onValueChange={(v) => setFundFilter(v === NONE ? "" : v)}
         >
-          <option value="">All Funds</option>
-          {funds.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.name}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger size="sm" className="w-auto min-w-[160px]">
+            <SelectValue placeholder="All Funds" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={NONE}>All Funds</SelectItem>
+            {funds.map((f) => (
+              <SelectItem key={f.id} value={f.id}>
+                {f.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-        <select
-          value={periodFilter}
-          onChange={(e) => setPeriodFilter(e.target.value)}
-          className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+        <Select
+          value={periodFilter || NONE}
+          onValueChange={(v) => setPeriodFilter(v === NONE ? "" : v)}
         >
-          <option value="">All Periods</option>
-          {quarters.map((q) => (
-            <option key={`${q.year}-${q.quarter}`} value={`${q.year}-${q.quarter}`}>
-              {q.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger size="sm" className="w-auto min-w-[140px]">
+            <SelectValue placeholder="All Periods" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={NONE}>All Periods</SelectItem>
+            {quarters.map((q) => (
+              <SelectItem key={`${q.year}-${q.quarter}`} value={`${q.year}-${q.quarter}`}>
+                {q.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Report list */}
       {loading ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 divide-y divide-white/[0.04]">
+        <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 px-4 py-3">
-              <div className="h-4 w-4 animate-pulse rounded bg-white/10" />
+              <div className="h-4 w-4 animate-pulse rounded bg-bg-hover" />
               <div className="flex-1 space-y-1.5">
-                <div className="h-4 w-48 animate-pulse rounded bg-white/10" />
-                <div className="h-3 w-32 animate-pulse rounded bg-white/10" />
+                <div className="h-4 w-48 animate-pulse rounded bg-bg-hover" />
+                <div className="h-3 w-32 animate-pulse rounded bg-bg-hover" />
               </div>
-              <div className="h-5 w-16 animate-pulse rounded-full bg-white/10" />
+              <div className="h-5 w-16 animate-pulse rounded-full bg-bg-hover" />
             </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-8 text-center text-sm text-white/40">
+        <div className="rounded-xl border border-border-default bg-bg-elevated px-4 py-8 text-center text-sm text-text-muted">
           {reports.length === 0
             ? "No LP reports yet. Create reports from individual fund pages."
             : "No reports match the selected filters."}
         </div>
       ) : (
-        <div className="rounded-xl border border-white/10 bg-white/5 divide-y divide-white/[0.04]">
+        <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
           {filtered.map((report) => (
             <button
               key={report.id}
@@ -160,13 +177,13 @@ export function AllReportsClient({ funds }: { funds: FundOption[] }) {
               onClick={() =>
                 router.push(`/lp-reports/${report.fund_id}/reports/${report.id}`)
               }
-              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.03]"
+              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-bg-raised"
             >
-              <FileText className="h-4 w-4 shrink-0 text-white/30" />
+              <FileText className="h-4 w-4 shrink-0 text-text-faint" />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium">{report.title}</p>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-white/40">
-                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-white/60">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
+                  <span className="rounded-full bg-bg-hover px-2 py-0.5 text-text-tertiary">
                     {report.fund_name}
                   </span>
                   <Calendar className="h-3 w-3" />
@@ -181,13 +198,13 @@ export function AllReportsClient({ funds }: { funds: FundOption[] }) {
               <span
                 className={
                   report.status === "published"
-                    ? "rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200"
-                    : "rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200"
+                    ? "rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-[var(--status-success-text)]"
+                    : "rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-[var(--status-warning-text)]"
                 }
               >
                 {report.status}
               </span>
-              <ChevronRight className="h-4 w-4 shrink-0 text-white/20" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-text-faint" />
             </button>
           ))}
         </div>

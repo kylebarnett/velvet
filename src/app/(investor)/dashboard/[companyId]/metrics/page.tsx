@@ -24,7 +24,7 @@ export default async function CompanyMetricsPage({
 
   if (!relationship) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+      <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]">
         Company not in your portfolio.
       </div>
     );

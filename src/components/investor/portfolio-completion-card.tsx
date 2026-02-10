@@ -76,15 +76,15 @@ export function PortfolioCompletionCard({
   const overdueCount = countOverdue(companies);
 
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-white/[0.03]">
+    <div className="rounded-xl border border-border-subtle bg-bg-raised">
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-start justify-between p-4 text-left transition-colors hover:bg-white/[0.02]"
+        className="flex w-full items-start justify-between p-4 text-left transition-colors hover:bg-bg-raised"
         aria-expanded={expanded}
       >
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-text-muted">
             <BarChart3 className="h-3.5 w-3.5" />
             Portfolio Completion
           </div>
@@ -95,26 +95,26 @@ export function PortfolioCompletionCard({
               {completionPercent}%
             </span>
             {overdueCount > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-medium text-red-300">
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-medium text-[var(--status-error-text)]">
                 <AlertTriangle className="h-3 w-3" />
                 {overdueCount} overdue
               </span>
             )}
           </div>
           <div className="mt-2">
-            <div className="h-1.5 w-full rounded-full bg-white/10">
+            <div className="h-1.5 w-full rounded-full bg-bg-hover">
               <div
                 className={`h-1.5 rounded-full transition-all duration-500 ${getProgressColor(completionPercent)}`}
                 style={{ width: `${completionPercent}%` }}
               />
             </div>
-            <div className="mt-1 text-xs text-white/40">
+            <div className="mt-1 text-xs text-text-muted">
               {submittedRequests} of {totalRequests} requests fulfilled &middot;{" "}
               {quarterLabel}
             </div>
           </div>
         </div>
-        <div className="ml-3 mt-1 shrink-0 text-white/30">
+        <div className="ml-3 mt-1 shrink-0 text-text-faint">
           <ChevronDown
             className={`h-4 w-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
           />
@@ -127,8 +127,8 @@ export function PortfolioCompletionCard({
       >
         <div className="overflow-hidden">
           {companies.length > 0 && (
-            <div className="border-t border-white/[0.06] px-4 pb-4 pt-3">
-              <div className="mb-2 text-xs font-medium uppercase tracking-wider text-white/30">
+            <div className="border-t border-border-subtle px-4 pb-4 pt-3">
+              <div className="mb-2 text-xs font-medium uppercase tracking-wider text-text-faint">
                 Per company
               </div>
               <div className="flex flex-col gap-1.5">
@@ -148,12 +148,12 @@ export function PortfolioCompletionCard({
                     <Link
                       key={company.id}
                       href={`/dashboard/${company.id}`}
-                      className="group flex items-center gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-white/[0.04]"
+                      className="group flex items-center gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-bg-raised"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="truncate text-sm font-medium text-white/80 group-hover:text-white">
+                            <span className="truncate text-sm font-medium text-text-primary group-hover:text-text-primary">
                               {company.name}
                             </span>
                             {companyOverdue > 0 && (
@@ -163,12 +163,12 @@ export function PortfolioCompletionCard({
                               </span>
                             )}
                           </div>
-                          <span className="ml-2 shrink-0 text-xs tabular-nums text-white/40">
+                          <span className="ml-2 shrink-0 text-xs tabular-nums text-text-muted">
                             {company.submitted}/{company.total}
                           </span>
                         </div>
                         <div className="mt-1 flex items-center gap-2">
-                          <div className="h-1 flex-1 rounded-full bg-white/10">
+                          <div className="h-1 flex-1 rounded-full bg-bg-hover">
                             <div
                               className={`h-1 rounded-full transition-all ${getProgressColor(pct)}`}
                               style={{ width: `${pct}%` }}
@@ -181,7 +181,7 @@ export function PortfolioCompletionCard({
                           </span>
                         </div>
                       </div>
-                      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-white/20 transition-colors group-hover:text-white/40" />
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-text-faint transition-colors group-hover:text-text-muted" />
                     </Link>
                   );
                 })}

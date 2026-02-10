@@ -79,7 +79,7 @@ export function CompanyLogo({
 
       setImgError(false);
       onLogoChange?.(json.logoUrl);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Upload failed.");
     } finally {
       setIsUploading(false);
@@ -104,7 +104,7 @@ export function CompanyLogo({
 
       setImgError(false);
       onLogoChange?.(null);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Remove failed.");
     } finally {
       setIsUploading(false);
@@ -152,7 +152,7 @@ export function CompanyLogo({
         }}
         className={`
           relative flex items-center justify-center overflow-hidden rounded-lg
-          border border-white/10 bg-white/5
+          border border-border-default bg-bg-elevated
           ${sizeClasses[size]}
           ${editable ? "cursor-pointer group" : ""}
           ${isUploading ? "opacity-60" : ""}
@@ -167,20 +167,20 @@ export function CompanyLogo({
             onError={() => setImgError(true)}
           />
         ) : (
-          <span className="font-medium text-white/60">{initial}</span>
+          <span className="font-medium text-text-tertiary">{initial}</span>
         )}
 
         {/* Hover overlay for editable logos */}
         {editable && !isUploading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-            <Camera className="h-4 w-4 text-white/80" />
+          <div className="absolute inset-0 flex items-center justify-center bg-bg-backdrop opacity-0 transition-opacity group-hover:opacity-100">
+            <Camera className="h-4 w-4 text-text-primary" />
           </div>
         )}
 
         {/* Loading spinner */}
         {isUploading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
+          <div className="absolute inset-0 flex items-center justify-center bg-bg-backdrop">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-default border-t-white/80" />
           </div>
         )}
 
@@ -197,22 +197,22 @@ export function CompanyLogo({
       {showMenu && (
         <div
           ref={menuRef}
-          className="absolute left-0 top-full z-50 mt-2 min-w-[140px] overflow-hidden rounded-lg border border-white/10 bg-zinc-900/95 shadow-xl backdrop-blur-sm"
+          className="absolute left-0 top-full z-50 mt-2 min-w-[140px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary/95 shadow-xl backdrop-blur-sm"
         >
           <button
             onClick={() => {
               setShowMenu(false);
               fileInputRef.current?.click();
             }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-text-primary transition-colors hover:bg-bg-hover hover:text-text-primary"
           >
             <Camera className="h-4 w-4" />
             Change
           </button>
-          <div className="mx-2 border-t border-white/10" />
+          <div className="mx-2 border-t border-border-default" />
           <button
             onClick={handleRemove}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10 hover:text-[var(--status-error-text)]"
           >
             <X className="h-4 w-4" />
             Remove
@@ -222,7 +222,7 @@ export function CompanyLogo({
 
       {/* Error tooltip */}
       {error && (
-        <div className="absolute left-0 top-full z-50 mt-1 whitespace-nowrap rounded-md border border-red-500/20 bg-red-500/10 px-2 py-1 text-xs text-red-200">
+        <div className="absolute left-0 top-full z-50 mt-1 whitespace-nowrap rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-2 py-1 text-xs text-[var(--status-error-text)]">
           {error}
         </div>
       )}

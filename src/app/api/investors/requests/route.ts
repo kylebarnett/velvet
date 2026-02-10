@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { parsePagination } from "@/lib/api/pagination";
+import { logger } from "@/lib/logger";
 
 export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
@@ -62,7 +63,7 @@ export async function GET(req: Request) {
   const { data: requests, error, count } = await query;
 
   if (error) {
-    console.error("Failed to fetch requests:", error.message);
+    logger.error("Failed to fetch requests:", error.message);
     return jsonError("Failed to fetch requests.", 500);
   }
 

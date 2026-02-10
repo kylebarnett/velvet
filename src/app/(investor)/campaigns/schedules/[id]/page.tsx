@@ -1,12 +1,41 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
+import dynamic from "next/dynamic";
 import { ArrowLeft, Play, Pause, Edit, Trash2, Calendar, Clock, Building2, Bell } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ScheduleRunHistory, type ScheduleRun } from "@/components/investor/schedule-run-history";
+import type { ScheduleRun } from "@/components/investor/schedule-run-history";
 import { getCadenceDescription } from "@/lib/schedules";
 import { ScheduleDetailActions } from "./actions";
+
+const ScheduleRunHistory = dynamic(
+  () =>
+    import("@/components/investor/schedule-run-history").then((mod) => ({
+      default: mod.ScheduleRunHistory,
+    })),
+  {
+    loading: () => (
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="rounded-xl border border-border-default bg-bg-elevated p-4"
+          >
+            <div className="flex items-center justify-between">
+              <div className="h-4 w-32 animate-pulse rounded bg-bg-hover" />
+              <div className="h-5 w-16 animate-pulse rounded-full bg-bg-hover" />
+            </div>
+            <div className="mt-2 flex gap-4">
+              <div className="h-3 w-24 animate-pulse rounded bg-bg-hover" />
+              <div className="h-3 w-24 animate-pulse rounded bg-bg-hover" />
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+  }
+);
 
 export default async function ScheduleDetailPage({
   params,
@@ -131,10 +160,10 @@ export default async function ScheduleDetailPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <Link
-            href="/requests?tab=schedules"
-            className="mt-1 flex h-8 w-8 items-center justify-center rounded-md border border-white/10 hover:bg-white/5"
+            href="/campaigns?tab=schedules"
+            className="mt-1 flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-elevated"
           >
-            <ArrowLeft className="h-4 w-4 text-white/50" />
+            <ArrowLeft className="h-4 w-4 text-text-muted" />
           </Link>
           <div>
             <div className="flex items-center gap-3">
@@ -144,14 +173,14 @@ export default async function ScheduleDetailPage({
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${
                   schedule.is_active
-                    ? "bg-emerald-500/20 text-emerald-200"
-                    : "bg-zinc-500/20 text-zinc-300"
+                    ? "bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
+                    : "bg-bg-hover text-text-secondary"
                 }`}
               >
                 {schedule.is_active ? "Active" : "Paused"}
               </span>
             </div>
-            <p className="mt-1 text-sm text-white/60">
+            <p className="mt-1 text-sm text-text-tertiary">
               Created {format(new Date(schedule.created_at), "MMM d, yyyy")}
             </p>
           </div>
@@ -168,20 +197,20 @@ export default async function ScheduleDetailPage({
       {/* Overview cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Cadence */}
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="flex items-center gap-2 text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="flex items-center gap-2 text-text-tertiary">
             <Calendar className="h-4 w-4" />
             <span className="text-xs">Cadence</span>
           </div>
           <div className="mt-2 font-medium">
             {getCadenceDescription(schedule.cadence as "monthly" | "quarterly" | "annual")}
           </div>
-          <div className="text-xs text-white/40">Day {schedule.day_of_month}</div>
+          <div className="text-xs text-text-muted">Day {schedule.day_of_month}</div>
         </div>
 
         {/* Next run */}
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="flex items-center gap-2 text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="flex items-center gap-2 text-text-tertiary">
             <Clock className="h-4 w-4" />
             <span className="text-xs">Next Run</span>
           </div>
@@ -195,15 +224,15 @@ export default async function ScheduleDetailPage({
                 : "Paused"}
           </div>
           {schedule.next_run_at && schedule.is_active && (
-            <div className="text-xs text-white/40">
+            <div className="text-xs text-text-muted">
               {format(new Date(schedule.next_run_at), "MMM d, yyyy")}
             </div>
           )}
         </div>
 
         {/* Companies */}
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="flex items-center gap-2 text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="flex items-center gap-2 text-text-tertiary">
             <Building2 className="h-4 w-4" />
             <span className="text-xs">Companies</span>
           </div>
@@ -213,13 +242,13 @@ export default async function ScheduleDetailPage({
               : `All (${portfolioCount ?? 0})`}
           </div>
           {schedule.include_future_companies && !schedule.company_ids && (
-            <div className="text-xs text-white/40">Including future</div>
+            <div className="text-xs text-text-muted">Including future</div>
           )}
         </div>
 
         {/* Reminders */}
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <div className="flex items-center gap-2 text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="flex items-center gap-2 text-text-tertiary">
             <Bell className="h-4 w-4" />
             <span className="text-xs">Reminders</span>
           </div>
@@ -227,7 +256,7 @@ export default async function ScheduleDetailPage({
             {schedule.reminder_enabled ? "Enabled" : "Disabled"}
           </div>
           {schedule.reminder_enabled && schedule.reminder_days_before_due && (
-            <div className="text-xs text-white/40">
+            <div className="text-xs text-text-muted">
               {(schedule.reminder_days_before_due as number[])
                 .map((d) => `${d}d`)
                 .join(", ")}{" "}
@@ -239,19 +268,19 @@ export default async function ScheduleDetailPage({
 
       {/* Template details */}
       {template && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-5">
-          <h2 className="text-sm font-medium text-white/70">Template</h2>
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-5">
+          <h2 className="text-sm font-medium text-text-secondary">Template</h2>
           <div className="mt-2">
             <div className="font-medium">{template.name}</div>
             {template.description && (
-              <p className="mt-1 text-sm text-white/60">{template.description}</p>
+              <p className="mt-1 text-sm text-text-tertiary">{template.description}</p>
             )}
           </div>
 
           {/* Metrics */}
           {metrics.length > 0 && (
             <div className="mt-4">
-              <div className="text-xs font-medium text-white/60 mb-2">
+              <div className="text-xs font-medium text-text-tertiary mb-2">
                 Metrics ({metrics.length})
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -260,7 +289,7 @@ export default async function ScheduleDetailPage({
                   .map((item) => (
                     <span
                       key={item.id}
-                      className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70"
+                      className="rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-secondary"
                     >
                       {item.metric_name}
                     </span>
@@ -273,8 +302,8 @@ export default async function ScheduleDetailPage({
 
       {/* Target companies */}
       {companies.length > 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-5">
-          <h2 className="text-sm font-medium text-white/70">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-5">
+          <h2 className="text-sm font-medium text-text-secondary">
             Target Companies ({companies.length})
           </h2>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -282,7 +311,7 @@ export default async function ScheduleDetailPage({
               <Link
                 key={company.id}
                 href={`/dashboard/${company.id}`}
-                className="rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-sm text-white/70 hover:bg-white/5 hover:text-white"
+                className="rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
               >
                 {company.name}
               </Link>
@@ -293,20 +322,20 @@ export default async function ScheduleDetailPage({
 
       {/* Run history */}
       <div>
-        <h2 className="mb-3 text-sm font-medium text-white/70">Run History</h2>
+        <h2 className="mb-3 text-sm font-medium text-text-secondary">Run History</h2>
         <ScheduleRunHistory runs={runs} />
       </div>
 
       {/* Configuration summary */}
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-5">
-        <h2 className="text-sm font-medium text-white/70">Configuration</h2>
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-5">
+        <h2 className="text-sm font-medium text-text-secondary">Configuration</h2>
         <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
           <div className="flex justify-between">
-            <span className="text-white/60">Due date offset</span>
+            <span className="text-text-tertiary">Due date offset</span>
             <span>{schedule.due_days_offset} days after request</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-white/60">Last run</span>
+            <span className="text-text-tertiary">Last run</span>
             <span>
               {schedule.last_run_at
                 ? format(new Date(schedule.last_run_at), "MMM d, yyyy")
@@ -314,11 +343,11 @@ export default async function ScheduleDetailPage({
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-white/60">Total runs</span>
+            <span className="text-text-tertiary">Total runs</span>
             <span>{runs.length}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-white/60">Created</span>
+            <span className="text-text-tertiary">Created</span>
             <span>{format(new Date(schedule.created_at), "MMM d, yyyy")}</span>
           </div>
         </div>

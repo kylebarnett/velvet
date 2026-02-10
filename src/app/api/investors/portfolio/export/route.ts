@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   const { supabase, user } = await getApiUser();
@@ -25,7 +26,7 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Failed to export portfolio:", error.message);
+    logger.error("Failed to export portfolio:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

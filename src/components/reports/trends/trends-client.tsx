@@ -93,12 +93,12 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
 
   if (availableMetrics.length === 0) {
     return (
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent p-8 text-center">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/[0.03] via-transparent to-transparent" />
+      <div className="relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent p-8 text-center">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-bg-raised via-transparent to-transparent" />
         <div className="relative">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.05] ring-1 ring-white/[0.08]">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated ring-1 ring-border-subtle">
             <svg
-              className="h-6 w-6 text-white/40"
+              className="h-6 w-6 text-text-muted"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -111,8 +111,8 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
               />
             </svg>
           </div>
-          <p className="text-white/60">No metric data available yet</p>
-          <p className="mt-1 text-sm text-white/40">
+          <p className="text-text-tertiary">No metric data available yet</p>
+          <p className="mt-1 text-sm text-text-muted">
             Trends will appear here once founders submit metric data
           </p>
         </div>
@@ -125,7 +125,7 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
       {/* Selectors */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-full sm:w-56">
-          <label className="mb-1.5 block text-xs font-medium text-white/60">
+          <label className="mb-1.5 block text-xs font-medium text-text-tertiary">
             Metric
           </label>
           <Select value={selectedMetric} onValueChange={setSelectedMetric}>
@@ -143,7 +143,7 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
         </div>
 
         <div className="w-40">
-          <label className="mb-1.5 block text-xs font-medium text-white/60">
+          <label className="mb-1.5 block text-xs font-medium text-text-tertiary">
             Period Type
           </label>
           <Select value={periodType} onValueChange={setPeriodType}>
@@ -159,7 +159,7 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
         </div>
 
         <div className="w-32">
-          <label className="mb-1.5 block text-xs font-medium text-white/60">
+          <label className="mb-1.5 block text-xs font-medium text-text-tertiary">
             Periods
           </label>
           <Select value={periods} onValueChange={setPeriods}>
@@ -179,7 +179,7 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200"
+          className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]"
         >
           {error}
         </div>
@@ -188,19 +188,19 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
       {/* Loading state */}
       {loading && (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent p-5">
-            <div className="mb-4 h-5 w-40 animate-pulse rounded bg-white/10" />
-            <div className="h-64 animate-pulse rounded-xl bg-white/[0.03]" />
+          <div className="rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent p-5">
+            <div className="mb-4 h-5 w-40 animate-pulse rounded bg-bg-hover" />
+            <div className="h-64 animate-pulse rounded-xl bg-bg-raised" />
           </div>
-          <div className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent p-5">
-            <div className="mb-4 h-5 w-40 animate-pulse rounded bg-white/10" />
-            <div className="h-64 animate-pulse rounded-xl bg-white/[0.03]" />
+          <div className="rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent p-5">
+            <div className="mb-4 h-5 w-40 animate-pulse rounded bg-bg-hover" />
+            <div className="h-64 animate-pulse rounded-xl bg-bg-raised" />
           </div>
-          <div className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent p-5">
-            <div className="mb-4 h-5 w-32 animate-pulse rounded bg-white/10" />
+          <div className="rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent p-5">
+            <div className="mb-4 h-5 w-32 animate-pulse rounded bg-bg-hover" />
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-12 animate-pulse rounded-lg bg-white/[0.03]" />
+                <div key={i} className="h-12 animate-pulse rounded-lg bg-bg-raised" />
               ))}
             </div>
           </div>
@@ -211,14 +211,14 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
       {!loading && data && (
         <div className="space-y-6">
           {/* Summary stat */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-white/60">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-text-tertiary">
             <span>
-              Analyzing <span className="font-medium text-white">{data.companyCount}</span>{" "}
+              Analyzing <span className="font-medium text-text-primary">{data.companyCount}</span>{" "}
               {data.companyCount === 1 ? "company" : "companies"}
             </span>
-            <span className="hidden text-white/20 sm:inline">|</span>
+            <span className="hidden text-text-faint sm:inline">|</span>
             <span>
-              <span className="font-medium text-white">{data.companiesWithGrowth}</span> with
+              <span className="font-medium text-text-primary">{data.companiesWithGrowth}</span> with
               growth data
             </span>
           </div>

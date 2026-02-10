@@ -5,6 +5,7 @@ import { jsonError } from "@/lib/api/auth";
 import { checkRateLimit, getClientIp } from "@/lib/api/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseRouteHandlerClient } from "@/lib/supabase/route-handler";
+import { logger } from "@/lib/logger";
 
 const schema = z.object({
   email: z.string().email(),
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
     },
   });
   if (error) {
-    console.error("Failed to create account:", error.message);
+    logger.error("Failed to create account:", error.message);
     return jsonError("Failed to create account.", 400);
   }
 
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
       .eq("id", invitation.company_id);
 
     if (companyUpdateError) {
-      console.error("Failed to link founder to company:", companyUpdateError);
+      logger.error("Failed to link founder to company:", companyUpdateError);
       return jsonError("Account created but failed to link company. Please contact support.", 500);
     }
 
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
       .eq("id", invitation.id);
 
     if (inviteUpdateError) {
-      console.error("Failed to update invitation status:", inviteUpdateError);
+      logger.error("Failed to update invitation status:", inviteUpdateError);
     }
 
     // Auto-approve the inviting investor's relationship
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
       .eq("is_inviting_investor", true);
 
     if (approvalError) {
-      console.error("Failed to auto-approve inviting investor:", approvalError);
+      logger.error("Failed to auto-approve inviting investor:", approvalError);
     }
   } else if (role === "founder" && companyName && data.user) {
     // Create new company record for founders without invite
@@ -148,7 +149,7 @@ export async function POST(request: NextRequest) {
       founder_id: data.user.id,
     });
     if (companyError) {
-      console.error("Failed to create company record:", companyError);
+      logger.error("Failed to create company record:", companyError);
       return jsonError("Account created but failed to create company. Please contact support.", 500);
     }
   }

@@ -80,7 +80,7 @@ export function ReportHeader({
       <button
         type="button"
         onClick={() => setShowSaveModal(true)}
-        className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
+        className="flex items-center gap-1.5 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
       >
         <Save className="h-3 w-3" />
         Save

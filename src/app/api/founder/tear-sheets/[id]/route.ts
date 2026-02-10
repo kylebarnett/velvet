@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 const updateSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -97,7 +98,7 @@ export async function PUT(
         409,
       );
     }
-    console.error("Tear sheet update error:", error);
+    logger.error("Tear sheet update error:", error);
     return jsonError("Failed to update tear sheet.", 500);
   }
 
@@ -136,7 +137,7 @@ export async function DELETE(
     .eq("founder_id", user.id);
 
   if (error) {
-    console.error("Tear sheet delete error:", error);
+    logger.error("Tear sheet delete error:", error);
     return jsonError("Failed to delete tear sheet.", 500);
   }
 

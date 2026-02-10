@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -126,7 +127,7 @@ export async function POST(req: Request) {
     .upload(filePath, file, { upsert: false });
 
   if (uploadError) {
-    console.error("Failed to upload document:", uploadError.message);
+    logger.error("Failed to upload document:", uploadError.message);
     return jsonError("Failed to upload document.", 400);
   }
 
@@ -151,7 +152,7 @@ export async function POST(req: Request) {
     .single();
 
   if (docErr) {
-    console.error("Failed to save document record:", docErr.message);
+    logger.error("Failed to save document record:", docErr.message);
     return jsonError("Failed to save document.", 400);
   }
 

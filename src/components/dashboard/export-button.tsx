@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Download } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 type ExportButtonProps = {
   companyId: string;
@@ -42,8 +43,8 @@ export function ExportButton({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Export error:", err);
+    } catch (err: unknown) {
+      logger.error("Export error:", err);
     } finally {
       setIsExporting(false);
     }
@@ -54,7 +55,7 @@ export function ExportButton({
       type="button"
       onClick={handleExport}
       disabled={isExporting}
-      className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-white/60 hover:border-white/15 hover:text-white/80 transition-colors disabled:opacity-50"
+      className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-1.5 text-xs font-medium text-text-tertiary hover:border-border-default hover:text-text-secondary transition-colors disabled:opacity-50"
     >
       <Download className="h-3.5 w-3.5" />
       {isExporting ? "Exporting..." : "Export CSV"}

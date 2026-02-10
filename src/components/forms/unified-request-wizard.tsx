@@ -159,29 +159,41 @@ export function UnifiedRequestWizard() {
     scheduleId?: string;
   } | null>(null);
 
-  const selectedTemplate = templates.find((t) => t.id === selectedTemplateId);
+  const selectedTemplate = React.useMemo(
+    () => templates.find((t) => t.id === selectedTemplateId),
+    [templates, selectedTemplateId],
+  );
 
   // Last-used template tracking
   const [lastTemplateId, setLastTemplateId] = React.useState<string | null>(null);
 
   // Filter templates
-  const systemTemplates = templates.filter((t) => t.isSystem && !hiddenTemplateIds.includes(t.id));
-  const userTemplates = templates.filter((t) => !t.isSystem);
-  const recentTemplate = lastTemplateId ? templates.find((t) => t.id === lastTemplateId) : null;
+  const systemTemplates = React.useMemo(
+    () => templates.filter((t) => t.isSystem && !hiddenTemplateIds.includes(t.id)),
+    [templates, hiddenTemplateIds],
+  );
+  const userTemplates = React.useMemo(
+    () => templates.filter((t) => !t.isSystem),
+    [templates],
+  );
+  const recentTemplate = React.useMemo(
+    () => (lastTemplateId ? templates.find((t) => t.id === lastTemplateId) : null),
+    [templates, lastTemplateId],
+  );
 
   const sortedCompanies = React.useMemo(
     () => [...companies].sort((a, b) => a.name.localeCompare(b.name)),
     [companies]
   );
 
-  function toggleExpanded(templateId: string) {
+  const toggleExpanded = React.useCallback((templateId: string) => {
     setExpandedTemplates((prev) => {
       const next = new Set(prev);
       if (next.has(templateId)) next.delete(templateId);
       else next.add(templateId);
       return next;
     });
-  }
+  }, []);
 
   React.useEffect(() => {
     async function loadData() {
@@ -246,20 +258,23 @@ export function UnifiedRequestWizard() {
     setStep(2);
   }
 
-  function toggleCompany(id: string) {
-    const next = new Set(selectedCompanyIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setSelectedCompanyIds(next);
-  }
+  const toggleCompany = React.useCallback((id: string) => {
+    setSelectedCompanyIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
-  function selectAllCompanies() {
-    if (selectedCompanyIds.size === companies.length) {
-      setSelectedCompanyIds(new Set());
-    } else {
-      setSelectedCompanyIds(new Set(companies.map((c) => c.id)));
-    }
-  }
+  const selectAllCompanies = React.useCallback(() => {
+    setSelectedCompanyIds((prev) => {
+      if (prev.size === companies.length) {
+        return new Set();
+      }
+      return new Set(companies.map((c) => c.id));
+    });
+  }, [companies]);
 
   async function handleSubmitOneTime() {
     if (selectedCompanyIds.size === 0) return;
@@ -353,7 +368,7 @@ export function UnifiedRequestWizard() {
       if (!res.ok) throw new Error(json.error ?? "Failed to create schedule");
 
       setResult({ type: "recurring", scheduleId: json.id });
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create schedule");
     } finally {
       setSubmitting(false);
@@ -484,11 +499,11 @@ export function UnifiedRequestWizard() {
           )}
           <div className="mt-6 flex items-center justify-center gap-3">
             <button
-              onClick={() => router.push(result.type === "recurring" ? "/requests?tab=schedules" : "/requests")}
+              onClick={() => router.push(result.type === "recurring" ? "/campaigns?tab=schedules" : "/campaigns")}
               className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
-              {result.type === "recurring" ? "View Schedules" : "View Requests"}
+              {result.type === "recurring" ? "View Schedules" : "View Campaigns"}
             </button>
             <button
               onClick={() => {
@@ -551,7 +566,7 @@ export function UnifiedRequestWizard() {
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             <Link
-              href="/requests"
+              href="/campaigns"
               className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -599,7 +614,7 @@ export function UnifiedRequestWizard() {
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-medium text-text-secondary">My Templates</h2>
                 <Link
-                  href="/requests?tab=templates"
+                  href="/campaigns?tab=templates"
                   className="text-xs text-text-muted hover:text-text-secondary"
                 >
                   Manage templates

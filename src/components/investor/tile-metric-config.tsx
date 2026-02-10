@@ -82,7 +82,7 @@ export function TileMetricConfig({
 
       onSave(primaryMetric, secondaryMetric);
       onClose();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save preferences");
     } finally {
       setSaving(false);
@@ -118,23 +118,23 @@ export function TileMetricConfig({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-bg-backdrop backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
+      <div className="relative w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-white">Tile Metrics</h3>
-            <p className="mt-1 text-sm text-white/60">
+            <h3 className="text-lg font-semibold text-text-primary">Tile Metrics</h3>
+            <p className="mt-1 text-sm text-text-tertiary">
               Choose which metrics appear on the {companyName} tile in your dashboard.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-white/40 hover:bg-white/10 hover:text-white"
+            className="rounded-md p-1 text-text-muted hover:bg-bg-hover hover:text-text-primary"
           >
             <X className="h-5 w-5" />
           </button>
@@ -143,7 +143,7 @@ export function TileMetricConfig({
         <div className="mt-6 space-y-4">
           {/* Primary metric selector */}
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-1.5">
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
               Primary Metric
             </label>
             <Select
@@ -162,16 +162,16 @@ export function TileMetricConfig({
                 ))}
               </SelectContent>
             </Select>
-            <p className="mt-1 text-xs text-white/40">
+            <p className="mt-1 text-xs text-text-muted">
               If not set, the most relevant metric will be shown automatically.
             </p>
           </div>
 
           {/* Secondary metric selector */}
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-1.5">
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
               Secondary Metric
-              <span className="ml-1 text-white/40">(optional)</span>
+              <span className="ml-1 text-text-muted">(optional)</span>
             </label>
             <Select
               value={secondaryMetric ?? "__none__"}
@@ -191,7 +191,7 @@ export function TileMetricConfig({
               </SelectContent>
             </Select>
             {!primaryMetric && (
-              <p className="mt-1 text-xs text-white/40">
+              <p className="mt-1 text-xs text-text-muted">
                 Select a primary metric first to enable secondary.
               </p>
             )}
@@ -202,7 +202,7 @@ export function TileMetricConfig({
             <button
               type="button"
               onClick={handleReset}
-              className="flex items-center gap-1.5 text-sm text-white/50 hover:text-white"
+              className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Reset to default
@@ -210,7 +210,7 @@ export function TileMetricConfig({
           )}
 
           {error && (
-            <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
               {error}
             </div>
           )}
@@ -220,7 +220,7 @@ export function TileMetricConfig({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-4 text-sm font-medium text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             Cancel
           </button>
@@ -228,7 +228,7 @@ export function TileMetricConfig({
             type="button"
             onClick={handleSave}
             disabled={saving || !hasChanges}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             Save

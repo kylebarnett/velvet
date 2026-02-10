@@ -49,11 +49,11 @@ function RunRow({ run }: { run: ScheduleRun }) {
   const hasErrors = run.errors && run.errors.length > 0;
 
   return (
-    <div className="border-b border-white/5 last:border-0">
+    <div className="border-b border-border-subtle last:border-0">
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center gap-4 px-4 py-3 text-left hover:bg-white/5"
+        className="flex w-full items-center gap-4 px-4 py-3 text-left hover:bg-bg-elevated"
       >
         <div className={`flex items-center gap-2 ${status.className}`}>
           <StatusIcon className="h-4 w-4" />
@@ -61,16 +61,16 @@ function RunRow({ run }: { run: ScheduleRun }) {
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="text-sm text-white/70">
+          <div className="text-sm text-text-secondary">
             {format(new Date(run.runAt), "MMM d, yyyy 'at' h:mm a")}
           </div>
-          <div className="text-xs text-white/40">
+          <div className="text-xs text-text-muted">
             Period: {format(new Date(run.periodStart), "MMM d")} -{" "}
             {format(new Date(run.periodEnd), "MMM d, yyyy")}
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-4 text-xs text-white/60">
+        <div className="hidden sm:flex items-center gap-4 text-xs text-text-tertiary">
           <span>
             {run.requestsCreated} request{run.requestsCreated !== 1 ? "s" : ""}
           </span>
@@ -83,16 +83,16 @@ function RunRow({ run }: { run: ScheduleRun }) {
         </div>
 
         {hasErrors && (
-          <span className="shrink-0 rounded-full bg-red-500/10 px-2 py-0.5 text-xs text-red-300">
+          <span className="shrink-0 rounded-full bg-red-500/10 px-2 py-0.5 text-xs text-[var(--status-error-text)]">
             {run.errors.length} error{run.errors.length !== 1 ? "s" : ""}
           </span>
         )}
 
         {hasErrors ? (
           expanded ? (
-            <ChevronUp className="h-4 w-4 shrink-0 text-white/30" />
+            <ChevronUp className="h-4 w-4 shrink-0 text-text-faint" />
           ) : (
-            <ChevronDown className="h-4 w-4 shrink-0 text-white/30" />
+            <ChevronDown className="h-4 w-4 shrink-0 text-text-faint" />
           )
         ) : (
           <div className="w-4" />
@@ -101,9 +101,9 @@ function RunRow({ run }: { run: ScheduleRun }) {
 
       {/* Expanded details */}
       {expanded && hasErrors && (
-        <div className="border-t border-white/5 bg-black/20 px-4 py-3">
+        <div className="border-t border-border-subtle bg-bg-input px-4 py-3">
           {/* Mobile stats */}
-          <div className="mb-3 flex flex-wrap gap-3 text-xs text-white/60 sm:hidden">
+          <div className="mb-3 flex flex-wrap gap-3 text-xs text-text-tertiary sm:hidden">
             <span>
               {run.requestsCreated} request{run.requestsCreated !== 1 ? "s" : ""}
             </span>
@@ -115,18 +115,18 @@ function RunRow({ run }: { run: ScheduleRun }) {
             </span>
           </div>
 
-          <div className="text-xs font-medium text-white/60 mb-2">Errors</div>
+          <div className="text-xs font-medium text-text-tertiary mb-2">Errors</div>
           <div className="space-y-1.5">
             {run.errors.map((error, i) => (
               <div
                 key={i}
-                className="rounded bg-red-500/5 px-2 py-1.5 text-xs text-red-300"
+                className="rounded bg-red-500/5 px-2 py-1.5 text-xs text-[var(--status-error-text)]"
               >
                 {error.company && (
-                  <span className="text-white/60">{error.company}: </span>
+                  <span className="text-text-tertiary">{error.company}: </span>
                 )}
                 {error.metric && (
-                  <span className="text-white/60">{error.metric} - </span>
+                  <span className="text-text-tertiary">{error.metric} - </span>
                 )}
                 {error.message}
               </div>
@@ -141,8 +141,8 @@ function RunRow({ run }: { run: ScheduleRun }) {
 export function ScheduleRunHistory({ runs }: ScheduleRunHistoryProps) {
   if (runs.length === 0) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-        <div className="text-sm text-white/60">
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="text-sm text-text-tertiary">
           No runs yet. This schedule will run automatically on its next scheduled
           date, or you can trigger it manually.
         </div>
@@ -151,9 +151,9 @@ export function ScheduleRunHistory({ runs }: ScheduleRunHistoryProps) {
   }
 
   return (
-    <div className="rounded-xl border border-white/10 overflow-hidden">
-      <div className="border-b border-white/10 bg-white/5 px-4 py-2">
-        <h3 className="text-sm font-medium text-white/70">Run History</h3>
+    <div className="rounded-xl border border-border-default overflow-hidden">
+      <div className="border-b border-border-default bg-bg-elevated px-4 py-2">
+        <h3 className="text-sm font-medium text-text-secondary">Run History</h3>
       </div>
       <div className="max-h-[400px] overflow-y-auto">
         {runs.map((run) => (

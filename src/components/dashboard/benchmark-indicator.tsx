@@ -116,14 +116,14 @@ export function BenchmarkIndicator({
       {showTooltip && (
         <div
           ref={tooltipRef}
-          className="absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-zinc-900 px-3 py-2 text-xs text-white/80 shadow-xl"
+          className="absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-border-default bg-bg-secondary px-3 py-2 text-xs text-text-secondary shadow-xl"
         >
           <span className="font-medium">{percentile}th percentile</span>
-          <span className="text-white/50">
+          <span className="text-text-muted">
             {" "}
             (above {percentile}% of companies)
           </span>
-          <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-b border-r border-white/10 bg-zinc-900" />
+          <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-b border-r border-border-default bg-bg-secondary" />
         </div>
       )}
     </span>

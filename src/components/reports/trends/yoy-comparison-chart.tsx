@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { formatValue } from "@/components/charts/types";
+import { useChartTheme } from "@/hooks/use-chart-theme";
 
 type YoYDataPoint = {
   period: string;
@@ -44,8 +45,8 @@ function CustomTooltip({
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-lg border border-white/10 bg-zinc-900 px-3 py-2 shadow-xl">
-      <p className="mb-1 text-xs text-white/50">{label}</p>
+    <div className="rounded-lg border border-border-default bg-bg-secondary px-3 py-2 shadow-xl">
+      <p className="mb-1 text-xs text-text-muted">{label}</p>
       {payload.map((entry) => {
         const yearLabel =
           entry.dataKey === "currentYear"
@@ -57,8 +58,8 @@ function CustomTooltip({
               className="h-2 w-2 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-white/60">{yearLabel}:</span>
-            <span className="font-medium text-white">
+            <span className="text-text-tertiary">{yearLabel}:</span>
+            <span className="font-medium text-text-primary">
               {entry.value != null
                 ? formatValue(entry.value, metricName)
                 : "N/A"}
@@ -76,12 +77,13 @@ export function YoYComparisonChart({
   currentYear,
   priorYear,
 }: YoYComparisonChartProps) {
+  const chartTheme = useChartTheme();
   const hasData = data.some(
     (d) => d.currentYear !== null || d.priorYear !== null
   );
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent transition-all duration-300 hover:border-white/[0.12]">
+    <div className="group relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent transition-all duration-300 hover:border-border-default">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-500/[0.05] via-transparent to-transparent" />
 
       <div className="relative p-5">
@@ -103,8 +105,8 @@ export function YoYComparisonChart({
             </svg>
           </div>
           <div>
-            <h3 className="font-semibold text-white">Year-over-Year Comparison</h3>
-            <p className="text-xs text-white/40">
+            <h3 className="font-semibold text-text-primary">Year-over-Year Comparison</h3>
+            <p className="text-xs text-text-muted">
               {metricName} &mdash; {currentYear} vs {priorYear}
             </p>
           </div>
@@ -112,7 +114,7 @@ export function YoYComparisonChart({
 
         {!hasData ? (
           <div className="flex h-64 items-center justify-center">
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-text-muted">
               Not enough data for year-over-year comparison. Data for both{" "}
               {currentYear} and {priorYear} is needed.
             </p>
@@ -125,18 +127,18 @@ export function YoYComparisonChart({
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.06)"
+                stroke={chartTheme.grid}
                 vertical={false}
               />
               <XAxis
                 dataKey="label"
-                tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+                tick={{ fill: chartTheme.tick, fontSize: 11 }}
                 tickLine={false}
                 axisLine={false}
                 dy={10}
               />
               <YAxis
-                tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+                tick={{ fill: chartTheme.tick, fontSize: 11 }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) => formatValue(value, metricName)}
@@ -160,7 +162,7 @@ export function YoYComparisonChart({
                       ? String(currentYear)
                       : String(priorYear);
                   return (
-                    <span className="text-xs text-white/70">{label}</span>
+                    <span className="text-xs text-text-secondary">{label}</span>
                   );
                 }}
               />
@@ -177,11 +179,11 @@ export function YoYComparisonChart({
               <Line
                 type="monotone"
                 dataKey="priorYear"
-                stroke="rgba(255,255,255,0.3)"
+                stroke={chartTheme.secondaryLine}
                 strokeWidth={2}
                 strokeDasharray="6 3"
                 dot={{
-                  fill: "rgba(255,255,255,0.3)",
+                  fill: chartTheme.secondaryLine,
                   strokeWidth: 0,
                   r: 3,
                 }}

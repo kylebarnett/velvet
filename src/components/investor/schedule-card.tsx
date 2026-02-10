@@ -92,26 +92,26 @@ export function ScheduleCard({
   const hasMoreMetrics = metrics.length > maxVisibleMetrics;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-5">
+    <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-5">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <Link
-            href={`/requests/schedules/${schedule.id}`}
-            className="font-medium text-white hover:underline"
+            href={`/campaigns/schedules/${schedule.id}`}
+            className="font-medium text-text-primary hover:underline"
           >
             {schedule.name}
           </Link>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-white/60">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-tertiary">
             <span className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               {getCadenceDescription(schedule.cadence)}
             </span>
-            <span className="text-white/30">·</span>
+            <span className="text-text-faint">·</span>
             <span>Day {schedule.dayOfMonth}</span>
             {schedule.companyIds ? (
               <>
-                <span className="text-white/30">·</span>
+                <span className="text-text-faint">·</span>
                 <span className="flex items-center gap-1">
                   <Building2 className="h-3 w-3" />
                   {schedule.companyIds.length} companies
@@ -119,7 +119,7 @@ export function ScheduleCard({
               </>
             ) : (
               <>
-                <span className="text-white/30">·</span>
+                <span className="text-text-faint">·</span>
                 <span>All portfolio</span>
               </>
             )}
@@ -131,8 +131,8 @@ export function ScheduleCard({
           <span
             className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${
               schedule.isActive
-                ? "bg-emerald-500/20 text-emerald-200"
-                : "bg-zinc-500/20 text-zinc-300"
+                ? "bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
+                : "bg-bg-hover text-text-secondary"
             }`}
           >
             {schedule.isActive ? "Active" : "Paused"}
@@ -144,21 +144,21 @@ export function ScheduleCard({
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
               disabled={loading}
-              className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-50"
+              className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-50"
             >
               {loading ? (
-                <RefreshCw className="h-4 w-4 animate-spin text-white/50" />
+                <RefreshCw className="h-4 w-4 animate-spin text-text-muted" />
               ) : (
-                <MoreVertical className="h-4 w-4 text-white/50" />
+                <MoreVertical className="h-4 w-4 text-text-muted" />
               )}
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-full z-20 mt-1 w-40 rounded-lg border border-white/10 bg-zinc-900 py-1 shadow-xl">
+              <div className="absolute right-0 top-full z-20 mt-1 w-40 rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl">
                 <button
                   type="button"
                   onClick={() => handleAction(() => onRunNow(schedule.id))}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-white/70 hover:bg-white/5 hover:text-white"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                 >
                   <Play className="h-4 w-4" />
                   Run now
@@ -168,7 +168,7 @@ export function ScheduleCard({
                   <button
                     type="button"
                     onClick={() => handleAction(() => onPause(schedule.id))}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-white/70 hover:bg-white/5 hover:text-white"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                   >
                     <Pause className="h-4 w-4" />
                     Pause
@@ -177,14 +177,14 @@ export function ScheduleCard({
                   <button
                     type="button"
                     onClick={() => handleAction(() => onResume(schedule.id))}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-white/70 hover:bg-white/5 hover:text-white"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                   >
                     <Play className="h-4 w-4" />
                     Resume
                   </button>
                 )}
 
-                <div className="my-1 border-t border-white/10" />
+                <div className="my-1 border-t border-border-default" />
 
                 <button
                   type="button"
@@ -202,9 +202,9 @@ export function ScheduleCard({
 
       {/* Template info */}
       {schedule.template && (
-        <div className="mt-3 border-t border-white/5 pt-3">
-          <div className="text-xs text-white/40">Template</div>
-          <div className="mt-1 text-sm text-white/70">{schedule.template.name}</div>
+        <div className="mt-3 border-t border-border-subtle pt-3">
+          <div className="text-xs text-text-muted">Template</div>
+          <div className="mt-1 text-sm text-text-secondary">{schedule.template.name}</div>
 
           {/* Metrics */}
           {metrics.length > 0 && (
@@ -213,7 +213,7 @@ export function ScheduleCard({
                 (item) => (
                   <span
                     key={item.id}
-                    className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60"
+                    className="rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-tertiary"
                   >
                     {item.metric_name}
                   </span>
@@ -223,7 +223,7 @@ export function ScheduleCard({
                 <button
                   type="button"
                   onClick={() => setExpanded(!expanded)}
-                  className="flex items-center gap-0.5 rounded-full bg-white/5 px-2 py-0.5 text-xs text-white/50 hover:bg-white/10 hover:text-white/70"
+                  className="flex items-center gap-0.5 rounded-full bg-bg-elevated px-2 py-0.5 text-xs text-text-muted hover:bg-bg-hover hover:text-text-secondary"
                 >
                   {expanded ? (
                     <>
@@ -243,7 +243,7 @@ export function ScheduleCard({
       )}
 
       {/* Next run / Last run */}
-      <div className="mt-3 flex flex-wrap gap-4 text-xs text-white/60">
+      <div className="mt-3 flex flex-wrap gap-4 text-xs text-text-tertiary">
         {schedule.nextRunAt && schedule.isActive && (
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />

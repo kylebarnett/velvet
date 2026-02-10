@@ -25,13 +25,13 @@ export function MetricCard({
 
   return (
     <div
-      className={`flex flex-col p-4 ${onClick ? "cursor-pointer transition-colors hover:bg-white/[0.04]" : ""}`}
+      className={`flex flex-col p-4 ${onClick ? "cursor-pointer transition-colors hover:bg-bg-raised" : ""}`}
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") onClick(); } : undefined}
     >
-      <div className="text-xs font-medium uppercase tracking-wider text-white/40">{title}</div>
+      <div className="text-xs font-medium uppercase tracking-wider text-text-muted">{title}</div>
       <div className="mt-2 flex items-end justify-between">
         <span className="text-2xl font-semibold">
           {formatValue(value, title)}
@@ -47,7 +47,7 @@ export function MetricCard({
 function TrendIndicator({ percentChange }: { percentChange: number | null }) {
   if (percentChange == null) {
     return (
-      <div className="flex items-center gap-1 text-white/40">
+      <div className="flex items-center gap-1 text-text-muted">
         <Minus className="h-4 w-4" />
       </div>
     );
@@ -72,7 +72,7 @@ function TrendIndicator({ percentChange }: { percentChange: number | null }) {
   }
 
   return (
-    <div className="flex items-center gap-1 text-white/40">
+    <div className="flex items-center gap-1 text-text-muted">
       <Minus className="h-4 w-4" />
       <span className="text-xs font-medium">0%</span>
     </div>

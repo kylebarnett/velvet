@@ -21,7 +21,7 @@ function CompanyLogoDisplay({ company }: { company: Company }) {
   const initial = company.name.charAt(0).toUpperCase();
 
   return (
-    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5">
+    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-border-default bg-bg-elevated">
       {logoUrl && !imgError ? (
         <img
           src={logoUrl}
@@ -30,7 +30,7 @@ function CompanyLogoDisplay({ company }: { company: Company }) {
           onError={() => setImgError(true)}
         />
       ) : (
-        <span className="font-medium text-white/60 text-xs">{initial}</span>
+        <span className="font-medium text-text-tertiary text-xs">{initial}</span>
       )}
     </div>
   );
@@ -43,14 +43,14 @@ export function DashboardCompanyList({ companies }: { companies: Company[] }) {
         <Link
           key={company.id}
           href={`/dashboard/${company.id}`}
-          className="flex items-center justify-between rounded-lg border border-white/5 px-3 py-2 hover:bg-white/5"
+          className="flex items-center justify-between rounded-lg border border-border-subtle px-3 py-2 hover:bg-bg-elevated"
         >
           <div className="flex items-center gap-3">
             <CompanyLogoDisplay company={company} />
             <div className="flex items-center">
               <span className="text-sm font-medium">{company.name}</span>
               {company.stage && (
-                <span className="ml-2 rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">
+                <span className="ml-2 rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-tertiary">
                   {company.stage.replace(/_/g, " ")}
                 </span>
               )}
@@ -58,15 +58,15 @@ export function DashboardCompanyList({ companies }: { companies: Company[] }) {
           </div>
           <div className="flex items-center gap-2">
             {company.founder_id ? (
-              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
+              <span className="rounded-full bg-[var(--status-success-bg)] px-2 py-0.5 text-xs text-[var(--status-success-text)]">
                 Founder joined
               </span>
             ) : (
-              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200">
+              <span className="rounded-full bg-[var(--status-warning-bg)] px-2 py-0.5 text-xs text-[var(--status-warning-text)]">
                 Awaiting signup
               </span>
             )}
-            <span className="text-xs text-white/40">
+            <span className="text-xs text-text-muted">
               {company.approvalStatus === "auto_approved" || company.approvalStatus === "approved"
                 ? "Approved"
                 : company.approvalStatus === "denied"

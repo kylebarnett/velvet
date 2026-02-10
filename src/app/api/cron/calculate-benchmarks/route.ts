@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { calculatePercentiles } from "@/lib/benchmarks/calculate";
+import { logger } from "@/lib/logger";
 
 type MetricValueRow = {
   metric_name: string;
@@ -45,7 +46,7 @@ async function handler(req: Request) {
     .select("id, industry, stage");
 
   if (companyError) {
-    console.error("Failed to fetch companies:", companyError.message);
+    logger.error("Failed to fetch companies:", companyError.message);
     return NextResponse.json(
       { error: "Failed to fetch companies." },
       { status: 500 },
@@ -71,7 +72,7 @@ async function handler(req: Request) {
       .range(fetchOffset, fetchOffset + FETCH_BATCH_SIZE - 1);
 
     if (mvError) {
-      console.error("Failed to fetch metric values:", mvError.message);
+      logger.error("Failed to fetch metric values:", mvError.message);
       return NextResponse.json(
         { error: "Failed to fetch metric values." },
         { status: 500 },
@@ -207,7 +208,7 @@ async function handler(req: Request) {
       });
 
     if (upsertError) {
-      console.error("Failed to upsert benchmarks:", upsertError.message);
+      logger.error("Failed to upsert benchmarks:", upsertError.message);
       return NextResponse.json(
         {
           error: "Failed to upsert benchmarks.",

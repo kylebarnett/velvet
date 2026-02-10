@@ -5,8 +5,17 @@ import { Loader2, BarChart3 } from "lucide-react";
 
 import { cn } from "@/lib/utils/cn";
 import { getPercentileBgColor } from "@/lib/benchmarks/calculate";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 import { BenchmarkChart } from "./benchmark-chart";
 import { BenchmarkTable } from "./benchmark-table";
+
+const NONE = "__none__";
 
 type CompanyBenchmark = {
   id: string;
@@ -156,75 +165,87 @@ export function BenchmarksClient() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-lg font-semibold text-zinc-50">
+        <h2 className="text-lg font-semibold text-text-primary">
           Portfolio Benchmarks
         </h2>
-        <p className="mt-1 text-sm text-white/60">
+        <p className="mt-1 text-sm text-text-tertiary">
           See how your portfolio companies rank against anonymized industry
           benchmarks.
         </p>
       </div>
 
       {/* Controls */}
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
         <div className="grid gap-4 md:grid-cols-3">
           {/* Metric selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/40">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
               Metric
             </label>
             {isLoadingMetrics ? (
-              <div className="h-11 animate-pulse rounded-md bg-white/[0.06]" />
+              <div className="h-11 animate-pulse rounded-md bg-bg-elevated" />
             ) : (
-              <select
-                value={selectedMetric}
-                onChange={(e) => setSelectedMetric(e.target.value)}
-                className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+              <Select
+                value={selectedMetric || NONE}
+                onValueChange={(v) => setSelectedMetric(v === NONE ? "" : v)}
               >
-                <option value="">Select a metric...</option>
-                {metricNames.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a metric..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Select a metric...</SelectItem>
+                  {metricNames.map((name) => (
+                    <SelectItem key={name} value={name}>
+                      {name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
 
           {/* Industry filter */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/40">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
               Industry
             </label>
-            <select
-              value={industry}
-              onChange={(e) => setIndustry(e.target.value)}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+            <Select
+              value={industry || NONE}
+              onValueChange={(v) => setIndustry(v === NONE ? "" : v)}
             >
-              {INDUSTRIES.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {INDUSTRIES.map((opt) => (
+                  <SelectItem key={opt.value || NONE} value={opt.value || NONE}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Stage filter */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/40">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
               Stage
             </label>
-            <select
-              value={stage}
-              onChange={(e) => setStage(e.target.value)}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+            <Select
+              value={stage || NONE}
+              onValueChange={(v) => setStage(v === NONE ? "" : v)}
             >
-              {STAGES.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STAGES.map((opt) => (
+                  <SelectItem key={opt.value || NONE} value={opt.value || NONE}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -232,7 +253,7 @@ export function BenchmarksClient() {
       {/* Error */}
       {error && (
         <div
-          className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200"
+          className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]"
           role="alert"
         >
           {error}
@@ -241,7 +262,7 @@ export function BenchmarksClient() {
 
       {/* Loading */}
       {isLoadingData && (
-        <div className="flex items-center justify-center gap-2 py-12 text-white/50">
+        <div className="flex items-center justify-center gap-2 py-12 text-text-muted">
           <Loader2 className="h-5 w-5 animate-spin" />
           <span className="text-sm">Loading benchmark data...</span>
         </div>
@@ -260,15 +281,15 @@ export function BenchmarksClient() {
           ).map(({ label, key }) => (
             <div
               key={key}
-              className="rounded-xl border border-white/10 bg-white/5 p-4"
+              className="rounded-xl border border-border-default bg-bg-elevated p-4"
             >
-              <div className="text-xs font-medium text-white/40">{label}</div>
-              <div className="mt-1 text-lg font-semibold tabular-nums text-zinc-50">
+              <div className="text-xs font-medium text-text-muted">{label}</div>
+              <div className="mt-1 text-lg font-semibold tabular-nums text-text-primary">
                 {benchmarkData![key].toLocaleString("en-US", {
                   maximumFractionDigits: 2,
                 })}
               </div>
-              <div className="mt-0.5 text-[10px] text-white/30">
+              <div className="mt-0.5 text-[10px] text-text-faint">
                 {benchmarkData!.sample_size} companies
               </div>
             </div>
@@ -300,7 +321,7 @@ export function BenchmarksClient() {
         selectedMetric &&
         !hasBenchmark &&
         hasCompanies && (
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-200">
+          <div className="rounded-xl border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] p-4 text-sm text-[var(--status-warning-text)]">
             No benchmark data available for this metric yet. Benchmarks are
             calculated daily when at least 5 companies have submitted data.
           </div>
@@ -312,8 +333,8 @@ export function BenchmarksClient() {
         selectedMetric &&
         !hasCompanies &&
         !isLoadingData && (
-          <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-            <p className="text-white/60">
+          <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+            <p className="text-text-tertiary">
               None of your portfolio companies have submitted data for this
               metric.
             </p>
@@ -322,9 +343,9 @@ export function BenchmarksClient() {
 
       {/* Initial empty state */}
       {!selectedMetric && !isLoadingData && !error && (
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-12 text-center">
-          <BarChart3 className="mx-auto mb-3 h-10 w-10 text-white/20" />
-          <p className="text-white/50">
+        <div className="rounded-xl border border-border-subtle bg-bg-raised p-12 text-center">
+          <BarChart3 className="mx-auto mb-3 h-10 w-10 text-text-faint" />
+          <p className="text-text-muted">
             Select a metric above to see how your portfolio companies compare to
             industry benchmarks.
           </p>

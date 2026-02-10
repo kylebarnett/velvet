@@ -17,7 +17,7 @@ export function HelpTooltip({ text, size = "sm" }: Props) {
     <div className="relative inline-flex">
       <button
         type="button"
-        className={`${iconSize} text-white/30 hover:text-white/60 transition-colors`}
+        className={`${iconSize} text-text-faint hover:text-text-tertiary transition-colors`}
         onMouseEnter={() => setShow(true)}
         onMouseLeave={() => setShow(false)}
         onClick={(e) => {
@@ -29,7 +29,7 @@ export function HelpTooltip({ text, size = "sm" }: Props) {
         <HelpCircle className="h-full w-full" />
       </button>
       {show && (
-        <div className="absolute bottom-full left-1/2 z-50 mb-2 w-56 -translate-x-1/2 rounded-lg border border-white/10 bg-zinc-900 p-2.5 text-xs text-white/70 shadow-xl">
+        <div className="absolute bottom-full left-1/2 z-50 mb-2 w-56 -translate-x-1/2 rounded-lg border border-border-default bg-bg-secondary p-2.5 text-xs text-text-secondary shadow-xl">
           {text}
         </div>
       )}

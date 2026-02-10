@@ -8,6 +8,7 @@ import {
   EMAIL_EXTRACTION_SYSTEM_PROMPT,
   buildEmailUserPrompt,
 } from "@/lib/ai/prompts";
+import { logger } from "@/lib/logger";
 
 const emailIngestSchema = z.object({
   content: z
@@ -231,7 +232,7 @@ export async function POST(req: Request) {
   } catch (e: unknown) {
     const message =
       e instanceof Error ? e.message : "Email extraction failed.";
-    console.error("Email extraction error:", message);
+    logger.error("Email extraction error:", message);
     return jsonError("Email extraction failed.", 500);
   }
 }

@@ -21,9 +21,9 @@ type Props = {
 };
 
 const roleBadgeStyles: Record<string, string> = {
-  admin: "bg-amber-500/20 text-amber-200",
-  member: "bg-blue-500/20 text-blue-200",
-  viewer: "bg-white/10 text-white/60",
+  admin: "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]",
+  member: "bg-[var(--status-info-bg)] text-[var(--status-info-text)]",
+  viewer: "bg-bg-hover text-text-tertiary",
 };
 
 export function PendingInvitations({
@@ -63,10 +63,10 @@ export function PendingInvitations({
 
   return (
     <div>
-      <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/40">
+      <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
         Pending Invitations ({pending.length})
       </h3>
-      <div className="rounded-xl border border-white/10 bg-white/5 divide-y divide-white/5">
+      <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
         {pending.map((inv) => {
           const isExpired = new Date(inv.expires_at) < new Date();
           return (
@@ -74,10 +74,10 @@ export function PendingInvitations({
               key={inv.id}
               className="flex items-center gap-3 px-4 py-3"
             >
-              <Mail className="h-4 w-4 shrink-0 text-white/30" />
+              <Mail className="h-4 w-4 shrink-0 text-text-faint" />
               <div className="min-w-0 flex-1">
                 <div className="text-sm truncate">{inv.email}</div>
-                <div className="flex items-center gap-2 mt-0.5 text-xs text-white/40">
+                <div className="flex items-center gap-2 mt-0.5 text-xs text-text-muted">
                   <span
                     className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
                       roleBadgeStyles[inv.role] ?? roleBadgeStyles.viewer
@@ -88,7 +88,7 @@ export function PendingInvitations({
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {isExpired ? (
-                      <span className="text-red-300">Expired</span>
+                      <span className="text-[var(--status-error-text)]">Expired</span>
                     ) : (
                       `Expires ${new Date(inv.expires_at).toLocaleDateString()}`
                     )}
@@ -100,7 +100,7 @@ export function PendingInvitations({
                   type="button"
                   onClick={() => setCancelModal({ open: true, invitation: inv })}
                   disabled={cancelling === inv.id}
-                  className="rounded-md p-1.5 text-white/30 hover:bg-white/5 hover:text-white/60 disabled:opacity-40"
+                  className="rounded-md p-1.5 text-text-faint hover:bg-bg-elevated hover:text-text-tertiary disabled:opacity-40"
                   title="Cancel invitation"
                 >
                   <X className="h-4 w-4" />

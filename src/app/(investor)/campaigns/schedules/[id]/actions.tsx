@@ -50,7 +50,7 @@ export function ScheduleDetailActions({
       setActive(false);
       setSuccess("Schedule paused");
       router.refresh();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to pause schedule");
     } finally {
       setLoading(null);
@@ -69,7 +69,7 @@ export function ScheduleDetailActions({
       setActive(true);
       setSuccess("Schedule resumed");
       router.refresh();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to resume schedule");
     } finally {
       setLoading(null);
@@ -92,7 +92,7 @@ export function ScheduleDetailActions({
           : "No new requests created (may already exist)";
       setSuccess(message);
       router.refresh();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to run schedule");
     } finally {
       setLoading(null);
@@ -109,9 +109,9 @@ export function ScheduleDetailActions({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to delete schedule");
 
-      router.push("/requests?tab=schedules");
+      router.push("/campaigns?tab=schedules");
       router.refresh();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to delete schedule");
       setDeleteModal(false);
     } finally {
@@ -126,8 +126,8 @@ export function ScheduleDetailActions({
         <div
           className={`fixed top-4 right-4 z-50 max-w-sm rounded-lg border p-3 text-sm shadow-lg ${
             error
-              ? "border-red-500/20 bg-red-500/10 text-red-200"
-              : "border-emerald-500/20 bg-emerald-500/10 text-emerald-200"
+              ? "border-[var(--status-error-bg)] bg-[var(--status-error-bg)] text-[var(--status-error-text)]"
+              : "border-[var(--status-success-bg)] bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
           }`}
         >
           {error || success}
@@ -140,7 +140,7 @@ export function ScheduleDetailActions({
           type="button"
           onClick={handleRunNow}
           disabled={loading !== null}
-          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white/70 hover:bg-white/10 disabled:opacity-50"
+          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-text-secondary hover:bg-bg-hover disabled:opacity-50"
         >
           {loading === "run" ? (
             <RefreshCw className="h-4 w-4 animate-spin" />
@@ -155,7 +155,7 @@ export function ScheduleDetailActions({
             type="button"
             onClick={handlePause}
             disabled={loading !== null}
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white/70 hover:bg-white/10 disabled:opacity-50"
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-text-secondary hover:bg-bg-hover disabled:opacity-50"
           >
             {loading === "pause" ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -169,7 +169,7 @@ export function ScheduleDetailActions({
             type="button"
             onClick={handleResume}
             disabled={loading !== null}
-            className="inline-flex h-9 items-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50"
+            className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
           >
             {loading === "resume" ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -184,7 +184,7 @@ export function ScheduleDetailActions({
           type="button"
           onClick={() => setDeleteModal(true)}
           disabled={loading !== null}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 text-red-400 hover:bg-red-500/10 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border-default bg-bg-elevated text-red-400 hover:bg-red-500/10 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500/50"
           aria-label="Delete schedule"
         >
           <Trash2 className="h-4 w-4" />

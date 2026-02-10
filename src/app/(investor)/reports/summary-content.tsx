@@ -83,8 +83,8 @@ export async function SummaryContent({
 
   if (relError) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
-        <p className="text-red-200">Failed to load portfolio data.</p>
+      <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-6 text-center">
+        <p className="text-[var(--status-error-text)]">Failed to load portfolio data.</p>
       </div>
     );
   }
@@ -134,11 +134,11 @@ export async function SummaryContent({
 
   if (companyIds.length === 0) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-        <p className="text-white/60">No companies in your portfolio yet.</p>
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <p className="text-text-tertiary">No companies in your portfolio yet.</p>
         <a
           href="/portfolio/import"
-          className="mt-2 inline-block text-sm underline underline-offset-4 hover:text-white"
+          className="mt-2 inline-block text-sm underline underline-offset-4 hover:text-text-primary"
         >
           Import contacts to get started
         </a>
@@ -154,8 +154,8 @@ export async function SummaryContent({
 
   if (mvError) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
-        <p className="text-red-200">Failed to load metric data.</p>
+      <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-6 text-center">
+        <p className="text-[var(--status-error-text)]">Failed to load metric data.</p>
       </div>
     );
   }

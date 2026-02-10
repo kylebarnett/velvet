@@ -60,23 +60,23 @@ export function SavedReportsDropdown({
       <button
         type="button"
         onClick={handleToggle}
-        className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
+        className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
       >
         Saved Reports
         <ChevronDown className="h-3 w-3" />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-1 min-w-[220px] max-h-[300px] overflow-y-auto rounded-lg border border-white/10 bg-zinc-900 shadow-xl">
+        <div className="absolute right-0 top-full z-50 mt-1 min-w-[220px] max-h-[300px] overflow-y-auto rounded-lg border border-border-default bg-bg-secondary shadow-xl">
           {loading ? (
-            <div className="px-3 py-4 text-center text-xs text-white/40">Loading...</div>
+            <div className="px-3 py-4 text-center text-xs text-text-muted">Loading...</div>
           ) : reports.length === 0 ? (
-            <div className="px-3 py-4 text-center text-xs text-white/40">No saved reports</div>
+            <div className="px-3 py-4 text-center text-xs text-text-muted">No saved reports</div>
           ) : (
             reports.map((report) => (
               <div
                 key={report.id}
-                className="flex items-center justify-between gap-2 px-3 py-2 hover:bg-white/5"
+                className="flex items-center justify-between gap-2 px-3 py-2 hover:bg-bg-elevated"
               >
                 <button
                   type="button"
@@ -86,16 +86,16 @@ export function SavedReportsDropdown({
                   }}
                   className="min-w-0 flex-1 text-left"
                 >
-                  <div className="truncate text-xs font-medium text-white/80">
+                  <div className="truncate text-xs font-medium text-text-primary">
                     {report.name}
                     {report.is_default && (
-                      <span className="ml-1.5 rounded bg-white/10 px-1 py-0.5 text-[10px] text-white/50">
+                      <span className="ml-1.5 rounded bg-bg-hover px-1 py-0.5 text-[10px] text-text-muted">
                         Default
                       </span>
                     )}
                   </div>
                   {report.description && (
-                    <div className="mt-0.5 truncate text-[10px] text-white/40">
+                    <div className="mt-0.5 truncate text-[10px] text-text-muted">
                       {report.description}
                     </div>
                   )}
@@ -107,7 +107,7 @@ export function SavedReportsDropdown({
                     onDelete(report.id);
                     setReports((prev) => prev.filter((r) => r.id !== report.id));
                   }}
-                  className="shrink-0 rounded p-1 text-white/30 hover:bg-red-500/10 hover:text-red-400"
+                  className="shrink-0 rounded p-1 text-text-faint hover:bg-red-500/10 hover:text-red-400"
                 >
                   <Trash2 className="h-3 w-3" />
                 </button>

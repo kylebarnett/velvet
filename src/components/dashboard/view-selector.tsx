@@ -67,15 +67,15 @@ export function ViewSelector({
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-white/60 hover:border-white/15 hover:text-white/80 transition-colors"
+          className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-1.5 text-xs font-medium text-text-tertiary hover:border-border-default hover:text-text-secondary transition-colors"
         >
           <span>View: {displayName}</span>
           <ChevronDown className="h-3 w-3" />
         </button>
         {isOpen && (
-          <div className="absolute left-0 top-full z-50 mt-1 min-w-[200px] overflow-hidden rounded-lg border border-white/10 bg-zinc-900 shadow-xl">
+          <div className="absolute left-0 top-full z-50 mt-1 min-w-[200px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary shadow-xl">
             {views.length === 0 ? (
-              <div className="px-3 py-2 text-xs text-white/60">No saved views</div>
+              <div className="px-3 py-2 text-xs text-text-tertiary">No saved views</div>
             ) : (
               views.map((view) => (
                 <div
@@ -84,8 +84,8 @@ export function ViewSelector({
                     flex w-full items-center justify-between
                     ${
                       selectedViewId === view.id
-                        ? "bg-white/10"
-                        : "hover:bg-white/5"
+                        ? "bg-bg-hover"
+                        : "hover:bg-bg-elevated"
                     }
                   `}
                 >
@@ -99,21 +99,21 @@ export function ViewSelector({
                       flex flex-1 items-center justify-between px-3 py-2 text-left text-xs
                       ${
                         selectedViewId === view.id
-                          ? "text-white"
-                          : "text-white/70 hover:text-white"
+                          ? "text-text-primary"
+                          : "text-text-secondary hover:text-text-primary"
                       }
                     `}
                   >
                     <span>{view.name}</span>
                     {view.isDefault && (
-                      <span className="text-[10px] text-white/40">Default</span>
+                      <span className="text-[10px] text-text-muted">Default</span>
                     )}
                   </button>
                   {onDelete && (
                     <button
                       type="button"
                       onClick={(e) => handleDeleteClick(e, view)}
-                      className="mr-2 rounded p-1 text-white/30 transition-colors hover:bg-white/10 hover:text-red-400"
+                      className="mr-2 rounded p-1 text-text-faint transition-colors hover:bg-bg-hover hover:text-red-400"
                       title="Delete view"
                       aria-label={`Delete ${view.name} view`}
                     >
@@ -125,14 +125,14 @@ export function ViewSelector({
             )}
             {onCreateNew && (
               <>
-                <div className="mx-2 border-t border-white/10" />
+                <div className="mx-2 border-t border-border-default" />
                 <button
                   type="button"
                   onClick={() => {
                     onCreateNew();
                     setIsOpen(false);
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-white/70 hover:bg-white/5 hover:text-white"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                 >
                   <Plus className="h-3 w-3" />
                   Create new view

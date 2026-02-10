@@ -6,9 +6,11 @@ import {
   calculateReportingPeriod,
   calculateNextRunAfterCompletion,
   calculateReminderDates,
+  cadenceToPeriodType,
 } from "@/lib/schedules";
 import { escapeHtml } from "@/lib/utils/html";
 import { sendEmailBatchWithRetry } from "@/lib/email/retry";
+import { logger } from "@/lib/logger";
 
 const BATCH_SIZE = 100;
 
@@ -91,7 +93,7 @@ export async function POST(req: Request) {
     .lte("next_run_at", now.toISOString());
 
   if (fetchError) {
-    console.error("Failed to fetch schedules:", fetchError);
+    logger.error("Failed to fetch schedules:", fetchError);
     return NextResponse.json({ error: fetchError.message }, { status: 500 });
   }
 
@@ -133,7 +135,7 @@ export async function POST(req: Request) {
         .eq("investor_id", schedule.investor_id);
 
       if (relError) {
-        console.error(`Failed to fetch companies for schedule ${schedule.id}:`, relError);
+        logger.error(`Failed to fetch companies for schedule ${schedule.id}:`, relError);
         continue;
       }
 
@@ -171,7 +173,7 @@ export async function POST(req: Request) {
       .in("id", companyIds);
 
     if (companyError) {
-      console.error(`Failed to fetch companies for schedule ${schedule.id}:`, companyError);
+      logger.error(`Failed to fetch companies for schedule ${schedule.id}:`, companyError);
       continue;
     }
 
@@ -183,6 +185,11 @@ export async function POST(req: Request) {
     const periodStartStr = periodStart.toISOString().split("T")[0];
     const periodEndStr = periodEnd.toISOString().split("T")[0];
     const dueDateStr = dueDate.toISOString().split("T")[0];
+
+    // Use the schedule cadence to determine the correct period type for definitions.
+    // Template items may have a different period_type (e.g. "monthly") but the actual
+    // request period is determined by the schedule's cadence (e.g. "quarterly").
+    const schedulePeriodType = cadenceToPeriodType(cadence);
 
     // Batch-fetch all metric definitions for this investor (avoid N+1)
     const metricNames = templateItems.map((i) => i.metric_name);
@@ -200,12 +207,12 @@ export async function POST(req: Request) {
     // Ensure all metric definitions exist (create missing ones in batch)
     const missingDefs: { investor_id: string; name: string; period_type: string; data_type: string }[] = [];
     for (const item of templateItems) {
-      const key = `${item.metric_name}|${item.period_type}`;
+      const key = `${item.metric_name}|${schedulePeriodType}`;
       if (!defMap.has(key)) {
         missingDefs.push({
           investor_id: schedule.investor_id,
           name: item.metric_name,
-          period_type: item.period_type,
+          period_type: schedulePeriodType,
           data_type: item.data_type,
         });
       }
@@ -275,7 +282,7 @@ export async function POST(req: Request) {
 
       // Create metric requests for each template item
       for (const item of templateItems) {
-        const defKey = `${item.metric_name}|${item.period_type}`;
+        const defKey = `${item.metric_name}|${schedulePeriodType}`;
         const metricDefId = defMap.get(defKey);
 
         if (!metricDefId) {

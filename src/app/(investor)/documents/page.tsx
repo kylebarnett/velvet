@@ -439,7 +439,7 @@ export default function DocumentsPage() {
                       </div>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className={`rounded-full px-2 py-0.5 text-xs ${getDocumentTypeColor(doc.document_type)}`}>
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getDocumentTypeColor(doc.document_type)}`}>
                         {TYPE_LABELS[doc.document_type] ?? doc.document_type}
                       </span>
                       <span className="text-xs text-text-tertiary">{formatFileSize(doc.file_size)}</span>
@@ -507,7 +507,7 @@ export default function DocumentsPage() {
                     {doc.company?.name ?? "Unknown"}
                   </div>
                   <div className="w-28">
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs ${getDocumentTypeColor(doc.document_type)}`}>
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getDocumentTypeColor(doc.document_type)}`}>
                       {TYPE_LABELS[doc.document_type] ?? doc.document_type}
                     </span>
                   </div>

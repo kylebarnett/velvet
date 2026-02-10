@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useParams } from "next/navigation";
 import { TearSheetPreview } from "@/components/founder/tear-sheet-preview";
+import { logger } from "@/lib/logger";
 
 type TearSheet = {
   id: string;
@@ -70,22 +71,22 @@ export default function PublicTearSheetPage() {
         previewRef.current,
         `${tearSheet?.title ?? "tear-sheet"}.pdf`,
       );
-    } catch (e) {
-      console.error("PDF export failed:", e);
+    } catch (e: unknown) {
+      logger.error("PDF export failed:", e);
     } finally {
       setExportingPdf(false);
     }
   }
 
   if (loading) {
-    return <div className="text-center text-sm text-white/60">Loading...</div>;
+    return <div className="text-center text-sm text-text-tertiary">Loading...</div>;
   }
 
   if (error || !tearSheet) {
     return (
       <div className="text-center">
         <h1 className="text-lg font-semibold">Not Found</h1>
-        <p className="mt-2 text-sm text-white/60">
+        <p className="mt-2 text-sm text-text-tertiary">
           {error ?? "This tear sheet is not available."}
         </p>
       </div>
@@ -105,7 +106,7 @@ export default function PublicTearSheetPage() {
           type="button"
           onClick={handleExportPdf}
           disabled={exportingPdf}
-          className="rounded-md bg-white px-3 py-1.5 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-50"
+          className="rounded-md bg-btn-primary-bg px-3 py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
         >
           {exportingPdf ? "Generating..." : "Download PDF"}
         </button>

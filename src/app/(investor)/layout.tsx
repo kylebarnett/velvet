@@ -45,7 +45,7 @@ export default async function InvestorLayout({
             children: [
               { href: "/dashboard", label: "Companies", icon: "building2" },
               { href: "/portfolio", label: "Contacts", icon: "users" },
-              { href: "/requests", label: "Requests", icon: "send" },
+              { href: "/campaigns", label: "Campaigns", icon: "send" },
             ],
           },
           { href: "/reports", label: "Reports", icon: "bar-chart-3", divider: true },

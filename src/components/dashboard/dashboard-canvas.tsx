@@ -99,8 +99,8 @@ export function DashboardCanvas({
 
   if (widgets.length === 0) {
     return (
-      <div ref={containerRef} className="min-h-[400px] rounded-xl border-2 border-dashed border-white/10 bg-black/20 flex items-center justify-center">
-        <p className="text-white/40">
+      <div ref={containerRef} className="min-h-[400px] rounded-xl border-2 border-dashed border-border-default bg-bg-input flex items-center justify-center">
+        <p className="text-text-muted">
           Drag widgets from the library or click to add them to your dashboard
         </p>
       </div>
@@ -108,7 +108,7 @@ export function DashboardCanvas({
   }
 
   return (
-    <div ref={containerRef} className="min-h-[400px] rounded-xl border border-white/10 bg-black/20 p-2">
+    <div ref={containerRef} className="min-h-[400px] rounded-xl border border-border-default bg-bg-input p-2">
       <GridLayout
         className="layout"
         layout={layout}
@@ -132,15 +132,15 @@ export function DashboardCanvas({
           <div
             key={widget.id}
             className={`
-              rounded-lg border bg-white/5 overflow-hidden
-              ${selectedWidgetId === widget.id ? "border-blue-500/50 ring-1 ring-blue-500/30" : "border-white/10"}
+              rounded-lg border bg-bg-elevated overflow-hidden
+              ${selectedWidgetId === widget.id ? "border-blue-500/50 ring-1 ring-blue-500/30" : "border-border-default"}
             `}
           >
             {/* Widget header */}
-            <div className="drag-handle flex items-center justify-between border-b border-white/5 bg-black/20 px-2 py-1 cursor-move">
+            <div className="drag-handle flex items-center justify-between border-b border-border-subtle bg-bg-input px-2 py-1 cursor-move">
               <div className="flex items-center gap-1.5">
-                <GripVertical className="h-3.5 w-3.5 text-white/30" />
-                <span className="text-xs text-white/60 truncate max-w-[200px]">
+                <GripVertical className="h-3.5 w-3.5 text-text-faint" />
+                <span className="text-xs text-text-tertiary truncate max-w-[200px]">
                   {isChartConfig(widget.config) && widget.config.title
                     ? widget.config.title
                     : isMetricCardConfig(widget.config) && widget.config.title
@@ -156,7 +156,7 @@ export function DashboardCanvas({
                   e.stopPropagation();
                   onSelectWidget(selectedWidgetId === widget.id ? null : widget.id);
                 }}
-                className="p-1 text-white/40 hover:text-white/60"
+                className="p-1 text-text-muted hover:text-text-tertiary"
               >
                 <Settings className="h-3.5 w-3.5" />
               </button>
@@ -164,7 +164,7 @@ export function DashboardCanvas({
 
             {/* Widget preview */}
             <div className="p-3 flex items-center justify-center h-[calc(100%-28px)]">
-              <span className="text-xs text-white/30 text-center">
+              <span className="text-xs text-text-faint text-center">
                 {getWidgetPreview(widget)}
               </span>
             </div>

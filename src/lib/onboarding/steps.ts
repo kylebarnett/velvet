@@ -55,15 +55,15 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   // Requests
   {
     id: "requests-intro",
-    page: "/requests",
+    page: "/campaigns",
     target: '[data-onboarding="requests-title"]',
-    title: "Metric Requests",
+    title: "Campaigns",
     message:
-      "Create and track metric requests across your portfolio companies.",
+      "Create and track metric collection campaigns across your portfolio.",
   },
   {
     id: "create-request",
-    page: "/requests",
+    page: "/campaigns",
     target: '[data-onboarding="new-request"]',
     title: "Send a Request",
     message:
@@ -72,7 +72,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   },
   {
     id: "templates-tab",
-    page: "/requests",
+    page: "/campaigns",
     target: '[data-onboarding="templates-tab"]',
     title: "Metric Templates",
     message:
@@ -80,7 +80,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   },
   {
     id: "schedules-tab",
-    page: "/requests",
+    page: "/campaigns",
     target: '[data-onboarding="schedules-tab"]',
     title: "Automated Schedules",
     message:

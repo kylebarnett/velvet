@@ -148,7 +148,7 @@ export function FundDetailClient({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">{fund.name}</h1>
-          <p className="mt-0.5 text-sm text-white/60">
+          <p className="mt-0.5 text-sm text-text-tertiary">
             Vintage {fund.vintage_year}
             {fund.fund_size != null && (
               <> &middot; {formatCurrency(fund.fund_size, fund.currency)} fund</>
@@ -157,7 +157,7 @@ export function FundDetailClient({
         </div>
         <button
           onClick={() => setShowEdit(true)}
-          className="flex h-9 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white/70 hover:bg-white/10 hover:text-white"
+          className="flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
         >
           <Pencil className="h-3.5 w-3.5" />
           Edit Fund
@@ -170,23 +170,23 @@ export function FundDetailClient({
       {/* Tab content */}
       <div key={activeTab} className="animate-fade-in">
         {activeTab === "reports" && (
-          <div className="rounded-xl border border-white/10 bg-white/5">
-            <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
-              <h3 className="text-sm font-medium text-white/80">LP Reports</h3>
+          <div className="rounded-xl border border-border-default bg-bg-elevated">
+            <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
+              <h3 className="text-sm font-medium text-text-secondary">LP Reports</h3>
               <button
                 onClick={() => setShowReport(true)}
-                className="flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs text-white/70 hover:bg-white/10 hover:text-white"
+                className="flex h-8 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Generate Report
               </button>
             </div>
             {reports.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-white/40">
+              <div className="px-4 py-8 text-center text-sm text-text-muted">
                 No LP reports yet. Reports can be generated once you have fund investments tracked.
               </div>
             ) : (
-              <div className="divide-y divide-white/[0.04]">
+              <div className="divide-y divide-border-subtle">
                 {reports.map((report) => (
                   <button
                     key={report.id}
@@ -194,12 +194,12 @@ export function FundDetailClient({
                     onClick={() =>
                       router.push(`/lp-reports/${fund.id}/reports/${report.id}`)
                     }
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.03]"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-bg-raised"
                   >
-                    <FileText className="h-4 w-4 shrink-0 text-white/30" />
+                    <FileText className="h-4 w-4 shrink-0 text-text-faint" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium">{report.title}</p>
-                      <div className="flex items-center gap-2 text-xs text-white/40">
+                      <div className="flex items-center gap-2 text-xs text-text-muted">
                         <Calendar className="h-3 w-3" />
                         {new Date(report.report_date).toLocaleDateString("en-US", {
                           month: "short",
@@ -213,13 +213,13 @@ export function FundDetailClient({
                     <span
                       className={
                         report.status === "published"
-                          ? "rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200"
-                          : "rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200"
+                          ? "rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-[var(--status-success-text)]"
+                          : "rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-[var(--status-warning-text)]"
                       }
                     >
                       {report.status}
                     </span>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-white/20" />
+                    <ChevronRight className="h-4 w-4 shrink-0 text-text-faint" />
                   </button>
                 ))}
               </div>
@@ -233,9 +233,9 @@ export function FundDetailClient({
             {loadingPerf ? (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <div className="h-3 w-12 animate-pulse rounded bg-white/10" />
-                    <div className="mt-2 h-7 w-16 animate-pulse rounded bg-white/10" />
+                  <div key={i} className="rounded-xl border border-border-default bg-bg-elevated p-4">
+                    <div className="h-3 w-12 animate-pulse rounded bg-bg-hover" />
+                    <div className="mt-2 h-7 w-16 animate-pulse rounded bg-bg-hover" />
                   </div>
                 ))}
               </div>

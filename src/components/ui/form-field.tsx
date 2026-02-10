@@ -14,7 +14,7 @@ export function FormField({ label, htmlFor, error, children, className }: FormFi
     <div className={cn("space-y-1.5", className)}>
       <label
         htmlFor={htmlFor}
-        className="block text-xs font-medium text-white/60"
+        className="block text-xs font-medium text-text-tertiary"
       >
         {label}
       </label>

@@ -19,7 +19,7 @@ export default async function ReportsPage({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-6">
-      <Suspense fallback={<div className="h-20 animate-pulse rounded-lg bg-white/5" />}>
+      <Suspense fallback={<div className="h-20 animate-pulse rounded-lg bg-bg-elevated" />}>
         <ReportFilters />
       </Suspense>
 
@@ -28,12 +28,12 @@ export default async function ReportsPage({ searchParams }: PageProps) {
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-24 animate-pulse rounded-xl bg-white/5" />
+                <div key={i} className="h-24 animate-pulse rounded-xl bg-bg-elevated" />
               ))}
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {[...Array(2)].map((_, i) => (
-                <div key={i} className="h-48 animate-pulse rounded-xl bg-white/5" />
+                <div key={i} className="h-48 animate-pulse rounded-xl bg-bg-elevated" />
               ))}
             </div>
           </div>

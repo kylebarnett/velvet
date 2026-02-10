@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 const updateSchema = z.object({
   name: z.string().min(1).max(200).optional(),
@@ -86,7 +87,7 @@ export async function PUT(
     .single();
 
   if (error) {
-    console.error("Failed to update fund:", error.message);
+    logger.error("Failed to update fund:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -125,7 +126,7 @@ export async function DELETE(
     .eq("investor_id", user.id);
 
   if (error) {
-    console.error("Failed to delete fund:", error.message);
+    logger.error("Failed to delete fund:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

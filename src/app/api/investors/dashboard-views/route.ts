@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { parsePagination } from "@/lib/api/pagination";
+import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
   companyId: z.string().uuid(),
@@ -54,7 +55,7 @@ export async function GET(req: Request) {
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error("Failed to fetch dashboard views:", error.message);
+    logger.error("Failed to fetch dashboard views:", error.message);
     return jsonError("Failed to fetch views.", 500);
   }
 
@@ -119,7 +120,7 @@ export async function POST(req: Request) {
     if (error.code === "23505") {
       return jsonError("A view with this name already exists.", 409);
     }
-    console.error("Failed to create dashboard view:", error.message);
+    logger.error("Failed to create dashboard view:", error.message);
     return jsonError("Failed to create view.", 500);
   }
 

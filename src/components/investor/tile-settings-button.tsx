@@ -38,7 +38,7 @@ export function TileSettingsButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2 sm:py-1.5 text-xs font-medium text-white/80 hover:border-white/20"
+        className="flex items-center justify-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-2 sm:py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
         title="Configure tile metrics"
       >
         <Sliders className="h-3.5 w-3.5" />

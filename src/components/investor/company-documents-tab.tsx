@@ -358,7 +358,7 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
                   <p className="text-xs text-text-tertiary truncate">{doc.description}</p>
                 )}
               </div>
-              <span className={`hidden sm:inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs ${getDocumentTypeColor(doc.document_type)}`}>
+              <span className={`hidden sm:inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getDocumentTypeColor(doc.document_type)}`}>
                 {TYPE_LABELS[doc.document_type] ?? doc.document_type}
               </span>
               <span className="hidden sm:inline shrink-0 text-xs text-text-tertiary">

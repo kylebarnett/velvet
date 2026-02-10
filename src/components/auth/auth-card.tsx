@@ -127,12 +127,12 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
   }
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 shadow-sm">
+    <div className="mx-auto w-full max-w-md rounded-2xl border border-border-default bg-bg-elevated p-4 sm:p-6 shadow-sm">
       <div className="space-y-2">
         <h1 className="text-lg font-semibold tracking-tight">
           {mode === "login" ? "Welcome back" : "Create your account"}
         </h1>
-        <p className="text-sm text-white/60">
+        <p className="text-sm text-text-tertiary">
           {mode === "login"
             ? "Log in to access your dashboard."
             : inviteToken && companyName
@@ -147,17 +147,17 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
       >
         {mode === "signup" && (
           <div className="grid gap-2">
-            <label className="text-sm text-white/70" htmlFor="fullName">
+            <label className="text-sm text-text-secondary" htmlFor="fullName">
               Full name
             </label>
             <input
               id="fullName"
-              className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none ring-0 placeholder:text-white/30 focus:border-white/20"
+              className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
               placeholder="Jane Doe"
               {...form.register("fullName")}
             />
             {form.formState.errors.fullName?.message && (
-              <p className="text-xs text-red-300">
+              <p className="text-xs text-[var(--status-error-text)]">
                 {String(form.formState.errors.fullName.message)}
               </p>
             )}
@@ -165,13 +165,13 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
         )}
 
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="email">
+          <label className="text-sm text-text-secondary" htmlFor="email">
             Email
           </label>
           <input
             id="email"
-            className={`h-11 rounded-md border border-white/10 px-3 text-sm outline-none ring-0 placeholder:text-white/30 focus:border-white/20 ${
-              inviteEmail ? "bg-black/20 text-white/80 cursor-not-allowed" : "bg-black/30"
+            className={`h-11 rounded-md border border-border-default px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)] ${
+              inviteEmail ? "bg-bg-raised text-text-secondary cursor-not-allowed" : "bg-bg-input"
             }`}
             placeholder="you@company.com"
             type="email"
@@ -180,24 +180,24 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
             {...form.register("email")}
           />
           {inviteEmail && (
-            <p className="text-xs text-white/60">
+            <p className="text-xs text-text-tertiary">
               Email is pre-filled from your invitation link.
             </p>
           )}
           {form.formState.errors.email?.message && (
-            <p className="text-xs text-red-300">
+            <p className="text-xs text-[var(--status-error-text)]">
               {String(form.formState.errors.email.message)}
             </p>
           )}
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="password">
+          <label className="text-sm text-text-secondary" htmlFor="password">
             Password
           </label>
           <input
             id="password"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none ring-0 placeholder:text-white/30 focus:border-white/20"
+            className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
             placeholder="••••••••"
             type="password"
             autoComplete={
@@ -206,7 +206,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
             {...form.register("password")}
           />
           {form.formState.errors.password?.message && (
-            <p className="text-xs text-red-300">
+            <p className="text-xs text-[var(--status-error-text)]">
               {String(form.formState.errors.password.message)}
             </p>
           )}
@@ -215,21 +215,21 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
         {mode === "signup" && inviteToken && companyName && (
           <>
             <div className="grid gap-2">
-              <label className="text-sm text-white/70">
+              <label className="text-sm text-text-secondary">
                 Company
               </label>
-              <div className="flex h-11 items-center rounded-md border border-white/10 bg-black/20 px-3 text-sm text-white/80">
+              <div className="flex h-11 items-center rounded-md border border-border-default bg-bg-raised px-3 text-sm text-text-secondary">
                 {companyName}
               </div>
             </div>
 
             <div className="grid gap-2">
-              <label className="text-sm text-white/70" htmlFor="companyWebsite">
-                Company website <span className="text-white/40">(optional)</span>
+              <label className="text-sm text-text-secondary" htmlFor="companyWebsite">
+                Company website <span className="text-text-muted">(optional)</span>
               </label>
               <input
                 id="companyWebsite"
-                className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none ring-0 placeholder:text-white/30 focus:border-white/20"
+                className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
                 placeholder="acme.com"
                 {...form.register("companyWebsite")}
               />
@@ -239,7 +239,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
 
         {mode === "signup" && !inviteToken && (
           <div className="grid gap-2">
-            <label className="text-sm text-white/70" htmlFor="role">
+            <label className="text-sm text-text-secondary" htmlFor="role">
               I am a
             </label>
             <Controller
@@ -258,7 +258,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
               )}
             />
             {form.formState.errors.role?.message && (
-              <p className="text-xs text-red-300">
+              <p className="text-xs text-[var(--status-error-text)]">
                 {String(form.formState.errors.role.message)}
               </p>
             )}
@@ -268,35 +268,35 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
         {mode === "signup" && !inviteToken && watchedRole === "founder" && (
           <>
             <div className="grid gap-2">
-              <label className="text-sm text-white/70" htmlFor="companyName">
+              <label className="text-sm text-text-secondary" htmlFor="companyName">
                 Company name
               </label>
               <input
                 id="companyName"
-                className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none ring-0 placeholder:text-white/30 focus:border-white/20"
+                className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
                 placeholder="Acme Inc."
                 {...form.register("companyName")}
               />
               {form.formState.errors.companyName?.message && (
-                <p className="text-xs text-red-300">
+                <p className="text-xs text-[var(--status-error-text)]">
                   {String(form.formState.errors.companyName.message)}
                 </p>
               )}
             </div>
 
             <div className="grid gap-2">
-              <label className="text-sm text-white/70" htmlFor="companyWebsite">
+              <label className="text-sm text-text-secondary" htmlFor="companyWebsite">
                 Company website{" "}
-                <span className="text-white/40">(recommended)</span>
+                <span className="text-text-muted">(recommended)</span>
               </label>
               <input
                 id="companyWebsite"
-                className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none ring-0 placeholder:text-white/30 focus:border-white/20"
+                className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
                 placeholder="acme.com"
                 {...form.register("companyWebsite")}
               />
               {form.formState.errors.companyWebsite?.message && (
-                <p className="text-xs text-red-300">
+                <p className="text-xs text-[var(--status-error-text)]">
                   {String(form.formState.errors.companyWebsite.message)}
                 </p>
               )}
@@ -305,13 +305,13 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
         )}
 
         {error && (
-          <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+          <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
             {error}
           </div>
         )}
 
         <button
-          className="inline-flex h-11 w-full items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+          className="inline-flex h-11 w-full items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           disabled={isSubmitting}
           type="submit"
         >
@@ -322,18 +322,18 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
               : "Create account"}
         </button>
 
-        <p className="text-center text-sm text-white/60">
+        <p className="text-center text-sm text-text-tertiary">
           {mode === "login" ? (
             <>
               New here?{" "}
-              <Link className="text-white hover:underline" href="/signup">
+              <Link className="text-text-primary hover:underline" href="/signup">
                 Create an account
               </Link>
             </>
           ) : (
             <>
               Already have an account?{" "}
-              <Link className="text-white hover:underline" href="/login">
+              <Link className="text-text-primary hover:underline" href="/login">
                 Log in
               </Link>
             </>

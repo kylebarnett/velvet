@@ -8,6 +8,7 @@ import {
   calculateNextRunAfterCompletion,
 } from "@/lib/schedules";
 import { escapeHtml } from "@/lib/utils/html";
+import { logger } from "@/lib/logger";
 
 const BATCH_SIZE = 100;
 
@@ -373,19 +374,19 @@ export async function POST(
             emailsSent += batch.length;
           }
         } else if (isDev) {
-          console.log(`[DEV] Email batch send failed: ${res.statusText}`);
+          logger.info(`[DEV] Email batch send failed: ${res.statusText}`);
           emailsSent += batch.length; // Count as sent in dev
         }
-      } catch (err) {
+      } catch (err: unknown) {
         if (isDev) {
-          console.log(`[DEV] Email error: ${err instanceof Error ? err.message : "Unknown"}`);
+          logger.info(`[DEV] Email error: ${err instanceof Error ? err.message : "Unknown"}`);
           emailsSent += batch.length;
         }
       }
     }
   } else if (!apiKey && isDev) {
     emailsSent = founderCompanies.size;
-    console.log(`[DEV] Would send ${emailsSent} notification emails`);
+    logger.info(`[DEV] Would send ${emailsSent} notification emails`);
   }
 
   // Create run record

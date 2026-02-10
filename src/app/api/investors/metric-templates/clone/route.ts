@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 const cloneSchema = z.object({
   sourceTemplateId: z.string().min(1),
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
     .single();
 
   if (createError) {
-    console.error("Failed to clone template:", createError.message);
+    logger.error("Failed to clone template:", createError.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -83,7 +84,7 @@ export async function POST(req: Request) {
     if (itemsError) {
       // Cleanup template on item insert failure
       await supabase.from("metric_templates").delete().eq("id", newTemplate.id);
-      console.error("Failed to clone template items:", itemsError.message);
+      logger.error("Failed to clone template items:", itemsError.message);
       return jsonError("Failed to process request.", 500);
     }
   }

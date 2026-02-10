@@ -25,6 +25,7 @@ import {
 } from "recharts";
 
 import { formatValue, getChartColor } from "@/components/charts/types";
+import { useChartTheme } from "@/hooks/use-chart-theme";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -98,8 +99,10 @@ function ResultBarChart({
   chartData: { label: string; value: number }[];
   metricName?: string;
 }) {
+  const chartTheme = useChartTheme();
+
   return (
-    <div className="mt-3 rounded-lg border border-white/10 bg-black/20 p-2">
+    <div className="mt-3 rounded-lg border border-border-default bg-bg-input p-2">
       <ResponsiveContainer
         width="100%"
         height={Math.max(140, chartData.length * 36)}
@@ -111,12 +114,12 @@ function ResultBarChart({
         >
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.06)"
+            stroke={chartTheme.grid}
             horizontal={false}
           />
           <XAxis
             type="number"
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10 }}
+            tick={{ fill: chartTheme.tick, fontSize: 10 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => formatValue(v, metricName)}
@@ -124,22 +127,22 @@ function ResultBarChart({
           <YAxis
             type="category"
             dataKey="label"
-            tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 11 }}
+            tick={{ fill: chartTheme.secondaryLine, fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             width={80}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "rgba(9, 9, 11, 0.95)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              backgroundColor: chartTheme.tooltipBg,
+              border: `1px solid ${chartTheme.tooltipBorder}`,
               borderRadius: "8px",
               padding: "8px 12px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+              boxShadow: `0 4px 12px ${chartTheme.tooltipShadow}`,
             }}
-            itemStyle={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}
+            itemStyle={{ color: chartTheme.tooltipText, fontSize: 12 }}
             labelStyle={{
-              color: "rgba(255,255,255,0.5)",
+              color: chartTheme.tooltipLabel,
               fontSize: 11,
               marginBottom: 4,
             }}
@@ -168,14 +171,14 @@ function ResultTable({ data }: { data: Record<string, unknown>[] }) {
   const columns = Object.keys(data[0]);
 
   return (
-    <div className="mt-3 overflow-x-auto rounded-lg border border-white/10">
+    <div className="mt-3 overflow-x-auto rounded-lg border border-border-default">
       <table className="w-full text-left text-xs">
         <thead>
-          <tr className="border-b border-white/10 bg-white/[0.03]">
+          <tr className="border-b border-border-default bg-bg-raised">
             {columns.map((col) => (
               <th
                 key={col}
-                className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-white/50"
+                className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-muted"
               >
                 {col}
               </th>
@@ -186,10 +189,10 @@ function ResultTable({ data }: { data: Record<string, unknown>[] }) {
           {data.map((row, i) => (
             <tr
               key={i}
-              className="border-b border-white/[0.06] last:border-b-0"
+              className="border-b border-border-subtle last:border-b-0"
             >
               {columns.map((col) => (
-                <td key={col} className="px-2 py-1.5 text-white/80">
+                <td key={col} className="px-2 py-1.5 text-text-primary">
                   {row[col] == null ? "-" : String(row[col])}
                 </td>
               ))}
@@ -211,7 +214,7 @@ function LoadingDots() {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-white/40"
+          className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-text-muted"
           style={{ animationDelay: `${i * 150}ms` }}
         />
       ))}
@@ -331,7 +334,7 @@ export function ChatbotWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-5 right-5 z-[45] flex h-12 w-12 items-center justify-center rounded-full bg-white text-zinc-950 shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
+          className="fixed bottom-5 right-5 z-[45] flex h-12 w-12 items-center justify-center rounded-full bg-btn-primary-bg text-btn-primary-text shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
           aria-label="Open Ask AI chat"
           type="button"
         >
@@ -342,7 +345,7 @@ export function ChatbotWidget() {
       {/* Mobile backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-[49] bg-black/40 backdrop-blur-sm sm:hidden"
+          className="fixed inset-0 z-[49] bg-bg-sidebar backdrop-blur-sm sm:hidden"
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
         />
@@ -351,12 +354,12 @@ export function ChatbotWidget() {
       {/* Chat panel */}
       {isOpen && (
         <div
-          className="fixed bottom-0 right-0 z-[50] flex h-[600px] w-full flex-col rounded-t-2xl border border-white/10 bg-zinc-950 shadow-2xl sm:bottom-5 sm:right-5 sm:max-h-[70vh] sm:w-[420px] sm:rounded-2xl"
+          className="fixed bottom-0 right-0 z-[50] flex h-[600px] w-full flex-col rounded-t-2xl border border-border-default bg-bg-primary shadow-2xl sm:bottom-5 sm:right-5 sm:max-h-[70vh] sm:w-[420px] sm:rounded-2xl"
           role="dialog"
           aria-label="Ask AI chat"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+          <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
             <div className="flex items-center gap-2">
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-500/20">
                 <Sparkles className="h-3.5 w-3.5 text-violet-400" />
@@ -365,7 +368,7 @@ export function ChatbotWidget() {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-white/50 transition-colors hover:bg-white/10 hover:text-white/80"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-hover hover:text-text-secondary"
               aria-label="Close chat"
               type="button"
             >
@@ -385,7 +388,7 @@ export function ChatbotWidget() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10">
                     <Sparkles className="h-5 w-5 text-violet-400/70" />
                   </div>
-                  <p className="mt-3 text-sm text-white/50">
+                  <p className="mt-3 text-sm text-text-muted">
                     Ask about your portfolio
                   </p>
                 </div>
@@ -398,10 +401,10 @@ export function ChatbotWidget() {
                       <button
                         key={suggestion.text}
                         onClick={() => handleSuggestionClick(suggestion.text)}
-                        className="flex w-full items-start gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-left text-xs text-white/70 transition-colors hover:border-white/10 hover:bg-white/5 hover:text-white/90"
+                        className="flex w-full items-start gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-2 text-left text-xs text-text-secondary transition-colors hover:border-border-default hover:bg-bg-elevated hover:text-text-primary"
                         type="button"
                       >
-                        <Icon className="mt-0.5 h-3 w-3 shrink-0 text-white/30" />
+                        <Icon className="mt-0.5 h-3 w-3 shrink-0 text-text-faint" />
                         <span>{suggestion.text}</span>
                       </button>
                     );
@@ -411,7 +414,7 @@ export function ChatbotWidget() {
                 {/* Recent queries */}
                 {recentQueries.length > 0 && (
                   <div>
-                    <h3 className="mb-2 text-[10px] font-medium uppercase tracking-wider text-white/30">
+                    <h3 className="mb-2 text-[10px] font-medium uppercase tracking-wider text-text-faint">
                       Recent
                     </h3>
                     <div className="space-y-1">
@@ -419,10 +422,10 @@ export function ChatbotWidget() {
                         <button
                           key={`${q}-${i}`}
                           onClick={() => handleSuggestionClick(q)}
-                          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-white/50 transition-colors hover:bg-white/5 hover:text-white/70"
+                          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-secondary"
                           type="button"
                         >
-                          <Clock className="h-3 w-3 shrink-0 text-white/20" />
+                          <Clock className="h-3 w-3 shrink-0 text-text-faint" />
                           <span className="truncate">{q}</span>
                         </button>
                       ))}
@@ -439,7 +442,7 @@ export function ChatbotWidget() {
                   <div key={entry.id} className="space-y-2">
                     {/* User message */}
                     <div className="flex justify-end">
-                      <div className="max-w-[85%] rounded-xl bg-white/10 px-3 py-2 text-xs">
+                      <div className="max-w-[85%] rounded-xl bg-bg-hover px-3 py-2 text-xs">
                         {entry.query}
                       </div>
                     </div>
@@ -450,7 +453,7 @@ export function ChatbotWidget() {
                         <Sparkles className="h-3 w-3 text-violet-400" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="rounded-xl bg-white/5 px-3 py-2 text-xs leading-relaxed text-white/90">
+                        <div className="rounded-xl bg-bg-elevated px-3 py-2 text-xs leading-relaxed text-text-primary">
                           {entry.answer.split("\n").map((line, i) => (
                             <React.Fragment key={i}>
                               {line}
@@ -486,7 +489,7 @@ export function ChatbotWidget() {
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-violet-500/20">
                   <Sparkles className="h-3 w-3 text-violet-400" />
                 </div>
-                <div className="rounded-xl bg-white/5 px-3 py-2">
+                <div className="rounded-xl bg-bg-elevated px-3 py-2">
                   <LoadingDots />
                 </div>
               </div>
@@ -498,7 +501,7 @@ export function ChatbotWidget() {
             <div className="mx-4 mb-2">
               <div
                 role="alert"
-                className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-200"
+                className="flex items-start gap-2 rounded-lg border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-xs text-[var(--status-error-text)]"
               >
                 <AlertCircle className="mt-0.5 h-3 w-3 shrink-0" />
                 <span>{error}</span>
@@ -507,7 +510,7 @@ export function ChatbotWidget() {
           )}
 
           {/* Input bar */}
-          <div className="border-t border-white/10 bg-zinc-900 px-3 py-3 sm:rounded-b-2xl">
+          <div className="border-t border-border-default bg-bg-secondary px-3 py-3 sm:rounded-b-2xl">
             <div className="relative">
               <input
                 ref={inputRef}
@@ -516,13 +519,13 @@ export function ChatbotWidget() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about your portfolio..."
-                className="h-10 w-full rounded-lg border border-white/10 bg-white/5 pl-3 pr-10 text-xs text-zinc-50 placeholder:text-white/30 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                className="h-10 w-full rounded-lg border border-border-default bg-bg-elevated pl-3 pr-10 text-xs text-text-primary placeholder:text-text-faint focus:border-border-default focus:outline-none focus:ring-1 focus:ring-ring-focus"
                 disabled={state === "loading"}
               />
               <button
                 onClick={() => handleSubmit()}
                 disabled={!input.trim() || state === "loading"}
-                className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md bg-white text-black transition-colors hover:bg-white/90 disabled:opacity-40 disabled:hover:bg-white"
+                className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md bg-btn-primary-bg text-btn-primary-text transition-colors hover:bg-btn-primary-hover disabled:opacity-40 disabled:hover:bg-btn-primary-bg"
                 type="button"
                 aria-label="Send query"
               >

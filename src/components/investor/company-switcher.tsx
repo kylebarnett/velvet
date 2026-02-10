@@ -101,26 +101,26 @@ export function CompanySwitcher({ currentCompanyId, currentCompanyName, companie
       {/* Trigger button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left transition-colors hover:border-white/20 hover:bg-white/10"
+        className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-elevated px-3 py-2 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
       >
-        <span className="text-lg font-semibold text-white">{currentCompanyName}</span>
-        <ChevronDown className={`h-4 w-4 text-white/60 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <span className="text-lg font-semibold text-text-primary">{currentCompanyName}</span>
+        <ChevronDown className={`h-4 w-4 text-text-tertiary transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-white/10 bg-zinc-900/95 shadow-2xl backdrop-blur-sm">
+        <div className="absolute left-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border-default bg-bg-secondary/95 shadow-2xl backdrop-blur-sm">
           {/* Search input */}
-          <div className="border-b border-white/10 p-3">
+          <div className="border-b border-border-default p-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
               <input
                 ref={inputRef}
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search companies..."
-                className="h-10 w-full rounded-lg border border-white/10 bg-black/30 pl-10 pr-3 text-sm placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+                className="h-10 w-full rounded-lg border border-border-default bg-bg-input pl-10 pr-3 text-sm placeholder:text-text-faint focus:border-border-default focus:outline-none"
               />
             </div>
           </div>
@@ -129,8 +129,8 @@ export function CompanySwitcher({ currentCompanyId, currentCompanyName, companie
           <div className="max-h-72 overflow-y-auto">
             {filteredCompanies.length === 0 ? (
               <div className="flex flex-col items-center py-8 text-center">
-                <Building2 className="mb-2 h-8 w-8 text-white/20" />
-                <p className="text-sm text-white/60">No companies found</p>
+                <Building2 className="mb-2 h-8 w-8 text-text-faint" />
+                <p className="text-sm text-text-tertiary">No companies found</p>
               </div>
             ) : (
               <div className="py-1">
@@ -174,12 +174,12 @@ function CompanyOption({
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-white/5 ${
-        isSelected ? "bg-white/5" : ""
+      className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-bg-elevated ${
+        isSelected ? "bg-bg-elevated" : ""
       }`}
     >
       {/* Logo */}
-      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5">
+      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-default bg-bg-elevated">
         {displayUrl && !imgError ? (
           <img
             src={displayUrl}
@@ -188,24 +188,24 @@ function CompanyOption({
             onError={() => setImgError(true)}
           />
         ) : (
-          <span className="text-sm font-medium text-white/60">{initial}</span>
+          <span className="text-sm font-medium text-text-tertiary">{initial}</span>
         )}
       </div>
 
       {/* Info */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className={`truncate font-medium ${isSelected ? "text-white" : "text-white/80"}`}>
+          <span className={`truncate font-medium ${isSelected ? "text-text-primary" : "text-text-primary"}`}>
             {company.name}
           </span>
           {isSelected && (
-            <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-medium text-white/60">
+            <span className="rounded bg-bg-hover px-1.5 py-0.5 text-[10px] font-medium text-text-tertiary">
               Current
             </span>
           )}
         </div>
         {(industryLabel || stageLabel) && (
-          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-white/60">
+          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-text-tertiary">
             {industryLabel && <span>{industryLabel}</span>}
             {industryLabel && stageLabel && <span>·</span>}
             {stageLabel && <span>{stageLabel}</span>}

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Download } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 export function DownloadCsvButton() {
   const [downloading, setDownloading] = React.useState(false);
@@ -23,8 +24,8 @@ export function DownloadCsvButton() {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Download failed:", err);
+    } catch (err: unknown) {
+      logger.error("Download failed:", err);
     } finally {
       setDownloading(false);
     }
@@ -34,7 +35,7 @@ export function DownloadCsvButton() {
     <button
       onClick={handleDownload}
       disabled={downloading}
-      className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/70 hover:bg-white/10 hover:text-white disabled:opacity-60"
+      className="inline-flex items-center gap-2 rounded-md border border-border-default bg-bg-elevated px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary disabled:opacity-60"
       type="button"
     >
       <Download className="h-4 w-4" />

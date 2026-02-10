@@ -90,17 +90,17 @@ export function MetricRequestForm() {
   const FieldError = ({ name }: { name: keyof FormValues }) => {
     const message = form.formState.errors[name]?.message;
     if (!message) return null;
-    return <p className="text-xs text-red-300">{String(message)}</p>;
+    return <p className="text-xs text-[var(--status-error-text)]">{String(message)}</p>;
   };
 
   return (
     <form
-      className="max-w-2xl rounded-xl border border-white/10 bg-white/5 p-5"
+      className="max-w-2xl rounded-xl border border-border-default bg-bg-elevated p-5"
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <div className="grid gap-4 md:grid-cols-2">
         <div className="grid gap-2">
-          <label className="text-sm text-white/70">
+          <label className="text-sm text-text-secondary">
             Portfolio company
           </label>
           <Controller
@@ -125,12 +125,12 @@ export function MetricRequestForm() {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="metricName">
+          <label className="text-sm text-text-secondary" htmlFor="metricName">
             Metric name
           </label>
           <input
             id="metricName"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+            className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
             placeholder="Monthly Recurring Revenue"
             {...form.register("metricName")}
           />
@@ -138,7 +138,7 @@ export function MetricRequestForm() {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm text-white/70">
+          <label className="text-sm text-text-secondary">
             Period type
           </label>
           <Controller
@@ -161,39 +161,39 @@ export function MetricRequestForm() {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="dueDate">
+          <label className="text-sm text-text-secondary" htmlFor="dueDate">
             Due date
           </label>
           <input
             id="dueDate"
             type="date"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+            className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none focus:border-border-default"
             {...form.register("dueDate")}
           />
           <FieldError name="dueDate" />
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="periodStart">
+          <label className="text-sm text-text-secondary" htmlFor="periodStart">
             Period start
           </label>
           <input
             id="periodStart"
             type="date"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+            className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none focus:border-border-default"
             {...form.register("periodStart")}
           />
           <FieldError name="periodStart" />
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="periodEnd">
+          <label className="text-sm text-text-secondary" htmlFor="periodEnd">
             Period end
           </label>
           <input
             id="periodEnd"
             type="date"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+            className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none focus:border-border-default"
             {...form.register("periodEnd")}
           />
           <FieldError name="periodEnd" />
@@ -201,19 +201,19 @@ export function MetricRequestForm() {
       </div>
 
       {error && (
-        <div className="mt-4 rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="mt-4 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
       {success && (
-        <div className="mt-4 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100">
+        <div className="mt-4 rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2 text-sm text-[var(--status-success-text)]">
           {success}
         </div>
       )}
 
       <div className="mt-4 flex items-center justify-end">
         <button
-          className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+          className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           disabled={form.formState.isSubmitting}
           type="submit"
         >

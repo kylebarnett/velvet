@@ -32,7 +32,7 @@ export default async function CompanyDashboardPage({
 
   if (!relationship) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+      <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]">
         Company not in your portfolio.
       </div>
     );
@@ -47,7 +47,7 @@ export default async function CompanyDashboardPage({
 
   if (!company) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+      <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]">
         Company not found.
       </div>
     );
@@ -123,7 +123,7 @@ export default async function CompanyDashboardPage({
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="flex items-center gap-1 text-xs text-white/40 hover:text-white"
+              className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">All Companies</span>
@@ -137,11 +137,11 @@ export default async function CompanyDashboardPage({
               companies={portfolioCompanies}
             />
             {company.founder_id ? (
-              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
+              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-[var(--status-success-text)]">
                 Founder joined
               </span>
             ) : (
-              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200">
+              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-[var(--status-warning-text)]">
                 Pending signup
               </span>
             )}
@@ -164,7 +164,7 @@ export default async function CompanyDashboardPage({
       </div>
 
       {!isApproved && (
-        <div className="rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
+        <div className="rounded-md border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] px-3 py-2 text-sm text-[var(--status-warning-text)]">
           Your access is {relationship.approval_status}. The founder needs to approve your access before you can see metric data.
         </div>
       )}
@@ -181,8 +181,8 @@ export default async function CompanyDashboardPage({
       )}
 
       {!isApproved && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-white/60">Metrics will appear here once your access is approved.</p>
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <p className="text-text-tertiary">Metrics will appear here once your access is approved.</p>
         </div>
       )}
     </div>

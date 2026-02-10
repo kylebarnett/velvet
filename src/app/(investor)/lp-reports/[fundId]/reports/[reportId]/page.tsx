@@ -1,9 +1,51 @@
 import Link from "next/link";
+import nextDynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ReportEditor } from "@/components/lp/report-editor";
+
+const ReportEditor = nextDynamic(
+  () =>
+    import("@/components/lp/report-editor").then((mod) => ({
+      default: mod.ReportEditor,
+    })),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="h-7 w-48 animate-pulse rounded bg-bg-elevated" />
+            <div className="mt-1 h-3 w-24 animate-pulse rounded bg-bg-elevated" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-9 w-20 animate-pulse rounded-md bg-bg-elevated" />
+            <div className="h-9 w-16 animate-pulse rounded-md bg-bg-elevated" />
+            <div className="h-9 w-20 animate-pulse rounded-md bg-bg-elevated" />
+          </div>
+        </div>
+        {/* Two-column skeleton */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="space-y-4">
+            <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+              <div className="h-3 w-24 animate-pulse rounded bg-bg-hover" />
+              <div className="mt-4 h-11 w-full animate-pulse rounded-md bg-bg-elevated" />
+            </div>
+            <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+              <div className="h-3 w-32 animate-pulse rounded bg-bg-hover" />
+              <div className="mt-3 h-24 w-full animate-pulse rounded-md bg-bg-elevated" />
+            </div>
+          </div>
+          <div className="rounded-xl border border-border-default bg-bg-elevated p-6">
+            <div className="h-3 w-20 animate-pulse rounded bg-bg-hover" />
+            <div className="mt-2 h-6 w-48 animate-pulse rounded bg-bg-elevated" />
+          </div>
+        </div>
+      </div>
+    ),
+  }
+);
 
 export const dynamic = "force-dynamic";
 
@@ -29,12 +71,12 @@ export default async function ReportEditorPage({
       <div className="space-y-4">
         <Link
           href="/lp-reports"
-          className="flex items-center gap-1 text-xs text-white/40 hover:text-white"
+          className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to Funds
         </Link>
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+        <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]">
           Fund not found.
         </div>
       </div>
@@ -54,12 +96,12 @@ export default async function ReportEditorPage({
       <div className="space-y-4">
         <Link
           href={`/lp-reports/${fundId}?tab=reports`}
-          className="flex items-center gap-1 text-xs text-white/40 hover:text-white"
+          className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to Fund
         </Link>
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+        <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]">
           Report not found.
         </div>
       </div>

@@ -45,7 +45,7 @@ const TrendIcon = ({ trend }: { trend: "up" | "down" | "flat" }) => {
     return <TrendingUp className="h-4 w-4 text-emerald-400 print:text-emerald-600" />;
   if (trend === "down")
     return <TrendingDown className="h-4 w-4 text-red-400 print:text-red-600" />;
-  return <Minus className="h-4 w-4 text-white/40 print:text-gray-400" />;
+  return <Minus className="h-4 w-4 text-text-muted print:text-gray-400" />;
 };
 
 function Section({
@@ -57,10 +57,10 @@ function Section({
 }) {
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold uppercase tracking-wider text-white/60 print:text-gray-500">
+      <h3 className="text-sm font-semibold uppercase tracking-wider text-text-tertiary print:text-gray-500">
         {title}
       </h3>
-      <div className="text-sm leading-relaxed text-white/80 print:text-gray-700">
+      <div className="text-sm leading-relaxed text-text-primary print:text-gray-700">
         {children}
       </div>
     </div>
@@ -120,24 +120,24 @@ export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) 
         }}
       />
 
-      <div className="tear-sheet-preview mx-auto max-w-2xl rounded-xl border border-white/10 bg-white/5 p-6 print:border-none print:bg-white print:p-0 sm:p-8">
+      <div className="tear-sheet-preview mx-auto max-w-2xl rounded-xl border border-border-default bg-bg-elevated p-6 print:border-none print:bg-white print:p-0 sm:p-8">
         {/* Header */}
-        <div className="border-b border-white/10 pb-5 print:border-gray-200">
+        <div className="border-b border-border-default pb-5 print:border-gray-200">
           {tearSheet.companyName && (
-            <div className="text-xs font-medium uppercase tracking-wider text-white/40 print:text-gray-400">
+            <div className="text-xs font-medium uppercase tracking-wider text-text-muted print:text-gray-400">
               {tearSheet.companyName}
             </div>
           )}
           <h1 className="mt-1 text-xl font-semibold tracking-tight print:text-gray-900">
             {tearSheet.title}
           </h1>
-          <div className="mt-1 text-sm text-white/60 print:text-gray-500">
+          <div className="mt-1 text-sm text-text-tertiary print:text-gray-500">
             {tearSheet.quarter} {tearSheet.year}
           </div>
         </div>
 
         {!hasContent && (
-          <div className="py-12 text-center text-sm text-white/40">
+          <div className="py-12 text-center text-sm text-text-muted">
             No content yet. Start editing to build your tear sheet.
           </div>
         )}
@@ -146,17 +146,17 @@ export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) 
           {/* Key Metrics */}
           {filteredMetrics.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-white/60 print:text-gray-500">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-text-tertiary print:text-gray-500">
                 Key Metrics
               </h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredMetrics.map((metric) => (
                   <div
                     key={metric.metricName}
-                    className="rounded-lg border border-white/10 bg-black/20 p-3 print:border-gray-200 print:bg-gray-50"
+                    className="rounded-lg border border-border-default bg-bg-input p-3 print:border-gray-200 print:bg-gray-50"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-white/60 print:text-gray-500">
+                      <span className="text-xs font-medium text-text-tertiary print:text-gray-500">
                         {metric.metricName}
                       </span>
                       <TrendIcon trend={metric.trend} />
@@ -165,7 +165,7 @@ export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) 
                       {formatMetricValue(metric.currentValue, metric.metricName)}
                     </div>
                     {metric.previousValue && (
-                      <div className="mt-0.5 text-xs text-white/40 print:text-gray-400">
+                      <div className="mt-0.5 text-xs text-text-muted print:text-gray-400">
                         prev: {formatMetricValue(metric.previousValue, metric.metricName)}
                       </div>
                     )}
@@ -190,7 +190,7 @@ export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) 
                   <li key={i}>
                     <span className="font-medium">{m.title}</span>
                     {m.description && (
-                      <div className="mt-0.5 text-white/60 print:text-gray-500">
+                      <div className="mt-0.5 text-text-tertiary print:text-gray-500">
                         <RichTextDisplay html={m.description} />
                       </div>
                     )}

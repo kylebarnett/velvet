@@ -8,6 +8,7 @@ import {
   isValidYear,
   type PeriodInput,
 } from "@/lib/utils/period";
+import { logger } from "@/lib/logger";
 
 const schema = z
   .object({
@@ -84,7 +85,7 @@ export async function POST(req: Request) {
     .single();
 
   if (defError) {
-    console.error("Failed to create metric definition:", defError.message);
+    logger.error("Failed to create metric definition:", defError.message);
     return jsonError("Failed to process request.", 400);
   }
 
@@ -103,7 +104,7 @@ export async function POST(req: Request) {
     .single();
 
   if (reqError) {
-    console.error("Failed to create metric request:", reqError.message);
+    logger.error("Failed to create metric request:", reqError.message);
     return jsonError("Failed to process request.", 400);
   }
 

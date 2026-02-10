@@ -57,15 +57,15 @@ export function DistributionCharts({
 
   if (!hasData) {
     return (
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent p-8 text-center">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/[0.03] via-transparent to-transparent" />
+      <div className="relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent p-8 text-center">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-bg-raised via-transparent to-transparent" />
         <div className="relative">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.05] ring-1 ring-white/[0.08]">
-            <svg className="h-6 w-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated ring-1 ring-border-subtle">
+            <svg className="h-6 w-6 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
             </svg>
           </div>
-          <p className="text-white/60">No distribution data available</p>
+          <p className="text-text-tertiary">No distribution data available</p>
         </div>
       </div>
     );
@@ -83,7 +83,7 @@ export function DistributionCharts({
         return (
           <div
             key={config.key}
-            className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent transition-all duration-300 hover:border-white/[0.12]"
+            className="group relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent transition-all duration-300 hover:border-border-default"
           >
             {/* Gradient overlay */}
             <div className={`absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] ${config.gradient}`} />
@@ -95,8 +95,8 @@ export function DistributionCharts({
                   {config.icon}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">{config.title}</h3>
-                  <p className="text-xs text-white/40">{config.subtitle}</p>
+                  <h3 className="font-semibold text-text-primary">{config.title}</h3>
+                  <p className="text-xs text-text-muted">{config.subtitle}</p>
                 </div>
               </div>
 
@@ -113,17 +113,17 @@ export function DistributionCharts({
               <div className="mt-4 space-y-1.5">
                 {data.slice(0, 4).map((item) => (
                   <div key={item.key} className="flex items-center justify-between text-sm">
-                    <span className="text-white/60">{item.name}</span>
+                    <span className="text-text-tertiary">{item.name}</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium tabular-nums text-white">{item.value}</span>
-                      <span className="text-xs text-white/30">
+                      <span className="font-medium tabular-nums text-text-primary">{item.value}</span>
+                      <span className="text-xs text-text-faint">
                         ({Math.round((item.value / total) * 100)}%)
                       </span>
                     </div>
                   </div>
                 ))}
                 {data.length > 4 && (
-                  <div className="pt-1 text-xs text-white/30">
+                  <div className="pt-1 text-xs text-text-faint">
                     +{data.length - 4} more
                   </div>
                 )}

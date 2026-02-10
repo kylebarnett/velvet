@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 // GET - List all schedules for investor
 export async function GET() {
@@ -46,7 +47,7 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Failed to fetch schedules:", error.message);
+    logger.error("Failed to fetch schedules:", error.message);
     return jsonError("Failed to fetch schedules.", 500);
   }
 
@@ -181,7 +182,7 @@ export async function POST(req: Request) {
     .single();
 
   if (createError) {
-    console.error("Failed to create schedule:", createError.message);
+    logger.error("Failed to create schedule:", createError.message);
     return jsonError("Failed to create schedule.", 500);
   }
 

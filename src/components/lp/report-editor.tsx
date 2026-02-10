@@ -446,7 +446,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   }, [companyMetricsCache, fetchingMetrics, metricPageIds, metricQuarters, metricOrder]);
 
   // Build content payload (shared by save + publish)
-  function buildContentPayload(): Record<string, unknown> {
+  const buildContentPayload = useCallback((): Record<string, unknown> => {
     return {
       quarterlySummary,
       selectedInvestmentIds: [...selectedIds],
@@ -484,7 +484,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
       metricOrder,
       generatedAt: new Date().toISOString(),
     };
-  }
+  }, [quarterlySummary, selectedIds, themeId, performance, selectedInvestments, metricPageIds, companyMetricsCache, metricQuarters, metricOrder]);
 
   // Reset initial ref after successful save/publish/unpublish
   function resetInitialRef() {
@@ -635,13 +635,17 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   }
 
   // Preview data for ReportPreview
-  const previewInvestments = selectedInvestments.map((inv) => ({
-    id: inv.company_id,
-    company: inv.company_name,
-    invested: inv.invested_amount,
-    current: inv.current_value,
-    realized: inv.realized_value,
-  }));
+  const previewInvestments = useMemo(
+    () =>
+      selectedInvestments.map((inv) => ({
+        id: inv.company_id,
+        company: inv.company_name,
+        invested: inv.invested_amount,
+        current: inv.current_value,
+        realized: inv.realized_value,
+      })),
+    [selectedInvestments],
+  );
 
   // Build company metrics map for preview (filtered by selected quarters, with order)
   const previewCompanyMetrics = useMemo(() => {
@@ -674,6 +678,9 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
 
     return Object.keys(result).length > 0 ? result : undefined;
   }, [selectedInvestments, metricPageIds, companyMetricsCache, metricQuarters, metricOrder]);
+
+  // Memoize theme colors to avoid new object reference on each render
+  const themeColors = useMemo(() => getReportTheme(themeId).colors, [themeId]);
 
   return (
     <div className="space-y-4">
@@ -992,7 +999,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
               performance={performance}
               investments={previewInvestments}
               quarterlySummary={quarterlySummary}
-              theme={getReportTheme(themeId).colors}
+              theme={themeColors}
               companyMetrics={previewCompanyMetrics}
             />
           </ScaledPreview>
@@ -1067,7 +1074,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
                 performance={performance}
                 investments={previewInvestments}
                 quarterlySummary={quarterlySummary}
-                theme={getReportTheme(themeId).colors}
+                theme={themeColors}
                 companyMetrics={previewCompanyMetrics}
               />
             </div>

@@ -103,7 +103,7 @@ export function InlineWebsite({ companyId, website: initialWebsite }: Props) {
             }, 150);
           }}
           placeholder="example.com"
-          className="h-7 w-48 rounded-md border border-white/20 bg-black/30 px-2 text-sm text-white placeholder:text-white/30 focus:border-white/30 focus:outline-none"
+          className="h-7 w-48 rounded-md border border-border-default bg-bg-input px-2 text-sm text-text-primary placeholder:text-text-faint focus:border-border-default focus:outline-none"
         />
         <button
           onMouseDown={(e) => e.preventDefault()}
@@ -115,7 +115,7 @@ export function InlineWebsite({ companyId, website: initialWebsite }: Props) {
         <button
           onMouseDown={(e) => e.preventDefault()}
           onClick={handleCancel}
-          className="flex h-7 w-7 items-center justify-center rounded-md bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70"
+          className="flex h-7 w-7 items-center justify-center rounded-md bg-bg-elevated text-text-muted hover:bg-bg-hover hover:text-text-secondary"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -130,7 +130,7 @@ export function InlineWebsite({ companyId, website: initialWebsite }: Props) {
           href={getFullUrl(website)}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-sm text-white/50 hover:text-white hover:underline"
+          className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary hover:underline"
         >
           {getDisplayUrl(website)}
           <ExternalLink className="h-3 w-3" />
@@ -138,7 +138,7 @@ export function InlineWebsite({ companyId, website: initialWebsite }: Props) {
         <button
           onClick={handleStartEdit}
           disabled={saving}
-          className="text-xs text-white/30 hover:text-white/60"
+          className="text-xs text-text-faint hover:text-text-tertiary"
         >
           edit
         </button>
@@ -150,7 +150,7 @@ export function InlineWebsite({ companyId, website: initialWebsite }: Props) {
     <button
       onClick={handleStartEdit}
       disabled={saving}
-      className="flex items-center gap-1 text-sm text-white/40 hover:text-white/60"
+      className="flex items-center gap-1 text-sm text-text-muted hover:text-text-tertiary"
     >
       <Plus className="h-3.5 w-3.5" />
       Add website

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 /** Metadata keys differ by role so they don't collide. */
 function metaKeys(role: string) {
@@ -61,7 +62,7 @@ export async function PUT(req: Request) {
   });
 
   if (error) {
-    console.error("Failed to update onboarding:", error);
+    logger.error("Failed to update onboarding:", error);
     return jsonError("Failed to update onboarding state.", 500);
   }
 

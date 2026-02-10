@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Rect = {
   x: number;
@@ -274,7 +275,7 @@ export function OnboardingTooltip({
   return (
     <div
       ref={tooltipRef}
-      className="pointer-events-auto fixed z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-zinc-800 p-4 shadow-xl"
+      className="pointer-events-auto fixed z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-border-default bg-bg-secondary p-4 shadow-xl"
       style={tooltipStyle}
     >
       {/* Arrow */}
@@ -283,7 +284,7 @@ export function OnboardingTooltip({
       {/* Close button */}
       <button
         onClick={onSkip}
-        className="absolute right-2 top-2 rounded-md p-1 text-white/40 hover:bg-white/10 hover:text-white/60"
+        className="absolute right-2 top-2 rounded-md p-1 text-text-muted hover:bg-bg-hover hover:text-text-tertiary"
         type="button"
         aria-label="Skip tour"
       >
@@ -292,30 +293,29 @@ export function OnboardingTooltip({
 
       {/* Content */}
       <div className="pr-6">
-        <h3 className="text-sm font-semibold text-white">{title}</h3>
-        <p className="mt-1.5 text-sm text-white/70">{message}</p>
+        <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
+        <p className="mt-1.5 text-sm text-text-secondary">{message}</p>
       </div>
 
       {/* Footer */}
       <div className="mt-4 flex items-center justify-between gap-2">
-        <div className="shrink-0 text-xs text-white/40">
+        <div className="shrink-0 text-xs text-text-muted">
           {currentStep + 1}/{totalSteps}
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={onSkip}
-            className="shrink-0 text-xs text-white/50 hover:text-white/70"
+            className="shrink-0 text-xs text-text-muted hover:text-text-secondary"
             type="button"
           >
             Skip
           </button>
-          <button
+          <Button
+            size="sm"
             onClick={onNext}
-            className="shrink-0 rounded-md bg-white px-3 py-1.5 text-xs font-medium text-black hover:bg-white/90"
-            type="button"
           >
             {isLastStep ? "Finish" : "Next"}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -325,7 +325,7 @@ export function OnboardingTooltip({
           <div
             key={i}
             className={`h-1.5 w-1.5 rounded-full transition-colors ${
-              i === currentStep ? "bg-white" : "bg-white/20"
+              i === currentStep ? "bg-text-primary" : "bg-bg-hover"
             }`}
           />
         ))}

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 // GET - Get a single template with items (system or owned by user)
 export async function GET(
@@ -116,7 +117,7 @@ export async function PUT(
     .eq("id", id);
 
   if (updateError) {
-    console.error("Failed to update template:", updateError.message);
+    logger.error("Failed to update template:", updateError.message);
     return jsonError("Failed to update template.", 500);
   }
 
@@ -127,7 +128,7 @@ export async function PUT(
     .eq("template_id", id);
 
   if (deleteError) {
-    console.error("Failed to delete template items:", deleteError.message);
+    logger.error("Failed to delete template items:", deleteError.message);
     return jsonError("Failed to update template.", 500);
   }
 
@@ -146,7 +147,7 @@ export async function PUT(
     .select();
 
   if (itemsError) {
-    console.error("Failed to insert template items:", itemsError.message);
+    logger.error("Failed to insert template items:", itemsError.message);
     return jsonError("Failed to update template.", 500);
   }
 
@@ -183,7 +184,7 @@ export async function DELETE(
     .eq("investor_id", user.id);
 
   if (error) {
-    console.error("Failed to delete template:", error.message);
+    logger.error("Failed to delete template:", error.message);
     return jsonError("Failed to delete template.", 500);
   }
 

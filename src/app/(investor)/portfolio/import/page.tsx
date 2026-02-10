@@ -28,7 +28,7 @@ export default async function ImportPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Import Portfolio Contacts</h1>
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-text-tertiary">
             Upload a CSV file with your portfolio company contacts.
           </p>
         </div>
@@ -36,7 +36,7 @@ export default async function ImportPage() {
           {hasExistingContacts && <DownloadCsvButton />}
           <Link
             href="/portfolio"
-            className="text-sm text-white/60 hover:text-white"
+            className="text-sm text-text-tertiary hover:text-text-primary"
           >
             Back to Portfolio
           </Link>
@@ -46,45 +46,45 @@ export default async function ImportPage() {
       <CsvImportForm />
 
       {/* CSV Format Help */}
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-6">
         <h3 className="text-sm font-medium">CSV Format</h3>
-        <p className="mt-2 text-sm text-white/60">
+        <p className="mt-2 text-sm text-text-tertiary">
           Your CSV file should include the following columns. Column names are flexible
           (e.g., &quot;Company Name&quot;, &quot;company_name&quot;, or &quot;companyName&quot; all work).
         </p>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-left">
-                <th className="pb-2 pr-6 font-medium text-white/70">Column</th>
-                <th className="pb-2 pr-6 font-medium text-white/70">Required</th>
-                <th className="pb-2 font-medium text-white/70">Example</th>
+              <tr className="border-b border-border-default text-left">
+                <th className="pb-2 pr-6 font-medium text-text-secondary">Column</th>
+                <th className="pb-2 pr-6 font-medium text-text-secondary">Required</th>
+                <th className="pb-2 font-medium text-text-secondary">Example</th>
               </tr>
             </thead>
-            <tbody className="text-white/60">
-              <tr className="border-b border-white/5">
+            <tbody className="text-text-tertiary">
+              <tr className="border-b border-border-subtle">
                 <td className="py-2 pr-6">Company Name</td>
                 <td className="py-2 pr-6 text-emerald-400">Yes</td>
                 <td className="py-2">Acme Corp</td>
               </tr>
-              <tr className="border-b border-white/5">
+              <tr className="border-b border-border-subtle">
                 <td className="py-2 pr-6">First Name</td>
                 <td className="py-2 pr-6 text-emerald-400">Yes</td>
                 <td className="py-2">Jane</td>
               </tr>
-              <tr className="border-b border-white/5">
+              <tr className="border-b border-border-subtle">
                 <td className="py-2 pr-6">Last Name</td>
                 <td className="py-2 pr-6 text-emerald-400">Yes</td>
                 <td className="py-2">Doe</td>
               </tr>
-              <tr className="border-b border-white/5">
+              <tr className="border-b border-border-subtle">
                 <td className="py-2 pr-6">Email</td>
                 <td className="py-2 pr-6 text-emerald-400">Yes</td>
                 <td className="py-2">jane@acme.com</td>
               </tr>
               <tr>
                 <td className="py-2 pr-6">Company Website</td>
-                <td className="py-2 pr-6 text-white/40">No</td>
+                <td className="py-2 pr-6 text-text-muted">No</td>
                 <td className="py-2">https://acme.com</td>
               </tr>
             </tbody>

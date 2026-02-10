@@ -13,6 +13,7 @@ import {
 } from "recharts";
 
 import { formatValue } from "@/components/charts/types";
+import { useChartTheme } from "@/hooks/use-chart-theme";
 
 type CompanyBenchmark = {
   id: string;
@@ -72,13 +73,13 @@ function CustomTooltip({
 
   const data = payload[0].payload;
   return (
-    <div className="rounded-lg border border-white/10 bg-zinc-900 px-3 py-2 shadow-xl">
-      <p className="text-xs font-medium text-white">{data.name}</p>
-      <p className="mt-0.5 text-sm tabular-nums text-white/80">
+    <div className="rounded-lg border border-border-default bg-bg-secondary px-3 py-2 shadow-xl">
+      <p className="text-xs font-medium text-text-primary">{data.name}</p>
+      <p className="mt-0.5 text-sm tabular-nums text-text-primary">
         {data.formattedValue}
       </p>
       {data.percentile !== null && (
-        <p className="mt-0.5 text-[10px] text-white/50">
+        <p className="mt-0.5 text-[10px] text-text-muted">
           {data.percentile}th percentile
         </p>
       )}
@@ -95,13 +96,15 @@ export function BenchmarkChart({
   if (companies.length === 0) {
     return (
       <div
-        className="flex items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/40"
+        className="flex items-center justify-center rounded-xl border border-border-default bg-bg-elevated text-text-muted"
         style={{ height }}
       >
         No company data available
       </div>
     );
   }
+
+  const chartTheme = useChartTheme();
 
   // Sort companies by value descending for the chart
   const chartData = [...companies]
@@ -115,9 +118,9 @@ export function BenchmarkChart({
     }));
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+    <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
       <div className="mb-1 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-white/80">
+        <h3 className="text-sm font-medium text-text-primary">
           {metricName} - Portfolio vs Benchmarks
         </h3>
         <div className="flex items-center gap-3">
@@ -134,7 +137,7 @@ export function BenchmarkChart({
                 className="inline-block h-0.5 w-4"
                 style={{ backgroundColor: style.stroke }}
               />
-              <span className="text-[10px] text-white/40">{style.label}</span>
+              <span className="text-[10px] text-text-muted">{style.label}</span>
             </span>
           ))}
         </div>
@@ -146,12 +149,12 @@ export function BenchmarkChart({
         >
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.06)"
+            stroke={chartTheme.grid}
             vertical={false}
           />
           <XAxis
             dataKey="name"
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+            tick={{ fill: chartTheme.tick, fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             dy={10}
@@ -161,7 +164,7 @@ export function BenchmarkChart({
             height={companies.length > 6 ? 60 : 30}
           />
           <YAxis
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+            tick={{ fill: chartTheme.tick, fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v: number) => formatValue(v, metricName)}
@@ -170,7 +173,7 @@ export function BenchmarkChart({
           />
           <Tooltip
             content={<CustomTooltip />}
-            cursor={{ fill: "rgba(255,255,255,0.03)" }}
+            cursor={{ fill: chartTheme.cursor }}
           />
 
           {/* Percentile reference lines */}

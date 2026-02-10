@@ -42,7 +42,7 @@ export class ErrorBoundary extends React.Component<
 
       return (
         <div className="flex items-center justify-center p-8">
-          <div className="w-full max-w-md rounded-xl border border-white/10 bg-white/5 p-6 text-center">
+          <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -61,16 +61,16 @@ export class ErrorBoundary extends React.Component<
               </svg>
             </div>
 
-            <h2 className="mb-2 text-lg font-semibold text-zinc-50">
+            <h2 className="mb-2 text-lg font-semibold text-text-primary">
               Something went wrong
             </h2>
-            <p className="mb-6 text-sm text-white/60">
+            <p className="mb-6 text-sm text-text-tertiary">
               An unexpected error occurred. Try reloading to fix the issue.
             </p>
 
             <button
               onClick={this.handleReset}
-              className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-white/90"
+              className="rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text transition-colors hover:bg-btn-primary-hover"
             >
               Reload
             </button>
@@ -79,13 +79,13 @@ export class ErrorBoundary extends React.Component<
               <div className="mt-4">
                 <button
                   onClick={this.toggleDetails}
-                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60 transition-colors hover:bg-white/10"
+                  className="rounded-lg border border-border-default bg-bg-elevated px-3 py-1.5 text-xs text-text-tertiary transition-colors hover:bg-bg-hover"
                 >
                   {this.state.showDetails ? "Hide details" : "Show details"}
                 </button>
 
                 {this.state.showDetails && (
-                  <pre className="mt-3 max-h-40 overflow-auto rounded-lg border border-white/10 bg-black/30 p-3 text-left text-xs text-red-300">
+                  <pre className="mt-3 max-h-40 overflow-auto rounded-lg border border-border-default bg-bg-input p-3 text-left text-xs text-[var(--status-error-text)]">
                     {this.state.error.message}
                   </pre>
                 )}

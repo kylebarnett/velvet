@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 const schema = z.object({
   stage: z.string().nullable().optional(),
@@ -71,7 +72,7 @@ export async function PUT(
     .eq("id", companyId);
 
   if (error) {
-    console.error("Failed to update tags:", error.message);
+    logger.error("Failed to update tags:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

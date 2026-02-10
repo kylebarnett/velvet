@@ -11,6 +11,7 @@ import {
   calculateGrowthRate,
   REVENUE_PRIORITY,
 } from "@/lib/reports/aggregation";
+import { logger } from "@/lib/logger";
 
 type MetricValue = {
   id: string;
@@ -62,7 +63,7 @@ export async function GET(req: Request) {
     .in("approval_status", ["auto_approved", "approved"]);
 
   if (relError) {
-    console.error("Failed to fetch relationships:", relError.message);
+    logger.error("Failed to fetch relationships:", relError.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -125,7 +126,7 @@ export async function GET(req: Request) {
 
   const { data: metricValues, error: mvError, count: metricCount } = await query;
   if (mvError) {
-    console.error("Failed to fetch metric values:", mvError.message);
+    logger.error("Failed to fetch metric values:", mvError.message);
     return jsonError("Failed to process request.", 500);
   }
 

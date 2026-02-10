@@ -43,7 +43,7 @@ export function ScheduleList({ initialSchedules }: ScheduleListProps) {
         )
       );
       setSuccess("Schedule paused");
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to pause schedule");
     }
   };
@@ -64,7 +64,7 @@ export function ScheduleList({ initialSchedules }: ScheduleListProps) {
         )
       );
       setSuccess("Schedule resumed");
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to resume schedule");
     }
   };
@@ -89,7 +89,7 @@ export function ScheduleList({ initialSchedules }: ScheduleListProps) {
           ? `Created ${json.requestsCreated} requests, sent ${json.emailsSent} emails`
           : "No new requests created (may already exist)";
       setSuccess(message);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to run schedule");
     }
   };
@@ -105,7 +105,7 @@ export function ScheduleList({ initialSchedules }: ScheduleListProps) {
       setSchedules((prev) => prev.filter((s) => s.id !== id));
       setDeleteModal({ open: false, schedule: null });
       setSuccess("Schedule deleted");
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to delete schedule");
     }
   };
@@ -117,19 +117,19 @@ export function ScheduleList({ initialSchedules }: ScheduleListProps) {
     <>
       {/* Messages */}
       {error && (
-        <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">
+        <div className="mb-4 rounded-lg border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-3 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
       {success && (
-        <div className="mb-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+        <div className="mb-4 rounded-lg border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] p-3 text-sm text-[var(--status-success-text)]">
           {success}
         </div>
       )}
 
       {schedules.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-          <div className="text-sm text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+          <div className="text-sm text-text-tertiary">
             No schedules yet. Create your first schedule to automate metric
             requests.
           </div>
@@ -139,7 +139,7 @@ export function ScheduleList({ initialSchedules }: ScheduleListProps) {
           {/* Active schedules */}
           {activeSchedules.length > 0 && (
             <div>
-              <h2 className="mb-3 text-sm font-medium text-white/70">
+              <h2 className="mb-3 text-sm font-medium text-text-secondary">
                 Active Schedules ({activeSchedules.length})
               </h2>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -163,7 +163,7 @@ export function ScheduleList({ initialSchedules }: ScheduleListProps) {
           {/* Paused schedules */}
           {pausedSchedules.length > 0 && (
             <div>
-              <h2 className="mb-3 text-sm font-medium text-white/50">
+              <h2 className="mb-3 text-sm font-medium text-text-muted">
                 Paused Schedules ({pausedSchedules.length})
               </h2>
               <div className="grid gap-4 sm:grid-cols-2">

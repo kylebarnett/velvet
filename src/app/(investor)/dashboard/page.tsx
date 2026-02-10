@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, Clock, CheckCircle2 } from "lucide-react";
+import { Building2, CheckCircle2 } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -247,22 +247,30 @@ export default async function InvestorDashboardPage() {
     }
   }
 
-  // Count pending requests and total requests for response rate
-  const { count: pendingRequests } = await supabase
+  // Count distinct companies with pending requests (awaiting submission)
+  const { data: pendingCompanyRows } = await supabase
     .from("metric_requests")
-    .select("id", { count: "exact", head: true })
+    .select("company_id")
     .eq("investor_id", user.id)
     .eq("status", "pending");
 
-  // Count recent submissions (this week)
+  const awaitingCompanyCount = pendingCompanyRows
+    ? new Set(pendingCompanyRows.map((r) => r.company_id)).size
+    : 0;
+
+  // Count distinct companies with submissions this week
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
-  const { count: recentSubmissions } = await supabase
+  const { data: submittedCompanyRows } = await supabase
     .from("metric_requests")
-    .select("id", { count: "exact", head: true })
+    .select("company_id")
     .eq("investor_id", user.id)
     .eq("status", "submitted")
     .gte("updated_at", weekAgo.toISOString());
+
+  const submittedThisWeekCount = submittedCompanyRows
+    ? new Set(submittedCompanyRows.map((r) => r.company_id)).size
+    : 0;
 
   // Portfolio completion: current quarter requests grouped by company
   const currentQuarterStart = new Date();
@@ -375,8 +383,8 @@ export default async function InvestorDashboardPage() {
       <div className="grid gap-5 md:grid-cols-3">
         {[
           { label: "Portfolio companies", value: String(companies.length), href: "/portfolio", icon: Building2, gradient: "kpi-gradient-blue" },
-          { label: "Pending requests", value: String(pendingRequests ?? 0), href: "/requests?status=pending", icon: Clock, gradient: "kpi-gradient-amber" },
-          { label: "Submitted this week", value: String(recentSubmissions ?? 0), href: "/requests?status=submitted", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
+          { label: "Awaiting submission", value: String(awaitingCompanyCount), href: "/campaigns", icon: Building2, gradient: "kpi-gradient-amber" },
+          { label: "Submitted this week", value: String(submittedThisWeekCount), href: "/campaigns", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
         ].map((card) => (
           <Link
             key={card.label}

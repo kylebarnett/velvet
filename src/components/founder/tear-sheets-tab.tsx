@@ -5,6 +5,13 @@ import Link from "next/link";
 import { ArrowUpDown, LayoutGrid, List } from "lucide-react";
 import { TearSheetCard } from "@/components/founder/tear-sheet-card";
 import { SlidingTabs, SlidingIconTabs, TabItem } from "@/components/ui/sliding-tabs";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 type TearSheet = {
   id: string;
@@ -47,19 +54,19 @@ function LoadingSkeleton() {
       {[0, 1].map((i) => (
         <div
           key={i}
-          className="animate-pulse rounded-xl border border-white/10 bg-white/5 p-4"
+          className="animate-pulse rounded-xl border border-border-default bg-bg-elevated p-4"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 space-y-2">
-              <div className="h-4 w-48 rounded bg-white/10" />
+              <div className="h-4 w-48 rounded bg-bg-hover" />
               <div className="flex gap-2">
-                <div className="h-5 w-16 rounded-full bg-white/10" />
-                <div className="h-5 w-14 rounded bg-white/5" />
+                <div className="h-5 w-16 rounded-full bg-bg-hover" />
+                <div className="h-5 w-14 rounded bg-bg-elevated" />
               </div>
             </div>
-            <div className="h-7 w-7 rounded-md bg-white/5" />
+            <div className="h-7 w-7 rounded-md bg-bg-elevated" />
           </div>
-          <div className="mt-3 h-3 w-28 rounded bg-white/5" />
+          <div className="mt-3 h-3 w-28 rounded bg-bg-elevated" />
         </div>
       ))}
     </div>
@@ -163,13 +170,13 @@ export function TearSheetsTab() {
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold tracking-tight">Tear Sheets</h2>
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-text-tertiary">
             Create quarterly summaries to share with investors.
           </p>
         </div>
         <Link
           href="/portal/tear-sheets/new"
-          className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
+          className="inline-flex h-9 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
         >
           New Tear Sheet
         </Link>
@@ -178,7 +185,7 @@ export function TearSheetsTab() {
       {loading && <LoadingSkeleton />}
 
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
@@ -197,18 +204,19 @@ export function TearSheetsTab() {
 
           {/* Year filter */}
           {availableYears.length > 1 && (
-            <select
-              value={filterYear}
-              onChange={(e) => setFilterYear(e.target.value)}
-              className="h-8 rounded-md border border-white/10 bg-black/20 px-2 text-xs text-white/80 outline-none"
-            >
-              <option value="All">All years</option>
-              {availableYears.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
+            <Select value={filterYear} onValueChange={setFilterYear}>
+              <SelectTrigger size="sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All years</SelectItem>
+                {availableYears.map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
 
           {/* Sort buttons + view toggle */}
@@ -218,8 +226,8 @@ export function TearSheetsTab() {
               onClick={() => toggleSort("date")}
               className={`flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
                 sortField === "date"
-                  ? "border-white/20 bg-white/10 text-white"
-                  : "border-white/10 bg-black/20 text-white/50 hover:text-white/70"
+                  ? "border-border-default bg-bg-hover text-text-primary"
+                  : "border-border-default bg-bg-input text-text-muted hover:text-text-secondary"
               }`}
             >
               Date
@@ -232,8 +240,8 @@ export function TearSheetsTab() {
               onClick={() => toggleSort("status")}
               className={`flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
                 sortField === "status"
-                  ? "border-white/20 bg-white/10 text-white"
-                  : "border-white/10 bg-black/20 text-white/50 hover:text-white/70"
+                  ? "border-border-default bg-bg-hover text-text-primary"
+                  : "border-border-default bg-bg-input text-text-muted hover:text-text-secondary"
               }`}
             >
               Status
@@ -252,17 +260,17 @@ export function TearSheetsTab() {
       )}
 
       {!loading && !error && tearSheets.length === 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-white/60">No tear sheets yet.</p>
-          <p className="mt-2 text-sm text-white/40">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <p className="text-text-tertiary">No tear sheets yet.</p>
+          <p className="mt-2 text-sm text-text-muted">
             Create your first quarterly summary to share with investors.
           </p>
         </div>
       )}
 
       {!loading && displayed.length === 0 && tearSheets.length > 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-sm text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <p className="text-sm text-text-tertiary">
             No tear sheets match the selected filters.
           </p>
         </div>
@@ -281,10 +289,10 @@ export function TearSheetsTab() {
       )}
 
       {displayed.length > 0 && viewMode === "list" && (
-        <div className="overflow-hidden rounded-xl border border-white/10">
+        <div className="overflow-hidden rounded-xl border border-border-default">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-white/[0.03] text-left text-xs font-medium text-white/60">
+              <tr className="border-b border-border-default bg-bg-raised text-left text-xs font-medium text-text-tertiary">
                 <th className="px-4 py-2.5">Title</th>
                 <th className="px-4 py-2.5">Period</th>
                 <th className="px-4 py-2.5">Status</th>
@@ -292,7 +300,7 @@ export function TearSheetsTab() {
                 <th className="w-10 px-4 py-2.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border-subtle">
               {displayed.map((ts) => {
                 const updatedAt = new Date(ts.updated_at).toLocaleDateString(
                   "en-US",
@@ -301,17 +309,17 @@ export function TearSheetsTab() {
                 return (
                   <tr
                     key={ts.id}
-                    className="group transition-colors hover:bg-white/[0.03]"
+                    className="group transition-colors hover:bg-bg-raised"
                   >
                     <td className="px-4 py-3">
                       <Link
                         href={`/portal/tear-sheets/${ts.id}`}
-                        className="font-medium hover:text-white/80"
+                        className="font-medium hover:text-text-secondary"
                       >
                         {ts.title}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-white/60">
+                    <td className="px-4 py-3 text-text-tertiary">
                       {ts.quarter} {ts.year}
                     </td>
                     <td className="px-4 py-3">
@@ -319,20 +327,20 @@ export function TearSheetsTab() {
                         <span
                           className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                             ts.status === "published"
-                              ? "bg-emerald-500/20 text-emerald-200"
-                              : "bg-amber-500/20 text-amber-200"
+                              ? "bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
+                              : "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]"
                           }`}
                         >
                           {ts.status === "published" ? "Published" : "Draft"}
                         </span>
                         {ts.share_enabled && (
-                          <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-blue-200">
+                          <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-[var(--status-info-text)]">
                             Shared
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-white/40">{updatedAt}</td>
+                    <td className="px-4 py-3 text-text-muted">{updatedAt}</td>
                     <td className="px-4 py-3">
                       <TearSheetCard
                         tearSheet={ts}

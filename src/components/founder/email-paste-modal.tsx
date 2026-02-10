@@ -45,9 +45,9 @@ function formatPeriodLabel(periodStart: string, periodType: string): string {
 }
 
 function confidenceColor(confidence: number): string {
-  if (confidence >= 0.8) return "text-emerald-300";
-  if (confidence >= 0.5) return "text-amber-300";
-  return "text-red-300";
+  if (confidence >= 0.8) return "text-[var(--status-success-text)]";
+  if (confidence >= 0.5) return "text-[var(--tag-amber-text)]";
+  return "text-[var(--status-error-text)]";
 }
 
 export function EmailPasteModal({
@@ -226,7 +226,7 @@ export function EmailPasteModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget && state !== "extracting" && state !== "saving") {
           handleClose();
@@ -236,15 +236,15 @@ export function EmailPasteModal({
       aria-modal="true"
       aria-label="Import from Email"
     >
-      <div className="w-full max-w-2xl rounded-xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
+      <div className="w-full max-w-2xl rounded-xl border border-border-default bg-bg-secondary p-6 shadow-2xl">
         {/* Header */}
         <div className="mb-4 flex items-start justify-between">
           <div>
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-zinc-50">
-              <Mail className="h-5 w-5 text-white/70" />
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-text-primary">
+              <Mail className="h-5 w-5 text-text-secondary" />
               Import from Email
             </h2>
-            <p className="mt-1 text-sm text-white/60">
+            <p className="mt-1 text-sm text-text-tertiary">
               Paste your investor update email content to automatically extract
               metrics.
             </p>
@@ -253,7 +253,7 @@ export function EmailPasteModal({
             type="button"
             onClick={handleClose}
             disabled={state === "extracting" || state === "saving"}
-            className="rounded-md p-1 text-white/40 hover:text-white/70 disabled:opacity-50"
+            className="rounded-md p-1 text-text-muted hover:text-text-secondary disabled:opacity-50"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -263,7 +263,7 @@ export function EmailPasteModal({
         {/* Error message */}
         {error && (
           <div
-            className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200"
+            className="mb-4 rounded-lg border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]"
             role="alert"
           >
             {error}
@@ -277,7 +277,7 @@ export function EmailPasteModal({
               <button
                 type="button"
                 onClick={() => setShowExample((prev) => !prev)}
-                className="mb-3 flex items-center gap-1.5 text-xs text-white/50 hover:text-white/70 transition-colors"
+                className="mb-3 flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary transition-colors"
               >
                 <ChevronDown
                   className={cn(
@@ -288,7 +288,7 @@ export function EmailPasteModal({
                 What should I paste?
               </button>
               {showExample && (
-                <div className="mb-3 rounded-lg bg-white/5 p-3 text-xs text-white/50 font-mono whitespace-pre-line">
+                <div className="mb-3 rounded-lg bg-bg-elevated p-3 text-xs text-text-muted font-mono whitespace-pre-line">
                   {`Paste the body of an investor update email. For example:\n\nQ4 2025 Update:\nRevenue: $1.2M (+15% QoQ)\nMRR: $100K\nBurn Rate: $85K/month\nRunway: 14 months`}
                 </div>
               )}
@@ -298,9 +298,9 @@ export function EmailPasteModal({
                 value={emailContent}
                 onChange={(e) => setEmailContent(e.target.value)}
                 placeholder="Paste your investor update email here..."
-                className="min-h-[300px] w-full resize-y rounded-md border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-zinc-50 placeholder:text-white/30 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20"
+                className="min-h-[300px] w-full resize-y rounded-md border border-border-default bg-bg-input px-3 py-2.5 text-sm text-text-primary placeholder:text-text-faint focus:border-border-default focus:outline-none focus:ring-1 focus:ring-[var(--ring-focus)]"
               />
-              <p className="mt-1 text-xs text-white/40">
+              <p className="mt-1 text-xs text-text-muted">
                 {emailContent.length.toLocaleString()} / 50,000 characters
               </p>
             </div>
@@ -308,7 +308,7 @@ export function EmailPasteModal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/10"
+                className="rounded-lg border border-border-default bg-bg-elevated px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-hover"
               >
                 Cancel
               </button>
@@ -316,7 +316,7 @@ export function EmailPasteModal({
                 type="button"
                 onClick={handleExtract}
                 disabled={!emailContent.trim()}
-                className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
               >
                 <Sparkles className="h-4 w-4" />
                 Extract Metrics
@@ -328,11 +328,11 @@ export function EmailPasteModal({
         {/* Extracting: Loading state */}
         {state === "extracting" && (
           <div className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-white/60" />
-            <p className="mt-4 text-sm text-white/60">
+            <Loader2 className="h-8 w-8 animate-spin text-text-tertiary" />
+            <p className="mt-4 text-sm text-text-tertiary">
               Extracting metrics from email...
             </p>
-            <p className="mt-1 text-xs text-white/40">
+            <p className="mt-1 text-xs text-text-muted">
               Processing... {(elapsedMs / 1000).toFixed(1)}s
             </p>
           </div>
@@ -342,14 +342,14 @@ export function EmailPasteModal({
         {state === "reviewing" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-text-secondary">
                 Found{" "}
-                <span className="font-medium text-zinc-50">
+                <span className="font-medium text-text-primary">
                   {metrics.length}
                 </span>{" "}
                 metric{metrics.length !== 1 ? "s" : ""}.
                 {providerInfo && (
-                  <span className="ml-2 text-white/40">
+                  <span className="ml-2 text-text-muted">
                     via {providerInfo}
                   </span>
                 )}
@@ -357,7 +357,7 @@ export function EmailPasteModal({
               <button
                 type="button"
                 onClick={toggleAll}
-                className="text-xs text-white/50 hover:text-white/80"
+                className="text-xs text-text-muted hover:text-text-secondary"
               >
                 {selected.size === metrics.length
                   ? "Deselect all"
@@ -366,7 +366,7 @@ export function EmailPasteModal({
             </div>
 
             {/* Confidence legend */}
-            <div className="flex items-center gap-4 text-[11px] text-white/50">
+            <div className="flex items-center gap-4 text-[11px] text-text-muted">
               <span className="flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" /> High (&ge;80%)
               </span>
@@ -379,14 +379,14 @@ export function EmailPasteModal({
             </div>
 
             {/* Metrics list */}
-            <div className="max-h-[360px] space-y-1 overflow-y-auto rounded-lg border border-white/10 bg-black/20 p-1">
+            <div className="max-h-[360px] space-y-1 overflow-y-auto rounded-lg border border-border-default bg-bg-input p-1">
               {metrics.map((metric, index) => (
                 <label
                   key={index}
                   className={cn(
                     "flex cursor-pointer items-start gap-3 rounded-lg p-3 transition-colors",
                     selected.has(index)
-                      ? "bg-white/5"
+                      ? "bg-bg-elevated"
                       : "opacity-50 hover:opacity-75",
                   )}
                 >
@@ -394,11 +394,11 @@ export function EmailPasteModal({
                     type="checkbox"
                     checked={selected.has(index)}
                     onChange={() => toggleMetric(index)}
-                    className="mt-0.5 h-4 w-4 rounded border-white/20 bg-black/30 text-white accent-white"
+                    className="mt-0.5 h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium text-zinc-50">
+                      <span className="text-sm font-medium text-text-primary">
                         {metric.name}
                       </span>
                       <div className="flex items-center gap-1.5">
@@ -433,11 +433,11 @@ export function EmailPasteModal({
                               }
                             }}
                             onClick={(e) => e.stopPropagation()}
-                            className="h-7 w-28 rounded border border-white/20 bg-black/40 px-2 text-right text-sm font-semibold text-zinc-50 focus:border-white/30 focus:outline-none"
+                            className="h-7 w-28 rounded border border-border-default bg-bg-sidebar px-2 text-right text-sm font-semibold text-text-primary focus:border-border-default focus:outline-none"
                           />
                         ) : (
                           <>
-                            <span className="whitespace-nowrap text-sm font-semibold text-zinc-50">
+                            <span className="whitespace-nowrap text-sm font-semibold text-text-primary">
                               {editedValues[index] !== undefined
                                 ? formatValue(
                                     parseFloat(editedValues[index]),
@@ -457,7 +457,7 @@ export function EmailPasteModal({
                                 e.stopPropagation();
                                 setEditingIndex(index);
                               }}
-                              className="rounded p-0.5 text-white/30 hover:text-white/60 transition-colors"
+                              className="rounded p-0.5 text-text-faint hover:text-text-tertiary transition-colors"
                               aria-label={`Edit ${metric.name} value`}
                             >
                               <Pencil className="h-3 w-3" />
@@ -466,20 +466,20 @@ export function EmailPasteModal({
                         )}
                       </div>
                     </div>
-                    <div className="mt-1 flex items-center gap-2 text-xs text-white/50">
+                    <div className="mt-1 flex items-center gap-2 text-xs text-text-muted">
                       <span>
                         {formatPeriodLabel(
                           metric.period_start,
                           metric.period_type,
                         )}
                       </span>
-                      <span className="text-white/20">|</span>
+                      <span className="text-text-faint">|</span>
                       <span className={confidenceColor(metric.confidence)}>
                         {Math.round(metric.confidence * 100)}% confidence
                       </span>
                     </div>
                     {metric.context && (
-                      <p className="mt-1 line-clamp-2 text-xs text-white/30 italic">
+                      <p className="mt-1 line-clamp-2 text-xs text-text-faint italic">
                         &quot;{metric.context}&quot;
                       </p>
                     )}
@@ -498,7 +498,7 @@ export function EmailPasteModal({
                   setEditingIndex(null);
                   setEditedValues({});
                 }}
-                className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/10"
+                className="rounded-lg border border-border-default bg-bg-elevated px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-hover"
               >
                 Back
               </button>
@@ -506,7 +506,7 @@ export function EmailPasteModal({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/10"
+                  className="rounded-lg border border-border-default bg-bg-elevated px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-hover"
                 >
                   Cancel
                 </button>
@@ -514,7 +514,7 @@ export function EmailPasteModal({
                   type="button"
                   onClick={handleSave}
                   disabled={selected.size === 0}
-                  className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
                 >
                   Save {selected.size} Metric{selected.size !== 1 ? "s" : ""}
                 </button>
@@ -526,8 +526,8 @@ export function EmailPasteModal({
         {/* Saving: Loading state */}
         {state === "saving" && (
           <div className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-white/60" />
-            <p className="mt-4 text-sm text-white/60">
+            <Loader2 className="h-8 w-8 animate-spin text-text-tertiary" />
+            <p className="mt-4 text-sm text-text-tertiary">
               Saving metrics...
             </p>
           </div>
@@ -537,19 +537,19 @@ export function EmailPasteModal({
         {state === "done" && (
           <div className="flex flex-col items-center justify-center py-12">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
-              <CheckCircle2 className="h-6 w-6 text-emerald-300" />
+              <CheckCircle2 className="h-6 w-6 text-[var(--status-success-text)]" />
             </div>
-            <p className="mt-4 text-sm font-medium text-zinc-50">
+            <p className="mt-4 text-sm font-medium text-text-primary">
               {savedCount} metric{savedCount !== 1 ? "s" : ""} saved
               successfully
             </p>
-            <p className="mt-1 text-xs text-white/50">
+            <p className="mt-1 text-xs text-text-muted">
               Your dashboard will update to reflect the new data.
             </p>
             <button
               type="button"
               onClick={handleClose}
-              className="mt-6 rounded-lg bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90"
+              className="mt-6 rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
             >
               Done
             </button>

@@ -6,6 +6,13 @@ import { ChevronDown, Check, X, BarChart3, Table2, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils/cn";
 import { formatPeriod } from "@/components/charts/types";
 import { SlidingIconTabs } from "@/components/ui/sliding-tabs";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 import { NormalizationToggle, type NormalizationMode } from "./normalization-toggle";
 import { ComparisonChart } from "./comparison-chart";
 import { ComparisonTable } from "./comparison-table";
@@ -108,13 +115,13 @@ function MultiSelectDropdown({
         className={cn(
           "flex min-h-[2.75rem] w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
           isOpen
-            ? "border-white/20 bg-black/40"
-            : "border-white/10 bg-black/30 hover:border-white/15"
+            ? "border-border-default bg-bg-sidebar"
+            : "border-border-default bg-bg-input hover:border-border-default"
         )}
       >
         <div className="flex flex-1 flex-wrap items-center gap-1.5">
           {selected.length === 0 ? (
-            <span className="text-white/40">{label}</span>
+            <span className="text-text-muted">{label}</span>
           ) : (
             <>
               {selectedLabels.map((name) => {
@@ -122,7 +129,7 @@ function MultiSelectDropdown({
                 return (
                   <span
                     key={value}
-                    className="inline-flex items-center gap-1 rounded-md bg-white/10 px-2 py-0.5 text-xs text-white/80"
+                    className="inline-flex items-center gap-1 rounded-md bg-bg-hover px-2 py-0.5 text-xs text-text-primary"
                   >
                     {name}
                     <button
@@ -131,7 +138,7 @@ function MultiSelectDropdown({
                         e.stopPropagation();
                         removeOption(value);
                       }}
-                      className="text-white/40 hover:text-white/70"
+                      className="text-text-muted hover:text-text-secondary"
                       aria-label={`Remove ${name}`}
                     >
                       <X className="h-3 w-3" />
@@ -140,23 +147,23 @@ function MultiSelectDropdown({
                 );
               })}
               {overflowCount > 0 && (
-                <span className="text-xs text-white/50">+{overflowCount} more</span>
+                <span className="text-xs text-text-muted">+{overflowCount} more</span>
               )}
             </>
           )}
         </div>
         <ChevronDown
           className={cn(
-            "h-4 w-4 flex-shrink-0 text-white/40 transition-transform duration-150",
+            "h-4 w-4 flex-shrink-0 text-text-muted transition-transform duration-150",
             isOpen && "rotate-180"
           )}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-white/10 bg-zinc-900 py-1 shadow-xl">
+        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl">
           {options.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-white/40">No options available</div>
+            <div className="px-3 py-2 text-sm text-text-muted">No options available</div>
           ) : (
             options.map((option) => {
               const isSelected = selected.includes(option.value);
@@ -172,21 +179,21 @@ function MultiSelectDropdown({
                   className={cn(
                     "flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors",
                     isSelected
-                      ? "bg-white/[0.06] text-white"
+                      ? "bg-bg-elevated text-text-primary"
                       : isDisabled
-                        ? "cursor-not-allowed text-white/20"
-                        : "text-white/70 hover:bg-white/[0.04] hover:text-white"
+                        ? "cursor-not-allowed text-text-faint"
+                        : "text-text-secondary hover:bg-bg-raised hover:text-text-primary"
                   )}
                 >
                   <span
                     className={cn(
                       "flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border transition-colors",
                       isSelected
-                        ? "border-white/30 bg-white/15"
-                        : "border-white/15 bg-transparent"
+                        ? "border-border-default bg-bg-hover"
+                        : "border-border-default bg-transparent"
                     )}
                   >
-                    {isSelected && <Check className="h-3 w-3 text-white" />}
+                    {isSelected && <Check className="h-3 w-3 text-text-primary" />}
                   </span>
                   {renderOption ? (
                     renderOption(option, isSelected)
@@ -198,7 +205,7 @@ function MultiSelectDropdown({
             })
           )}
           {maxSelections && (
-            <div className="border-t border-white/[0.06] px-3 py-1.5 text-[10px] text-white/30">
+            <div className="border-t border-border-subtle px-3 py-1.5 text-[10px] text-text-faint">
               {selected.length}/{maxSelections} selected
             </div>
           )}
@@ -430,11 +437,11 @@ export function ComparisonClient({
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Company selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/40">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
               Companies (2-8)
             </label>
             <MultiSelectDropdown
@@ -448,7 +455,7 @@ export function ComparisonClient({
 
           {/* Metric selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/40">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
               Metrics
             </label>
             <MultiSelectDropdown
@@ -461,20 +468,21 @@ export function ComparisonClient({
 
           {/* Period type selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/40">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
               Period
             </label>
-            <select
-              value={periodType}
-              onChange={(e) => setPeriodType(e.target.value as PeriodType)}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
-            >
-              {PERIOD_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            <Select value={periodType} onValueChange={(v) => setPeriodType(v as PeriodType)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PERIOD_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* View + Normalization controls */}
@@ -498,12 +506,12 @@ export function ComparisonClient({
 
         {/* Validation messages */}
         {selectedCompanies.length > 0 && selectedCompanies.length < 2 && (
-          <p className="mt-2 text-xs text-amber-300/80">
+          <p className="mt-2 text-xs text-[var(--tag-amber-text)]">
             Select at least 2 companies to compare.
           </p>
         )}
         {selectedCompanies.length >= 2 && selectedMetrics.length === 0 && (
-          <p className="mt-2 text-xs text-amber-300/80">
+          <p className="mt-2 text-xs text-[var(--tag-amber-text)]">
             Select at least 1 metric to compare.
           </p>
         )}
@@ -512,7 +520,7 @@ export function ComparisonClient({
       {/* Error */}
       {error && (
         <div
-          className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200"
+          className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]"
           role="alert"
         >
           {error}
@@ -521,7 +529,7 @@ export function ComparisonClient({
 
       {/* Loading */}
       {isLoading && (
-        <div className="flex items-center justify-center gap-2 py-12 text-white/50">
+        <div className="flex items-center justify-center gap-2 py-12 text-text-muted">
           <Loader2 className="h-5 w-5 animate-spin" />
           <span className="text-sm">Loading comparison data...</span>
         </div>
@@ -548,7 +556,7 @@ export function ComparisonClient({
 
             return (
               <div key={metric}>
-                <h3 className="mb-2 text-sm font-medium text-white/80">{metric}</h3>
+                <h3 className="mb-2 text-sm font-medium text-text-primary">{metric}</h3>
                 <ComparisonTable
                   data={data}
                   companies={companyNames}
@@ -563,8 +571,8 @@ export function ComparisonClient({
 
       {/* Empty state */}
       {!isLoading && !error && !hasResults && canFetch && companiesData.length === 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-          <p className="text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+          <p className="text-text-tertiary">
             No metric data found for the selected companies and parameters.
           </p>
         </div>
@@ -572,9 +580,9 @@ export function ComparisonClient({
 
       {/* Initial state */}
       {!canFetch && !isLoading && !error && (
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-12 text-center">
-          <BarChart3 className="mx-auto mb-3 h-10 w-10 text-white/20" />
-          <p className="text-white/50">
+        <div className="rounded-xl border border-border-subtle bg-bg-raised p-12 text-center">
+          <BarChart3 className="mx-auto mb-3 h-10 w-10 text-text-faint" />
+          <p className="text-text-muted">
             Select at least 2 companies and 1 metric to start comparing.
           </p>
         </div>

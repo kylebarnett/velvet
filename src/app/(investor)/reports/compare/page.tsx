@@ -71,20 +71,20 @@ export default async function ComparePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-zinc-50">Company Comparison</h1>
-        <p className="mt-1 text-sm text-white/60">
+        <h1 className="text-xl font-semibold text-text-primary">Company Comparison</h1>
+        <p className="mt-1 text-sm text-text-tertiary">
           Compare metrics across portfolio companies side by side.
         </p>
       </div>
 
       {companies.length < 2 ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-white/60">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <p className="text-text-tertiary">
             You need at least 2 approved portfolio companies to use comparison.
           </p>
           <a
             href="/portfolio/import"
-            className="mt-2 inline-block text-sm underline underline-offset-4 hover:text-white"
+            className="mt-2 inline-block text-sm underline underline-offset-4 hover:text-text-primary"
           >
             Import contacts to get started
           </a>

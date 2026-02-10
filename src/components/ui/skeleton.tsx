@@ -9,7 +9,7 @@ interface SkeletonProps {
 export function Skeleton({ className }: SkeletonProps) {
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-white/10", className)}
+      className={cn("animate-pulse rounded-md bg-bg-hover", className)}
       aria-hidden="true"
     />
   );
@@ -44,7 +44,7 @@ export function SkeletonCard({ className }: SkeletonCardProps) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-white/10 bg-white/5 p-4",
+        "rounded-xl border border-border-default bg-bg-elevated p-4",
         className
       )}
     >
@@ -71,12 +71,12 @@ export function SkeletonTable({
   return (
     <div
       className={cn(
-        "rounded-xl border border-white/10 bg-white/5 overflow-hidden",
+        "rounded-xl border border-border-default bg-bg-elevated overflow-hidden",
         className
       )}
     >
       {/* Header */}
-      <div className="flex gap-4 border-b border-white/10 bg-white/5 px-4 py-3">
+      <div className="flex gap-4 border-b border-border-default bg-bg-elevated px-4 py-3">
         {Array.from({ length: columns }).map((_, i) => (
           <Skeleton key={i} className="h-4 flex-1" />
         ))}
@@ -85,7 +85,7 @@ export function SkeletonTable({
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div
           key={rowIndex}
-          className="flex gap-4 border-b border-white/5 px-4 py-3 last:border-b-0"
+          className="flex gap-4 border-b border-border-subtle px-4 py-3 last:border-b-0"
         >
           {Array.from({ length: columns }).map((_, colIndex) => (
             <Skeleton key={colIndex} className="h-4 flex-1" />

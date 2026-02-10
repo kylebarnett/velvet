@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 const updateSchema = z.object({
   primaryMetric: z.string().min(1).nullable(),
@@ -86,7 +87,7 @@ export async function PUT(
     .eq("id", relationship.id);
 
   if (error) {
-    console.error("Failed to update tile metrics:", error.message);
+    logger.error("Failed to update tile metrics:", error.message);
     return jsonError("Failed to update tile metrics.", 500);
   }
 

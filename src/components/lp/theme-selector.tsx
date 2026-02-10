@@ -36,8 +36,8 @@ function ThemeSwatch({
       className={cn(
         "relative flex flex-col items-center gap-1.5 rounded-lg border p-2 transition-colors",
         selected
-          ? "border-white/40 bg-white/[0.08] ring-2 ring-white/50"
-          : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]",
+          ? "border-border-default bg-bg-elevated ring-2 ring-[var(--ring-focus)]"
+          : "border-border-default bg-bg-raised hover:border-border-default hover:bg-bg-raised",
       )}
     >
       {/* Mini preview swatch */}
@@ -87,7 +87,7 @@ function ThemeSwatch({
       </div>
 
       {/* Label */}
-      <span className="text-[10px] font-medium leading-tight text-white/60">
+      <span className="text-[10px] font-medium leading-tight text-text-tertiary">
         {theme.label}
       </span>
 

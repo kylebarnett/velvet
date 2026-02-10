@@ -16,8 +16,8 @@ export default async function FounderCompanyPage() {
 
   if (!company) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-        <div className="text-sm text-white/60">No company found for your account.</div>
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="text-sm text-text-tertiary">No company found for your account.</div>
       </div>
     );
   }

@@ -4,6 +4,7 @@ import * as React from "react";
 import { Sliders, ChevronDown, Check, Loader2 } from "lucide-react";
 import { TileMetricConfig } from "./tile-metric-config";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
+import { logger } from "@/lib/logger";
 
 type Company = {
   id: string;
@@ -71,8 +72,8 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
 
       setAvailableMetrics(options);
       setConfigOpen(true);
-    } catch (err) {
-      console.error("Failed to load metrics:", err);
+    } catch (err: unknown) {
+      logger.error("Failed to load metrics:", err);
     } finally {
       setLoading(false);
     }
@@ -102,7 +103,7 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs font-medium text-white/60 hover:border-white/15 hover:text-white/80 transition-colors"
+          className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-2 text-xs font-medium text-text-tertiary hover:border-border-default hover:text-text-secondary transition-colors"
         >
           <Sliders className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Tile Settings</span>
@@ -110,9 +111,9 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
         </button>
 
         {isOpen && (
-          <div className="absolute left-0 top-full z-50 mt-1 w-64 max-w-[calc(100vw-2rem)] rounded-lg border border-white/10 bg-zinc-900 py-1 shadow-xl">
-            <div className="px-3 py-2 border-b border-white/10">
-              <p className="text-xs text-white/60">
+          <div className="absolute left-0 top-full z-50 mt-1 w-64 max-w-[calc(100vw-2rem)] rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl">
+            <div className="px-3 py-2 border-b border-border-default">
+              <p className="text-xs text-text-tertiary">
                 Configure which metrics appear on company tiles
               </p>
             </div>
@@ -129,26 +130,26 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
                     type="button"
                     onClick={() => handleSelectCompany(company)}
                     disabled={loading && selectedCompany?.id === company.id}
-                    className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-white/5 transition-colors disabled:opacity-50"
+                    className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-bg-elevated transition-colors disabled:opacity-50"
                   >
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded border border-white/10 bg-white/5">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded border border-border-default bg-bg-elevated">
                       {logoUrl ? (
                         <img src={logoUrl} alt="" className="h-full w-full object-cover" />
                       ) : (
-                        <span className="text-xs font-medium text-white/60">{initial}</span>
+                        <span className="text-xs font-medium text-text-tertiary">{initial}</span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm text-white truncate">{company.name}</div>
+                      <div className="text-sm text-text-primary truncate">{company.name}</div>
                       {hasCustomSettings && (
-                        <div className="text-xs text-white/40 truncate">
+                        <div className="text-xs text-text-muted truncate">
                           {settings?.primary}
                           {settings?.secondary && `, ${settings.secondary}`}
                         </div>
                       )}
                     </div>
                     {loading && selectedCompany?.id === company.id ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-white/40" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-text-muted" />
                     ) : hasCustomSettings ? (
                       <Check className="h-3.5 w-3.5 text-emerald-400" />
                     ) : null}

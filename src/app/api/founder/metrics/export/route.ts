@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 // GET - Export founder's metrics as CSV
 export async function GET(req: Request) {
@@ -46,7 +47,7 @@ export async function GET(req: Request) {
   const { data: metrics, error } = await query;
 
   if (error) {
-    console.error("Failed to export founder metrics:", error.message);
+    logger.error("Failed to export founder metrics:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

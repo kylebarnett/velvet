@@ -5,6 +5,7 @@ import { getApiUser, jsonError } from "@/lib/api/auth";
 import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { escapeHtml } from "@/lib/utils/html";
+import { logger } from "@/lib/logger";
 
 const inviteSchema = z.object({
   email: z.string().email(),
@@ -131,7 +132,7 @@ export async function POST(
     .single();
 
   if (error) {
-    console.error("Failed to create invitation:", error.message);
+    logger.error("Failed to create invitation:", error.message);
     return jsonError("Failed to process request.", 400);
   }
 
@@ -202,13 +203,13 @@ export async function POST(
 
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        console.error("Failed to send org invitation email:", text);
+        logger.error("Failed to send org invitation email:", text);
       }
-    } catch (err) {
-      console.error("Failed to send org invitation email:", err);
+    } catch (err: unknown) {
+      logger.error("Failed to send org invitation email:", err);
     }
   } else {
-    console.log(`[DEV] Would send org invite to ${email}: ${inviteUrl}`);
+    logger.info(`[DEV] Would send org invite to ${email}: ${inviteUrl}`);
   }
 
   return NextResponse.json({

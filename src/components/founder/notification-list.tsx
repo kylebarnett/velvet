@@ -60,16 +60,16 @@ function getDueUrgency(dueDate: string | null): {
   );
 
   if (diffDays < 0) {
-    return { color: "text-red-300 bg-red-500/20", label: "Overdue" };
+    return { color: "text-[var(--status-error-text)] bg-red-500/20", label: "Overdue" };
   }
   if (diffDays <= 3) {
     return {
-      color: "text-amber-200 bg-amber-500/20",
+      color: "text-[var(--status-warning-text)] bg-amber-500/20",
       label: `Due in ${diffDays} day${diffDays !== 1 ? "s" : ""}`,
     };
   }
   return {
-    color: "text-white/60 bg-white/5",
+    color: "text-text-tertiary bg-bg-elevated",
     label: `Due ${due.toLocaleDateString()}`,
   };
 }
@@ -80,19 +80,19 @@ function LoadingSkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="animate-pulse rounded-xl border border-white/10 bg-white/5 p-4"
+          className="animate-pulse rounded-xl border border-border-default bg-bg-elevated p-4"
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-2">
-              <div className="h-4 w-40 rounded bg-white/10" />
+              <div className="h-4 w-40 rounded bg-bg-hover" />
               <div className="flex gap-1.5">
-                <div className="h-5 w-16 rounded-md bg-white/5" />
-                <div className="h-5 w-20 rounded-md bg-white/5" />
-                <div className="h-5 w-14 rounded-md bg-white/5" />
+                <div className="h-5 w-16 rounded-md bg-bg-elevated" />
+                <div className="h-5 w-20 rounded-md bg-bg-elevated" />
+                <div className="h-5 w-14 rounded-md bg-bg-elevated" />
               </div>
-              <div className="h-3 w-32 rounded bg-white/5" />
+              <div className="h-3 w-32 rounded bg-bg-elevated" />
             </div>
-            <div className="h-8 w-16 rounded-md bg-white/10" />
+            <div className="h-8 w-16 rounded-md bg-bg-hover" />
           </div>
         </div>
       ))}
@@ -184,7 +184,7 @@ export function NotificationList({
 
   if (error) {
     return (
-      <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+      <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
         {error}
       </div>
     );
@@ -194,8 +194,8 @@ export function NotificationList({
 
   if (displayRequests.length === 0) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-        <div className="text-sm text-white/60">
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+        <div className="text-sm text-text-tertiary">
           {mode === "completed"
             ? "No completed submissions yet."
             : "No pending metric requests."}
@@ -239,15 +239,15 @@ export function NotificationList({
         {sortedCompleted.map((group) => (
           <div
             key={`${group.periodType}-${group.periodStart}`}
-            className="rounded-xl border border-white/10 bg-white/[0.03] p-4"
+            className="rounded-xl border border-border-default bg-bg-raised p-4"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-medium text-white/70">
+                  <span className="text-sm font-medium text-text-secondary">
                     {group.label}
                   </span>
-                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-200">
+                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-[var(--status-success-text)]">
                     Submitted
                   </span>
                 </div>
@@ -255,13 +255,13 @@ export function NotificationList({
                   {group.metrics.map((m) => (
                     <span
                       key={m.metricName}
-                      className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/60"
+                      className="rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-tertiary"
                     >
                       {m.metricName}
                     </span>
                   ))}
                 </div>
-                <div className="mt-2 text-xs text-white/40">
+                <div className="mt-2 text-xs text-text-muted">
                   {group.metrics.length} metric
                   {group.metrics.length !== 1 ? "s" : ""} &middot;{" "}
                   Requested by{" "}
@@ -288,7 +288,7 @@ export function NotificationList({
         return (
           <div
             key={`${group.periodType}-${group.periodStart}`}
-            className="rounded-xl border border-white/10 bg-white/5 p-4"
+            className="rounded-xl border border-border-default bg-bg-elevated p-4"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -308,13 +308,13 @@ export function NotificationList({
                   {group.metrics.map((m) => (
                     <span
                       key={m.metricName}
-                      className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/70"
+                      className="rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary"
                     >
                       {m.metricName}
                     </span>
                   ))}
                 </div>
-                <div className="mt-2 text-xs text-white/60">
+                <div className="mt-2 text-xs text-text-tertiary">
                   {group.metrics.length} metric
                   {group.metrics.length !== 1 ? "s" : ""} &middot;{" "}
                   Requested by{" "}
@@ -333,7 +333,7 @@ export function NotificationList({
                       periodEnd: group.periodEnd,
                     })
                   }
-                  className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
+                  className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover"
                 >
                   Submit
                 </button>

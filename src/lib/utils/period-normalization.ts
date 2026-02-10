@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 /**
  * Period Normalization Utility
  *
@@ -124,7 +125,7 @@ export function normalizePeriod(
 ): NormalizedPeriod | null {
   const date = parseDate(periodStart);
   if (!date) {
-    console.warn(`[period-normalization] Invalid date: ${periodStart}`);
+    logger.warn(`[period-normalization] Invalid date: ${periodStart}`);
     return null;
   }
 

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   open: boolean;
@@ -80,32 +81,25 @@ export function ConfirmModal({
 
   if (!open) return null;
 
-  const confirmStyles =
-    variant === "danger"
-      ? "bg-red-500 hover:bg-red-600 text-white"
-      : variant === "warning"
-        ? "bg-amber-500 hover:bg-amber-600 text-white"
-        : "bg-white hover:bg-white/90 text-black";
-
   const iconBgColor =
     variant === "danger"
       ? "bg-red-500/10"
       : variant === "warning"
         ? "bg-amber-500/10"
-        : "bg-white/10";
+        : "bg-bg-hover";
 
   const iconColor =
     variant === "danger"
       ? "text-red-400"
       : variant === "warning"
         ? "text-amber-400"
-        : "text-white/60";
+        : "text-text-tertiary";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-bg-backdrop backdrop-blur-sm"
         onClick={onCancel}
         aria-hidden="true"
       />
@@ -116,34 +110,33 @@ export function ConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative mx-4 w-full max-w-md rounded-xl border border-white/10 bg-zinc-900 p-6 shadow-2xl"
+        className="relative mx-4 w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 shadow-2xl"
       >
         <div className="flex items-start gap-4">
           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${iconBgColor}`}>
             <AlertTriangle className={`h-5 w-5 ${iconColor}`} aria-hidden="true" />
           </div>
           <div className="flex-1">
-            <h3 id={titleId} className="text-lg font-semibold text-white">{title}</h3>
-            <p className="mt-2 text-sm text-white/60">{message}</p>
+            <h3 id={titleId} className="text-lg font-semibold text-text-primary">{title}</h3>
+            <p className="mt-2 text-sm text-text-tertiary">{message}</p>
           </div>
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-3">
-          <button
+          <Button
             ref={cancelRef}
-            type="button"
+            variant="secondary"
             onClick={onCancel}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
           >
             {cancelLabel}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant={variant === "danger" ? "danger" : "primary"}
+            className={variant === "warning" ? "bg-amber-500 text-white hover:bg-amber-600" : undefined}
             onClick={onConfirm}
-            className={`inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${confirmStyles}`}
           >
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

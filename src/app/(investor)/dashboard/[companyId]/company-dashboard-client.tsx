@@ -20,6 +20,7 @@ import { CompanyDocumentsTab } from "@/components/investor/company-documents-tab
 import { CompanyTearSheetsTab } from "@/components/investor/company-tear-sheets-tab";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
+import { logger } from "@/lib/logger";
 
 type DashboardView = {
   id: string;
@@ -273,8 +274,8 @@ function MetricsTabContent({
         setSelectedViewId(remaining[0]?.id ?? null);
       }
       router.refresh();
-    } catch (err) {
-      console.error("Failed to delete view:", err);
+    } catch (err: unknown) {
+      logger.error("Failed to delete view:", err);
     }
   }
 
@@ -334,7 +335,7 @@ function MetricsTabContent({
         </div>
         <div className="flex items-center gap-2">
           <Link
-            href={`/requests/new?companyId=${companyId}`}
+            href={`/campaigns/new?companyId=${companyId}`}
             className="flex items-center justify-center gap-2 rounded-lg bg-btn-primary-bg px-3 py-2 sm:py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover transition-colors"
           >
             <Send className="h-3.5 w-3.5" />

@@ -22,14 +22,14 @@ export function DocumentsTab({ companyId }: DocumentsTabProps) {
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold tracking-tight">Documents</h2>
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-text-tertiary">
             Upload decks, financials, and other supporting material.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setShowUpload(true)}
-          className="inline-flex h-9 items-center justify-center rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
+          className="inline-flex h-9 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
         >
           Upload
         </button>

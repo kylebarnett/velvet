@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Button } from "@/components/ui/button";
 
 interface SaveReportModalProps {
   open: boolean;
@@ -41,28 +42,28 @@ export function SaveReportModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-white/10 bg-zinc-900 p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6">
         <h3 className="text-lg font-medium">Save Report</h3>
-        <p className="mt-1 text-sm text-white/60">
+        <p className="mt-1 text-sm text-text-tertiary">
           Save your current {reportType} report configuration.
         </p>
 
         <div className="mt-4 space-y-3">
           <div>
-            <label className="text-xs font-medium text-white/60">Name</label>
+            <label className="text-xs font-medium text-text-tertiary">Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Report name"
-              className="mt-1 h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+              className="mt-1 h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm placeholder:text-text-faint focus:border-border-default focus:outline-none"
               autoFocus
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium text-white/60">
+            <label className="text-xs font-medium text-text-tertiary">
               Description (optional)
             </label>
             <input
@@ -70,37 +71,34 @@ export function SaveReportModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief description"
-              className="mt-1 h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm placeholder:text-white/40 focus:border-white/20 focus:outline-none"
+              className="mt-1 h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm placeholder:text-text-faint focus:border-border-default focus:outline-none"
             />
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-white/70">
+          <label className="flex items-center gap-2 text-sm text-text-secondary">
             <input
               type="checkbox"
               checked={isDefault}
               onChange={(e) => setIsDefault(e.target.checked)}
-              className="rounded border-white/20"
+              className="rounded border-border-default"
             />
             Set as default for {reportType} reports
           </label>
         </div>
 
         <div className="mt-5 flex justify-end gap-3">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={onCancel}
-            className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10"
           >
             Cancel
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             onClick={() => onSave({ name, description, isDefault })}
             disabled={!name.trim() || saving}
-            className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

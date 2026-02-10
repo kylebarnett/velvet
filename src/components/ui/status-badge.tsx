@@ -19,11 +19,11 @@ interface StatusBadgeProps {
 }
 
 const variantStyles: Record<StatusBadgeVariant, string> = {
-  success: "bg-emerald-500/20 text-emerald-200",
-  warning: "bg-amber-500/20 text-amber-200",
-  error: "bg-red-500/20 text-red-200",
-  info: "bg-blue-500/20 text-blue-200",
-  neutral: "bg-white/10 text-white/70",
+  success: "bg-[var(--status-success-bg)] text-[var(--status-success-text)]",
+  warning: "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]",
+  error: "bg-[var(--status-error-bg)] text-[var(--status-error-text)]",
+  info: "bg-[var(--status-info-bg)] text-[var(--status-info-text)]",
+  neutral: "bg-bg-hover text-text-secondary",
 };
 
 const sizeStyles: Record<StatusBadgeSize, string> = {

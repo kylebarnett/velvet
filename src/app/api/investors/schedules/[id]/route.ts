@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 // GET - Get a single schedule with run history
 export async function GET(
@@ -67,7 +68,7 @@ export async function GET(
     if (error.code === "PGRST116") {
       return jsonError("Schedule not found.", 404);
     }
-    console.error("Failed to fetch schedule:", error.message);
+    logger.error("Failed to fetch schedule:", error.message);
     return jsonError("Failed to fetch schedule.", 500);
   }
 
@@ -240,7 +241,7 @@ export async function PUT(
     .eq("id", id);
 
   if (updateError) {
-    console.error("Failed to update schedule:", updateError.message);
+    logger.error("Failed to update schedule:", updateError.message);
     return jsonError("Failed to update schedule.", 500);
   }
 
@@ -277,7 +278,7 @@ export async function DELETE(
     .eq("id", id);
 
   if (deleteError) {
-    console.error("Failed to delete schedule:", deleteError.message);
+    logger.error("Failed to delete schedule:", deleteError.message);
     return jsonError("Failed to delete schedule.", 500);
   }
 

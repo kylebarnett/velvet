@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { TearSheetEditor } from "@/components/founder/tear-sheet-editor";
 import { TearSheetPreview } from "@/components/founder/tear-sheet-preview";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+import { logger } from "@/lib/logger";
 
 type MobileViewMode = "editor" | "preview";
 
@@ -189,8 +190,8 @@ export default function EditTearSheetPage() {
         previewRef.current,
         `${tearSheet?.title ?? "tear-sheet"}.pdf`,
       );
-    } catch (e) {
-      console.error("PDF export failed:", e);
+    } catch (e: unknown) {
+      logger.error("PDF export failed:", e);
       setError("PDF export failed. Please try again.");
     } finally {
       setExportingPdf(false);
@@ -198,7 +199,7 @@ export default function EditTearSheetPage() {
   }
 
   if (loading) {
-    return <div className="text-sm text-white/60">Loading tear sheet...</div>;
+    return <div className="text-sm text-text-tertiary">Loading tear sheet...</div>;
   }
 
   if (error && !tearSheet) {
@@ -206,12 +207,12 @@ export default function EditTearSheetPage() {
       <div className="space-y-4">
         <Link
           href="/portal/tear-sheets"
-          className="flex items-center gap-1 text-sm text-white/50 hover:text-white"
+          className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to tear sheets
         </Link>
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       </div>
@@ -231,7 +232,7 @@ export default function EditTearSheetPage() {
         <div className="space-y-1">
           <Link
             href="/portal/tear-sheets"
-            className="flex items-center gap-1 text-sm text-white/50 hover:text-white"
+            className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to tear sheets
@@ -243,13 +244,13 @@ export default function EditTearSheetPage() {
             <span
               className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                 tearSheet.status === "published"
-                  ? "bg-emerald-500/20 text-emerald-200"
-                  : "bg-amber-500/20 text-amber-200"
+                  ? "bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
+                  : "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]"
               }`}
             >
               {tearSheet.status === "published" ? "Published" : "Draft"}
             </span>
-            <span className="text-xs text-white/60">
+            <span className="text-xs text-text-tertiary">
               {tearSheet.quarter} {tearSheet.year}
             </span>
           </div>
@@ -271,7 +272,7 @@ export default function EditTearSheetPage() {
             type="button"
             onClick={handleExportPdf}
             disabled={exportingPdf}
-            className="rounded-md border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/80 hover:border-white/20 disabled:opacity-50"
+            className="rounded-md border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default disabled:opacity-50"
           >
             {exportingPdf ? "Generating..." : "Download PDF"}
           </button>
@@ -283,8 +284,8 @@ export default function EditTearSheetPage() {
                 onClick={handleToggleShare}
                 className={`rounded-md border px-3 py-1.5 text-xs font-medium ${
                   tearSheet.share_enabled
-                    ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/20"
-                    : "border-white/10 bg-black/20 text-white/80 hover:border-white/20"
+                    ? "border-[var(--status-success-bg)] bg-[var(--status-success-bg)] text-[var(--status-success-text)] hover:bg-emerald-500/20"
+                    : "border-border-default bg-bg-input text-text-primary hover:border-border-default"
                 }`}
               >
                 {tearSheet.share_enabled ? "Sharing On" : "Enable Sharing"}
@@ -293,7 +294,7 @@ export default function EditTearSheetPage() {
                 type="button"
                 onClick={handleUnpublish}
                 disabled={saving}
-                className="rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200 hover:bg-amber-500/20 disabled:opacity-50"
+                className="rounded-md border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] px-3 py-1.5 text-xs font-medium text-[var(--status-warning-text)] hover:bg-amber-500/20 disabled:opacity-50"
               >
                 Unpublish
               </button>
@@ -304,7 +305,7 @@ export default function EditTearSheetPage() {
               type="button"
               onClick={handlePublish}
               disabled={saving}
-              className="rounded-md bg-white px-3 py-1.5 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-50"
+              className="rounded-md bg-btn-primary-bg px-3 py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
             >
               {saving ? "Publishing..." : "Publish"}
             </button>
@@ -314,9 +315,9 @@ export default function EditTearSheetPage() {
 
       {/* Share URL — copy to clipboard only, no visible link */}
       {tearSheet.share_enabled && shareUrl && (
-        <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-2">
+        <div className="rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-emerald-200">
+            <span className="text-xs text-[var(--status-success-text)]">
               Sharing is on — anyone with the link can view this tear sheet.
             </span>
             <button
@@ -325,7 +326,7 @@ export default function EditTearSheetPage() {
                 navigator.clipboard.writeText(shareUrl);
                 setSuccess("Link copied to clipboard.");
               }}
-              className="shrink-0 rounded-md border border-emerald-500/30 px-2.5 py-1 text-xs font-medium text-emerald-200 hover:bg-emerald-500/20"
+              className="shrink-0 rounded-md border border-emerald-500/30 px-2.5 py-1 text-xs font-medium text-[var(--status-success-text)] hover:bg-emerald-500/20"
             >
               Copy Link
             </button>
@@ -334,13 +335,13 @@ export default function EditTearSheetPage() {
       )}
 
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+        <div className="rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2 text-sm text-[var(--status-success-text)]">
           {success}
         </div>
       )}

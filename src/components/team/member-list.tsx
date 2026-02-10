@@ -24,9 +24,9 @@ type Props = {
 };
 
 const roleBadgeStyles: Record<string, string> = {
-  admin: "bg-amber-500/20 text-amber-200",
-  member: "bg-blue-500/20 text-blue-200",
-  viewer: "bg-white/10 text-white/60",
+  admin: "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]",
+  member: "bg-[var(--status-info-bg)] text-[var(--status-info-text)]",
+  viewer: "bg-bg-hover text-text-tertiary",
 };
 
 export function MemberList({
@@ -63,7 +63,7 @@ export function MemberList({
         throw new Error(json?.error ?? "Failed to update role.");
       }
       onMemberUpdated();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setUpdating(null);
@@ -86,7 +86,7 @@ export function MemberList({
         throw new Error(json?.error ?? "Failed to remove member.");
       }
       onMemberUpdated();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setUpdating(null);
@@ -96,12 +96,12 @@ export function MemberList({
   return (
     <div className="space-y-3">
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
 
-      <div className="rounded-xl border border-white/10 bg-white/5 divide-y divide-white/5">
+      <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
         {members.map((member) => {
           const isOwner = member.userId === ownerId;
           const isSelf = member.userId === currentUserId;
@@ -113,8 +113,8 @@ export function MemberList({
               className="flex items-center gap-4 px-4 py-3"
             >
               {/* Avatar */}
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5">
-                <span className="text-sm font-medium text-white/60">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border-default bg-bg-elevated">
+                <span className="text-sm font-medium text-text-tertiary">
                   {(member.name || member.email).charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -129,10 +129,10 @@ export function MemberList({
                     <Crown className="h-3.5 w-3.5 text-amber-400" aria-label="Owner" />
                   )}
                   {isSelf && (
-                    <span className="text-[10px] text-white/40">(you)</span>
+                    <span className="text-[10px] text-text-muted">(you)</span>
                   )}
                 </div>
-                <div className="text-xs text-white/40 truncate">
+                <div className="text-xs text-text-muted truncate">
                   {member.email}
                 </div>
               </div>
@@ -141,7 +141,7 @@ export function MemberList({
               {isAdmin && !isSelf && !isOwner ? (
                 <div className="flex items-center gap-2">
                   {isBeingUpdated ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-white/40" />
+                    <Loader2 className="h-4 w-4 animate-spin text-text-muted" />
                   ) : (
                     <>
                       <MemberRoleSelector
@@ -153,7 +153,7 @@ export function MemberList({
                         onClick={() =>
                           setRemoveModal({ open: true, member })
                         }
-                        className="rounded-md p-1.5 text-red-400/60 hover:bg-red-500/10 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-white/20"
+                        className="rounded-md p-1.5 text-red-400/60 hover:bg-red-500/10 hover:text-[var(--status-error-text)] focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                         title="Remove member"
                         aria-label={`Remove ${member.name || member.email}`}
                       >

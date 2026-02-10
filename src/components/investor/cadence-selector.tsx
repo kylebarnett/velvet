@@ -71,7 +71,7 @@ export function CadenceSelector({
     <div className="space-y-6">
       {/* Cadence selection */}
       <div>
-        <label className="text-sm font-medium text-white/70">Frequency</label>
+        <label className="text-sm font-medium text-text-secondary">Frequency</label>
         <div className="mt-2 grid gap-3 sm:grid-cols-3">
           {CADENCE_OPTIONS.map((option) => {
             const Icon = option.icon;
@@ -84,25 +84,25 @@ export function CadenceSelector({
                 onClick={() => onChange(option.value)}
                 className={`flex flex-col items-start rounded-xl border p-4 text-left transition-colors ${
                   isSelected
-                    ? "border-white/30 bg-white/10"
-                    : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/[0.07]"
+                    ? "border-border-default bg-bg-hover"
+                    : "border-border-default bg-bg-elevated hover:border-border-default hover:bg-bg-elevated"
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <Icon
                     className={`h-4 w-4 ${
-                      isSelected ? "text-white" : "text-white/50"
+                      isSelected ? "text-text-primary" : "text-text-muted"
                     }`}
                   />
                   <span
                     className={`font-medium ${
-                      isSelected ? "text-white" : "text-white/70"
+                      isSelected ? "text-text-primary" : "text-text-secondary"
                     }`}
                   >
                     {option.label}
                   </span>
                 </div>
-                <span className="mt-1 text-xs text-white/60">
+                <span className="mt-1 text-xs text-text-tertiary">
                   {option.description}
                 </span>
               </button>
@@ -113,7 +113,7 @@ export function CadenceSelector({
 
       {/* Day of month selection */}
       <div>
-        <label className="text-sm font-medium text-white/70">
+        <label className="text-sm font-medium text-text-secondary">
           Day of the{" "}
           {value === "monthly"
             ? "month"
@@ -121,7 +121,7 @@ export function CadenceSelector({
               ? "quarter's first month"
               : "year (January)"}
         </label>
-        <p className="mt-1 text-xs text-white/60">
+        <p className="mt-1 text-xs text-text-tertiary">
           Requests will be created on this day to request data for the previous{" "}
           {value === "monthly"
             ? "month"
@@ -149,7 +149,7 @@ export function CadenceSelector({
             </SelectContent>
           </Select>
         </div>
-        <p className="mt-2 text-xs text-white/40">
+        <p className="mt-2 text-xs text-text-muted">
           Tip: Choose a day between 1-7 to give founders time at the beginning
           of each period to prepare their metrics.
         </p>

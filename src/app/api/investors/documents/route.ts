@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { parsePagination } from "@/lib/api/pagination";
+import { logger } from "@/lib/logger";
 
 // GET - List all documents across investor's portfolio
 export async function GET(req: Request) {
@@ -77,7 +78,7 @@ export async function GET(req: Request) {
   const { data: documents, error, count } = await query;
 
   if (error) {
-    console.error("Failed to fetch documents:", error.message);
+    logger.error("Failed to fetch documents:", error.message);
     return jsonError("Failed to fetch documents.", 500);
   }
 

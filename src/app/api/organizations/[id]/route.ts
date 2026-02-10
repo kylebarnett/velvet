@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 const updateSchema = z.object({
   name: z.string().min(1).max(100),
@@ -67,7 +68,7 @@ export async function PUT(
     .eq("id", id);
 
   if (error) {
-    console.error("Failed to update organization:", error.message);
+    logger.error("Failed to update organization:", error.message);
     return jsonError("Failed to process request.", 400);
   }
 
@@ -114,7 +115,7 @@ export async function DELETE(
     .eq("id", id);
 
   if (error) {
-    console.error("Failed to delete organization:", error.message);
+    logger.error("Failed to delete organization:", error.message);
     return jsonError("Failed to process request.", 400);
   }
 

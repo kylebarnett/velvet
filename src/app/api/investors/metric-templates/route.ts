@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { parsePagination } from "@/lib/api/pagination";
+import { logger } from "@/lib/logger";
 
 // GET - List all templates for investor (system + user templates)
 export async function GET(req: Request) {
@@ -41,7 +42,7 @@ export async function GET(req: Request) {
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error("Failed to fetch templates:", error.message);
+    logger.error("Failed to fetch templates:", error.message);
     return jsonError("Failed to fetch templates.", 500);
   }
 
@@ -108,7 +109,7 @@ export async function POST(req: Request) {
     .single();
 
   if (templateError) {
-    console.error("Failed to create template:", templateError.message);
+    logger.error("Failed to create template:", templateError.message);
     return jsonError("Failed to create template.", 500);
   }
 
@@ -128,7 +129,7 @@ export async function POST(req: Request) {
   if (itemsError) {
     // Cleanup template on item insert failure
     await supabase.from("metric_templates").delete().eq("id", template.id);
-    console.error("Failed to create template items:", itemsError.message);
+    logger.error("Failed to create template items:", itemsError.message);
     return jsonError("Failed to create template.", 500);
   }
 

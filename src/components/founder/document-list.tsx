@@ -315,7 +315,7 @@ export function FounderDocumentList() {
         if (!res.ok) throw new Error(json?.error ?? "Failed to load documents.");
         if (json.companyName) setCompanyName(json.companyName);
         setDocuments(json.documents);
-      } catch (err) {
+      } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
       } finally {
         setLoading(false);
@@ -333,13 +333,13 @@ export function FounderDocumentList() {
     );
   }, [documents, searchQuery]);
 
-  function openDeleteModal(doc: Document) {
+  const openDeleteModal = React.useCallback((doc: Document) => {
     setDeleteModal({ open: true, document: doc });
-  }
+  }, []);
 
-  function closeDeleteModal() {
+  const closeDeleteModal = React.useCallback(() => {
     setDeleteModal({ open: false, document: null });
-  }
+  }, []);
 
   async function confirmDelete() {
     const doc = deleteModal.document;
@@ -358,14 +358,14 @@ export function FounderDocumentList() {
       setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
       if (previewDoc?.id === doc.id) setPreviewDoc(null);
       setSuccess("Document deleted.");
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setDeleting(false);
     }
   }
 
-  async function downloadDocument(doc: Document) {
+  const downloadDocument = React.useCallback(async (doc: Document) => {
     try {
       const res = await fetch(`/api/documents/download?path=${encodeURIComponent(doc.file_path)}`);
       if (!res.ok) {
@@ -386,10 +386,10 @@ export function FounderDocumentList() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Download failed.");
     }
-  }
+  }, []);
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -487,8 +487,8 @@ export function FounderDocumentList() {
                     <div className="min-w-0 flex-1">
                       <div className="font-medium truncate text-sm">{doc.file_name}</div>
                       <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-bg-hover px-2 py-0.5 text-xs">
-                          {documentTypeLabels[doc.document_type] ?? doc.document_type}
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${documentTypeColors[doc.document_type] ?? documentTypeColors.other}`}>
+                          {documentTypeShortLabels[doc.document_type] ?? doc.document_type}
                         </span>
                         {doc.period_label && (
                           <span className="rounded-full bg-[var(--tag-blue-bg)] px-2 py-0.5 text-xs text-[var(--tag-blue-text)]">
@@ -595,7 +595,7 @@ export function FounderDocumentList() {
                             </div>
                           </td>
                           <td className="p-3">
-                            <span className="rounded-full bg-bg-hover px-2 py-0.5 text-xs whitespace-nowrap">
+                            <span className={`inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${documentTypeColors[doc.document_type] ?? documentTypeColors.other}`}>
                               {documentTypeLabels[doc.document_type] ?? doc.document_type}
                             </span>
                           </td>

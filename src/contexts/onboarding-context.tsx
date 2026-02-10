@@ -8,6 +8,7 @@ import {
   type OnboardingStep,
   type UserRole,
 } from "@/lib/onboarding/steps";
+import { logger } from "@/lib/logger";
 
 type OnboardingState = {
   currentStepIndex: number | null;
@@ -89,8 +90,8 @@ export function OnboardingProvider({
             role,
           }),
         });
-      } catch (err) {
-        console.error("Failed to persist onboarding step:", err);
+      } catch (err: unknown) {
+        logger.error("Failed to persist onboarding step:", err);
       }
     },
     [role],

@@ -66,18 +66,18 @@ type WidgetLibraryProps = {
 
 export function WidgetLibrary({ onAddWidget }: WidgetLibraryProps) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-      <h3 className="mb-3 text-sm font-medium text-white/80">Widget Library</h3>
+    <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+      <h3 className="mb-3 text-sm font-medium text-text-secondary">Widget Library</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {WIDGET_TEMPLATES.map((template) => (
           <button
             key={`${template.type}-${template.subtype ?? ""}`}
             type="button"
             onClick={() => onAddWidget(template)}
-            className="flex flex-col items-center gap-2 rounded-lg border border-white/10 bg-black/20 p-3 transition-colors hover:border-white/20 hover:bg-black/30"
+            className="flex flex-col items-center gap-2 rounded-lg border border-border-default bg-bg-input p-3 transition-colors hover:border-border-default hover:bg-bg-elevated"
           >
-            <span className="text-white/60">{template.icon}</span>
-            <span className="text-xs text-white/70">{template.label}</span>
+            <span className="text-text-tertiary">{template.icon}</span>
+            <span className="text-xs text-text-secondary">{template.label}</span>
           </button>
         ))}
       </div>

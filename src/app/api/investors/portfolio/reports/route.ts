@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
@@ -36,7 +37,7 @@ export async function GET(req: Request) {
 
   const { data, error } = await query;
   if (error) {
-    console.error("Failed to fetch reports:", error.message);
+    logger.error("Failed to fetch reports:", error.message);
     return jsonError("Failed to fetch reports.", 500);
   }
 
@@ -83,7 +84,7 @@ export async function POST(req: Request) {
     .single();
 
   if (error) {
-    console.error("Failed to create report:", error.message);
+    logger.error("Failed to create report:", error.message);
     return jsonError("Failed to create report.", 500);
   }
 

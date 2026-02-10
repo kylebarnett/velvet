@@ -29,7 +29,7 @@ const OPTIONS: { value: NormalizationMode; label: string; description: string }[
 
 export function NormalizationToggle({ value, onChange }: NormalizationToggleProps) {
   return (
-    <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
+    <div className="flex items-center gap-1 rounded-lg border border-border-default bg-bg-raised p-0.5">
       {OPTIONS.map((option) => (
         <button
           key={option.value}
@@ -39,8 +39,8 @@ export function NormalizationToggle({ value, onChange }: NormalizationToggleProp
           className={cn(
             "rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-150",
             value === option.value
-              ? "bg-white/10 text-white shadow-sm"
-              : "text-white/50 hover:text-white/70"
+              ? "bg-bg-hover text-text-primary shadow-sm"
+              : "text-text-muted hover:text-text-secondary"
           )}
         >
           {option.label}

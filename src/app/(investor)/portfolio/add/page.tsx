@@ -13,13 +13,13 @@ export default async function AddContactPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Add Contact</h1>
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-text-tertiary">
             Manually add a portfolio company and founder contact.
           </p>
         </div>
         <Link
           href="/portfolio"
-          className="text-sm text-white/60 hover:text-white"
+          className="text-sm text-text-tertiary hover:text-text-primary"
         >
           Back to Portfolio
         </Link>

@@ -25,12 +25,12 @@ export function CompanyTagEditorWrapper({
   const hasTags = stage || industry || businessModel;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+    <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
       <div className="flex items-center justify-between">
         <div className="text-sm font-medium">Company Tags</div>
         <button
           onClick={() => setIsEditing(!isEditing)}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs font-medium text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           type="button"
         >
           <Pencil className="h-3 w-3" />
@@ -47,13 +47,13 @@ export function CompanyTagEditorWrapper({
               <TagBadge label="Model" value={businessModel} />
             </>
           ) : (
-            <span className="text-sm text-white/60">No tags set. Click Edit to add tags.</span>
+            <span className="text-sm text-text-tertiary">No tags set. Click Edit to add tags.</span>
           )}
         </div>
       )}
 
       {isEditing && (
-        <div className="mt-4 border-t border-white/10 pt-4">
+        <div className="mt-4 border-t border-border-default pt-4">
           <CompanyTagEditor
             companyId={companyId}
             stage={stage}

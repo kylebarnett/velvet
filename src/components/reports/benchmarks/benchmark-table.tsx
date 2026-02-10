@@ -36,7 +36,7 @@ function getDeltaColor(value: number, median: number): string {
   const diff = value - median;
   if (diff > 0) return "text-emerald-400";
   if (diff < 0) return "text-red-400";
-  return "text-white/60";
+  return "text-text-tertiary";
 }
 
 export function BenchmarkTable({
@@ -81,19 +81,19 @@ export function BenchmarkTable({
 
   function SortIcon({ field }: { field: SortField }) {
     if (sortField !== field) {
-      return <ArrowUpDown className="h-3 w-3 text-white/30" />;
+      return <ArrowUpDown className="h-3 w-3 text-text-faint" />;
     }
     return sortDir === "asc" ? (
-      <ArrowUp className="h-3 w-3 text-white/60" />
+      <ArrowUp className="h-3 w-3 text-text-tertiary" />
     ) : (
-      <ArrowDown className="h-3 w-3 text-white/60" />
+      <ArrowDown className="h-3 w-3 text-text-tertiary" />
     );
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5">
+    <div className="rounded-xl border border-border-default bg-bg-elevated">
       <div className="p-4 pb-2">
-        <h3 className="text-sm font-medium text-white/80">
+        <h3 className="text-sm font-medium text-text-primary">
           Company Rankings
         </h3>
       </div>
@@ -101,12 +101,12 @@ export function BenchmarkTable({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-white/[0.06]">
+            <tr className="border-b border-border-subtle">
               <th className="px-4 py-2.5">
                 <button
                   type="button"
                   onClick={() => toggleSort("name")}
-                  className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-white/40 transition-colors hover:text-white/60"
+                  className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-tertiary"
                 >
                   Company
                   <SortIcon field="name" />
@@ -116,7 +116,7 @@ export function BenchmarkTable({
                 <button
                   type="button"
                   onClick={() => toggleSort("value")}
-                  className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-white/40 transition-colors hover:text-white/60"
+                  className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-tertiary"
                 >
                   Value
                   <SortIcon field="value" />
@@ -126,7 +126,7 @@ export function BenchmarkTable({
                 <button
                   type="button"
                   onClick={() => toggleSort("percentile")}
-                  className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-white/40 transition-colors hover:text-white/60"
+                  className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-tertiary"
                 >
                   Percentile
                   <SortIcon field="percentile" />
@@ -137,7 +137,7 @@ export function BenchmarkTable({
                   <button
                     type="button"
                     onClick={() => toggleSort("delta")}
-                    className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-white/40 transition-colors hover:text-white/60"
+                    className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-tertiary"
                   >
                     vs Median
                     <SortIcon field="delta" />
@@ -150,17 +150,17 @@ export function BenchmarkTable({
             {sortedCompanies.map((company) => (
               <tr
                 key={company.id}
-                className="border-b border-white/[0.04] transition-colors hover:bg-white/[0.03]"
+                className="border-b border-border-subtle transition-colors hover:bg-bg-raised"
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-zinc-50">
+                    <span className="font-medium text-text-primary">
                       {company.name}
                     </span>
                     {(company.industry || company.stage) && (
                       <div className="flex items-center gap-1">
                         {company.industry && (
-                          <span className="rounded-md bg-blue-500/20 px-1.5 py-0.5 text-[10px] text-blue-200">
+                          <span className="rounded-md bg-blue-500/20 px-1.5 py-0.5 text-[10px] text-[var(--status-info-text)]">
                             {company.industry}
                           </span>
                         )}
@@ -173,7 +173,7 @@ export function BenchmarkTable({
                     )}
                   </div>
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-white/80">
+                <td className="px-4 py-3 text-right tabular-nums text-text-primary">
                   {company.formattedValue}
                 </td>
                 <td className="px-4 py-3 text-right">
@@ -187,7 +187,7 @@ export function BenchmarkTable({
                       P{company.percentile}
                     </span>
                   ) : (
-                    <span className="text-xs text-white/30">-</span>
+                    <span className="text-xs text-text-faint">-</span>
                   )}
                 </td>
                 {medianValue !== null && (
@@ -207,7 +207,7 @@ export function BenchmarkTable({
       </div>
 
       {companies.length === 0 && (
-        <div className="p-6 text-center text-sm text-white/40">
+        <div className="p-6 text-center text-sm text-text-muted">
           No company data to display.
         </div>
       )}

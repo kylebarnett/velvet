@@ -75,7 +75,7 @@ export function TemplatesTabContent() {
   const [editingSystem, setEditingSystem] = React.useState<string | null>(null);
   const [showHidden, setShowHidden] = React.useState(false);
 
-  function toggleExpanded(templateId: string) {
+  const toggleExpanded = React.useCallback((templateId: string) => {
     setExpandedTemplates((prev) => {
       const next = new Set(prev);
       if (next.has(templateId)) {
@@ -85,30 +85,10 @@ export function TemplatesTabContent() {
       }
       return next;
     });
-  }
+  }, []);
 
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = React.useState(false);
-
-  function toggleSelected(id: string) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }
-
-  function selectAll() {
-    setSelectedIds(new Set(userTemplates.map((t) => t.id)));
-  }
-
-  function selectNone() {
-    setSelectedIds(new Set());
-  }
 
   const [assignModal, setAssignModal] = React.useState<{
     open: boolean;
@@ -132,14 +112,42 @@ export function TemplatesTabContent() {
     template: Template | null;
   }>({ open: false, mode: "create", template: null });
 
-  const systemTemplates = templates.filter((t) => t.isSystem);
-  const visibleSystemTemplates = systemTemplates.filter(
-    (t) => !hiddenTemplateIds.includes(t.id)
+  const systemTemplates = React.useMemo(
+    () => templates.filter((t) => t.isSystem),
+    [templates],
   );
-  const hiddenSystemTemplates = systemTemplates.filter((t) =>
-    hiddenTemplateIds.includes(t.id)
+  const visibleSystemTemplates = React.useMemo(
+    () => systemTemplates.filter((t) => !hiddenTemplateIds.includes(t.id)),
+    [systemTemplates, hiddenTemplateIds],
   );
-  const userTemplates = templates.filter((t) => !t.isSystem);
+  const hiddenSystemTemplates = React.useMemo(
+    () => systemTemplates.filter((t) => hiddenTemplateIds.includes(t.id)),
+    [systemTemplates, hiddenTemplateIds],
+  );
+  const userTemplates = React.useMemo(
+    () => templates.filter((t) => !t.isSystem),
+    [templates],
+  );
+
+  const toggleSelected = React.useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const selectAll = React.useCallback(() => {
+    setSelectedIds(new Set(userTemplates.map((t) => t.id)));
+  }, [userTemplates]);
+
+  const selectNone = React.useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
 
   async function loadData() {
     try {

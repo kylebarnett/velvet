@@ -46,14 +46,14 @@ export function SchedulesTabContent() {
         {[1, 2].map((i) => (
           <div
             key={i}
-            className="rounded-xl border border-white/10 bg-white/5 p-4"
+            className="rounded-xl border border-border-default bg-bg-elevated p-4"
           >
             <div className="space-y-3">
-              <div className="h-5 w-40 animate-pulse rounded bg-white/10" />
-              <div className="h-4 w-64 animate-pulse rounded bg-white/5" />
+              <div className="h-5 w-40 animate-pulse rounded bg-bg-hover" />
+              <div className="h-4 w-64 animate-pulse rounded bg-bg-elevated" />
               <div className="flex gap-2">
                 {[1, 2, 3].map((j) => (
-                  <div key={j} className="h-5 w-16 animate-pulse rounded-full bg-white/10" />
+                  <div key={j} className="h-5 w-16 animate-pulse rounded-full bg-bg-hover" />
                 ))}
               </div>
             </div>
@@ -65,10 +65,10 @@ export function SchedulesTabContent() {
 
   if (migrationNeeded) {
     return (
-      <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
-        <p className="text-sm text-amber-200">
+      <div className="rounded-xl border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] p-4">
+        <p className="text-sm text-[var(--status-warning-text)]">
           The schedules feature requires a database migration. Please run{" "}
-          <code className="rounded bg-black/30 px-1.5 py-0.5 text-xs">
+          <code className="rounded bg-bg-input px-1.5 py-0.5 text-xs">
             0010_metric_request_schedules.sql
           </code>{" "}
           in your Supabase SQL Editor.
@@ -79,7 +79,7 @@ export function SchedulesTabContent() {
 
   if (error) {
     return (
-      <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+      <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
         {error}
       </div>
     );
@@ -90,15 +90,15 @@ export function SchedulesTabContent() {
       {/* Header with new schedule button */}
       <div className="flex items-center justify-between">
         <div className="flex items-start gap-3">
-          <Calendar className="mt-0.5 h-5 w-5 shrink-0 text-blue-300" />
-          <p className="text-sm text-white/60">
+          <Calendar className="mt-0.5 h-5 w-5 shrink-0 text-[var(--tag-blue-text)]" />
+          <p className="text-sm text-text-tertiary">
             Schedules automatically create metric requests and send email
             notifications to founders on a recurring cadence.
           </p>
         </div>
         <Link
-          href="/requests/new"
-          className="ml-4 inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90"
+          href="/campaigns/new"
+          className="ml-4 inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
         >
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">New schedule</span>

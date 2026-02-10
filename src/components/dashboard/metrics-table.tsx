@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { createPortal } from "react-dom";
 import { formatValue, formatPeriod } from "@/components/charts/types";
 import { Sparkles, PenLine, RotateCcw, Info, GripVertical, ArrowUpDown } from "lucide-react";
@@ -456,6 +457,235 @@ function getPreferenceKey(storageKey: string): string {
   return `metric_order.${storageKey}`;
 }
 
+/** Virtualization threshold — only virtualize when row count exceeds this */
+const VIRTUALIZE_THRESHOLD = 30;
+/** Estimated row height in pixels for the virtualizer */
+const ESTIMATED_ROW_HEIGHT = 44;
+
+type MetricsTableBodyProps = {
+  scrollRef: React.RefObject<HTMLDivElement | null>;
+  displayData: MetricRow[];
+  displayPeriods: string[];
+  visiblePeriods: string[];
+  showTotals: boolean;
+  isReorderMode: boolean;
+  hoveredCell: HoveredCell;
+  handleCellMouseEnter: (metricName: string, periodStart: string, cellEl: HTMLTableCellElement) => void;
+  handleCellMouseLeave: () => void;
+  handleMetricInfoHover: (metricName: string, periodType: string, rect: DOMRect) => void;
+  handleMetricInfoLeave: () => void;
+  handleResizeStart: (e: React.MouseEvent) => void;
+  periodHeaderRefs: React.MutableRefObject<Map<string, HTMLTableCellElement>>;
+  observerRef: React.MutableRefObject<IntersectionObserver | null>;
+  periodColWidth: number | null;
+  GRIP_COL_WIDTH: number;
+  METRIC_COL_WIDTH: number;
+  TOTAL_COL_WIDTH: number;
+};
+
+function MetricsTableBody({
+  scrollRef,
+  displayData,
+  displayPeriods,
+  visiblePeriods,
+  showTotals,
+  isReorderMode,
+  hoveredCell,
+  handleCellMouseEnter,
+  handleCellMouseLeave,
+  handleMetricInfoHover,
+  handleMetricInfoLeave,
+  handleResizeStart,
+  periodHeaderRefs,
+  observerRef,
+  periodColWidth,
+  GRIP_COL_WIDTH,
+  METRIC_COL_WIDTH,
+  TOTAL_COL_WIDTH,
+}: MetricsTableBodyProps) {
+  const shouldVirtualize = displayData.length > VIRTUALIZE_THRESHOLD && !isReorderMode;
+
+  const virtualizer = useVirtualizer({
+    count: displayData.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => ESTIMATED_ROW_HEIGHT,
+    overscan: 10,
+    enabled: shouldVirtualize,
+  });
+
+  const totalColCount =
+    (isReorderMode ? 1 : 0) +
+    1 + // metric name column
+    displayPeriods.length +
+    (showTotals ? 1 : 0);
+
+  const tableWidth =
+    GRIP_COL_WIDTH +
+    METRIC_COL_WIDTH +
+    displayPeriods.length * (periodColWidth ?? 150) +
+    TOTAL_COL_WIDTH;
+
+  const theadContent = (
+    <tr className="border-b border-border-subtle">
+      {isReorderMode && (
+        <th className="sticky left-0 z-10 w-8 bg-[var(--table-bg)] py-2.5 pl-2" />
+      )}
+      <th
+        className={`group/header relative sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-[var(--table-bg)] py-2.5 pl-3 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider text-text-muted`}
+        style={{ boxShadow: "4px 0 6px -4px rgba(0,0,0,0.2)" }}
+      >
+        Metric
+        {/* Resize handle */}
+        <div
+          onMouseDown={handleResizeStart}
+          className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize opacity-0 transition-opacity group-hover/header:opacity-100 hover:!opacity-100"
+        >
+          <div className="absolute right-0 top-0 bottom-0 w-px bg-border-default" />
+        </div>
+      </th>
+      {displayPeriods.map((period) => (
+        <th
+          key={period}
+          data-period={period}
+          ref={(el) => {
+            if (el) {
+              periodHeaderRefs.current.set(period, el);
+              observerRef.current?.observe(el);
+            } else {
+              const prev = periodHeaderRefs.current.get(period);
+              if (prev) observerRef.current?.unobserve(prev);
+              periodHeaderRefs.current.delete(period);
+            }
+          }}
+          className="overflow-hidden px-3 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-text-muted"
+        >
+          <span className="block truncate whitespace-nowrap">
+            {formatPeriod(period, displayData[0]?.periodType ?? "quarterly")}
+          </span>
+        </th>
+      ))}
+      {showTotals && (
+        <th
+          className="sticky right-0 z-10 bg-[var(--table-bg)] py-2.5 px-3 text-right text-[11px] font-semibold uppercase tracking-wider text-text-muted"
+          style={{ boxShadow: "-4px 0 6px -4px rgba(0,0,0,0.2)" }}
+        >
+          <span className="inline-flex items-center justify-end gap-1">
+            Total
+            <TotalColumnTooltip
+              periodType={displayData[0]?.periodType ?? "quarterly"}
+              periodsVisible={visiblePeriods.length}
+            />
+          </span>
+        </th>
+      )}
+    </tr>
+  );
+
+  if (!shouldVirtualize) {
+    return (
+      <div ref={scrollRef} className="overflow-x-auto">
+        <table
+          className="text-sm"
+          style={{ tableLayout: "fixed", width: tableWidth }}
+        >
+          <colgroup>
+            {isReorderMode && <col style={{ width: GRIP_COL_WIDTH }} />}
+            <col style={{ width: METRIC_COL_WIDTH }} />
+            {displayPeriods.map((period) => (
+              <col key={period} style={{ width: periodColWidth ?? 150 }} />
+            ))}
+            {showTotals && <col style={{ width: TOTAL_COL_WIDTH }} />}
+          </colgroup>
+          <thead>{theadContent}</thead>
+          <tbody>
+            {displayData.map((metric) => (
+              <SortableMetricRow
+                key={metric.metricName}
+                metric={metric}
+                displayPeriods={displayPeriods}
+                visiblePeriods={visiblePeriods}
+                showTotals={showTotals}
+                isReorderMode={isReorderMode}
+                hoveredCell={hoveredCell}
+                onCellMouseEnter={handleCellMouseEnter}
+                onCellMouseLeave={handleCellMouseLeave}
+                onMetricInfoHover={handleMetricInfoHover}
+                onMetricInfoLeave={handleMetricInfoLeave}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  // Virtualized rendering
+  const virtualItems = virtualizer.getVirtualItems();
+
+  return (
+    <div ref={scrollRef} className="max-h-[600px] overflow-auto">
+      <table
+        className="text-sm"
+        style={{ tableLayout: "fixed", width: tableWidth }}
+      >
+        <colgroup>
+          {isReorderMode && <col style={{ width: GRIP_COL_WIDTH }} />}
+          <col style={{ width: METRIC_COL_WIDTH }} />
+          {displayPeriods.map((period) => (
+            <col key={period} style={{ width: periodColWidth ?? 150 }} />
+          ))}
+          {showTotals && <col style={{ width: TOTAL_COL_WIDTH }} />}
+        </colgroup>
+        <thead className="sticky top-0 z-20 bg-[var(--table-bg)]">
+          {theadContent}
+        </thead>
+        <tbody>
+          {/* Top spacer */}
+          {virtualItems.length > 0 && virtualItems[0].start > 0 && (
+            <tr>
+              <td
+                colSpan={totalColCount}
+                style={{ height: virtualItems[0].start, padding: 0, border: 0 }}
+              />
+            </tr>
+          )}
+          {virtualItems.map((virtualRow) => {
+            const metric = displayData[virtualRow.index];
+            return (
+              <SortableMetricRow
+                key={metric.metricName}
+                metric={metric}
+                displayPeriods={displayPeriods}
+                visiblePeriods={visiblePeriods}
+                showTotals={showTotals}
+                isReorderMode={isReorderMode}
+                hoveredCell={hoveredCell}
+                onCellMouseEnter={handleCellMouseEnter}
+                onCellMouseLeave={handleCellMouseLeave}
+                onMetricInfoHover={handleMetricInfoHover}
+                onMetricInfoLeave={handleMetricInfoLeave}
+              />
+            );
+          })}
+          {/* Bottom spacer */}
+          {virtualItems.length > 0 && (
+            <tr>
+              <td
+                colSpan={totalColCount}
+                style={{
+                  height: virtualizer.getTotalSize() - (virtualItems.at(-1)?.end ?? 0),
+                  padding: 0,
+                  border: 0,
+                }}
+              />
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function MetricsTable({
   data,
   title,
@@ -855,6 +1085,62 @@ export function MetricsTable({
     };
   }, []);
 
+  // Get all unique periods across metrics, sorted chronologically
+  const sortedPeriods = useMemo(() => {
+    const allPeriods = new Set<string>();
+    displayData.forEach((metric) => {
+      metric.periods.forEach((p) => allPeriods.add(p.periodStart));
+    });
+    return Array.from(allPeriods).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+    );
+  }, [displayData]);
+
+  // Ensure minimum columns so the table feels complete:
+  //   monthly  → 12 months
+  //   yearly   → 5 years
+  const displayPeriods = useMemo(() => {
+    const pType = displayData[0]?.periodType ?? "quarterly";
+    const minPeriods = pType === "monthly" ? 12 : pType === "yearly" ? 5 : 0;
+
+    if (minPeriods > 0 && sortedPeriods.length < minPeriods && sortedPeriods.length > 0) {
+      const latest = new Date(sortedPeriods[sortedPeriods.length - 1]);
+      const periodsSet = new Set(sortedPeriods);
+      for (let i = 1; periodsSet.size < minPeriods; i++) {
+        const d = pType === "monthly"
+          ? new Date(latest.getFullYear(), latest.getMonth() - i, 1)
+          : new Date(latest.getFullYear() - i, 0, 1);
+        const iso = d.toISOString().slice(0, 10);
+        periodsSet.add(iso);
+      }
+      return Array.from(periodsSet).sort(
+        (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+      );
+    }
+    return sortedPeriods;
+  }, [displayData, sortedPeriods]);
+
+  // The periods currently visible in the scroll viewport (for totals)
+  // Default to last 4 periods before scroll tracking kicks in (matches auto-scroll-right)
+  const visiblePeriods = useMemo(
+    () =>
+      visiblePeriodSet.length > 0
+        ? visiblePeriodSet
+        : sortedPeriods.slice(Math.max(0, sortedPeriods.length - 4)),
+    [visiblePeriodSet, sortedPeriods],
+  );
+
+  // Find the period data for the hovered cell
+  const hoveredPeriodData = useMemo(
+    () =>
+      hoveredCell
+        ? displayData
+            .find((m) => m.metricName === hoveredCell.metricName)
+            ?.periods.find((p) => p.periodStart === hoveredCell.periodStart)
+        : null,
+    [hoveredCell, displayData],
+  );
+
   // Show loading state while preferences are being fetched
   // This prevents flash of unsorted content on page load
   if ((savedOrder === null || !metricColLoaded) && storageKey) {
@@ -872,51 +1158,6 @@ export function MetricsTable({
       </div>
     );
   }
-
-  // Get all unique periods across metrics
-  const allPeriods = new Set<string>();
-  displayData.forEach((metric) => {
-    metric.periods.forEach((p) => allPeriods.add(p.periodStart));
-  });
-
-  const sortedPeriods = Array.from(allPeriods).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
-  );
-
-  // Ensure minimum columns so the table feels complete:
-  //   monthly  → 12 months
-  //   yearly   → 5 years
-  const periodType = displayData[0]?.periodType ?? "quarterly";
-  const minPeriods = periodType === "monthly" ? 12 : periodType === "yearly" ? 5 : 0;
-  let displayPeriods = sortedPeriods;
-
-  if (minPeriods > 0 && sortedPeriods.length < minPeriods && sortedPeriods.length > 0) {
-    const latest = new Date(sortedPeriods[sortedPeriods.length - 1]);
-    const periodsSet = new Set(sortedPeriods);
-    for (let i = 1; periodsSet.size < minPeriods; i++) {
-      const d = periodType === "monthly"
-        ? new Date(latest.getFullYear(), latest.getMonth() - i, 1)
-        : new Date(latest.getFullYear() - i, 0, 1);
-      const iso = d.toISOString().slice(0, 10);
-      periodsSet.add(iso);
-    }
-    displayPeriods = Array.from(periodsSet).sort(
-      (a, b) => new Date(a).getTime() - new Date(b).getTime(),
-    );
-  }
-
-  // The periods currently visible in the scroll viewport (for totals)
-  // Default to last 4 periods before scroll tracking kicks in (matches auto-scroll-right)
-  const visiblePeriods = visiblePeriodSet.length > 0
-    ? visiblePeriodSet
-    : sortedPeriods.slice(Math.max(0, sortedPeriods.length - 4));
-
-  // Find the period data for the hovered cell
-  const hoveredPeriodData = hoveredCell
-    ? displayData
-        .find((m) => m.metricName === hoveredCell.metricName)
-        ?.periods.find((p) => p.periodStart === hoveredCell.periodStart)
-    : null;
 
   return (
     <div className="flex h-full flex-col">
@@ -1014,100 +1255,26 @@ export function MetricsTable({
           items={displayData.map((m) => m.metricName)}
           strategy={verticalListSortingStrategy}
         >
-          <div ref={scrollRef} className="overflow-x-auto">
-            <table
-              className="text-sm"
-              style={{
-                tableLayout: "fixed",
-                width:
-                  GRIP_COL_WIDTH +
-                  METRIC_COL_WIDTH +
-                  displayPeriods.length * (periodColWidth ?? 150) +
-                  TOTAL_COL_WIDTH,
-              }}
-            >
-              <colgroup>
-                {isReorderMode && <col style={{ width: GRIP_COL_WIDTH }} />}
-                <col style={{ width: METRIC_COL_WIDTH }} />
-                {displayPeriods.map((period) => (
-                  <col key={period} style={{ width: periodColWidth ?? 150 }} />
-                ))}
-                {showTotals && <col style={{ width: TOTAL_COL_WIDTH }} />}
-              </colgroup>
-              <thead>
-                <tr className="border-b border-border-subtle">
-                  {isReorderMode && (
-                    <th className="sticky left-0 z-10 w-8 bg-[var(--table-bg)] py-2.5 pl-2" />
-                  )}
-                  <th
-                    className={`group/header relative sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-[var(--table-bg)] py-2.5 pl-3 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider text-text-muted`}
-                    style={{ boxShadow: "4px 0 6px -4px rgba(0,0,0,0.2)" }}
-                  >
-                    Metric
-                    {/* Resize handle */}
-                    <div
-                      onMouseDown={handleResizeStart}
-                      className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize opacity-0 transition-opacity group-hover/header:opacity-100 hover:!opacity-100"
-                    >
-                      <div className="absolute right-0 top-0 bottom-0 w-px bg-border-default" />
-                    </div>
-                  </th>
-                  {displayPeriods.map((period) => (
-                    <th
-                      key={period}
-                      data-period={period}
-                      ref={(el) => {
-                        if (el) {
-                          periodHeaderRefs.current.set(period, el);
-                          observerRef.current?.observe(el);
-                        } else {
-                          const prev = periodHeaderRefs.current.get(period);
-                          if (prev) observerRef.current?.unobserve(prev);
-                          periodHeaderRefs.current.delete(period);
-                        }
-                      }}
-                      className="overflow-hidden px-3 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-text-muted"
-                    >
-                      <span className="block truncate whitespace-nowrap">
-                        {formatPeriod(period, displayData[0]?.periodType ?? "quarterly")}
-                      </span>
-                    </th>
-                  ))}
-                  {showTotals && (
-                    <th
-                      className="sticky right-0 z-10 bg-[var(--table-bg)] py-2.5 px-3 text-right text-[11px] font-semibold uppercase tracking-wider text-text-muted"
-                      style={{ boxShadow: "-4px 0 6px -4px rgba(0,0,0,0.2)" }}
-                    >
-                      <span className="inline-flex items-center justify-end gap-1">
-                        Total
-                        <TotalColumnTooltip
-                          periodType={displayData[0]?.periodType ?? "quarterly"}
-                          periodsVisible={visiblePeriods.length}
-                        />
-                      </span>
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {displayData.map((metric) => (
-                  <SortableMetricRow
-                    key={metric.metricName}
-                    metric={metric}
-                    displayPeriods={displayPeriods}
-                    visiblePeriods={visiblePeriods}
-                    showTotals={showTotals}
-                    isReorderMode={isReorderMode}
-                    hoveredCell={hoveredCell}
-                    onCellMouseEnter={handleCellMouseEnter}
-                    onCellMouseLeave={handleCellMouseLeave}
-                    onMetricInfoHover={handleMetricInfoHover}
-                    onMetricInfoLeave={handleMetricInfoLeave}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <MetricsTableBody
+            scrollRef={scrollRef}
+            displayData={displayData}
+            displayPeriods={displayPeriods}
+            visiblePeriods={visiblePeriods}
+            showTotals={showTotals}
+            isReorderMode={isReorderMode}
+            hoveredCell={hoveredCell}
+            handleCellMouseEnter={handleCellMouseEnter}
+            handleCellMouseLeave={handleCellMouseLeave}
+            handleMetricInfoHover={handleMetricInfoHover}
+            handleMetricInfoLeave={handleMetricInfoLeave}
+            handleResizeStart={handleResizeStart}
+            periodHeaderRefs={periodHeaderRefs}
+            observerRef={observerRef}
+            periodColWidth={periodColWidth}
+            GRIP_COL_WIDTH={GRIP_COL_WIDTH}
+            METRIC_COL_WIDTH={METRIC_COL_WIDTH}
+            TOTAL_COL_WIDTH={TOTAL_COL_WIDTH}
+          />
         </SortableContext>
       </DndContext>
 

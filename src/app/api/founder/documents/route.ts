@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { parsePagination } from "@/lib/api/pagination";
+import { logger } from "@/lib/logger";
 
 export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
@@ -64,7 +65,7 @@ export async function GET(req: Request) {
   const { data: documents, error, count } = await query;
 
   if (error) {
-    console.error("Failed to fetch founder documents:", error.message);
+    logger.error("Failed to fetch founder documents:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

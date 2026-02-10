@@ -16,7 +16,7 @@ type OutlierTableProps = {
 
 export function OutlierTable({ outliers, metricName }: OutlierTableProps) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent transition-all duration-300 hover:border-white/[0.12]">
+    <div className="group relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent transition-all duration-300 hover:border-border-default">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-violet-500/[0.05] via-transparent to-transparent" />
 
       <div className="relative p-5">
@@ -38,8 +38,8 @@ export function OutlierTable({ outliers, metricName }: OutlierTableProps) {
             </svg>
           </div>
           <div>
-            <h3 className="font-semibold text-white">Outliers</h3>
-            <p className="text-xs text-white/40">
+            <h3 className="font-semibold text-text-primary">Outliers</h3>
+            <p className="text-xs text-text-muted">
               Companies with {metricName} growth &gt;2 standard deviations from
               the mean
             </p>
@@ -48,7 +48,7 @@ export function OutlierTable({ outliers, metricName }: OutlierTableProps) {
 
         {outliers.length === 0 ? (
           <div className="flex h-32 items-center justify-center">
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-text-muted">
               No outliers detected. All companies are within normal growth range.
             </p>
           </div>
@@ -56,28 +56,28 @@ export function OutlierTable({ outliers, metricName }: OutlierTableProps) {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/[0.06]">
-                  <th className="pb-3 text-left text-xs font-medium uppercase tracking-wider text-white/40">
+                <tr className="border-b border-border-subtle">
+                  <th className="pb-3 text-left text-xs font-medium uppercase tracking-wider text-text-muted">
                     Company
                   </th>
-                  <th className="pb-3 text-right text-xs font-medium uppercase tracking-wider text-white/40">
+                  <th className="pb-3 text-right text-xs font-medium uppercase tracking-wider text-text-muted">
                     Growth
                   </th>
-                  <th className="pb-3 text-right text-xs font-medium uppercase tracking-wider text-white/40">
+                  <th className="pb-3 text-right text-xs font-medium uppercase tracking-wider text-text-muted">
                     Direction
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
+              <tbody className="divide-y divide-border-subtle">
                 {outliers.map((outlier) => (
                   <tr
                     key={outlier.companyId}
-                    className="transition-colors hover:bg-white/[0.02]"
+                    className="transition-colors hover:bg-bg-raised"
                   >
                     <td className="py-3 pr-4">
                       <Link
                         href={`/dashboard/${outlier.companyId}`}
-                        className="text-sm font-medium text-white underline-offset-4 hover:underline"
+                        className="text-sm font-medium text-text-primary underline-offset-4 hover:underline"
                       >
                         {outlier.companyName}
                       </Link>
@@ -98,8 +98,8 @@ export function OutlierTable({ outliers, metricName }: OutlierTableProps) {
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           outlier.direction === "outperforming"
-                            ? "bg-emerald-500/20 text-emerald-200"
-                            : "bg-red-500/20 text-red-200"
+                            ? "bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
+                            : "bg-[var(--status-error-bg)] text-[var(--status-error-text)]"
                         }`}
                       >
                         {outlier.direction === "outperforming" ? (

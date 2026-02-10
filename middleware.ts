@@ -5,7 +5,7 @@ const PROTECTED_PATHS = [
   "/dashboard",
   "/portfolio",
   "/reports",
-  "/requests",
+  "/campaigns",
   "/documents",
   "/team",
   "/portal",

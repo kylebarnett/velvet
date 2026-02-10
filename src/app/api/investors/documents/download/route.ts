@@ -4,6 +4,7 @@ import { PassThrough } from "stream";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -70,7 +71,7 @@ export async function GET(req: Request) {
   const { data: documents, error } = await query;
 
   if (error) {
-    console.error("Failed to fetch documents for download:", error.message);
+    logger.error("Failed to fetch documents for download:", error.message);
     return jsonError("Failed to fetch documents.", 500);
   }
 
@@ -103,7 +104,7 @@ export async function GET(req: Request) {
       .download(doc.file_path);
 
     if (downloadError || !fileData) {
-      console.error(`Failed to download ${doc.file_path}:`, downloadError);
+      logger.error(`Failed to download ${doc.file_path}:`, downloadError);
       continue;
     }
 

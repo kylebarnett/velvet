@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   const { supabase, user } = await getApiUser();
@@ -27,7 +28,7 @@ export async function GET() {
     .eq("status", "pending");
 
   if (error) {
-    console.error("Notification count error:", error);
+    logger.error("Notification count error:", error);
     return jsonError("Failed to load notification count.", 500);
   }
 

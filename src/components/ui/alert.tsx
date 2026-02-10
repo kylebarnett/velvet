@@ -13,10 +13,10 @@ interface AlertProps {
 }
 
 const variantStyles: Record<AlertVariant, string> = {
-  error: "border-red-500/20 bg-red-500/10 text-red-200",
-  success: "border-emerald-500/20 bg-emerald-500/10 text-emerald-200",
-  warning: "border-amber-500/20 bg-amber-500/10 text-amber-200",
-  info: "border-blue-500/20 bg-blue-500/10 text-blue-200",
+  error: "border-[var(--status-error-bg)] bg-[var(--status-error-bg)] text-[var(--status-error-text)]",
+  success: "border-[var(--status-success-bg)] bg-[var(--status-success-bg)] text-[var(--status-success-text)]",
+  warning: "border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]",
+  info: "border-[var(--status-info-bg)] bg-[var(--status-info-bg)] text-[var(--status-info-text)]",
 };
 
 const iconMap: Record<AlertVariant, React.ElementType> = {

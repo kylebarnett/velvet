@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 const schema = z.object({
   companyId: z.string().uuid(),
@@ -88,7 +89,7 @@ export async function POST(req: Request) {
     .single();
 
   if (error) {
-    console.error("Failed to submit metric:", error.message);
+    logger.error("Failed to submit metric:", error.message);
     return jsonError("Failed to submit metric.", 400);
   }
 

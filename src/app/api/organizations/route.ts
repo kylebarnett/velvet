@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
     .single();
 
   if (orgErr) {
-    console.error("Failed to create organization:", orgErr.message);
+    logger.error("Failed to create organization:", orgErr.message);
     return jsonError("Failed to process request.", 400);
   }
 

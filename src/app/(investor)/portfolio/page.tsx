@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ContactsTable } from "@/components/portfolio/contacts-table";
+import { DownloadCsvButton } from "@/components/portfolio/download-csv-button";
 
 export const dynamic = "force-dynamic";
 
@@ -89,21 +90,22 @@ export default async function PortfolioPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div data-onboarding="portfolio-title">
           <h1 className="text-xl sm:text-2xl font-semibold">Portfolio</h1>
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-text-tertiary">
             Manage your portfolio companies and founder contacts.
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <DownloadCsvButton />
           <Link
             href="/portfolio/add"
-            className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="inline-flex items-center gap-2 rounded-md border border-border-default bg-bg-elevated px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
             data-onboarding="add-contact"
           >
             Add Contact
           </Link>
           <Link
             href="/portfolio/import"
-            className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50"
+            className="inline-flex items-center gap-2 rounded-md border border-border-default bg-bg-elevated px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
             data-onboarding="import-csv"
           >
             Import CSV
@@ -115,23 +117,23 @@ export default async function PortfolioPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
         <Link
           href="/dashboard"
-          className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 hover:bg-white/10 transition-colors"
+          className="rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 hover:bg-bg-hover transition-colors"
         >
-          <div className="text-xs sm:text-sm text-white/60">Companies</div>
+          <div className="text-xs sm:text-sm text-text-tertiary">Companies</div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{companyCount ?? 0}</div>
         </Link>
         <Link
-          href="/requests"
-          className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 hover:bg-white/10 transition-colors"
+          href="/campaigns"
+          className="rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 hover:bg-bg-hover transition-colors"
         >
-          <div className="text-xs sm:text-sm text-white/60">Pending</div>
+          <div className="text-xs sm:text-sm text-text-tertiary">Pending</div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{pendingRequests ?? 0}</div>
         </Link>
         <Link
           href="/documents"
-          className="rounded-xl border border-white/10 bg-white/5 p-3 sm:p-4 hover:bg-white/10 transition-colors"
+          className="rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 hover:bg-bg-hover transition-colors"
         >
-          <div className="text-xs sm:text-sm text-white/60">New Docs</div>
+          <div className="text-xs sm:text-sm text-text-tertiary">New Docs</div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{newDocuments ?? 0}</div>
         </Link>
       </div>

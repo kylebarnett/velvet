@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 const joinSchema = z.object({
   token: z.string().min(1),
@@ -84,7 +85,7 @@ export async function POST(req: Request) {
     });
 
   if (memberErr) {
-    console.error("Failed to join organization:", memberErr.message);
+    logger.error("Failed to join organization:", memberErr.message);
     return jsonError("Failed to process request.", 400);
   }
 

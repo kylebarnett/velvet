@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { escapeHtml } from "@/lib/utils/html";
+import { logger } from "@/lib/logger";
 
 const schema = z.union([
   z.object({ invitationIds: z.array(z.string().uuid()).min(1) }),
@@ -59,7 +60,7 @@ export async function POST(req: Request) {
   const { data: invitations, error: fetchError } = await query;
 
   if (fetchError) {
-    console.error("Failed to fetch invitations:", fetchError.message);
+    logger.error("Failed to fetch invitations:", fetchError.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -155,7 +156,7 @@ export async function POST(req: Request) {
   if (!apiKey) {
     // No API key, just log and mark all as sent
     for (const email of emailsToSend) {
-      console.log(`[DEV] Would send invite to ${email.email}: ${email.inviteUrl}`);
+      logger.info(`[DEV] Would send invite to ${email.email}: ${email.inviteUrl}`);
       successfulIds.push(email.id);
     }
   } else {
@@ -185,7 +186,7 @@ export async function POST(req: Request) {
           const text = await res.text().catch(() => "");
           if (isDev) {
             // In dev, don't fail - just log and continue
-            console.log(`[DEV] Batch email send failed: ${text || res.statusText}`);
+            logger.info(`[DEV] Batch email send failed: ${text || res.statusText}`);
             // Mark all as successful anyway in dev
             for (const email of batch) {
               successfulIds.push(email.id);
@@ -222,9 +223,9 @@ export async function POST(req: Request) {
             }
           }
         }
-      } catch (err) {
+      } catch (err: unknown) {
         if (isDev) {
-          console.log(`[DEV] Batch email send error: ${err instanceof Error ? err.message : "Unknown"}`);
+          logger.info(`[DEV] Batch email send error: ${err instanceof Error ? err.message : "Unknown"}`);
           // Mark all as successful anyway in dev
           for (const email of batch) {
             successfulIds.push(email.id);
@@ -253,7 +254,7 @@ export async function POST(req: Request) {
 
     if (updateError) {
       // Log error but don't fail the request
-      console.error("Failed to update invitation statuses:", updateError);
+      logger.error("Failed to update invitation statuses:", updateError);
     }
 
     results.sent = successfulIds.length;

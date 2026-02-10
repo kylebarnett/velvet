@@ -129,7 +129,7 @@ export function MetricNameTooltip({
   return createPortal(
     <div
       ref={tooltipRef}
-      className="z-[100] w-[280px] rounded-lg border border-white/10 bg-zinc-900 shadow-xl"
+      className="z-[100] w-[280px] rounded-lg border border-border-default bg-bg-secondary shadow-xl"
       style={style}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -144,40 +144,40 @@ export function MetricNameTooltip({
         /* Edit Mode */
         <div className="p-3 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-white/90 truncate">
+            <span className="text-xs font-medium text-text-primary truncate">
               Edit: {metricName}
             </span>
             <button
               type="button"
               onClick={() => setIsEditing(false)}
-              className="text-white/40 hover:text-white/70 transition-colors"
+              className="text-text-muted hover:text-text-secondary transition-colors"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
 
           <div>
-            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-white/40">
+            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-text-muted">
               Description *
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-md border border-white/10 bg-black/30 px-2.5 py-2 text-xs text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+              className="w-full resize-none rounded-md border border-border-default bg-bg-input px-2.5 py-2 text-xs text-text-primary placeholder:text-text-faint focus:border-[var(--border-default)] focus:outline-none"
               placeholder="What this metric measures..."
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-white/40">
+            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-text-muted">
               Formula (optional)
             </label>
             <input
               type="text"
               value={formula}
               onChange={(e) => setFormula(e.target.value)}
-              className="h-8 w-full rounded-md border border-white/10 bg-black/30 px-2.5 text-xs font-mono text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+              className="h-8 w-full rounded-md border border-border-default bg-bg-input px-2.5 text-xs font-mono text-text-primary placeholder:text-text-faint focus:border-[var(--border-default)] focus:outline-none"
               placeholder="e.g. Revenue / Customers"
             />
           </div>
@@ -188,7 +188,7 @@ export function MetricNameTooltip({
                 type="button"
                 onClick={handleReset}
                 disabled={isSaving}
-                className="text-[10px] text-white/40 underline underline-offset-2 hover:text-white/60 disabled:opacity-50"
+                className="text-[10px] text-text-muted underline underline-offset-2 hover:text-text-tertiary disabled:opacity-50"
               >
                 Reset to default
               </button>
@@ -199,7 +199,7 @@ export function MetricNameTooltip({
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
-                className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/70 hover:bg-white/10"
+                className="rounded-md border border-border-default bg-bg-elevated px-2.5 py-1 text-[11px] text-text-secondary hover:bg-bg-hover"
               >
                 Cancel
               </button>
@@ -207,7 +207,7 @@ export function MetricNameTooltip({
                 type="button"
                 onClick={handleSave}
                 disabled={!description.trim() || isSaving}
-                className="rounded-md bg-white px-2.5 py-1 text-[11px] font-medium text-black hover:bg-white/90 disabled:opacity-50"
+                className="rounded-md bg-btn-primary-bg px-2.5 py-1 text-[11px] font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
               >
                 {isSaving ? "Saving..." : "Save"}
               </button>
@@ -220,11 +220,11 @@ export function MetricNameTooltip({
           {/* Header */}
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-xs font-medium text-white/90 truncate">
+              <span className="text-xs font-medium text-text-primary truncate">
                 {metricName}
               </span>
               {isCustom && (
-                <span className="shrink-0 rounded bg-violet-500/20 px-1 py-px text-[9px] font-medium text-violet-300">
+                <span className="shrink-0 rounded bg-[var(--tag-violet-bg)] px-1 py-px text-[9px] font-medium text-[var(--tag-violet-text)]">
                   Custom
                 </span>
               )}
@@ -232,7 +232,7 @@ export function MetricNameTooltip({
             <button
               type="button"
               onClick={startEditing}
-              className="shrink-0 rounded p-1 text-white/30 hover:bg-white/10 hover:text-white/60 transition-colors"
+              className="shrink-0 rounded p-1 text-text-faint hover:bg-bg-hover hover:text-text-tertiary transition-colors"
               title="Edit definition"
             >
               <Pencil className="h-3 w-3" />
@@ -241,12 +241,12 @@ export function MetricNameTooltip({
 
           {/* Description */}
           {info?.description ? (
-            <p className="text-[11px] leading-relaxed text-white/60">
+            <p className="text-[11px] leading-relaxed text-text-tertiary">
               {info.description}
             </p>
           ) : (
             <p
-              className="cursor-pointer text-[11px] italic text-white/30 hover:text-white/50"
+              className="cursor-pointer text-[11px] italic text-text-faint hover:text-text-muted"
               onClick={startEditing}
             >
               No description yet — click to add one
@@ -255,18 +255,18 @@ export function MetricNameTooltip({
 
           {/* Formula */}
           {info?.formula && (
-            <div className="rounded-md bg-white/[0.03] px-2 py-1.5">
-              <span className="block text-[9px] font-medium uppercase tracking-wider text-white/30 mb-0.5">
+            <div className="rounded-md bg-bg-raised px-2 py-1.5">
+              <span className="block text-[9px] font-medium uppercase tracking-wider text-text-faint mb-0.5">
                 Formula
               </span>
-              <span className="block text-[11px] font-mono text-emerald-400/80">
+              <span className="block text-[11px] font-mono text-[var(--tag-emerald-text)]">
                 {info.formula}
               </span>
             </div>
           )}
 
           {/* Metadata footer */}
-          <div className="flex items-center gap-1.5 border-t border-white/[0.06] pt-2 text-[10px] text-white/35">
+          <div className="flex items-center gap-1.5 border-t border-border-subtle pt-2 text-[10px] text-text-faint">
             <span>{VALUE_TYPE_LABELS[valueType]}</span>
             <span>·</span>
             <span title={aggLabel}>{aggSymbol} {aggregationType === "sum" ? "Sum" : "Latest"}</span>

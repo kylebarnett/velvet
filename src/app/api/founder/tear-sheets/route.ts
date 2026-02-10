@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
   title: z.string().min(1).max(200),
@@ -35,7 +36,7 @@ export async function GET() {
     .order("quarter", { ascending: false });
 
   if (error) {
-    console.error("Tear sheet list error:", error);
+    logger.error("Tear sheet list error:", error);
     return jsonError("Failed to load tear sheets.", 500);
   }
 
@@ -87,7 +88,7 @@ export async function POST(req: Request) {
         409,
       );
     }
-    console.error("Tear sheet create error:", error);
+    logger.error("Tear sheet create error:", error);
     return jsonError("Failed to create tear sheet.", 500);
   }
 

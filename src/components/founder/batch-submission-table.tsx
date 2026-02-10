@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { AlertTriangle, ArrowLeft, CheckCircle2, Info } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
@@ -192,7 +193,7 @@ function MetricInfoTooltip({ metricName }: { metricName: string }) {
     <div className="relative inline-block">
       <button
         type="button"
-        className="mt-0.5 text-white/30 hover:text-white/60 transition-colors"
+        className="mt-0.5 text-text-faint hover:text-text-tertiary transition-colors"
         onMouseEnter={() => setShow(true)}
         onMouseLeave={() => setShow(false)}
         onClick={(e) => { e.stopPropagation(); setShow(!show); }}
@@ -201,12 +202,12 @@ function MetricInfoTooltip({ metricName }: { metricName: string }) {
         <Info className="h-3.5 w-3.5" />
       </button>
       {show && (
-        <div className="absolute bottom-full left-0 z-50 mb-2 w-64 rounded-lg border border-white/10 bg-zinc-900 p-3 shadow-xl">
-          <p className="text-xs font-medium text-white">{metricName}</p>
-          <p className="mt-1 text-xs text-white/60">{info.description}</p>
+        <div className="absolute bottom-full left-0 z-50 mb-2 w-64 rounded-lg border border-border-default bg-bg-secondary p-3 shadow-xl">
+          <p className="text-xs font-medium text-text-primary">{metricName}</p>
+          <p className="mt-1 text-xs text-text-tertiary">{info.description}</p>
           {info.formula && (
-            <div className="mt-2 rounded bg-white/5 px-2 py-1.5">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-white/40">Formula</p>
+            <div className="mt-2 rounded bg-bg-elevated px-2 py-1.5">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-text-muted">Formula</p>
               <p className="mt-0.5 text-xs text-emerald-400">{info.formula}</p>
             </div>
           )}
@@ -220,45 +221,250 @@ function LoadingSkeleton() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
-        <div className="h-5 w-32 animate-pulse rounded bg-white/10" />
-        <div className="h-8 w-40 animate-pulse rounded-lg bg-white/10" />
+        <div className="h-5 w-32 animate-pulse rounded bg-bg-hover" />
+        <div className="h-8 w-40 animate-pulse rounded-lg bg-bg-hover" />
       </div>
-      <div className="overflow-hidden rounded-xl border border-white/10">
+      <div className="overflow-hidden rounded-xl border border-border-default">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 bg-white/5">
+            <tr className="border-b border-border-default bg-bg-elevated">
               <th className="px-4 py-3 text-left">
-                <div className="h-4 w-16 animate-pulse rounded bg-white/10" />
+                <div className="h-4 w-16 animate-pulse rounded bg-bg-hover" />
               </th>
               {[0, 1, 2, 3].map((i) => (
                 <th key={i} className="px-3 py-3 text-center">
-                  <div className="mx-auto h-4 w-14 animate-pulse rounded bg-white/10" />
+                  <div className="mx-auto h-4 w-14 animate-pulse rounded bg-bg-hover" />
                 </th>
               ))}
               <th className="px-3 py-3">
-                <div className="h-4 w-12 animate-pulse rounded bg-white/10" />
+                <div className="h-4 w-12 animate-pulse rounded bg-bg-hover" />
               </th>
             </tr>
           </thead>
           <tbody>
             {[0, 1, 2].map((r) => (
-              <tr key={r} className="border-b border-white/5">
+              <tr key={r} className="border-b border-border-subtle">
                 <td className="px-4 py-3">
-                  <div className="h-4 w-24 animate-pulse rounded bg-white/10" />
+                  <div className="h-4 w-24 animate-pulse rounded bg-bg-hover" />
                 </td>
                 {[0, 1, 2, 3].map((c) => (
                   <td key={c} className="px-2 py-3">
-                    <div className="mx-auto h-9 w-full animate-pulse rounded-md bg-white/5" />
+                    <div className="mx-auto h-9 w-full animate-pulse rounded-md bg-bg-elevated" />
                   </td>
                 ))}
                 <td className="px-2 py-3">
-                  <div className="h-9 w-full animate-pulse rounded-md bg-white/5" />
+                  <div className="h-9 w-full animate-pulse rounded-md bg-bg-elevated" />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+/** Virtualization threshold — only virtualize when row count exceeds this */
+const BATCH_VIRTUALIZE_THRESHOLD = 30;
+/** Estimated row height in pixels for the virtualizer */
+const BATCH_ESTIMATED_ROW_HEIGHT = 52;
+
+type BatchRow = {
+  metricName: string;
+  investorNames: string[];
+  investorCount: number;
+  requestIds: string[];
+  values: Record<string, string>;
+  notes: string;
+};
+
+type BatchTableBodyProps = {
+  rows: BatchRow[];
+  periods: Period[];
+  existingValues: Record<string, Record<string, string>>;
+  cellErrors: Map<string, string>;
+  updateCellValue: (metricName: string, periodKey: string, value: string) => void;
+  updateNotes: (metricName: string, notes: string) => void;
+  setDetailMetric: React.Dispatch<React.SetStateAction<string | null>>;
+};
+
+function BatchTableBody({
+  rows,
+  periods,
+  existingValues,
+  cellErrors,
+  updateCellValue,
+  updateNotes,
+  setDetailMetric,
+}: BatchTableBodyProps) {
+  const parentRef = React.useRef<HTMLDivElement>(null);
+  const shouldVirtualize = rows.length > BATCH_VIRTUALIZE_THRESHOLD;
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => BATCH_ESTIMATED_ROW_HEIGHT,
+    overscan: 10,
+    enabled: shouldVirtualize,
+  });
+
+  // Column count: metric + periods + notes
+  const colCount = 1 + periods.length + 1;
+
+  const renderRow = (row: BatchRow) => (
+    <>
+      <td className="sticky left-0 z-10 bg-bg-primary px-4 py-2">
+        <div className="flex items-start gap-1.5">
+          <button
+            type="button"
+            onClick={() => setDetailMetric(row.metricName)}
+            className="font-medium text-text-primary hover:text-text-primary hover:underline underline-offset-2 text-left"
+          >
+            {row.metricName}
+          </button>
+          <MetricInfoTooltip metricName={row.metricName} />
+        </div>
+        {row.investorNames.length > 0 && (
+          <div className="text-[10px] text-text-muted">
+            {row.investorNames.join(", ")}
+          </div>
+        )}
+      </td>
+      {periods.map((p) => {
+        const existing = existingValues[row.metricName]?.[p.key];
+        const hasExisting = !!existing;
+        const cellKey = `${row.metricName}:${p.key}`;
+        const cellError = cellErrors.get(cellKey);
+        return (
+          <td
+            key={p.key}
+            className={`px-2 py-2 ${p.isRequested ? "bg-bg-hover" : ""}`}
+          >
+            <div className="relative">
+              <input
+                type="text"
+                value={row.values[p.key] ?? ""}
+                onChange={(e) =>
+                  updateCellValue(row.metricName, p.key, e.target.value)
+                }
+                placeholder={hasExisting ? existing : getFormatHint(row.metricName)}
+                className={`h-9 w-full rounded-md border bg-bg-input px-2 text-center text-sm font-mono focus:outline-none focus:ring-2 ${
+                  cellError
+                    ? "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20"
+                    : hasExisting && !row.values[p.key]
+                      ? "border-border-subtle text-text-muted focus:border-border-default focus:ring-[var(--ring-focus)]"
+                      : "border-border-default text-text-primary focus:border-border-default focus:ring-[var(--ring-focus)]"
+                }`}
+              />
+              {cellError && (
+                <div className="absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-red-900/90 px-2 py-0.5 text-[10px] text-[var(--status-error-text)]">
+                  {cellError}
+                </div>
+              )}
+            </div>
+          </td>
+        );
+      })}
+      <td className="px-2 py-2">
+        <input
+          type="text"
+          value={row.notes}
+          onChange={(e) => updateNotes(row.metricName, e.target.value)}
+          placeholder="Optional notes..."
+          className="h-9 w-full rounded-md border border-border-default bg-bg-input px-2 text-sm placeholder:text-text-faint focus:border-border-default focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+        />
+      </td>
+    </>
+  );
+
+  const theadContent = (
+    <tr className="border-b border-border-default bg-bg-elevated">
+      <th className="sticky left-0 z-10 bg-bg-elevated px-4 py-3 text-left font-medium text-text-secondary">
+        Metric
+      </th>
+      {periods.map((p) => (
+        <th
+          key={p.key}
+          className={`px-3 py-3 text-center font-medium text-text-secondary min-w-[120px] ${
+            p.isRequested ? "bg-bg-hover" : ""
+          }`}
+        >
+          {p.label}
+        </th>
+      ))}
+      <th className="px-3 py-3 text-left font-medium text-text-secondary min-w-[160px]">
+        Notes
+      </th>
+    </tr>
+  );
+
+  if (!shouldVirtualize) {
+    return (
+      <div className="overflow-x-auto rounded-xl border border-border-default">
+        <table className="w-full text-sm">
+          <thead>{theadContent}</thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.metricName} className="border-b border-border-subtle">
+                {renderRow(row)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  // Virtualized rendering
+  const virtualItems = virtualizer.getVirtualItems();
+
+  return (
+    <div
+      ref={parentRef}
+      className="max-h-[600px] overflow-auto rounded-xl border border-border-default"
+    >
+      <table className="w-full text-sm">
+        <thead className="sticky top-0 z-20 bg-bg-elevated">
+          {theadContent}
+        </thead>
+        <tbody>
+          {/* Top spacer */}
+          {virtualItems.length > 0 && virtualItems[0].start > 0 && (
+            <tr>
+              <td
+                colSpan={colCount}
+                style={{ height: virtualItems[0].start, padding: 0, border: 0 }}
+              />
+            </tr>
+          )}
+          {virtualItems.map((virtualRow) => {
+            const row = rows[virtualRow.index];
+            return (
+              <tr
+                key={virtualRow.key}
+                data-index={virtualRow.index}
+                ref={virtualizer.measureElement}
+                className="border-b border-border-subtle"
+              >
+                {renderRow(row)}
+              </tr>
+            );
+          })}
+          {/* Bottom spacer */}
+          {virtualItems.length > 0 && (
+            <tr>
+              <td
+                colSpan={colCount}
+                style={{
+                  height: virtualizer.getTotalSize() - (virtualItems.at(-1)?.end ?? 0),
+                  padding: 0,
+                  border: 0,
+                }}
+              />
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -436,7 +642,7 @@ export function BatchSubmissionTable({
     }
   }, [success]);
 
-  function validateCell(cellKey: string, value: string) {
+  const validateCell = React.useCallback((cellKey: string, value: string) => {
     setCellErrors((prev) => {
       const next = new Map(prev);
       if (value && isNaN(Number(value))) {
@@ -446,26 +652,28 @@ export function BatchSubmissionTable({
       }
       return next;
     });
-  }
+  }, []);
 
-  function updateCellValue(
-    metricName: string,
-    periodKey: string,
-    value: string,
-  ) {
-    setUserValues((prev) => ({
-      ...prev,
-      [metricName]: { ...prev[metricName], [periodKey]: value },
-    }));
-    validateCell(`${metricName}:${periodKey}`, value);
-  }
+  const updateCellValue = React.useCallback(
+    (metricName: string, periodKey: string, value: string) => {
+      setUserValues((prev) => ({
+        ...prev,
+        [metricName]: { ...prev[metricName], [periodKey]: value },
+      }));
+      validateCell(`${metricName}:${periodKey}`, value);
+    },
+    [validateCell],
+  );
 
-  function updateNotes(metricName: string, notes: string) {
-    setUserNotes((prev) => ({
-      ...prev,
-      [`${periodType}:${metricName}`]: notes,
-    }));
-  }
+  const updateNotes = React.useCallback(
+    (metricName: string, notes: string) => {
+      setUserNotes((prev) => ({
+        ...prev,
+        [`${periodType}:${metricName}`]: notes,
+      }));
+    },
+    [periodType],
+  );
 
   function prepareSubmissions() {
     if (!companyId) return;
@@ -585,7 +793,7 @@ export function BatchSubmissionTable({
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1 text-sm text-white/50 hover:text-white"
+          className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to requests
@@ -602,123 +810,34 @@ export function BatchSubmissionTable({
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-white/60">No metrics requested yet.</p>
-          <p className="mt-1 text-sm text-white/40">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <p className="text-text-tertiary">No metrics requested yet.</p>
+          <p className="mt-1 text-sm text-text-muted">
             Metrics will appear here when an investor sends you a request.
           </p>
         </div>
       ) : (
         <>
         {cellErrors.size > 0 && (
-          <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm text-red-200">
+          <div className="flex items-center gap-2 rounded-lg border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-2.5 text-sm text-[var(--status-error-text)]">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             <span>{cellErrors.size} value{cellErrors.size !== 1 ? "s" : ""} need attention — fix errors before submitting</span>
           </div>
         )}
-        <div className="overflow-x-auto rounded-xl border border-white/10">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10 bg-white/5">
-                <th className="sticky left-0 z-10 bg-white/5 px-4 py-3 text-left font-medium text-white/70">
-                  Metric
-                </th>
-                {periods.map((p) => (
-                  <th
-                    key={p.key}
-                    className={`px-3 py-3 text-center font-medium text-white/70 min-w-[120px] ${
-                      p.isRequested ? "bg-white/[0.08]" : ""
-                    }`}
-                  >
-                    {p.label}
-                  </th>
-                ))}
-                <th className="px-3 py-3 text-left font-medium text-white/70 min-w-[160px]">
-                  Notes
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.metricName} className="border-b border-white/5">
-                  <td className="sticky left-0 z-10 bg-zinc-950 px-4 py-2">
-                    <div className="flex items-start gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setDetailMetric(row.metricName)}
-                        className="font-medium text-white/90 hover:text-white hover:underline underline-offset-2 text-left"
-                      >
-                        {row.metricName}
-                      </button>
-                      <MetricInfoTooltip metricName={row.metricName} />
-                    </div>
-                    {row.investorNames.length > 0 && (
-                      <div className="text-[10px] text-white/40">
-                        {row.investorNames.join(", ")}
-                      </div>
-                    )}
-                  </td>
-                  {periods.map((p) => {
-                    const existing =
-                      existingValues[row.metricName]?.[p.key];
-                    const hasExisting = !!existing;
-                    const cellKey = `${row.metricName}:${p.key}`;
-                    const cellError = cellErrors.get(cellKey);
-                    return (
-                      <td
-                        key={p.key}
-                        className={`px-2 py-2 ${p.isRequested ? "bg-white/[0.08]" : ""}`}
-                      >
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={row.values[p.key] ?? ""}
-                            onChange={(e) =>
-                              updateCellValue(
-                                row.metricName,
-                                p.key,
-                                e.target.value,
-                              )
-                            }
-                            placeholder={hasExisting ? existing : getFormatHint(row.metricName)}
-                            className={`h-9 w-full rounded-md border bg-black/30 px-2 text-center text-sm font-mono focus:outline-none focus:ring-2 ${
-                              cellError
-                                ? "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20"
-                                : hasExisting && !row.values[p.key]
-                                  ? "border-white/5 text-white/40 focus:border-white/20 focus:ring-white/20"
-                                  : "border-white/10 text-white focus:border-white/20 focus:ring-white/20"
-                            }`}
-                          />
-                          {cellError && (
-                            <div className="absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-red-900/90 px-2 py-0.5 text-[10px] text-red-200">
-                              {cellError}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    );
-                  })}
-                  <td className="px-2 py-2">
-                    <input
-                      type="text"
-                      value={row.notes}
-                      onChange={(e) =>
-                        updateNotes(row.metricName, e.target.value)
-                      }
-                      placeholder="Optional notes..."
-                      className="h-9 w-full rounded-md border border-white/10 bg-black/30 px-2 text-sm placeholder:text-white/30 focus:border-white/20 focus:outline-none focus:ring-2 focus:ring-white/20"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <BatchTableBody
+          rows={rows}
+          periods={periods}
+          existingValues={existingValues}
+          cellErrors={cellErrors}
+          updateCellValue={updateCellValue}
+          updateNotes={updateNotes}
+          setDetailMetric={setDetailMetric}
+        />
         </>
       )}
 
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
@@ -731,18 +850,18 @@ export function BatchSubmissionTable({
         const remainingCount = isAllDone ? 0 : parseInt(parts[3], 10) || 0;
 
         return (
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+          <div className="rounded-xl border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] p-4">
             <div className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--status-success-text)]" />
               <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium text-emerald-200">
+                <p className="text-sm font-medium text-[var(--status-success-text)]">
                   {count} metric{count !== 1 ? "s" : ""} submitted for {periodType === "quarterly" ? "this quarter" : "this period"}
                 </p>
-                <p className="text-xs text-emerald-200/70">
+                <p className="text-xs text-[var(--status-success-text)]/70">
                   Your investors will see these immediately.
                 </p>
                 {failedCount > 0 && (
-                  <p className="text-xs text-amber-200">
+                  <p className="text-xs text-[var(--status-warning-text)]">
                     {failedCount} value{failedCount !== 1 ? "s" : ""} failed to submit.
                   </p>
                 )}
@@ -750,12 +869,12 @@ export function BatchSubmissionTable({
                   <button
                     type="button"
                     onClick={onBack}
-                    className="mt-2 inline-flex h-8 items-center rounded-md bg-emerald-500/20 px-3 text-xs font-medium text-emerald-200 hover:bg-emerald-500/30 transition-colors"
+                    className="mt-2 inline-flex h-8 items-center rounded-md bg-emerald-500/20 px-3 text-xs font-medium text-[var(--status-success-text)] hover:bg-emerald-500/30 transition-colors"
                   >
                     Back to requests
                   </button>
                 ) : remainingCount > 0 ? (
-                  <p className="text-xs text-white/50">
+                  <p className="text-xs text-text-muted">
                     You still have {remainingCount} pending metric{remainingCount !== 1 ? "s" : ""} to submit.
                   </p>
                 ) : null}
@@ -772,7 +891,7 @@ export function BatchSubmissionTable({
             onClick={prepareSubmissions}
             disabled={submitting || cellErrors.size > 0}
             title={cellErrors.size > 0 ? `Fix ${cellErrors.size} invalid value${cellErrors.size !== 1 ? "s" : ""} before submitting` : undefined}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-white px-5 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+            className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             {submitting
               ? "Submitting..."

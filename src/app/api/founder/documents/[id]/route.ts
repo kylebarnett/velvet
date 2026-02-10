@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 const idSchema = z.string().uuid();
 
@@ -60,7 +61,7 @@ export async function DELETE(
     .remove([document.file_path]);
 
   if (storageError) {
-    console.error("Storage delete error:", storageError);
+    logger.error("Storage delete error:", storageError);
     // Continue to delete DB record even if storage fails
   }
 
@@ -71,7 +72,7 @@ export async function DELETE(
     .eq("id", id);
 
   if (deleteError) {
-    console.error("Failed to delete document:", deleteError.message);
+    logger.error("Failed to delete document:", deleteError.message);
     return jsonError("Failed to process request.", 500);
   }
 

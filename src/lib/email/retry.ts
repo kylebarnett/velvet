@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
 
@@ -44,7 +45,7 @@ export async function sendEmailBatchWithRetry(
 
       // 4xx errors are not retryable (bad request, auth issues)
       if (res.status >= 400 && res.status < 500) {
-        console.error(
+        logger.error(
           `Email batch failed with ${res.status} (not retryable)`,
         );
         return { sent: 0, failed: emails.length };
@@ -52,7 +53,7 @@ export async function sendEmailBatchWithRetry(
 
       // 5xx or other — retryable
       lastError = new Error(`Resend API returned ${res.status}`);
-    } catch (err) {
+    } catch (err: unknown) {
       lastError = err;
     }
 
@@ -62,6 +63,6 @@ export async function sendEmailBatchWithRetry(
     }
   }
 
-  console.error("Email batch failed after retries:", lastError);
+  logger.error("Email batch failed after retries:", lastError);
   return { sent: 0, failed: emails.length };
 }

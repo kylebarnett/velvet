@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 const schema = z.object({
   status: z.enum(["approved", "denied"]),
@@ -54,7 +55,7 @@ export async function PUT(
     .eq("id", relationshipId);
 
   if (updateError) {
-    console.error("Failed to update approval:", updateError.message);
+    logger.error("Failed to update approval:", updateError.message);
     return jsonError("Failed to process request.", 500);
   }
 

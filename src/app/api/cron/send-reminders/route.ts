@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { escapeHtml } from "@/lib/utils/html";
 import { sendEmailBatchWithRetry } from "@/lib/email/retry";
+import { logger } from "@/lib/logger";
 
 const BATCH_SIZE = 100;
 
@@ -84,7 +85,7 @@ export async function POST(req: Request) {
     .limit(500);
 
   if (fetchError) {
-    console.error("Failed to fetch reminders:", fetchError);
+    logger.error("Failed to fetch reminders:", fetchError);
     return NextResponse.json({ error: fetchError.message }, { status: 500 });
   }
 
@@ -284,7 +285,7 @@ export async function POST(req: Request) {
         .in("id", founder.reminderIds);
       sent++;
     }
-    console.log(`[DEV] Would send ${founderReminders.size} reminder emails`);
+    logger.info(`[DEV] Would send ${founderReminders.size} reminder emails`);
   }
 
   return NextResponse.json({

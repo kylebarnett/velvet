@@ -10,6 +10,7 @@ import {
   type Investment,
   type CashFlow,
 } from "@/lib/lp/calculations";
+import { logger } from "@/lib/logger";
 
 // GET - Fund performance metrics
 export async function GET(
@@ -41,7 +42,7 @@ export async function GET(
     .eq("fund_id", id);
 
   if (error) {
-    console.error("Failed to fetch fund performance:", error.message);
+    logger.error("Failed to fetch fund performance:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { cn } from "@/lib/utils/cn";
 
 type PerformanceSummaryProps = {
@@ -49,6 +50,63 @@ function getIRRColor(value: number | null): string {
   return "text-red-400";
 }
 
+function KpiTooltip({
+  tooltip,
+  formula,
+  children,
+}: {
+  tooltip: string;
+  formula: string;
+  children: React.ReactNode;
+}) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [pos, setPos] = React.useState<{ top: number; left: number } | null>(null);
+
+  function show() {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    setPos({ top: rect.top, left: rect.left + rect.width / 2 });
+  }
+
+  function hide() {
+    setPos(null);
+  }
+
+  return (
+    <div ref={ref} onMouseEnter={show} onMouseLeave={hide} className="inline-block">
+      {children}
+      {pos && (
+        <div
+          className="fixed z-[100] rounded-lg shadow-xl"
+          style={{
+            top: pos.top - 8,
+            left: pos.left,
+            transform: "translate(-50%, -100%)",
+            width: "14rem",
+            padding: "8px 12px",
+            backgroundColor: "#1c1c20",
+            border: "1px solid rgba(255,255,255,0.12)",
+          }}
+        >
+          <p className="text-xs font-medium text-white">{tooltip}</p>
+          <p className="mt-1 font-mono text-[11px] text-white/50">{formula}</p>
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "100%",
+              transform: "translateX(-50%)",
+              borderWidth: "4px",
+              borderStyle: "solid",
+              borderColor: "#1c1c20 transparent transparent transparent",
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function PerformanceSummary({
   tvpi,
   dpi,
@@ -86,8 +144,8 @@ export function PerformanceSummary({
       label: "IRR",
       value: formatPercent(irr),
       color: getIRRColor(irr),
-      tooltip: "Internal Rate of Return",
-      formula: "Newton-Raphson on dated cash flows",
+      tooltip: "Annualized return accounting for timing of capital calls and distributions",
+      formula: "Time-weighted rate that sets NPV of cash flows to zero",
     },
     {
       label: "MOIC",
@@ -103,24 +161,15 @@ export function PerformanceSummary({
       {/* KPI cards */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {kpis.map((kpi) => (
-          <div
-            key={kpi.label}
-            className="group relative rounded-xl border border-border-default bg-bg-elevated p-4"
-          >
-            <p className="text-[10px] uppercase tracking-wider text-text-muted">{kpi.label}</p>
+          <div key={kpi.label} className="rounded-xl border border-border-default bg-bg-elevated p-4">
+            <KpiTooltip tooltip={kpi.tooltip} formula={kpi.formula}>
+              <p className="inline-flex cursor-help text-[10px] uppercase tracking-wider text-text-muted border-b border-dashed border-text-muted/30">
+                {kpi.label}
+              </p>
+            </KpiTooltip>
             <p className={cn("mt-1 text-2xl font-semibold", kpi.color)}>
               {kpi.value}
             </p>
-            {/* Hover tooltip */}
-            <div
-              className="pointer-events-none invisible absolute bottom-full left-1/2 z-50 mb-2 w-56 -translate-x-1/2 rounded-lg px-3 py-2.5 shadow-xl group-hover:visible"
-              style={{ backgroundColor: "#1c1c20", border: "1px solid rgba(255,255,255,0.12)" }}
-            >
-              <p className="text-xs font-medium text-white">{kpi.tooltip}</p>
-              <p className="mt-1 font-mono text-[11px] text-white/50">{kpi.formula}</p>
-              {/* Arrow */}
-              <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent" style={{ borderTopColor: "#1c1c20" }} />
-            </div>
           </div>
         ))}
       </div>

@@ -3,6 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 type PerformanceSnapshot = {
   tvpi: number | null;
@@ -157,17 +165,17 @@ export function ReportFormModal({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === backdropRef.current) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-xl border border-white/10 bg-zinc-900 p-6">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Generate LP Report</h2>
           <button
             onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-white/40 hover:bg-white/5 hover:text-white"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-primary"
             type="button"
             aria-label="Close"
           >
@@ -176,7 +184,7 @@ export function ReportFormModal({
         </div>
 
         {error && (
-          <div className="mt-3 rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200" role="alert">
+          <div className="mt-3 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]" role="alert">
             {error}
           </div>
         )}
@@ -184,43 +192,44 @@ export function ReportFormModal({
         <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">
           {/* Title */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Title</label>
+            <label className="mb-1 block text-sm text-text-secondary">Title</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+              className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
               placeholder="e.g. Q4 2025 LP Report"
             />
           </div>
 
           {/* Report Date */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Report Date</label>
+            <label className="mb-1 block text-sm text-text-secondary">Report Date</label>
             <input
               type="date"
               value={reportDate}
               onChange={(e) => setReportDate(e.target.value)}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+              className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
             />
           </div>
 
           {/* Report Type */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Report Type</label>
-            <select
-              value={reportType}
-              onChange={(e) => setReportType(e.target.value as "quarterly" | "annual" | "ad_hoc")}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
-            >
-              <option value="quarterly">Quarterly</option>
-              <option value="annual">Annual</option>
-              <option value="ad_hoc">Ad Hoc</option>
-            </select>
+            <label className="mb-1 block text-sm text-text-secondary">Report Type</label>
+            <Select value={reportType} onValueChange={(v) => setReportType(v as "quarterly" | "annual" | "ad_hoc")}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="quarterly">Quarterly</SelectItem>
+                <SelectItem value="annual">Annual</SelectItem>
+                <SelectItem value="ad_hoc">Ad Hoc</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Performance snapshot info */}
           {performance && (
-            <div className="rounded-md border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-xs text-white/50">
+            <div className="rounded-md border border-border-subtle bg-bg-raised px-3 py-2 text-xs text-text-muted">
               Report will include a performance snapshot: TVPI{" "}
               {performance.tvpi?.toFixed(2) ?? "—"}, DPI{" "}
               {performance.dpi?.toFixed(2) ?? "—"}, MOIC{" "}
@@ -231,20 +240,19 @@ export function ReportFormModal({
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="h-10 rounded-md border border-white/10 bg-white/5 px-4 text-sm hover:bg-white/10"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={saving}
-              className="h-10 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
             >
               {saving ? "Generating..." : "Generate Report"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

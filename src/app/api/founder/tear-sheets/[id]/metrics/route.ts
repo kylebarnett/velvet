@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 /** Map quarter to period_start and period_end date strings. */
 function getQuarterDates(quarter: string, year: number) {
@@ -73,7 +74,7 @@ export async function GET(
     .eq("period_start", currentDates.periodStart);
 
   if (currentError) {
-    console.error("Tear sheet metrics error:", currentError);
+    logger.error("Tear sheet metrics error:", currentError);
     return jsonError("Failed to load metrics.", 500);
   }
 
@@ -87,7 +88,7 @@ export async function GET(
       .eq("period_start", prevDates.periodStart);
 
     if (prevError) {
-      console.error("Tear sheet prev metrics error:", prevError);
+      logger.error("Tear sheet prev metrics error:", prevError);
       return jsonError("Failed to load metrics.", 500);
     }
     previousMetrics = prevData ?? [];

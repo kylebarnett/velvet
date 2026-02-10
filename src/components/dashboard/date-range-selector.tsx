@@ -39,13 +39,13 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-white/60 hover:border-white/15 hover:text-white/80 transition-colors"
+        className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-1.5 text-xs font-medium text-text-tertiary hover:border-border-default hover:text-text-secondary transition-colors"
       >
         {selectedLabel}
         <ChevronDown className="h-3 w-3" />
       </button>
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 min-w-[120px] overflow-hidden rounded-lg border border-white/10 bg-zinc-900 shadow-xl">
+        <div className="absolute right-0 top-full z-50 mt-1 min-w-[120px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary shadow-xl">
           {options.map((option) => (
             <button
               key={option.value}
@@ -58,8 +58,8 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
                 block w-full px-3 py-2 text-left text-xs
                 ${
                   value === option.value
-                    ? "bg-white/10 text-white"
-                    : "text-white/70 hover:bg-white/5 hover:text-white"
+                    ? "bg-bg-hover text-text-primary"
+                    : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                 }
               `}
             >

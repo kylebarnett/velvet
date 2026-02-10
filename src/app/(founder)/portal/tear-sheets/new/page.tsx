@@ -61,7 +61,7 @@ export default function NewTearSheetPage() {
       <div className="space-y-1">
         <Link
           href="/portal/tear-sheets"
-          className="flex items-center gap-1 text-sm text-white/50 hover:text-white"
+          className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to tear sheets
@@ -71,7 +71,7 @@ export default function NewTearSheetPage() {
         </h1>
       </div>
 
-      <div className="max-w-md rounded-xl border border-white/10 bg-white/5 p-5">
+      <div className="max-w-md rounded-xl border border-border-default bg-bg-elevated p-5">
         <div className="space-y-4">
           <div className="grid gap-2">
             <label className="text-sm font-medium">Quarter</label>
@@ -83,8 +83,8 @@ export default function NewTearSheetPage() {
                   onClick={() => setQuarter(q)}
                   className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
                     quarter === q
-                      ? "border-white/20 bg-white/10 text-white"
-                      : "border-white/10 bg-black/20 text-white/60 hover:border-white/15"
+                      ? "border-border-default bg-bg-hover text-text-primary"
+                      : "border-border-default bg-bg-input text-text-tertiary hover:border-border-default"
                   }`}
                 >
                   {q}
@@ -103,8 +103,8 @@ export default function NewTearSheetPage() {
                   onClick={() => setYear(y)}
                   className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
                     year === y
-                      ? "border-white/20 bg-white/10 text-white"
-                      : "border-white/10 bg-black/20 text-white/60 hover:border-white/15"
+                      ? "border-border-default bg-bg-hover text-text-primary"
+                      : "border-border-default bg-bg-input text-text-tertiary hover:border-border-default"
                   }`}
                 >
                   {y}
@@ -116,7 +116,7 @@ export default function NewTearSheetPage() {
           <div className="grid gap-2">
             <label className="text-sm font-medium" htmlFor="ts-title">
               Title{" "}
-              <span className="font-normal text-white/60">(optional)</span>
+              <span className="font-normal text-text-tertiary">(optional)</span>
             </label>
             <input
               id="ts-title"
@@ -124,12 +124,12 @@ export default function NewTearSheetPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={defaultTitle}
-              className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
+              className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
             />
           </div>
 
           {error && (
-            <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
               {error}
             </div>
           )}
@@ -138,7 +138,7 @@ export default function NewTearSheetPage() {
             type="button"
             onClick={handleCreate}
             disabled={creating}
-            className="w-full rounded-md bg-white py-2.5 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+            className="w-full rounded-md bg-btn-primary-bg py-2.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
           >
             {creating ? "Creating..." : "Create Tear Sheet"}
           </button>

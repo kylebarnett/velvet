@@ -2,6 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+
+const NONE = "__none__";
 
 type InvestmentFormModalProps = {
   open: boolean;
@@ -150,19 +160,19 @@ export function InvestmentFormModal({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === backdropRef.current) onClose();
       }}
     >
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 p-6">
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-border-default bg-bg-secondary p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">
             {mode === "create" ? "Add Investment" : "Edit Investment"}
           </h2>
           <button
             onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-white/40 hover:bg-white/5 hover:text-white"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-primary"
             type="button"
             aria-label="Close"
           >
@@ -171,7 +181,7 @@ export function InvestmentFormModal({
         </div>
 
         {error && (
-          <div className="mt-3 rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200" role="alert">
+          <div className="mt-3 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]" role="alert">
             {error}
           </div>
         )}
@@ -179,79 +189,83 @@ export function InvestmentFormModal({
         <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">
           {/* Company */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Company</label>
-            <select
-              value={companyId}
-              onChange={(e) => setCompanyId(e.target.value)}
+            <label className="mb-1 block text-sm text-text-secondary">Company</label>
+            <Select
+              value={companyId || NONE}
+              onValueChange={(v) => setCompanyId(v === NONE ? "" : v)}
               disabled={mode === "edit"}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none disabled:opacity-60"
             >
-              <option value="">Select a company...</option>
-              {companies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a company..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Select a company...</SelectItem>
+                {companies.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Invested Amount */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Invested Amount</label>
+            <label className="mb-1 block text-sm text-text-secondary">Invested Amount</label>
             <input
               value={investedAmount}
               onChange={(e) => setInvestedAmount(e.target.value)}
               type="number"
               step="any"
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+              className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
               placeholder="e.g. 1000000"
             />
           </div>
 
           {/* Current Value */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Current Value</label>
+            <label className="mb-1 block text-sm text-text-secondary">Current Value</label>
             <input
               value={currentValue}
               onChange={(e) => setCurrentValue(e.target.value)}
               type="number"
               step="any"
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+              className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
               placeholder="0"
             />
           </div>
 
           {/* Realized Value */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Realized Value</label>
+            <label className="mb-1 block text-sm text-text-secondary">Realized Value</label>
             <input
               value={realizedValue}
               onChange={(e) => setRealizedValue(e.target.value)}
               type="number"
               step="any"
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+              className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
               placeholder="0"
             />
           </div>
 
           {/* Investment Date */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Investment Date (optional)</label>
+            <label className="mb-1 block text-sm text-text-secondary">Investment Date (optional)</label>
             <input
               value={investmentDate}
               onChange={(e) => setInvestmentDate(e.target.value)}
               type="date"
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+              className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Notes (optional)</label>
+            <label className="mb-1 block text-sm text-text-secondary">Notes (optional)</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="min-h-[80px] w-full rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm focus:border-white/20 focus:outline-none"
+              className="min-h-[80px] w-full rounded-md border border-border-default bg-bg-input px-3 py-2 text-sm focus:border-border-default focus:outline-none"
               placeholder="Any additional notes..."
               maxLength={1000}
             />
@@ -259,20 +273,19 @@ export function InvestmentFormModal({
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="h-10 rounded-md border border-white/10 bg-white/5 px-4 text-sm hover:bg-white/10"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={saving}
-              className="h-10 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
             >
               {saving ? "Saving..." : mode === "create" ? "Add Investment" : "Save Changes"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

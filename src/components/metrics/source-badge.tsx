@@ -14,17 +14,17 @@ const sourceConfig: Record<
 > = {
   manual: {
     label: "Manual",
-    className: "bg-white/[0.06] text-white/60 ring-white/[0.08]",
+    className: "bg-bg-elevated text-text-tertiary ring-border-subtle",
     icon: PenLine,
   },
   ai_extracted: {
     label: "AI Extracted",
-    className: "bg-violet-500/15 text-violet-200 ring-violet-500/20",
+    className: "bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)] ring-[var(--tag-violet-bg)]",
     icon: Sparkles,
   },
   override: {
     label: "Override",
-    className: "bg-amber-500/15 text-amber-200 ring-amber-500/20",
+    className: "bg-[var(--tag-amber-bg)] text-[var(--tag-amber-text)] ring-[var(--tag-amber-bg)]",
     icon: RotateCcw,
   },
 };

@@ -119,7 +119,7 @@ export function MetricDrilldownPanel({
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-200 ${
+        className={`fixed inset-0 z-40 bg-bg-sidebar backdrop-blur-sm transition-opacity duration-200 ${
           isVisible ? "opacity-100" : "opacity-0"
         }`}
         onClick={handleClose}
@@ -128,7 +128,7 @@ export function MetricDrilldownPanel({
 
       {/* Panel */}
       <div
-        className={`fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-white/10 bg-zinc-900 shadow-2xl transition-transform duration-200 sm:w-[480px] ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-border-default bg-bg-secondary shadow-2xl transition-transform duration-200 sm:w-[480px] ${
           isVisible ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
@@ -136,25 +136,25 @@ export function MetricDrilldownPanel({
         aria-labelledby="drilldown-title"
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-white/10 p-6">
+        <div className="flex items-start justify-between border-b border-border-default p-6">
           <div>
             <h2
               id="drilldown-title"
-              className="flex items-center gap-2 text-lg font-semibold text-white"
+              className="flex items-center gap-2 text-lg font-semibold text-text-primary"
             >
-              <TrendingUp className="h-5 w-5 text-white/60" />
+              <TrendingUp className="h-5 w-5 text-text-tertiary" />
               {metricLabel} Breakdown
             </h2>
-            <p className="mt-1 text-2xl font-bold text-white">
+            <p className="mt-1 text-2xl font-bold text-text-primary">
               {formatValue(total, metricName)}
             </p>
-            <p className="mt-1 text-sm text-white/60">
+            <p className="mt-1 text-sm text-text-tertiary">
               Across {companies.length} {companies.length === 1 ? "company" : "companies"}
             </p>
           </div>
           <button
             onClick={handleClose}
-            className="rounded-lg p-2 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            className="rounded-lg p-2 text-text-tertiary transition-colors hover:bg-bg-hover hover:text-text-primary"
             aria-label="Close panel"
           >
             <X className="h-5 w-5" />
@@ -162,8 +162,8 @@ export function MetricDrilldownPanel({
         </div>
 
         {/* Sort Controls */}
-        <div className="flex items-center gap-2 border-b border-white/10 px-6 py-3">
-          <span className="text-xs font-medium uppercase tracking-wider text-white/40">
+        <div className="flex items-center gap-2 border-b border-border-default px-6 py-3">
+          <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
             Sort by
           </span>
           <div className="flex gap-1">
@@ -192,11 +192,11 @@ export function MetricDrilldownPanel({
         <div className="flex-1 overflow-y-auto">
           {sortedCompanies.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
-              <Building2 className="mb-3 h-10 w-10 text-white/20" />
-              <p className="text-white/60">No company data available</p>
+              <Building2 className="mb-3 h-10 w-10 text-text-faint" />
+              <p className="text-text-tertiary">No company data available</p>
             </div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-border-subtle">
               {sortedCompanies.map((company) => (
                 <CompanyRow
                   key={company.companyId}
@@ -229,8 +229,8 @@ function SortButton({
       onClick={onClick}
       className={`flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
         isActive
-          ? "bg-white/10 text-white"
-          : "text-white/60 hover:bg-white/5 hover:text-white/80"
+          ? "bg-bg-hover text-text-primary"
+          : "text-text-tertiary hover:bg-bg-elevated hover:text-text-secondary"
       }`}
     >
       {label}
@@ -264,10 +264,10 @@ function CompanyRow({
   return (
     <button
       onClick={onClick}
-      className="group flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-white/5"
+      className="group flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-bg-elevated"
     >
       {/* Logo */}
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-default bg-bg-elevated">
         {displayUrl && !imgError ? (
           <img
             src={displayUrl}
@@ -276,19 +276,19 @@ function CompanyRow({
             onError={() => setImgError(true)}
           />
         ) : (
-          <span className="text-sm font-medium text-white/60">{initial}</span>
+          <span className="text-sm font-medium text-text-tertiary">{initial}</span>
         )}
       </div>
 
       {/* Info */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="truncate font-medium text-white group-hover:text-white">
+          <span className="truncate font-medium text-text-primary group-hover:text-text-primary">
             {company.companyName}
           </span>
-          <ArrowUpRight className="h-4 w-4 flex-shrink-0 text-white/0 transition-colors group-hover:text-white/60" />
+          <ArrowUpRight className="h-4 w-4 flex-shrink-0 text-white/0 transition-colors group-hover:text-text-tertiary" />
         </div>
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-white/60">
+        <div className="mt-0.5 flex items-center gap-2 text-xs text-text-tertiary">
           {industryLabel && <span>{industryLabel}</span>}
           {industryLabel && stageLabel && <span>·</span>}
           {stageLabel && <span>{stageLabel}</span>}
@@ -299,7 +299,7 @@ function CompanyRow({
 
       {/* Value and Growth */}
       <div className="flex flex-col items-end text-right">
-        <span className="text-lg font-semibold text-white">
+        <span className="text-lg font-semibold text-text-primary">
           {formatValue(company.value, metricName)}
         </span>
         {company.growth !== null && (

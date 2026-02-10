@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 // Display labels for tag values
 const INDUSTRY_LABELS: Record<string, string> = {
@@ -55,7 +56,7 @@ export async function GET(_req: Request) {
     .in("approval_status", ["auto_approved", "approved"]);
 
   if (relError) {
-    console.error("Failed to fetch relationships:", relError.message);
+    logger.error("Failed to fetch relationships:", relError.message);
     return jsonError("Failed to process request.", 500);
   }
 

@@ -83,7 +83,7 @@ export function CompanyTagEditor({
     <div className="space-y-3">
       <div className="grid gap-3 md:grid-cols-3">
         <div className="grid gap-1.5">
-          <label className="text-xs text-white/60">Stage</label>
+          <label className="text-xs text-text-tertiary">Stage</label>
           <Select
             value={currentStage || "__none__"}
             onValueChange={(v) => setCurrentStage(v === "__none__" ? "" : v)}
@@ -102,7 +102,7 @@ export function CompanyTagEditor({
           </Select>
         </div>
         <div className="grid gap-1.5">
-          <label className="text-xs text-white/60">Industry</label>
+          <label className="text-xs text-text-tertiary">Industry</label>
           <Select
             value={currentIndustry || "__none__"}
             onValueChange={(v) => setCurrentIndustry(v === "__none__" ? "" : v)}
@@ -121,7 +121,7 @@ export function CompanyTagEditor({
           </Select>
         </div>
         <div className="grid gap-1.5">
-          <label className="text-xs text-white/60">Business model</label>
+          <label className="text-xs text-text-tertiary">Business model</label>
           <Select
             value={currentModel || "__none__"}
             onValueChange={(v) => setCurrentModel(v === "__none__" ? "" : v)}
@@ -143,7 +143,7 @@ export function CompanyTagEditor({
 
       <div className="flex items-center gap-3">
         <button
-          className="inline-flex h-8 items-center justify-center rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+          className="inline-flex h-8 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           onClick={handleSave}
           disabled={saving}
           type="button"
@@ -151,10 +151,10 @@ export function CompanyTagEditor({
           {saving ? "Saving..." : "Save tags"}
         </button>
         {saved && (
-          <span className="text-xs text-emerald-200">Saved</span>
+          <span className="text-xs text-[var(--status-success-text)]">Saved</span>
         )}
         {error && (
-          <span className="text-xs text-red-200">{error}</span>
+          <span className="text-xs text-[var(--status-error-text)]">{error}</span>
         )}
       </div>
     </div>
@@ -164,7 +164,7 @@ export function CompanyTagEditor({
 export function TagBadge({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
   return (
-    <span className="inline-flex rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/70">
+    <span className="inline-flex rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-secondary">
       {formatLabel(value)}
     </span>
   );

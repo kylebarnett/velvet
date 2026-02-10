@@ -45,7 +45,7 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "min-h-[80px] w-full rounded-b-md border border-t-0 border-white/10 bg-black/30 px-3 py-2 text-sm outline-none focus:border-white/20 prose prose-invert prose-sm max-w-none [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:underline [&_a]:text-blue-300",
+          "min-h-[80px] w-full rounded-b-md border border-t-0 border-border-default bg-bg-input px-3 py-2 text-sm outline-none focus:border-border-default prose prose-invert prose-sm max-w-none [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:underline [&_a]:text-blue-300",
       },
     },
   });
@@ -75,13 +75,13 @@ export function RichTextEditor({
   const btnClass = (active: boolean) =>
     `rounded p-1.5 transition-colors ${
       active
-        ? "bg-white/15 text-white"
-        : "text-white/50 hover:bg-white/10 hover:text-white/70"
+        ? "bg-bg-hover text-text-primary"
+        : "text-text-muted hover:bg-bg-hover hover:text-text-secondary"
     }`;
 
   return (
     <div>
-      <div className="flex items-center gap-0.5 rounded-t-md border border-white/10 bg-black/20 px-1 py-1">
+      <div className="flex items-center gap-0.5 rounded-t-md border border-border-default bg-bg-input px-1 py-1">
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}

@@ -13,22 +13,22 @@ const statusConfig: Record<
 > = {
   pending: {
     label: "Ready to extract",
-    className: "bg-white/10 text-white/60",
+    className: "bg-bg-hover text-text-tertiary",
     icon: Clock,
   },
   processing: {
     label: "Extracting...",
-    className: "bg-blue-500/20 text-blue-200",
+    className: "bg-[var(--status-info-bg)] text-[var(--status-info-text)]",
     icon: Loader2,
   },
   completed: {
     label: "Extracted",
-    className: "bg-emerald-500/20 text-emerald-200",
+    className: "bg-[var(--status-success-bg)] text-[var(--status-success-text)]",
     icon: CheckCircle2,
   },
   failed: {
     label: "Failed",
-    className: "bg-red-500/20 text-red-200",
+    className: "bg-[var(--status-error-bg)] text-[var(--status-error-text)]",
     icon: XCircle,
   },
 };

@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import { Users, Plus, Loader2, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { MemberList } from "./member-list";
 import { PendingInvitations } from "./pending-invitations";
 import { InviteMemberModal } from "./invite-member-modal";
+import { logger } from "@/lib/logger";
 
 type Member = {
   id: string;
@@ -67,16 +69,16 @@ export function TeamSettings({ currentUserId }: Props) {
         const invitationsJson = await invitationsRes.json();
 
         if (!membersRes.ok) {
-          console.error("Failed to load members:", membersJson);
+          logger.error("Failed to load members:", membersJson);
         }
         if (!invitationsRes.ok) {
-          console.error("Failed to load invitations:", invitationsJson);
+          logger.error("Failed to load invitations:", invitationsJson);
         }
 
         setMembers(membersJson.members ?? []);
         setInvitations(invitationsJson.invitations ?? []);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
@@ -126,7 +128,7 @@ export function TeamSettings({ currentUserId }: Props) {
 
       // Refresh in background to get full data
       loadData();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setCreating(false);
@@ -136,7 +138,7 @@ export function TeamSettings({ currentUserId }: Props) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-white/40" />
+        <Loader2 className="h-6 w-6 animate-spin text-text-muted" />
       </div>
     );
   }
@@ -145,16 +147,16 @@ export function TeamSettings({ currentUserId }: Props) {
   if (!org) {
     return (
       <div className="space-y-6">
-        <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-          <Users className="mx-auto h-10 w-10 text-white/30" />
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+          <Users className="mx-auto h-10 w-10 text-text-faint" />
           <h3 className="mt-4 text-base font-semibold">Create a Team</h3>
-          <p className="mt-2 text-sm text-white/60 max-w-sm mx-auto">
+          <p className="mt-2 text-sm text-text-tertiary max-w-sm mx-auto">
             Invite team members to collaborate on your portfolio. Team members
             share access to portfolio data based on their role.
           </p>
 
           {error && (
-            <div className="mt-4 rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            <div className="mt-4 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
               {error}
             </div>
           )}
@@ -165,19 +167,18 @@ export function TeamSettings({ currentUserId }: Props) {
               value={orgName}
               onChange={(e) => setOrgName(e.target.value)}
               placeholder="Team name"
-              className="h-11 flex-1 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
+              className="h-11 flex-1 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleCreateOrg();
               }}
             />
-            <button
-              type="button"
+            <Button
+              size="lg"
               onClick={handleCreateOrg}
               disabled={creating || !orgName.trim()}
-              className="h-11 rounded-md bg-white px-5 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
             >
               {creating ? "Creating..." : "Create"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -191,37 +192,35 @@ export function TeamSettings({ currentUserId }: Props) {
       {/* Org header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/5">
-            <Settings className="h-5 w-5 text-white/40" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border-default bg-bg-elevated">
+            <Settings className="h-5 w-5 text-text-muted" />
           </div>
           <div>
             <h2 className="font-semibold">{org.name}</h2>
-            <p className="text-xs text-white/60">
+            <p className="text-xs text-text-tertiary">
               {members.length} member{members.length !== 1 ? "s" : ""}
             </p>
           </div>
         </div>
         {isAdmin && (
-          <button
-            type="button"
+          <Button
             onClick={() => setShowInviteModal(true)}
-            className="inline-flex h-9 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90"
           >
             <Plus className="h-4 w-4" />
             Invite
-          </button>
+          </Button>
         )}
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
 
       {/* Members */}
       <div>
-        <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/60">
+        <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-tertiary">
           Members
         </h3>
         <MemberList

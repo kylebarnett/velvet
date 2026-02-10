@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 // POST - Pause a schedule
 export async function POST(
@@ -39,7 +40,7 @@ export async function POST(
     .eq("id", id);
 
   if (updateError) {
-    console.error("Failed to pause schedule:", updateError.message);
+    logger.error("Failed to pause schedule:", updateError.message);
     return jsonError("Failed to process request.", 500);
   }
 

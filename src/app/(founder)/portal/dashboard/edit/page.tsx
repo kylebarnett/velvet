@@ -20,7 +20,7 @@ export default async function FounderDashboardEditPage() {
 
   if (!company) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+      <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]">
         No company linked to your account.
       </div>
     );
@@ -56,7 +56,7 @@ export default async function FounderDashboardEditPage() {
         <div className="space-y-1">
           <Link
             href="/portal"
-            className="flex items-center gap-1 text-sm text-white/50 hover:text-white"
+            className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
           >
             <ArrowLeft className="h-4 w-4" />
             Cancel

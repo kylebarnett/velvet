@@ -41,25 +41,25 @@ export function ComparisonTable({
 }: ComparisonTableProps) {
   if (!data.length) {
     return (
-      <div className="flex h-32 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/40">
+      <div className="flex h-32 items-center justify-center rounded-xl border border-border-default bg-bg-elevated text-text-muted">
         No data available
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5">
+    <div className="rounded-xl border border-border-default bg-bg-elevated">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10">
-              <th className="sticky left-0 bg-zinc-900/80 px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-white/40">
+            <tr className="border-b border-border-default">
+              <th className="sticky left-0 bg-bg-secondary/80 px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-muted">
                 Period
               </th>
               {companies.map((company, index) => (
                 <th
                   key={company}
-                  className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-white/60"
+                  className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary"
                 >
                   <span className="flex items-center justify-end gap-2">
                     <span
@@ -72,13 +72,13 @@ export function ComparisonTable({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/[0.06]">
+          <tbody className="divide-y divide-border-subtle">
             {data.map((row, rowIndex) => (
               <tr
                 key={rowIndex}
-                className="transition-colors hover:bg-white/[0.03]"
+                className="transition-colors hover:bg-bg-raised"
               >
-                <td className="sticky left-0 bg-zinc-900/60 px-4 py-2.5 text-white/70">
+                <td className="sticky left-0 bg-bg-secondary/60 px-4 py-2.5 text-text-secondary">
                   {row.period}
                 </td>
                 {companies.map((company) => {
@@ -86,7 +86,7 @@ export function ComparisonTable({
                   return (
                     <td
                       key={company}
-                      className="whitespace-nowrap px-4 py-2.5 text-right tabular-nums text-white/80"
+                      className="whitespace-nowrap px-4 py-2.5 text-right tabular-nums text-text-primary"
                     >
                       {formatCellValue(val, normalization, metricName)}
                     </td>

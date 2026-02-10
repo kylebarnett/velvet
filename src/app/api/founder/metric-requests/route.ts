@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 // GET - Deduplicated metric requests for the founder's company
 // Groups by metric_name + period, shows requesting investor count
@@ -34,7 +35,7 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Metric requests fetch error:", error);
+    logger.error("Metric requests fetch error:", error);
     return jsonError("Failed to load requests.", 500);
   }
 
@@ -59,7 +60,7 @@ export async function GET() {
       .in("id", definitionIds);
 
     if (defError) {
-      console.error("Metric definitions fetch error:", defError);
+      logger.error("Metric definitions fetch error:", defError);
       return jsonError("Failed to load metric details.", 500);
     }
 
@@ -75,7 +76,7 @@ export async function GET() {
       .in("id", investorIds);
 
     if (invError) {
-      console.error("Investor lookup error:", invError);
+      logger.error("Investor lookup error:", invError);
       // Non-fatal — fall back to "Investor" as display name
     }
 
@@ -132,6 +133,20 @@ export async function GET() {
     );
   }
 
+  // Infer the actual period type from the request's date range, since the
+  // metric_definition.period_type may be stale/wrong (e.g. template items
+  // stored as "monthly" even though the investor requested quarterly).
+  function inferPeriodType(periodStart: string, periodEnd: string): string {
+    const start = new Date(periodStart);
+    const end = new Date(periodEnd);
+    const diffMs = end.getTime() - start.getTime();
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+    if (diffDays > 300) return "annual";
+    if (diffDays > 60) return "quarterly";
+    return "monthly";
+  }
+
   // Group requests by metric + period
   type GroupedRequest = {
     metricName: string;
@@ -155,7 +170,10 @@ export async function GET() {
     const investorName =
       investorMap.get(req.investor_id) || "Investor";
 
-    const key = `${def.name.toLowerCase()}|${def.period_type}|${req.period_start}|${req.period_end}`;
+    // Derive period type from request dates (not definition) to avoid stale mismatches
+    const periodType = inferPeriodType(req.period_start, req.period_end);
+
+    const key = `${def.name.toLowerCase()}|${periodType}|${req.period_start}|${req.period_end}`;
     const existing = groups.get(key);
 
     if (existing) {
@@ -174,7 +192,7 @@ export async function GET() {
     } else {
       groups.set(key, {
         metricName: def.name,
-        periodType: def.period_type,
+        periodType,
         periodStart: req.period_start,
         periodEnd: req.period_end,
         dueDate: req.due_date,
@@ -212,7 +230,7 @@ export async function GET() {
       .in("id", staleIds);
 
     if (updateError) {
-      console.error("Reconcile stale requests error:", updateError);
+      logger.error("Reconcile stale requests error:", updateError);
     }
 
     // Also update the response data so the founder sees the correct status now

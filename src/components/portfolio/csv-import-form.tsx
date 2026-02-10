@@ -230,7 +230,7 @@ export function CsvImportForm() {
           router.refresh();
         }, 2000);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setImporting(false);
@@ -254,8 +254,8 @@ export function CsvImportForm() {
       <div
         className={`relative rounded-xl border-2 border-dashed p-12 text-center transition-colors ${
           dragActive
-            ? "border-white/40 bg-white/5"
-            : "border-white/10 hover:border-white/20"
+            ? "border-border-default bg-bg-elevated"
+            : "border-border-default hover:border-border-default"
         }`}
         onDragOver={(e) => {
           e.preventDefault();
@@ -271,35 +271,35 @@ export function CsvImportForm() {
           onChange={handleChange}
           className="absolute inset-0 cursor-pointer opacity-0"
         />
-        <Upload className="mx-auto h-10 w-10 text-white/40" />
-        <p className="mt-4 text-sm text-white/70">
+        <Upload className="mx-auto h-10 w-10 text-text-muted" />
+        <p className="mt-4 text-sm text-text-secondary">
           {file ? file.name : "Drag and drop a CSV file, or click to select"}
         </p>
-        <p className="mt-2 text-xs text-white/60">
-          <span className="font-medium text-white/60">Required:</span> Company Name, First Name, Last Name, Email
+        <p className="mt-2 text-xs text-text-tertiary">
+          <span className="font-medium text-text-tertiary">Required:</span> Company Name, First Name, Last Name, Email
         </p>
-        <p className="mt-0.5 text-xs text-white/60">
-          <span className="font-medium text-white/60">Optional:</span> Company Website
+        <p className="mt-0.5 text-xs text-text-tertiary">
+          <span className="font-medium text-text-tertiary">Optional:</span> Company Website
         </p>
       </div>
 
       {/* Duplicate warning */}
       {hasDuplicates && (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
-          <div className="flex items-center gap-2 text-amber-200">
+        <div className="rounded-xl border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] p-4">
+          <div className="flex items-center gap-2 text-[var(--status-warning-text)]">
             <AlertTriangle className="h-4 w-4" />
             <span className="text-sm font-medium">
               Duplicate Emails Detected ({parsedData.duplicates.size})
             </span>
           </div>
-          <p className="mt-1 text-sm text-amber-200/80">
+          <p className="mt-1 text-sm text-[var(--status-warning-text)]/80">
             The following emails appear multiple times in your CSV:
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {[...parsedData.duplicates].map((email) => (
               <span
                 key={email}
-                className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-200"
+                className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-[var(--status-warning-text)]"
               >
                 {email}
               </span>
@@ -310,19 +310,19 @@ export function CsvImportForm() {
 
       {/* Validation errors */}
       {hasValidationErrors && !hasDuplicates && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4">
-          <div className="flex items-center gap-2 text-red-200">
+        <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4">
+          <div className="flex items-center gap-2 text-[var(--status-error-text)]">
             <AlertCircle className="h-4 w-4" />
             <span className="text-sm font-medium">Validation Errors</span>
           </div>
-          <ul className="mt-2 space-y-1 text-sm text-red-200/80">
+          <ul className="mt-2 space-y-1 text-sm text-[var(--status-error-text)]/80">
             {parsedData.errors.slice(0, 10).map((err, i) => (
               <li key={i}>
                 Row {err.row}: {err.message}
               </li>
             ))}
             {parsedData.errors.length > 10 && (
-              <li className="text-red-200/60">
+              <li className="text-[var(--status-error-text)]/60">
                 ...and {parsedData.errors.length - 10} more errors
               </li>
             )}
@@ -332,7 +332,7 @@ export function CsvImportForm() {
 
       {/* Preview table */}
       {parsedData && parsedData.rows.length > 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-sm font-medium">
               Preview ({parsedData.rows.length} {parsedData.rows.length === 1 ? "company" : "companies"})
@@ -340,7 +340,7 @@ export function CsvImportForm() {
             {parsedData.rows.length > PREVIEW_LIMIT && (
               <button
                 onClick={() => setShowAll(!showAll)}
-                className="text-sm text-white/60 hover:text-white/80"
+                className="text-sm text-text-tertiary hover:text-text-secondary"
               >
                 {showAll ? "Show less" : `Show all ${parsedData.rows.length}`}
               </button>
@@ -349,7 +349,7 @@ export function CsvImportForm() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-white/60">
+                <tr className="border-b border-border-default text-left text-text-tertiary">
                   <th className="pb-2 pr-4">#</th>
                   <th className="pb-2 pr-4">Company</th>
                   <th className="pb-2 pr-4">Contact</th>
@@ -362,17 +362,17 @@ export function CsvImportForm() {
                   return (
                     <tr
                       key={i}
-                      className={`border-b border-white/5 ${isDuplicate ? "bg-amber-500/10" : ""}`}
+                      className={`border-b border-border-subtle ${isDuplicate ? "bg-amber-500/10" : ""}`}
                     >
-                      <td className="py-2 pr-4 text-white/40">{i + 1}</td>
+                      <td className="py-2 pr-4 text-text-muted">{i + 1}</td>
                       <td className="py-2 pr-4">{row.company_name}</td>
                       <td className="py-2 pr-4">
                         {row.first_name} {row.last_name}
                       </td>
-                      <td className={`py-2 ${isDuplicate ? "text-amber-200" : "text-white/60"}`}>
+                      <td className={`py-2 ${isDuplicate ? "text-[var(--status-warning-text)]" : "text-text-tertiary"}`}>
                         {row.email}
                         {isDuplicate && (
-                          <span className="ml-2 text-xs text-amber-200/60">(duplicate)</span>
+                          <span className="ml-2 text-xs text-[var(--status-warning-text)]/60">(duplicate)</span>
                         )}
                       </td>
                     </tr>
@@ -381,7 +381,7 @@ export function CsvImportForm() {
               </tbody>
             </table>
             {!showAll && parsedData.rows.length > PREVIEW_LIMIT && (
-              <p className="mt-2 text-xs text-white/40">
+              <p className="mt-2 text-xs text-text-muted">
                 ...and {parsedData.rows.length - PREVIEW_LIMIT} more
               </p>
             )}
@@ -391,22 +391,22 @@ export function CsvImportForm() {
 
       {/* Error message */}
       {error && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+        <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-3 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
 
       {/* Import result */}
       {importResult && (
-        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-          <div className="flex items-center gap-2 text-emerald-200">
+        <div className="rounded-xl border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] p-4">
+          <div className="flex items-center gap-2 text-[var(--status-success-text)]">
             <CheckCircle className="h-4 w-4" />
             <span className="text-sm font-medium">
               Successfully imported {importResult.imported} {importResult.imported === 1 ? "company" : "companies"}
             </span>
           </div>
           {importResult.errors.length > 0 && (
-            <ul className="mt-2 space-y-1 text-sm text-amber-200/80">
+            <ul className="mt-2 space-y-1 text-sm text-[var(--status-warning-text)]/80">
               {importResult.errors.map((err, i) => (
                 <li key={i}>
                   Row {err.row}: {err.message}
@@ -414,7 +414,7 @@ export function CsvImportForm() {
               ))}
             </ul>
           )}
-          <p className="mt-2 text-xs text-emerald-200/60">Redirecting to portfolio...</p>
+          <p className="mt-2 text-xs text-[var(--status-success-text)]/60">Redirecting to portfolio...</p>
         </div>
       )}
 
@@ -424,7 +424,7 @@ export function CsvImportForm() {
           <button
             onClick={handleImport}
             disabled={!canImport}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+            className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             {importing
               ? "Importing..."

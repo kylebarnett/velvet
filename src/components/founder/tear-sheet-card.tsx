@@ -38,7 +38,7 @@ export function TearSheetCard({
         e.preventDefault();
         setShowConfirm(true);
       }}
-      className="shrink-0 rounded-md p-1.5 text-white/30 hover:bg-white/5 hover:text-red-300"
+      className="shrink-0 rounded-md p-1.5 text-text-faint hover:bg-bg-elevated hover:text-[var(--status-error-text)]"
       aria-label="Delete tear sheet"
     >
       <Trash2 className="h-4 w-4" />
@@ -77,12 +77,12 @@ export function TearSheetCard({
 
   return (
     <>
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1 space-y-1">
             <Link
               href={`/portal/tear-sheets/${tearSheet.id}`}
-              className="block truncate text-sm font-medium hover:text-white/80"
+              className="block truncate text-sm font-medium hover:text-text-secondary"
             >
               {tearSheet.title}
             </Link>
@@ -90,17 +90,17 @@ export function TearSheetCard({
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                   tearSheet.status === "published"
-                    ? "bg-emerald-500/20 text-emerald-200"
-                    : "bg-amber-500/20 text-amber-200"
+                    ? "bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
+                    : "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]"
                 }`}
               >
                 {tearSheet.status === "published" ? "Published" : "Draft"}
               </span>
-              <span className="text-xs text-white/60">
+              <span className="text-xs text-text-tertiary">
                 {tearSheet.quarter} {tearSheet.year}
               </span>
               {tearSheet.share_enabled && (
-                <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-blue-200">
+                <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-[var(--status-info-text)]">
                   Shared
                 </span>
               )}
@@ -108,7 +108,7 @@ export function TearSheetCard({
           </div>
           {deleteButton}
         </div>
-        <div className="mt-3 text-xs text-white/40">Updated {updatedAt}</div>
+        <div className="mt-3 text-xs text-text-muted">Updated {updatedAt}</div>
       </div>
 
       {confirmModal}

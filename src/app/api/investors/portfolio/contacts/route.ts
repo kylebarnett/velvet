@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 // GET - List contacts for investor with pagination and search
 export async function GET(req: Request) {
@@ -84,7 +85,7 @@ export async function GET(req: Request) {
   // Get total count
   const { count: totalCount, error: countError } = await countQuery;
   if (countError) {
-    console.error("Failed to count contacts:", countError.message);
+    logger.error("Failed to count contacts:", countError.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -113,7 +114,7 @@ export async function GET(req: Request) {
   const { data, error } = await dataQuery;
 
   if (error) {
-    console.error("Failed to fetch contacts:", error.message);
+    logger.error("Failed to fetch contacts:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -167,7 +168,7 @@ export async function PUT(req: Request) {
     .single();
 
   if (error) {
-    console.error("Failed to update contact:", error.message);
+    logger.error("Failed to update contact:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

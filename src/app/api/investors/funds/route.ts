@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { checkRateLimit } from "@/lib/api/rate-limit";
+import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
   name: z.string().min(1).max(200),
@@ -26,7 +27,7 @@ export async function GET() {
     .order("vintage_year", { ascending: false });
 
   if (error) {
-    console.error("Failed to list funds:", error.message);
+    logger.error("Failed to list funds:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -69,7 +70,7 @@ export async function POST(req: Request) {
     .single();
 
   if (error) {
-    console.error("Failed to create fund:", error.message);
+    logger.error("Failed to create fund:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

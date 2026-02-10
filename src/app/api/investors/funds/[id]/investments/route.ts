@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
   company_id: z.string().uuid(),
@@ -42,7 +43,7 @@ export async function GET(
     .order("investment_date", { ascending: false });
 
   if (error) {
-    console.error("Failed to list investments:", error.message);
+    logger.error("Failed to list investments:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -117,7 +118,7 @@ export async function POST(
     .single();
 
   if (error) {
-    console.error("Failed to create investment:", error.message);
+    logger.error("Failed to create investment:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

@@ -3,6 +3,7 @@ import {
   FINANCIAL_EXTRACTION_SYSTEM_PROMPT,
   buildUserPrompt,
 } from "../prompts";
+import { logger } from "@/lib/logger";
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 const GEMINI_BASE = "https://generativelanguage.googleapis.com";
@@ -124,7 +125,7 @@ export class GeminiExtractor implements MetricExtractor {
       if (response.status !== 429 || attempt === MAX_RETRIES) break;
 
       const delay = Math.min(2000 * Math.pow(2, attempt), 30000);
-      console.warn(`[gemini] Rate limited (429), retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})`);
+      logger.warn(`[gemini] Rate limited (429), retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})`);
       await new Promise((r) => setTimeout(r, delay));
     }
 
@@ -168,7 +169,7 @@ export class GeminiExtractor implements MetricExtractor {
     try {
       parsed = JSON.parse(jsonText);
     } catch {
-      console.error("[gemini] Raw response (first 500 chars):", textContent.slice(0, 500));
+      logger.error("[gemini] Raw response (first 500 chars):", textContent.slice(0, 500));
       throw new Error("Failed to parse Gemini response as JSON.");
     }
 

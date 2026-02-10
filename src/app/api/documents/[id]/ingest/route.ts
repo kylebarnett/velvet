@@ -5,6 +5,7 @@ import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createExtractor } from "@/lib/ai/extractor";
 import { normalizeMetricPeriods } from "@/lib/utils/period-normalization";
+import { logger } from "@/lib/logger";
 
 export async function POST(
   _req: Request,
@@ -56,7 +57,7 @@ export async function POST(
     .maybeSingle();
 
   if (updateError) {
-    console.error("Failed to update document status:", updateError.message);
+    logger.error("Failed to update document status:", updateError.message);
     return jsonError("Failed to process document.", 400);
   }
   if (!updated) {
@@ -143,7 +144,7 @@ export async function POST(
       periodsAdjusted: adjustedCount,
       processingTimeMs: result.processing_time_ms,
     });
-  } catch (err) {
+  } catch (err: unknown) {
     // Mark as failed on error
     await admin
       .from("documents")
@@ -151,7 +152,7 @@ export async function POST(
       .eq("id", id);
 
     const message = err instanceof Error ? err.message : "Extraction failed.";
-    console.error("[ingest] Extraction error:", message);
+    logger.error("[ingest] Extraction error:", message);
     return jsonError("Extraction failed.", 500);
   }
 }

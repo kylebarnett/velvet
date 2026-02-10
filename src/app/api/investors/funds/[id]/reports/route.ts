@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { checkRateLimit } from "@/lib/api/rate-limit";
+import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
   title: z.string().min(1).max(200),
@@ -42,7 +43,7 @@ export async function GET(
     .order("report_date", { ascending: false });
 
   if (error) {
-    console.error("Failed to list LP reports:", error.message);
+    logger.error("Failed to list LP reports:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -101,7 +102,7 @@ export async function POST(
     .single();
 
   if (error) {
-    console.error("Failed to create LP report:", error.message);
+    logger.error("Failed to create LP report:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

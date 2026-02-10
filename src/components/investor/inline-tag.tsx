@@ -45,9 +45,9 @@ const TAG_LABELS: Record<TagType, string> = {
 };
 
 const TAG_COLORS: Record<TagType, { bg: string; text: string; border: string }> = {
-  stage: { bg: "bg-violet-500/15", text: "text-violet-300", border: "border-violet-500/30" },
-  industry: { bg: "bg-blue-500/15", text: "text-blue-300", border: "border-blue-500/30" },
-  businessModel: { bg: "bg-emerald-500/15", text: "text-emerald-300", border: "border-emerald-500/30" },
+  stage: { bg: "bg-[var(--tag-violet-bg)]", text: "text-[var(--tag-violet-text)]", border: "border-[var(--tag-violet-bg)]" },
+  industry: { bg: "bg-[var(--tag-blue-bg)]", text: "text-[var(--tag-blue-text)]", border: "border-[var(--tag-blue-bg)]" },
+  businessModel: { bg: "bg-[var(--tag-emerald-bg)]", text: "text-[var(--tag-emerald-text)]", border: "border-[var(--tag-emerald-bg)]" },
 };
 
 function getDisplayLabel(type: TagType, value: string | null): string {
@@ -132,7 +132,7 @@ export const InlineTag = React.memo(function InlineTag({
         disabled={saving}
         className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-all ${
           isEmpty
-            ? "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70"
+            ? "border-border-default bg-bg-elevated text-text-muted hover:border-border-default hover:text-text-secondary"
             : `${colors.bg} ${colors.text} ${colors.border} hover:brightness-110`
         } ${saving ? "opacity-60" : ""}`}
       >
@@ -141,18 +141,18 @@ export const InlineTag = React.memo(function InlineTag({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-1 min-w-[140px] overflow-hidden rounded-lg border border-white/10 bg-zinc-900/95 py-1 shadow-xl backdrop-blur-sm">
+        <div className="absolute left-0 top-full z-50 mt-1 min-w-[140px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary/95 py-1 shadow-xl backdrop-blur-sm">
           {/* Clear option */}
           {value && (
             <>
               <button
                 onClick={() => handleSelect(null)}
-                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-white/60 hover:bg-white/5 hover:text-white/80"
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-text-tertiary hover:bg-bg-elevated hover:text-text-secondary"
               >
                 <X className="h-3 w-3" />
                 Clear
               </button>
-              <div className="mx-2 my-1 border-t border-white/10" />
+              <div className="mx-2 my-1 border-t border-border-default" />
             </>
           )}
 
@@ -161,8 +161,8 @@ export const InlineTag = React.memo(function InlineTag({
             <button
               key={option.value}
               onClick={() => handleSelect(option.value)}
-              className={`flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-white/5 ${
-                option.value === value ? "text-white" : "text-white/70"
+              className={`flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-bg-elevated ${
+                option.value === value ? "text-text-primary" : "text-text-secondary"
               }`}
             >
               <span>{option.label}</span>

@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { getChartColor, formatValue, formatPeriod } from "@/components/charts/types";
+import { useChartTheme } from "@/hooks/use-chart-theme";
 import type { NormalizationMode } from "./normalization-toggle";
 
 type ComparisonChartProps = {
@@ -79,7 +80,7 @@ export function ComparisonChart({
   if (!data.length) {
     return (
       <div
-        className="flex items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/40"
+        className="flex items-center justify-center rounded-xl border border-border-default bg-bg-elevated text-text-muted"
         style={{ height }}
       >
         No data available for the selected parameters
@@ -87,11 +88,12 @@ export function ComparisonChart({
     );
   }
 
+  const chartTheme = useChartTheme();
   const yAxisLabel = getYAxisLabel(normalization);
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-      <h3 className="mb-3 text-sm font-medium text-white/80">{metricName}</h3>
+    <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+      <h3 className="mb-3 text-sm font-medium text-text-primary">{metricName}</h3>
       <ResponsiveContainer width="100%" height={height}>
         <RechartsLineChart
           data={data}
@@ -99,18 +101,18 @@ export function ComparisonChart({
         >
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.06)"
+            stroke={chartTheme.grid}
             vertical={false}
           />
           <XAxis
             dataKey="period"
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+            tick={{ fill: chartTheme.tick, fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             dy={10}
           />
           <YAxis
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+            tick={{ fill: chartTheme.tick, fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => formatYAxisTick(v, normalization, metricName)}
@@ -122,7 +124,7 @@ export function ComparisonChart({
                     value: yAxisLabel,
                     angle: -90,
                     position: "insideLeft",
-                    fill: "rgba(255,255,255,0.3)",
+                    fill: chartTheme.secondaryLine,
                     fontSize: 10,
                     dx: -10,
                   }
@@ -131,15 +133,15 @@ export function ComparisonChart({
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "rgba(9, 9, 11, 0.95)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              backgroundColor: chartTheme.tooltipBg,
+              border: `1px solid ${chartTheme.tooltipBorder}`,
               borderRadius: "8px",
               padding: "8px 12px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+              boxShadow: `0 4px 12px ${chartTheme.tooltipShadow}`,
             }}
-            itemStyle={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}
+            itemStyle={{ color: chartTheme.tooltipText, fontSize: 12 }}
             labelStyle={{
-              color: "rgba(255,255,255,0.5)",
+              color: chartTheme.tooltipLabel,
               fontSize: 11,
               marginBottom: 4,
             }}
@@ -151,7 +153,7 @@ export function ComparisonChart({
           <Legend
             wrapperStyle={{ paddingTop: 10 }}
             formatter={(value: string) => (
-              <span className="text-xs text-white/70">{value}</span>
+              <span className="text-xs text-text-secondary">{value}</span>
             )}
           />
           {companies.map((company, index) => (

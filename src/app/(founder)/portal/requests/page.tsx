@@ -2,8 +2,13 @@
 
 import * as React from "react";
 import { NotificationList } from "@/components/founder/notification-list";
-import { BatchSubmissionTable } from "@/components/founder/batch-submission-table";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+
+const BatchSubmissionTable = React.lazy(() =>
+  import("@/components/founder/batch-submission-table").then((mod) => ({
+    default: mod.BatchSubmissionTable,
+  }))
+);
 
 type TabValue = "pending" | "completed";
 
@@ -46,11 +51,33 @@ export default function FounderRequestsPage() {
           </p>
         </div>
 
-        <BatchSubmissionTable
-          initialCompanyId={companyId}
-          prefilterPeriod={submitPeriod}
-          onBack={handleBackFromSubmit}
-        />
+        <React.Suspense
+          fallback={
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-border-default bg-bg-elevated p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="h-5 w-48 animate-pulse rounded bg-bg-hover" />
+                    <div className="h-6 w-16 animate-pulse rounded-full bg-bg-elevated" />
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    <div className="h-3 w-64 animate-pulse rounded bg-bg-elevated" />
+                    <div className="h-3 w-40 animate-pulse rounded bg-bg-elevated" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          }
+        >
+          <BatchSubmissionTable
+            initialCompanyId={companyId}
+            prefilterPeriod={submitPeriod}
+            onBack={handleBackFromSubmit}
+          />
+        </React.Suspense>
       </div>
     );
   }

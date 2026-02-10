@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 // GET - Fetch hidden template IDs
 export async function GET() {
@@ -35,7 +36,7 @@ export async function PUT(req: Request) {
 
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) {
-    console.error("Validation error:", parsed.error);
+    logger.error("Validation error:", parsed.error);
     return jsonError("Invalid request body.", 400);
   }
 
@@ -65,7 +66,7 @@ export async function PUT(req: Request) {
   });
 
   if (error) {
-    console.error("Failed to update hidden templates:", error);
+    logger.error("Failed to update hidden templates:", error);
     return jsonError("Failed to update hidden templates.", 500);
   }
 

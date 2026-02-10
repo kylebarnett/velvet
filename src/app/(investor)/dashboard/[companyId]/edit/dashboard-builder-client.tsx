@@ -224,7 +224,7 @@ export function DashboardBuilderClient({
       setIsDirty(false);
       router.push(`/dashboard/${companyId}`);
       router.refresh();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setIsSaving(false);
@@ -254,7 +254,7 @@ export function DashboardBuilderClient({
       setIsDirty(false);
       router.push(`/dashboard/${companyId}`);
       router.refresh();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setIsSaving(false);

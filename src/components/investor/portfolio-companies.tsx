@@ -96,7 +96,7 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
           )}
           {(filterStage || filterIndustry || filterModel) && (
             <button
-              className="h-9 rounded-md border border-white/10 px-3 text-xs text-white/60 hover:bg-white/5"
+              className="h-9 rounded-md border border-border-default px-3 text-xs text-text-tertiary hover:bg-bg-elevated"
               onClick={() => { setFilterStage(""); setFilterIndustry(""); setFilterModel(""); }}
               type="button"
             >
@@ -109,7 +109,7 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
       {/* Company cards */}
       <div className="space-y-3">
         {filtered.map((company) => (
-          <div key={company.id} className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div key={company.id} className="rounded-xl border border-border-default bg-bg-elevated p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <CompanyLogo
@@ -130,7 +130,7 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{company.name}</span>
                     {company.founder_id && (
-                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-200">
+                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-[var(--status-success-text)]">
                         Founder joined
                       </span>
                     )}
@@ -140,13 +140,13 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
                     <TagBadge label="Industry" value={company.industry} />
                     <TagBadge label="Model" value={company.business_model} />
                     {!company.stage && !company.industry && !company.business_model && (
-                      <span className="text-xs text-white/40">No tags</span>
+                      <span className="text-xs text-text-muted">No tags</span>
                     )}
                   </div>
                 </div>
               </div>
               <button
-                className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10"
+                className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-3 text-xs font-medium text-text-primary hover:bg-bg-hover"
                 onClick={() => setEditingId(editingId === company.id ? null : company.id)}
                 type="button"
               >
@@ -155,7 +155,7 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
             </div>
 
             {editingId === company.id && (
-              <div className="mt-4 border-t border-white/10 pt-4">
+              <div className="mt-4 border-t border-border-default pt-4">
                 <CompanyTagEditor
                   companyId={company.id}
                   stage={company.stage}
@@ -185,8 +185,8 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
       </div>
 
       {filtered.length === 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
-          <p className="text-sm text-white/60">No companies match the selected filters.</p>
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-4 text-center">
+          <p className="text-sm text-text-tertiary">No companies match the selected filters.</p>
         </div>
       )}
     </div>

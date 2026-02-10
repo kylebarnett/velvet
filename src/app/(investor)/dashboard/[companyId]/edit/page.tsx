@@ -27,7 +27,7 @@ export default async function DashboardEditPage({
 
   if (!relationship) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+      <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]">
         Company not in your portfolio.
       </div>
     );
@@ -42,12 +42,12 @@ export default async function DashboardEditPage({
       <div className="space-y-4">
         <Link
           href={`/dashboard/${companyId}`}
-          className="flex items-center gap-1 text-sm text-white/50 hover:text-white"
+          className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to dashboard
         </Link>
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-200">
+        <div className="rounded-xl border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] p-4 text-sm text-[var(--status-warning-text)]">
           Your access is pending approval. You can edit the dashboard once the founder approves your access.
         </div>
       </div>
@@ -63,7 +63,7 @@ export default async function DashboardEditPage({
 
   if (!company) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+      <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]">
         Company not found.
       </div>
     );
@@ -99,7 +99,7 @@ export default async function DashboardEditPage({
         <div className="space-y-1">
           <Link
             href={`/dashboard/${companyId}`}
-            className="flex items-center gap-1 text-sm text-white/50 hover:text-white"
+            className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
           >
             <ArrowLeft className="h-4 w-4" />
             Cancel

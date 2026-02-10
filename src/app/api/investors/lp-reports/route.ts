@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 // GET - List all LP reports across investor's funds
 export async function GET() {
@@ -16,7 +17,7 @@ export async function GET() {
     .order("report_date", { ascending: false });
 
   if (error) {
-    console.error("Failed to fetch LP reports:", error.message);
+    logger.error("Failed to fetch LP reports:", error.message);
     return jsonError("Failed to fetch reports.", 500);
   }
 

@@ -2,6 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 type FundFormModalProps = {
   open: boolean;
@@ -114,19 +122,19 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === backdropRef.current) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-xl border border-white/10 bg-zinc-900 p-6">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">
             {mode === "create" ? "Create Fund" : "Edit Fund"}
           </h2>
           <button
             onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-white/40 hover:bg-white/5 hover:text-white"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-primary"
             type="button"
             aria-label="Close"
           >
@@ -135,7 +143,7 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
         </div>
 
         {error && (
-          <div className="mt-3 rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200" role="alert">
+          <div className="mt-3 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]" role="alert">
             {error}
           </div>
         )}
@@ -143,69 +151,69 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
         <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">
           {/* Name */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Fund Name</label>
+            <label className="mb-1 block text-sm text-text-secondary">Fund Name</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+              className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
               placeholder="e.g. Fund I"
             />
           </div>
 
           {/* Vintage Year */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Vintage Year</label>
+            <label className="mb-1 block text-sm text-text-secondary">Vintage Year</label>
             <input
               value={vintageYear}
               onChange={(e) => setVintageYear(e.target.value)}
               type="number"
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+              className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
             />
           </div>
 
           {/* Fund Size */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Fund Size (optional)</label>
+            <label className="mb-1 block text-sm text-text-secondary">Fund Size (optional)</label>
             <input
               value={fundSize}
               onChange={(e) => setFundSize(e.target.value)}
               type="number"
               step="any"
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+              className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
               placeholder="e.g. 50000000"
             />
           </div>
 
           {/* Currency */}
           <div>
-            <label className="mb-1 block text-sm text-white/70">Currency</label>
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
-            >
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-              <option value="GBP">GBP</option>
-            </select>
+            <label className="mb-1 block text-sm text-text-secondary">Currency</label>
+            <Select value={currency} onValueChange={setCurrency}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="USD">USD</SelectItem>
+                <SelectItem value="EUR">EUR</SelectItem>
+                <SelectItem value="GBP">GBP</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="h-10 rounded-md border border-white/10 bg-white/5 px-4 text-sm hover:bg-white/10"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={saving}
-              className="h-10 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
             >
               {saving ? "Saving..." : mode === "create" ? "Create Fund" : "Save Changes"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

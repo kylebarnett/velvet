@@ -113,8 +113,8 @@ const DEFAULT_CARDS = [
       </svg>
     ),
     gradient: "from-white/10 via-white/5 to-transparent",
-    accent: "text-white",
-    ring: "ring-white/10"
+    accent: "text-text-primary",
+    ring: "ring-border-default"
   },
   {
     key: "withMetrics",
@@ -197,16 +197,16 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
 
   if (kpis.length === 0) {
     return (
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent p-8 text-center">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/[0.03] via-transparent to-transparent" />
+      <div className="relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent p-8 text-center">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-bg-raised via-transparent to-transparent" />
         <div className="relative">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.05] ring-1 ring-white/[0.08]">
-            <svg className="h-6 w-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated ring-1 ring-border-subtle">
+            <svg className="h-6 w-6 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </div>
-          <p className="text-white/60">No metric data available yet</p>
-          <p className="mt-1 text-sm text-white/40">
+          <p className="text-text-tertiary">No metric data available yet</p>
+          <p className="mt-1 text-sm text-text-muted">
             Metrics will appear here once founders submit data
           </p>
         </div>
@@ -228,7 +228,7 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
               onMetricClick(kpi.metric);
             }
           }}
-          className={`group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent p-5 transition-all duration-300 hover:border-white/[0.15] hover:shadow-lg hover:shadow-black/20 ${
+          className={`group relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent p-5 transition-all duration-300 hover:border-border-default hover:shadow-lg hover:shadow-black/20 ${
             kpi.clickable && onMetricClick ? "cursor-pointer hover:scale-[1.02]" : ""
           }`}
           style={{ animationDelay: `${index * 50}ms` }}
@@ -242,11 +242,11 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
           <div className="relative">
             {/* Header */}
             <div className="flex items-start justify-between">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.05] ring-1 ${kpi.ring} ${kpi.accent} transition-transform duration-300 group-hover:scale-110`}>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-bg-elevated ring-1 ${kpi.ring} ${kpi.accent} transition-transform duration-300 group-hover:scale-110`}>
                 {kpi.icon}
               </div>
               {kpi.coverage < 100 && (
-                <div className="flex items-center gap-1 rounded-full bg-white/[0.05] px-2 py-1 text-[10px] font-medium text-white/60">
+                <div className="flex items-center gap-1 rounded-full bg-bg-elevated px-2 py-1 text-[10px] font-medium text-text-tertiary">
                   <div className="h-1.5 w-1.5 rounded-full bg-amber-400/60" />
                   {kpi.coverage}%
                 </div>
@@ -255,22 +255,22 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
 
             {/* Value */}
             <div className="mt-4">
-              <div className="text-3xl font-semibold tracking-tight text-white">
+              <div className="text-3xl font-semibold tracking-tight text-text-primary">
                 {kpi.value}
               </div>
-              <div className="mt-1 text-sm text-white/60">{kpi.label}</div>
+              <div className="mt-1 text-sm text-text-tertiary">{kpi.label}</div>
             </div>
 
             {/* Footer */}
             {kpi.count < totalCompanies && (
-              <div className="mt-3 flex items-center gap-2 border-t border-white/[0.05] pt-3">
-                <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/[0.08]">
+              <div className="mt-3 flex items-center gap-2 border-t border-border-subtle pt-3">
+                <div className="h-1 flex-1 overflow-hidden rounded-full bg-bg-hover">
                   <div
                     className={`h-full rounded-full bg-gradient-to-r ${kpi.gradient.replace('/20', '/40').replace('/5', '/20')}`}
                     style={{ width: `${kpi.coverage}%` }}
                   />
                 </div>
-                <span className="text-xs text-white/40">
+                <span className="text-xs text-text-muted">
                   {kpi.count}/{totalCompanies}
                 </span>
               </div>

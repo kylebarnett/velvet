@@ -74,12 +74,12 @@ export function InvestmentTable({
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5">
-      <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
-        <h3 className="text-sm font-medium text-white/80">Investments</h3>
+    <div className="rounded-xl border border-border-default bg-bg-elevated">
+      <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
+        <h3 className="text-sm font-medium text-text-primary">Investments</h3>
         <button
           onClick={() => setShowAdd(true)}
-          className="flex h-8 items-center gap-1.5 rounded-md bg-white px-3 text-xs font-medium text-black hover:bg-white/90"
+          className="flex h-8 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover"
         >
           <Plus className="h-3.5 w-3.5" />
           Add Investment
@@ -87,14 +87,14 @@ export function InvestmentTable({
       </div>
 
       {investments.length === 0 ? (
-        <div className="px-4 py-8 text-center text-sm text-white/40">
+        <div className="px-4 py-8 text-center text-sm text-text-muted">
           No investments yet. Add your first investment to start tracking performance.
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-left text-xs uppercase tracking-wider text-white/40">
+              <tr className="border-b border-border-subtle text-left text-xs uppercase tracking-wider text-text-muted">
                 <th className="px-4 py-2.5 font-medium">Company</th>
                 <th className="px-4 py-2.5 font-medium text-right">Invested</th>
                 <th className="px-4 py-2.5 font-medium text-right">Current Value</th>
@@ -114,23 +114,23 @@ export function InvestmentTable({
                 return (
                   <tr
                     key={inv.id}
-                    className="border-b border-white/[0.04] transition-colors hover:bg-white/[0.02]"
+                    className="border-b border-border-subtle transition-colors hover:bg-bg-raised"
                   >
                     <td className="px-4 py-3 font-medium">{inv.company_name}</td>
-                    <td className="px-4 py-3 text-right text-white/70">
+                    <td className="px-4 py-3 text-right text-text-secondary">
                       {formatCurrency(inv.invested_amount, currency)}
                     </td>
-                    <td className="px-4 py-3 text-right text-white/70">
+                    <td className="px-4 py-3 text-right text-text-secondary">
                       {formatCurrency(inv.current_value, currency)}
                     </td>
-                    <td className="px-4 py-3 text-right text-white/70">
+                    <td className="px-4 py-3 text-right text-text-secondary">
                       {formatCurrency(inv.realized_value, currency)}
                     </td>
                     <td
                       className={cn(
                         "hidden px-4 py-3 text-right font-medium sm:table-cell",
                         moic == null
-                          ? "text-white/30"
+                          ? "text-text-faint"
                           : moic >= 1
                             ? "text-emerald-400"
                             : "text-red-400",
@@ -138,14 +138,14 @@ export function InvestmentTable({
                     >
                       {moic != null ? `${moic.toFixed(2)}x` : "-"}
                     </td>
-                    <td className="hidden px-4 py-3 text-white/60 md:table-cell">
+                    <td className="hidden px-4 py-3 text-text-tertiary md:table-cell">
                       {formatDate(inv.investment_date)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => setEditingInvestment(inv)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded text-white/40 hover:bg-white/5 hover:text-white"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded text-text-muted hover:bg-bg-elevated hover:text-text-primary"
                           title="Edit"
                           type="button"
                         >
@@ -154,7 +154,7 @@ export function InvestmentTable({
                         <button
                           onClick={() => handleDelete(inv.id)}
                           disabled={deletingId === inv.id}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded text-white/40 hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded text-text-muted hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
                           title="Delete"
                           type="button"
                         >

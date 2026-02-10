@@ -29,12 +29,12 @@ export default async function FundDetailPage({
       <div className="space-y-4">
         <Link
           href="/lp-reports"
-          className="flex items-center gap-1 text-xs text-white/40 hover:text-white"
+          className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to Funds
         </Link>
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
+        <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]">
           Fund not found.
         </div>
       </div>
@@ -95,7 +95,7 @@ export default async function FundDetailPage({
     <div className="space-y-6">
       <Link
         href="/lp-reports"
-        className="flex items-center gap-1 text-xs text-white/40 hover:text-white"
+        className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Funds

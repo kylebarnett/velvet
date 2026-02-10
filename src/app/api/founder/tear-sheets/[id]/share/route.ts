@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 const schema = z.object({
   enabled: z.boolean(),
@@ -65,7 +66,7 @@ export async function POST(
     .single();
 
   if (error) {
-    console.error("Share toggle error:", error);
+    logger.error("Share toggle error:", error);
     return jsonError("Failed to update sharing.", 500);
   }
 

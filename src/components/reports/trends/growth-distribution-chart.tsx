@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { useChartTheme } from "@/hooks/use-chart-theme";
 
 type GrowthBucket = {
   bucket: string;
@@ -43,9 +44,9 @@ function CustomTooltip({
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-lg border border-white/10 bg-zinc-900 px-3 py-2 shadow-xl">
-      <p className="text-xs text-white/50">{label}</p>
-      <p className="mt-0.5 text-sm font-medium text-white">
+    <div className="rounded-lg border border-border-default bg-bg-secondary px-3 py-2 shadow-xl">
+      <p className="text-xs text-text-muted">{label}</p>
+      <p className="mt-0.5 text-sm font-medium text-text-primary">
         {payload[0].value} {payload[0].value === 1 ? "company" : "companies"}
       </p>
     </div>
@@ -57,10 +58,11 @@ export function GrowthDistributionChart({
   metricName,
   companyCount,
 }: GrowthDistributionChartProps) {
+  const chartTheme = useChartTheme();
   const hasData = data.some((d) => d.count > 0);
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-transparent transition-all duration-300 hover:border-white/[0.12]">
+    <div className="group relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent transition-all duration-300 hover:border-border-default">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-amber-500/[0.05] via-transparent to-transparent" />
 
       <div className="relative p-5">
@@ -82,8 +84,8 @@ export function GrowthDistributionChart({
             </svg>
           </div>
           <div>
-            <h3 className="font-semibold text-white">Growth Distribution</h3>
-            <p className="text-xs text-white/40">
+            <h3 className="font-semibold text-text-primary">Growth Distribution</h3>
+            <p className="text-xs text-text-muted">
               {metricName} growth across {companyCount}{" "}
               {companyCount === 1 ? "company" : "companies"}
             </p>
@@ -92,7 +94,7 @@ export function GrowthDistributionChart({
 
         {!hasData ? (
           <div className="flex h-64 items-center justify-center">
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-text-muted">
               Not enough data to calculate growth distribution. At least two
               periods of data per company are needed.
             </p>
@@ -105,18 +107,18 @@ export function GrowthDistributionChart({
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.06)"
+                stroke={chartTheme.grid}
                 vertical={false}
               />
               <XAxis
                 dataKey="bucket"
-                tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+                tick={{ fill: chartTheme.tick, fontSize: 11 }}
                 tickLine={false}
                 axisLine={false}
                 dy={10}
               />
               <YAxis
-                tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
+                tick={{ fill: chartTheme.tick, fontSize: 11 }}
                 tickLine={false}
                 axisLine={false}
                 allowDecimals={false}
@@ -125,7 +127,7 @@ export function GrowthDistributionChart({
               />
               <Tooltip
                 content={<CustomTooltip />}
-                cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                cursor={{ fill: chartTheme.cursor }}
               />
               <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={60}>
                 {data.map((entry) => (
@@ -141,12 +143,12 @@ export function GrowthDistributionChart({
 
         {/* Legend */}
         {hasData && (
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 border-t border-white/[0.05] pt-3">
-            <div className="flex items-center gap-1.5 text-xs text-white/40">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 border-t border-border-subtle pt-3">
+            <div className="flex items-center gap-1.5 text-xs text-text-muted">
               <div className="h-2.5 w-2.5 rounded-sm bg-red-500" />
               <span>Negative growth</span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-white/40">
+            <div className="flex items-center gap-1.5 text-xs text-text-muted">
               <div className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
               <span>Positive growth</span>
             </div>

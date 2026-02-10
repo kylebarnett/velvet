@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 export async function GET(
   _req: Request,
@@ -36,7 +37,7 @@ export async function GET(
     .order("quarter", { ascending: false });
 
   if (error) {
-    console.error("Failed to fetch tear sheets:", error);
+    logger.error("Failed to fetch tear sheets:", error);
     return jsonError("Failed to load tear sheets.", 500);
   }
 

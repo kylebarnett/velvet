@@ -97,7 +97,7 @@ export function TemplateForm({
       if (onSaved) {
         onSaved();
       } else {
-        router.push("/requests?tab=templates");
+        router.push("/campaigns?tab=templates");
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
@@ -111,14 +111,14 @@ export function TemplateForm({
       className="max-w-2xl space-y-6"
       onSubmit={handleSubmit}
     >
-      <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-4">
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-5 space-y-4">
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="templateName">
+          <label className="text-sm text-text-secondary" htmlFor="templateName">
             Template name
           </label>
           <input
             id="templateName"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+            className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
             placeholder="e.g. SaaS Metrics"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -127,12 +127,12 @@ export function TemplateForm({
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="templateDesc">
+          <label className="text-sm text-text-secondary" htmlFor="templateDesc">
             Description (optional)
           </label>
           <textarea
             id="templateDesc"
-            className="min-h-16 rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+            className="min-h-16 rounded-md border border-border-default bg-bg-input px-3 py-2 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
             placeholder="What metrics this template tracks..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -140,13 +140,13 @@ export function TemplateForm({
         </div>
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-4">
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-5 space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">Metrics</span>
           <button
             type="button"
             onClick={addItem}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-xs font-medium text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs font-medium text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             <Plus className="h-3.5 w-3.5" />
             Add metric
@@ -158,7 +158,7 @@ export function TemplateForm({
             <div key={index} className="flex items-start gap-2">
               <div className="flex-1 grid gap-2 md:grid-cols-2">
                 <input
-                  className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+                  className="h-10 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
                   placeholder="Metric name (e.g. MRR)"
                   value={item.metric_name}
                   onChange={(e) => updateItem(index, "metric_name", e.target.value)}
@@ -179,7 +179,7 @@ export function TemplateForm({
                 type="button"
                 onClick={() => removeItem(index)}
                 disabled={items.length <= 1}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-white/10 disabled:opacity-30"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-30"
                 title="Remove metric"
               >
                 <Trash2 className="h-4 w-4 text-red-400/60" />
@@ -190,7 +190,7 @@ export function TemplateForm({
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
@@ -199,7 +199,7 @@ export function TemplateForm({
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+          className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
         >
           {saving
             ? "Saving..."
@@ -209,8 +209,8 @@ export function TemplateForm({
         </button>
         <button
           type="button"
-          onClick={() => onCancel ? onCancel() : router.push("/requests?tab=templates")}
-          className="inline-flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 text-sm text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+          onClick={() => onCancel ? onCancel() : router.push("/campaigns?tab=templates")}
+          className="inline-flex h-10 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-4 text-sm text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
         >
           Cancel
         </button>

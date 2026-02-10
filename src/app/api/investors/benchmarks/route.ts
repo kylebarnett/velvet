@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { getCompanyPercentile } from "@/lib/benchmarks/calculate";
 import { formatValue } from "@/components/charts/types";
+import { logger } from "@/lib/logger";
 
 const querySchema = z.object({
   metric: z.string().min(1),
@@ -60,7 +61,7 @@ export async function GET(req: Request) {
     await benchmarkQuery.limit(1);
 
   if (benchmarkError) {
-    console.error("Failed to fetch benchmarks:", benchmarkError.message);
+    logger.error("Failed to fetch benchmarks:", benchmarkError.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -85,7 +86,7 @@ export async function GET(req: Request) {
     .in("approval_status", ["auto_approved", "approved"]);
 
   if (relError) {
-    console.error("Failed to fetch investor relationships:", relError.message);
+    logger.error("Failed to fetch investor relationships:", relError.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -144,7 +145,7 @@ export async function GET(req: Request) {
       .order("period_start", { ascending: false });
 
     if (metricError) {
-      console.error("Failed to fetch metric values:", metricError.message);
+      logger.error("Failed to fetch metric values:", metricError.message);
       return jsonError("Failed to process request.", 500);
     }
 

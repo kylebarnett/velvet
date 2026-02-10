@@ -112,9 +112,9 @@ function generatePeriodOptions(periodType: string): Array<{
 }
 
 function confidenceColor(score: number): string {
-  if (score >= 0.8) return "text-emerald-300";
-  if (score >= 0.5) return "text-amber-300";
-  return "text-red-300";
+  if (score >= 0.8) return "text-[var(--status-success-text)]";
+  if (score >= 0.5) return "text-[var(--tag-amber-text)]";
+  return "text-[var(--status-error-text)]";
 }
 
 function confidenceLabel(score: number): string {
@@ -187,7 +187,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
           ? mapping.status === "accepted"
             ? "border-emerald-500/20 bg-emerald-500/5"
             : "border-red-500/20 bg-red-500/5 opacity-60"
-          : "border-white/10 bg-white/5"
+          : "border-border-default bg-bg-elevated"
       }`}
     >
       <div className="flex items-center gap-3">
@@ -201,13 +201,13 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
               {confidenceLabel(confidence)} ({(confidence * 100).toFixed(0)}%)
             </span>
           </div>
-          <div className="flex items-center gap-2 mt-0.5 text-xs text-white/60">
+          <div className="flex items-center gap-2 mt-0.5 text-xs text-text-tertiary">
             <span className="font-mono">{mapping.extracted_value?.raw ?? "—"}</span>
             {mapping.extracted_value?.unit && (
               <span>{mapping.extracted_value.unit}</span>
             )}
             <span>·</span>
-            <span className={periodChanged ? "line-through text-white/30" : ""}>
+            <span className={periodChanged ? "line-through text-text-faint" : ""}>
               {formatPeriodLabel(
                 mapping.extracted_period_start,
                 mapping.extracted_period_end,
@@ -216,8 +216,8 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
             </span>
             {periodChanged && (
               <>
-                <span className="text-amber-400">→</span>
-                <span className="text-amber-300 font-medium">
+                <span className="text-[var(--tag-amber-text)]">→</span>
+                <span className="text-[var(--tag-amber-text)] font-medium">
                   {formatPeriodLabel(
                     editPeriodStart,
                     editPeriodEnd,
@@ -234,7 +234,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
           <div className="flex items-center gap-2">
             <span
               className={`text-xs font-medium ${
-                mapping.status === "accepted" ? "text-emerald-300" : "text-red-300"
+                mapping.status === "accepted" ? "text-[var(--status-success-text)]" : "text-[var(--status-error-text)]"
               }`}
             >
               {mapping.status === "accepted" ? "Accepted" : "Rejected"}
@@ -244,7 +244,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 type="button"
                 onClick={() => setEditMode(true)}
                 disabled={disabled}
-                className="h-6 w-6 inline-flex items-center justify-center rounded-md text-white/40 hover:bg-white/10 hover:text-white/60 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-white/20"
+                className="h-6 w-6 inline-flex items-center justify-center rounded-md text-text-muted hover:bg-bg-hover hover:text-text-tertiary disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                 title="Edit metric"
               >
                 <Pencil className="h-3 w-3" />
@@ -264,7 +264,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 setEditPeriodEnd(mapping.extracted_period_end);
               }}
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-white/10 text-white/60 text-xs hover:bg-white/10 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-border-default text-text-tertiary text-xs hover:bg-bg-hover disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             >
               Cancel
             </button>
@@ -280,7 +280,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 setEditMode(false);
               }}
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-violet-500/20 text-violet-200 text-xs font-medium hover:bg-violet-500/30 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)] text-xs font-medium hover:opacity-80 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--tag-violet-bg)]"
             >
               <Check className="h-3.5 w-3.5" />
               Save
@@ -292,7 +292,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
             <button
               type="button"
               onClick={() => setExpanded((p) => !p)}
-              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-white/40 hover:bg-white/10 hover:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-text-muted hover:bg-bg-hover hover:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               title="Edit before accepting"
             >
               {expanded ? (
@@ -305,7 +305,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
               type="button"
               onClick={() => onReject(mapping.id)}
               disabled={disabled}
-              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-red-400/60 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-red-400/60 hover:bg-red-500/10 hover:text-[var(--status-error-text)] disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               title="Reject"
             >
               <X className="h-4 w-4" />
@@ -326,7 +326,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 )
               }
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-emerald-500/20 text-emerald-200 text-xs font-medium hover:bg-emerald-500/30 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-[var(--status-success-bg)] text-[var(--status-success-text)] text-xs font-medium hover:bg-emerald-500/30 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
               title="Accept"
             >
               <Check className="h-3.5 w-3.5" />
@@ -338,38 +338,38 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
 
       {/* Expanded edit form */}
       {((expanded && !isReviewed) || editMode) && (
-        <div className="mt-3 space-y-3 border-t border-white/5 pt-3">
+        <div className="mt-3 space-y-3 border-t border-border-subtle pt-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] text-white/60 uppercase tracking-wider">
+              <label className="text-[10px] text-text-tertiary uppercase tracking-wider">
                 Metric Name
               </label>
               <input
                 type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="mt-1 h-8 w-full rounded-md border border-white/10 bg-black/30 px-2 text-sm outline-none focus:border-white/20"
+                className="mt-1 h-8 w-full rounded-md border border-border-default bg-bg-input px-2 text-sm outline-none focus:border-border-default"
               />
             </div>
             <div>
-              <label className="text-[10px] text-white/60 uppercase tracking-wider">
+              <label className="text-[10px] text-text-tertiary uppercase tracking-wider">
                 Value
               </label>
               <input
                 type="text"
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="mt-1 h-8 w-full rounded-md border border-white/10 bg-black/30 px-2 text-sm font-mono outline-none focus:border-white/20"
+                className="mt-1 h-8 w-full rounded-md border border-border-default bg-bg-input px-2 text-sm font-mono outline-none focus:border-border-default"
               />
             </div>
           </div>
 
           {/* Period selector */}
           <div>
-            <label className="text-[10px] text-white/60 uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[10px] text-text-tertiary uppercase tracking-wider flex items-center gap-1.5">
               Period
               {periodChanged && (
-                <span className="text-amber-400 normal-case flex items-center gap-1">
+                <span className="text-[var(--tag-amber-text)] normal-case flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3" />
                   Changed from AI extraction
                 </span>
@@ -398,7 +398,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 ))}
               </SelectContent>
             </Select>
-            <p className="mt-1 text-[10px] text-white/30">
+            <p className="mt-1 text-[10px] text-text-faint">
               Select the correct period if AI extracted the wrong one
             </p>
           </div>

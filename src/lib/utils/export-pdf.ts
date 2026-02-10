@@ -95,7 +95,7 @@ export async function exportElementAsPdf(
     }
 
     pdf.save(filename.replace(/[^a-zA-Z0-9._-]/g, "_"));
-  } catch (err) {
+  } catch (err: unknown) {
     element.style.width = origWidth;
     element.style.maxWidth = origMaxWidth;
     element.style.minWidth = origMinWidth;

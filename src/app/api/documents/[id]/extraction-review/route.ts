@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 const reviewSchema = z.object({
   mappingId: z.string().uuid(),
@@ -157,7 +158,7 @@ export async function POST(
       .eq("id", existing.id);
 
     if (updateErr) {
-      console.error("Failed to update extraction value:", updateErr.message);
+      logger.error("Failed to update extraction value:", updateErr.message);
       return jsonError("Failed to process request.", 400);
     }
     metricValueId = existing.id;
@@ -182,7 +183,7 @@ export async function POST(
       .single();
 
     if (insertErr) {
-      console.error("Failed to insert extraction value:", insertErr.message);
+      logger.error("Failed to insert extraction value:", insertErr.message);
       return jsonError("Failed to process request.", 400);
     }
     metricValueId = inserted.id;

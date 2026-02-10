@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 const updateSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -108,7 +109,7 @@ export async function PUT(
     if (error.code === "23505") {
       return jsonError("A view with this name already exists.", 409);
     }
-    console.error("Failed to update dashboard view:", error.message);
+    logger.error("Failed to update dashboard view:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -147,7 +148,7 @@ export async function DELETE(
     .eq("founder_id", user.id);
 
   if (error) {
-    console.error("Failed to delete dashboard view:", error.message);
+    logger.error("Failed to delete dashboard view:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

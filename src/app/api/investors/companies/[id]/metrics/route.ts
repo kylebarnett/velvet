@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 // GET - Get all metric values for a company (investor view)
 export async function GET(
@@ -47,7 +48,7 @@ export async function GET(
     .order("period_start", { ascending: false });
 
   if (error) {
-    console.error("Failed to fetch company metrics:", error.message);
+    logger.error("Failed to fetch company metrics:", error.message);
     return jsonError("Failed to process request.", 500);
   }
 

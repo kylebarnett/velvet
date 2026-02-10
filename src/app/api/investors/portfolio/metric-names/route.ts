@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
 
 // GET - Distinct metric names across all approved portfolio companies
 export async function GET() {
@@ -18,7 +19,7 @@ export async function GET() {
     .in("approval_status", ["auto_approved", "approved"]);
 
   if (relError) {
-    console.error("Failed to fetch relationships:", relError.message);
+    logger.error("Failed to fetch relationships:", relError.message);
     return jsonError("Failed to process request.", 500);
   }
 
@@ -35,7 +36,7 @@ export async function GET() {
     .in("company_id", companyIds);
 
   if (mvError) {
-    console.error("Failed to fetch metric values:", mvError.message);
+    logger.error("Failed to fetch metric values:", mvError.message);
     return jsonError("Failed to process request.", 500);
   }
 

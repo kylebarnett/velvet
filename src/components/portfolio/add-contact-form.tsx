@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
 
 const schema = z.object({
   company_name: z.string().min(1, "Company name is required."),
@@ -60,7 +61,7 @@ export function AddContactForm() {
         router.push("/portfolio");
         router.refresh();
       }, 1500);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     }
   }
@@ -68,22 +69,22 @@ export function AddContactForm() {
   const FieldError = ({ name }: { name: keyof FormValues }) => {
     const message = form.formState.errors[name]?.message;
     if (!message) return null;
-    return <p className="text-xs text-red-300">{String(message)}</p>;
+    return <p className="text-xs text-[var(--status-error-text)]">{String(message)}</p>;
   };
 
   return (
     <form
-      className="max-w-xl rounded-xl border border-white/10 bg-white/5 p-5"
+      className="max-w-xl rounded-xl border border-border-default bg-bg-elevated p-5"
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <div className="grid gap-4">
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="company_name">
+          <label className="text-sm text-text-secondary" htmlFor="company_name">
             Company name
           </label>
           <input
             id="company_name"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+            className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
             placeholder="Acme Inc."
             {...form.register("company_name")}
           />
@@ -91,12 +92,12 @@ export function AddContactForm() {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="company_website">
-            Company website <span className="text-white/40">(optional)</span>
+          <label className="text-sm text-text-secondary" htmlFor="company_website">
+            Company website <span className="text-text-muted">(optional)</span>
           </label>
           <input
             id="company_website"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+            className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
             placeholder="acme.com"
             {...form.register("company_website")}
           />
@@ -104,12 +105,12 @@ export function AddContactForm() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="grid gap-2">
-            <label className="text-sm text-white/70" htmlFor="first_name">
+            <label className="text-sm text-text-secondary" htmlFor="first_name">
               First name
             </label>
             <input
               id="first_name"
-              className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+              className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
               placeholder="John"
               {...form.register("first_name")}
             />
@@ -117,12 +118,12 @@ export function AddContactForm() {
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm text-white/70" htmlFor="last_name">
+            <label className="text-sm text-text-secondary" htmlFor="last_name">
               Last name
             </label>
             <input
               id="last_name"
-              className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+              className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
               placeholder="Doe"
               {...form.register("last_name")}
             />
@@ -131,13 +132,13 @@ export function AddContactForm() {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm text-white/70" htmlFor="email">
+          <label className="text-sm text-text-secondary" htmlFor="email">
             Email
           </label>
           <input
             id="email"
             type="email"
-            className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none placeholder:text-white/30 focus:border-white/20"
+            className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
             placeholder="john@acme.com"
             {...form.register("email")}
           />
@@ -146,24 +147,23 @@ export function AddContactForm() {
       </div>
 
       {error && (
-        <div className="mt-4 rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="mt-4 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
       {success && (
-        <div className="mt-4 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100">
+        <div className="mt-4 rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2 text-sm text-emerald-100">
           {success}
         </div>
       )}
 
       <div className="mt-4 flex items-center justify-end">
-        <button
-          className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-white/50"
+        <Button
           disabled={form.formState.isSubmitting}
           type="submit"
         >
           {form.formState.isSubmitting ? "Adding..." : "Add Contact"}
-        </button>
+        </Button>
       </div>
     </form>
   );

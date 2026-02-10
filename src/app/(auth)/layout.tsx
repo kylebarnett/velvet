@@ -6,17 +6,17 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50">
+    <div className="min-h-screen bg-bg-primary text-text-primary">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 sm:py-6">
         <Link className="text-sm font-semibold tracking-tight" href="/">
           Velvet
         </Link>
-        <div className="flex items-center gap-2 sm:gap-3 text-sm text-white/70">
-          <Link className="hidden sm:block hover:text-white" href="/signup">
+        <div className="flex items-center gap-2 sm:gap-3 text-sm text-text-secondary">
+          <Link className="hidden sm:block hover:text-text-primary" href="/signup">
             Sign up for free
           </Link>
           <Link
-            className="rounded-md bg-white px-3 py-1.5 text-black hover:bg-white/90"
+            className="rounded-md bg-btn-primary-bg px-3 py-1.5 text-btn-primary-text hover:bg-btn-primary-hover"
             href="/login"
           >
             Login

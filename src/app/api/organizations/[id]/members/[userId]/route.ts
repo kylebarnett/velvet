@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 
 const updateSchema = z.object({
   role: z.enum(["admin", "member", "viewer"]),
@@ -53,7 +54,7 @@ export async function PUT(
     .eq("id", target.id);
 
   if (error) {
-    console.error("Failed to update member role:", error.message);
+    logger.error("Failed to update member role:", error.message);
     return jsonError("Failed to process request.", 400);
   }
 
@@ -102,7 +103,7 @@ export async function DELETE(
     .eq("user_id", targetUserId);
 
   if (error) {
-    console.error("Failed to remove member:", error.message);
+    logger.error("Failed to remove member:", error.message);
     return jsonError("Failed to process request.", 400);
   }
 

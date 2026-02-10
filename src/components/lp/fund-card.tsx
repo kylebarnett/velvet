@@ -57,11 +57,11 @@ export function FundCard({ fund }: FundCardProps) {
   }, [fund.id]);
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-5 transition-colors hover:bg-white/[0.07]">
+    <div className="rounded-xl border border-border-default bg-bg-elevated p-5 transition-colors hover:bg-bg-hover">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-base font-medium text-zinc-50">{fund.name}</h3>
-          <p className="mt-0.5 text-xs text-white/60">
+          <h3 className="text-base font-medium text-text-primary">{fund.name}</h3>
+          <p className="mt-0.5 text-xs text-text-tertiary">
             Vintage {fund.vintage_year}
             {fund.fund_size != null && (
               <> &middot; {formatCurrency(fund.fund_size, fund.currency)}</>
@@ -69,7 +69,7 @@ export function FundCard({ fund }: FundCardProps) {
           </p>
         </div>
         {performance && (
-          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">
+          <span className="rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-tertiary">
             {performance.investmentCount} investment{performance.investmentCount !== 1 ? "s" : ""}
           </span>
         )}
@@ -84,7 +84,7 @@ export function FundCard({ fund }: FundCardProps) {
 
       <Link
         href={`/lp-reports/${fund.id}`}
-        className="mt-4 flex h-9 items-center justify-center gap-1.5 rounded-md border border-white/10 bg-white/5 text-sm text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        className="mt-4 flex h-9 items-center justify-center gap-1.5 rounded-md border border-border-default bg-bg-elevated text-sm text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
       >
         View Details
         <ArrowRight className="h-3.5 w-3.5" />
@@ -104,11 +104,11 @@ function KpiMini({
 }) {
   return (
     <div className="min-w-0 flex-1">
-      <p className="text-[10px] uppercase tracking-wider text-white/40">{label}</p>
+      <p className="text-[10px] uppercase tracking-wider text-text-muted">{label}</p>
       <p
         className={cn(
           "mt-0.5 text-lg font-semibold",
-          value === "-" ? "text-white/30" : good ? "text-emerald-400" : "text-amber-400",
+          value === "-" ? "text-text-faint" : good ? "text-emerald-400" : "text-amber-400",
         )}
       >
         {value}

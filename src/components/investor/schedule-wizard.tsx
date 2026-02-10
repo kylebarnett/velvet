@@ -143,9 +143,9 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to create schedule");
 
-      router.push("/requests?tab=schedules");
+      router.push("/campaigns?tab=schedules");
       router.refresh();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create schedule");
     } finally {
       setSubmitting(false);
@@ -174,16 +174,16 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
           <React.Fragment key={s.id}>
             <div
               className={`flex items-center gap-2 ${
-                i <= step ? "text-white" : "text-white/60"
+                i <= step ? "text-text-primary" : "text-text-tertiary"
               }`}
             >
               <div
                 className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
                   i < step
-                    ? "bg-emerald-500/20 text-emerald-300"
+                    ? "bg-emerald-500/20 text-[var(--status-success-text)]"
                     : i === step
-                      ? "bg-white/20 text-white"
-                      : "bg-white/5 text-white/60"
+                      ? "bg-bg-hover text-text-primary"
+                      : "bg-bg-elevated text-text-tertiary"
                 }`}
               >
                 {i < step ? <Check className="h-3 w-3" /> : i + 1}
@@ -193,7 +193,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             {i < STEPS.length - 1 && (
               <div
                 className={`h-px w-8 sm:w-12 ${
-                  i < step ? "bg-emerald-500/30" : "bg-white/10"
+                  i < step ? "bg-emerald-500/30" : "bg-bg-hover"
                 }`}
               />
             )}
@@ -203,19 +203,19 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
 
       {/* Error message */}
       {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">
+        <div className="rounded-lg border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-3 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
 
       {/* Step content */}
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-6">
+      <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-6">
         {/* Step 1: Select Template */}
         {step === 0 && (
           <div className="space-y-6">
             <div>
               <h2 className="text-lg font-medium">Select a Template</h2>
-              <p className="mt-1 text-sm text-white/60">
+              <p className="mt-1 text-sm text-text-tertiary">
                 Choose which metrics to request from your portfolio companies.
               </p>
             </div>
@@ -223,7 +223,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             {/* User templates */}
             {userTemplates.length > 0 && (
               <div>
-                <h3 className="mb-3 text-sm font-medium text-white/70">
+                <h3 className="mb-3 text-sm font-medium text-text-secondary">
                   My Templates
                 </h3>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -234,17 +234,17 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                       onClick={() => setSelectedTemplate(t)}
                       className={`flex flex-col items-start rounded-xl border p-4 text-left transition-colors ${
                         selectedTemplate?.id === t.id
-                          ? "border-white/30 bg-white/10"
-                          : "border-white/10 bg-white/5 hover:border-white/20"
+                          ? "border-border-default bg-bg-hover"
+                          : "border-border-default bg-bg-elevated hover:border-border-default"
                       }`}
                     >
                       <span className="font-medium">{t.name}</span>
                       {t.description && (
-                        <span className="mt-1 text-xs text-white/60 line-clamp-2">
+                        <span className="mt-1 text-xs text-text-tertiary line-clamp-2">
                           {t.description}
                         </span>
                       )}
-                      <span className="mt-2 text-xs text-white/60">
+                      <span className="mt-2 text-xs text-text-tertiary">
                         {t.metric_template_items.length} metrics
                       </span>
                     </button>
@@ -256,7 +256,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             {/* System templates by industry */}
             {Object.entries(templatesByIndustry).map(([industry, templates]) => (
               <div key={industry}>
-                <h3 className="mb-3 text-sm font-medium text-white/70">
+                <h3 className="mb-3 text-sm font-medium text-text-secondary">
                   {INDUSTRY_LABELS[industry] ?? industry}
                 </h3>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -267,17 +267,17 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                       onClick={() => setSelectedTemplate(t)}
                       className={`flex flex-col items-start rounded-xl border p-4 text-left transition-colors ${
                         selectedTemplate?.id === t.id
-                          ? "border-white/30 bg-white/10"
-                          : "border-white/10 bg-white/5 hover:border-white/20"
+                          ? "border-border-default bg-bg-hover"
+                          : "border-border-default bg-bg-elevated hover:border-border-default"
                       }`}
                     >
                       <span className="font-medium">{t.name}</span>
                       {t.description && (
-                        <span className="mt-1 text-xs text-white/60 line-clamp-2">
+                        <span className="mt-1 text-xs text-text-tertiary line-clamp-2">
                           {t.description}
                         </span>
                       )}
-                      <span className="mt-2 text-xs text-white/60">
+                      <span className="mt-2 text-xs text-text-tertiary">
                         {t.metric_template_items.length} metrics
                       </span>
                     </button>
@@ -293,19 +293,19 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
           <div className="space-y-6">
             <div>
               <h2 className="text-lg font-medium">Select Companies</h2>
-              <p className="mt-1 text-sm text-white/60">
+              <p className="mt-1 text-sm text-text-tertiary">
                 Choose which companies should receive these metric requests.
               </p>
             </div>
 
             {/* All companies toggle */}
-            <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+            <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
               <input
                 type="checkbox"
                 id="all-companies"
                 checked={allCompanies}
                 onChange={(e) => setAllCompanies(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-white/20 bg-black/30"
+                className="mt-1 h-4 w-4 rounded border-border-default bg-bg-input"
               />
               <div>
                 <label
@@ -314,20 +314,20 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                 >
                   All portfolio companies
                 </label>
-                <p className="mt-0.5 text-xs text-white/60">
+                <p className="mt-0.5 text-xs text-text-tertiary">
                   Automatically include all companies in your portfolio
                 </p>
               </div>
             </div>
 
             {allCompanies && (
-              <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+              <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
                 <input
                   type="checkbox"
                   id="include-future"
                   checked={includeFutureCompanies}
                   onChange={(e) => setIncludeFutureCompanies(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-white/20 bg-black/30"
+                  className="mt-1 h-4 w-4 rounded border-border-default bg-bg-input"
                 />
                 <div>
                   <label
@@ -336,7 +336,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                   >
                     Include future companies
                   </label>
-                  <p className="mt-0.5 text-xs text-white/60">
+                  <p className="mt-0.5 text-xs text-text-tertiary">
                     Companies added to your portfolio later will automatically
                     be included
                   </p>
@@ -348,46 +348,46 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             {!allCompanies && (
               <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm text-white/60">
+                  <span className="text-sm text-text-tertiary">
                     {selectedCompanies.length} of {companies.length} selected
                   </span>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={selectAllCompanies}
-                      className="text-xs text-white/50 hover:text-white"
+                      className="text-xs text-text-muted hover:text-text-primary"
                     >
                       Select all
                     </button>
                     <button
                       type="button"
                       onClick={deselectAllCompanies}
-                      className="text-xs text-white/50 hover:text-white"
+                      className="text-xs text-text-muted hover:text-text-primary"
                     >
                       Deselect all
                     </button>
                   </div>
                 </div>
 
-                <div className="max-h-[300px] space-y-2 overflow-y-auto rounded-xl border border-white/10 bg-black/20 p-3">
+                <div className="max-h-[300px] space-y-2 overflow-y-auto rounded-xl border border-border-default bg-bg-input p-3">
                   {companies.map((company) => (
                     <label
                       key={company.id}
                       className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
                         selectedCompanies.includes(company.id)
-                          ? "border-white/20 bg-white/10"
-                          : "border-transparent hover:bg-white/5"
+                          ? "border-border-default bg-bg-hover"
+                          : "border-transparent hover:bg-bg-elevated"
                       }`}
                     >
                       <input
                         type="checkbox"
                         checked={selectedCompanies.includes(company.id)}
                         onChange={() => toggleCompany(company.id)}
-                        className="h-4 w-4 rounded border-white/20 bg-black/30"
+                        className="h-4 w-4 rounded border-border-default bg-bg-input"
                       />
                       <div className="min-w-0 flex-1">
                         <div className="font-medium truncate">{company.name}</div>
-                        <div className="flex gap-2 text-xs text-white/60">
+                        <div className="flex gap-2 text-xs text-text-tertiary">
                           {company.industry && (
                             <span>
                               {INDUSTRY_LABELS[company.industry] ?? company.industry}
@@ -409,7 +409,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
           <div className="space-y-6">
             <div>
               <h2 className="text-lg font-medium">Configure Schedule</h2>
-              <p className="mt-1 text-sm text-white/60">
+              <p className="mt-1 text-sm text-text-tertiary">
                 Set how often metric requests should be created.
               </p>
             </div>
@@ -423,10 +423,10 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
 
             {/* Due date offset */}
             <div>
-              <label className="text-sm font-medium text-white/70">
+              <label className="text-sm font-medium text-text-secondary">
                 Days until due date
               </label>
-              <p className="mt-1 text-xs text-white/60">
+              <p className="mt-1 text-xs text-text-tertiary">
                 How many days founders have to submit their metrics after the
                 request is created
               </p>
@@ -452,14 +452,14 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
           <div className="space-y-6">
             <div>
               <h2 className="text-lg font-medium">Set Reminders</h2>
-              <p className="mt-1 text-sm text-white/60">
+              <p className="mt-1 text-sm text-text-tertiary">
                 Configure email reminders for founders before the due date.
               </p>
             </div>
 
             {/* Schedule name */}
             <div>
-              <label className="text-sm font-medium text-white/70">
+              <label className="text-sm font-medium text-text-secondary">
                 Schedule Name
               </label>
               <input
@@ -467,21 +467,21 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                 value={scheduleName}
                 onChange={(e) => setScheduleName(e.target.value)}
                 placeholder={`${selectedTemplate?.name ?? "Metrics"} - ${cadence}`}
-                className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm outline-none focus:border-white/20"
+                className="mt-2 h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none focus:border-border-default"
               />
-              <p className="mt-1 text-xs text-white/60">
+              <p className="mt-1 text-xs text-text-tertiary">
                 A descriptive name to identify this schedule
               </p>
             </div>
 
             {/* Reminder toggle */}
-            <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+            <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
               <input
                 type="checkbox"
                 id="reminder-enabled"
                 checked={reminderEnabled}
                 onChange={(e) => setReminderEnabled(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-white/20 bg-black/30"
+                className="mt-1 h-4 w-4 rounded border-border-default bg-bg-input"
               />
               <div>
                 <label
@@ -490,7 +490,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                 >
                   Send reminder emails
                 </label>
-                <p className="mt-0.5 text-xs text-white/60">
+                <p className="mt-0.5 text-xs text-text-tertiary">
                   Automatically remind founders before the due date
                 </p>
               </div>
@@ -499,7 +499,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             {/* Reminder days */}
             {reminderEnabled && (
               <div>
-                <label className="text-sm font-medium text-white/70">
+                <label className="text-sm font-medium text-text-secondary">
                   Remind founders
                 </label>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -516,15 +516,15 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
                       }}
                       className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
                         reminderDays.includes(day)
-                          ? "bg-white/20 text-white"
-                          : "bg-white/5 text-white/50 hover:bg-white/10"
+                          ? "bg-bg-hover text-text-primary"
+                          : "bg-bg-elevated text-text-muted hover:bg-bg-hover"
                       }`}
                     >
                       {day} day{day !== 1 ? "s" : ""} before
                     </button>
                   ))}
                 </div>
-                <p className="mt-2 text-xs text-white/60">
+                <p className="mt-2 text-xs text-text-tertiary">
                   Select when to send reminder emails (reminders are
                   automatically cancelled when metrics are submitted)
                 </p>
@@ -532,34 +532,34 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             )}
 
             {/* Summary */}
-            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <h3 className="text-sm font-medium text-white/70">Summary</h3>
+            <div className="rounded-xl border border-border-default bg-bg-input p-4">
+              <h3 className="text-sm font-medium text-text-secondary">Summary</h3>
               <div className="mt-3 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-white/60">Template</span>
-                  <span className="text-white">{selectedTemplate?.name}</span>
+                  <span className="text-text-tertiary">Template</span>
+                  <span className="text-text-primary">{selectedTemplate?.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Companies</span>
-                  <span className="text-white">
+                  <span className="text-text-tertiary">Companies</span>
+                  <span className="text-text-primary">
                     {allCompanies
                       ? `All (${companies.length})`
                       : `${selectedCompanies.length} selected`}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Frequency</span>
-                  <span className="text-white capitalize">
+                  <span className="text-text-tertiary">Frequency</span>
+                  <span className="text-text-primary capitalize">
                     {cadence} on day {dayOfMonth}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Due in</span>
-                  <span className="text-white">{dueDaysOffset} days</span>
+                  <span className="text-text-tertiary">Due in</span>
+                  <span className="text-text-primary">{dueDaysOffset} days</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Reminders</span>
-                  <span className="text-white">
+                  <span className="text-text-tertiary">Reminders</span>
+                  <span className="text-text-primary">
                     {reminderEnabled
                       ? reminderDays.map((d) => `${d}d`).join(", ")
                       : "Disabled"}
@@ -577,7 +577,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
           type="button"
           onClick={handleBack}
           disabled={step === 0}
-          className="flex h-10 items-center gap-2 rounded-md border border-white/10 px-4 text-sm text-white/70 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex h-10 items-center gap-2 rounded-md border border-border-default px-4 text-sm text-text-secondary hover:bg-bg-elevated disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
@@ -588,7 +588,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             type="button"
             onClick={handleNext}
             disabled={!canProceed()}
-            className="flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/50"
+            className="flex h-10 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             Continue
             <ArrowRight className="h-4 w-4" />
@@ -598,7 +598,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             type="button"
             onClick={handleSubmit}
             disabled={!canProceed() || submitting}
-            className="flex h-10 items-center gap-2 rounded-md bg-white px-4 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-white/50"
+            className="flex h-10 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             {submitting ? (
               <>

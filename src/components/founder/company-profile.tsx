@@ -2,6 +2,13 @@
 
 import * as React from "react";
 import { Building2, Globe, Check, X, Pencil } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 type TagType = "stage" | "industry" | "businessModel";
 
@@ -32,9 +39,9 @@ const TAG_OPTIONS: Record<TagType, { value: string; label: string }[]> = {
 };
 
 const TAG_COLORS: Record<TagType, string> = {
-  stage: "bg-violet-500/15 text-violet-300 border-violet-500/30",
-  industry: "bg-blue-500/15 text-blue-300 border-blue-500/30",
-  businessModel: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  stage: "bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)] border-[var(--tag-violet-bg)]",
+  industry: "bg-[var(--tag-blue-bg)] text-[var(--tag-blue-text)] border-[var(--tag-blue-bg)]",
+  businessModel: "bg-[var(--tag-emerald-bg)] text-[var(--tag-emerald-text)] border-[var(--tag-emerald-bg)]",
 };
 
 function getTagLabel(type: TagType, value: string | null): string {
@@ -121,41 +128,41 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
     <div className="space-y-6">
       <div className="space-y-1">
         <h1 className="text-xl font-semibold tracking-tight">Company Profile</h1>
-        <p className="text-sm text-white/60">
+        <p className="text-sm text-text-tertiary">
           View and update your company information.
         </p>
       </div>
 
       {/* Status messages */}
       {success && (
-        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-200" role="alert">
+        <div className="flex items-center gap-2 rounded-lg border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-4 py-2.5 text-sm text-[var(--status-success-text)]" role="alert">
           <Check className="h-4 w-4 shrink-0" />
           {success}
         </div>
       )}
       {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm text-red-200" role="alert">
+        <div className="flex items-center gap-2 rounded-lg border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-2.5 text-sm text-[var(--status-error-text)]" role="alert">
           <X className="h-4 w-4 shrink-0" />
           {error}
-          <button type="button" onClick={() => setError(null)} className="ml-auto rounded p-0.5 hover:bg-white/10">
+          <button type="button" onClick={() => setError(null)} className="ml-auto rounded p-0.5 hover:bg-bg-hover">
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
       )}
 
-      <div className="rounded-xl border border-white/10 bg-white/5 divide-y divide-white/[0.06]">
+      <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
         {/* Company Name (read-only) */}
         <div className="flex items-center justify-between px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
-              <Building2 className="h-5 w-5 text-white/60" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-bg-hover">
+              <Building2 className="h-5 w-5 text-text-tertiary" />
             </div>
             <div>
-              <div className="text-xs text-white/60">Company Name</div>
+              <div className="text-xs text-text-tertiary">Company Name</div>
               <div className="font-medium">{data.name}</div>
             </div>
           </div>
-          <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs text-white/40">
+          <span className="rounded-full bg-bg-elevated px-2.5 py-1 text-xs text-text-muted">
             Locked
           </span>
         </div>
@@ -163,11 +170,11 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
         {/* Website (editable) */}
         <div className="flex items-center justify-between px-5 py-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10">
-              <Globe className="h-5 w-5 text-white/60" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-bg-hover">
+              <Globe className="h-5 w-5 text-text-tertiary" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-xs text-white/60">Website</div>
+              <div className="text-xs text-text-tertiary">Website</div>
               {editingWebsite ? (
                 <div className="mt-1 flex items-center gap-2">
                   <input
@@ -175,7 +182,7 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
                     value={websiteInput}
                     onChange={(e) => setWebsiteInput(e.target.value)}
                     placeholder="https://example.com"
-                    className="h-9 flex-1 rounded-md border border-white/10 bg-black/30 px-3 text-sm focus:border-white/20 focus:outline-none"
+                    className="h-9 flex-1 rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === "Enter") handleWebsiteSave();
@@ -189,7 +196,7 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
                     type="button"
                     onClick={handleWebsiteSave}
                     disabled={saving}
-                    className="flex h-9 items-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+                    className="flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
                   >
                     <Check className="h-3.5 w-3.5" />
                     Save
@@ -200,7 +207,7 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
                       setEditingWebsite(false);
                       setWebsiteInput(data.website ?? "");
                     }}
-                    className="flex h-9 items-center rounded-md border border-white/10 px-3 text-sm text-white/60 hover:bg-white/5"
+                    className="flex h-9 items-center rounded-md border border-border-default px-3 text-sm text-text-tertiary hover:bg-bg-elevated"
                   >
                     Cancel
                   </button>
@@ -212,12 +219,12 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
                       href={data.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-white/70 hover:text-white hover:underline truncate"
+                      className="text-sm text-text-secondary hover:text-text-primary hover:underline truncate"
                     >
                       {data.website}
                     </a>
                   ) : (
-                    <span className="text-sm text-white/40">Not set</span>
+                    <span className="text-sm text-text-muted">Not set</span>
                   )}
                 </div>
               )}
@@ -230,7 +237,7 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
                 setWebsiteInput(data.website ?? "");
                 setEditingWebsite(true);
               }}
-              className="shrink-0 rounded-md p-2 text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors"
+              className="shrink-0 rounded-md p-2 text-text-muted hover:text-text-secondary hover:bg-bg-elevated transition-colors"
             >
               <Pencil className="h-4 w-4" />
             </button>
@@ -264,6 +271,8 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
   );
 }
 
+const NONE = "__none__";
+
 function TagRow({
   label,
   type,
@@ -280,30 +289,34 @@ function TagRow({
   return (
     <div className="flex items-center justify-between px-5 py-4">
       <div>
-        <div className="text-xs text-white/60">{label}</div>
+        <div className="text-xs text-text-tertiary">{label}</div>
         <div className="mt-1">
           {value ? (
             <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${TAG_COLORS[type]}`}>
               {getTagLabel(type, value)}
             </span>
           ) : (
-            <span className="text-sm text-white/40">Not set</span>
+            <span className="text-sm text-text-muted">Not set</span>
           )}
         </div>
       </div>
-      <select
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value || null)}
+      <Select
+        value={value ?? NONE}
+        onValueChange={(v) => onChange(v === NONE ? null : v)}
         disabled={saving}
-        className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none disabled:opacity-60"
       >
-        <option value="">Not set</option>
-        {TAG_OPTIONS[type].map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger>
+          <SelectValue placeholder="Not set" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={NONE}>Not set</SelectItem>
+          {TAG_OPTIONS[type].map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
