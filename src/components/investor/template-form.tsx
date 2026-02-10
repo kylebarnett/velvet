@@ -111,7 +111,7 @@ export function TemplateForm({
       className="max-w-2xl space-y-6"
       onSubmit={handleSubmit}
     >
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-5 space-y-4">
+      <div className="rounded-xl border border-border-default card-surface p-5 space-y-4">
         <div className="grid gap-2">
           <label className="text-sm text-text-secondary" htmlFor="templateName">
             Template name
@@ -140,7 +140,7 @@ export function TemplateForm({
         </div>
       </div>
 
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-5 space-y-4">
+      <div className="rounded-xl border border-border-default card-surface p-5 space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">Metrics</span>
           <button

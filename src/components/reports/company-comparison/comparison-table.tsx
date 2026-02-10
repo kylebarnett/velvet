@@ -41,14 +41,14 @@ export function ComparisonTable({
 }: ComparisonTableProps) {
   if (!data.length) {
     return (
-      <div className="flex h-32 items-center justify-center rounded-xl border border-border-default bg-bg-elevated text-text-muted">
+      <div className="flex h-32 items-center justify-center rounded-xl border border-border-default card-surface text-text-muted">
         No data available
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated">
+    <div className="rounded-xl border border-border-default card-surface">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>

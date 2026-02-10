@@ -54,7 +54,7 @@ function LoadingSkeleton() {
       {[0, 1].map((i) => (
         <div
           key={i}
-          className="animate-pulse rounded-xl border border-border-default bg-bg-elevated p-4"
+          className="animate-pulse rounded-xl border border-border-default card-surface p-4"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 space-y-2">
@@ -260,7 +260,7 @@ export default function TearSheetsPage() {
       )}
 
       {!loading && !error && tearSheets.length === 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <p className="text-text-tertiary">No tear sheets yet.</p>
           <p className="mt-2 text-sm text-text-muted">
             Create your first quarterly summary to share with investors.
@@ -269,7 +269,7 @@ export default function TearSheetsPage() {
       )}
 
       {!loading && displayed.length === 0 && tearSheets.length > 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <p className="text-sm text-text-tertiary">
             No tear sheets match the selected filters.
           </p>

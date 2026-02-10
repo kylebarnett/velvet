@@ -95,7 +95,7 @@ export function MetricRequestForm() {
 
   return (
     <form
-      className="max-w-2xl rounded-xl border border-border-default bg-bg-elevated p-5"
+      className="max-w-2xl rounded-xl border border-border-default card-surface p-5"
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <div className="grid gap-4 md:grid-cols-2">

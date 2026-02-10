@@ -101,7 +101,7 @@ export function MemberList({
         </div>
       )}
 
-      <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
+      <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
         {members.map((member) => {
           const isOwner = member.userId === ownerId;
           const isSelf = member.userId === currentUserId;

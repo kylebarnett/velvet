@@ -60,7 +60,7 @@ export function DocumentUploadForm({ company }: Props) {
 
   return (
     <form
-      className="max-w-2xl rounded-xl border border-border-default bg-bg-elevated p-5"
+      className="max-w-2xl rounded-xl border border-border-default card-surface p-5"
       onSubmit={onSubmit}
     >
       <div className="grid gap-4">
@@ -95,6 +95,21 @@ export function DocumentUploadForm({ company }: Props) {
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
+          {documentType && (
+            <p className="text-xs text-text-muted">
+              {{
+                income_statement: "Revenue, expenses, and net income for a period",
+                balance_sheet: "Assets, liabilities, and equity at a point in time",
+                cash_flow_statement: "Cash inflows and outflows from operations, investing, and financing",
+                consolidated_financial_statements: "Combined financial statements across entities",
+                "409a_valuation": "Independent valuation report for stock option pricing",
+                investor_update: "Periodic update letter to investors on company progress",
+                board_deck: "Presentation materials prepared for board meetings",
+                cap_table: "Ownership breakdown showing shares, options, and investor stakes",
+                other: "Any other document type",
+              }[documentType]}
+            </p>
+          )}
         </div>
 
         <div className="grid gap-2">

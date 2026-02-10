@@ -209,7 +209,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
       )}
 
       {/* Step content */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-6">
+      <div className="rounded-xl border border-border-default card-surface p-4 sm:p-6">
         {/* Step 1: Select Template */}
         {step === 0 && (
           <div className="space-y-6">
@@ -299,7 +299,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             </div>
 
             {/* All companies toggle */}
-            <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
+            <div className="flex items-start gap-3 rounded-xl border border-border-default card-surface p-4">
               <input
                 type="checkbox"
                 id="all-companies"
@@ -321,7 +321,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             </div>
 
             {allCompanies && (
-              <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
+              <div className="flex items-start gap-3 rounded-xl border border-border-default card-surface p-4">
                 <input
                   type="checkbox"
                   id="include-future"
@@ -475,7 +475,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             </div>
 
             {/* Reminder toggle */}
-            <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
+            <div className="flex items-start gap-3 rounded-xl border border-border-default card-surface p-4">
               <input
                 type="checkbox"
                 id="reminder-enabled"
@@ -577,7 +577,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
           type="button"
           onClick={handleBack}
           disabled={step === 0}
-          className="flex h-10 items-center gap-2 rounded-md border border-border-default px-4 text-sm text-text-secondary hover:bg-bg-elevated disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex h-10 items-center gap-2 rounded-md border border-border-default px-4 text-sm text-text-secondary hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ArrowLeft className="h-4 w-4" />
           Back

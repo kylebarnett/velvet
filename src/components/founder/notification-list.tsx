@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { Inbox, CheckCircle2 } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatPeriod } from "@/components/charts/types";
 
 type GroupedRequest = {
@@ -34,6 +36,7 @@ type NotificationListProps = {
     periodStart: string;
     periodEnd: string;
   }) => void;
+  onCounts?: (counts: { pending: number; completed: number }) => void;
 };
 
 function formatPeriodLabel(periodType: string, periodStart: string): string {
@@ -80,7 +83,7 @@ function LoadingSkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="animate-pulse rounded-xl border border-border-default bg-bg-elevated p-4"
+          className="animate-pulse rounded-xl border border-border-default card-surface p-4"
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-2">
@@ -104,12 +107,15 @@ export function NotificationList({
   mode = "pending",
   onCompanyId,
   onSubmitGroup,
+  onCounts,
 }: NotificationListProps) {
   const [requests, setRequests] = React.useState<GroupedRequest[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const onCompanyIdRef = React.useRef(onCompanyId);
   onCompanyIdRef.current = onCompanyId;
+  const onCountsRef = React.useRef(onCounts);
+  onCountsRef.current = onCounts;
 
   React.useEffect(() => {
     async function load() {
@@ -118,7 +124,13 @@ export function NotificationList({
         const json = await res.json().catch(() => null);
         if (!res.ok) throw new Error(json?.error ?? "Failed to load.");
         if (json.companyId) onCompanyIdRef.current(json.companyId);
-        setRequests(json.requests ?? []);
+        const reqs: GroupedRequest[] = json.requests ?? [];
+        setRequests(reqs);
+        if (onCountsRef.current) {
+          const pending = reqs.filter((r) => !r.hasSubmission).length;
+          const completed = reqs.filter((r) => r.hasSubmission).length;
+          onCountsRef.current({ pending, completed });
+        }
       } catch (e: unknown) {
         const message =
           e instanceof Error ? e.message : "Something went wrong.";
@@ -194,13 +206,19 @@ export function NotificationList({
 
   if (displayRequests.length === 0) {
     return (
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
-        <div className="text-sm text-text-tertiary">
-          {mode === "completed"
-            ? "No completed submissions yet."
-            : "No pending metric requests."}
-        </div>
-      </div>
+      <EmptyState
+        icon={mode === "completed" ? CheckCircle2 : Inbox}
+        title={
+          mode === "completed"
+            ? "No completed submissions yet"
+            : "No pending metric requests"
+        }
+        description={
+          mode === "completed"
+            ? "Completed submissions will appear here after you submit metrics. You can also submit metrics proactively from your dashboard."
+            : "You're all caught up! When investors request metrics from your company, they'll appear here grouped by period. You can also submit metrics proactively from your dashboard."
+        }
+      />
     );
   }
 
@@ -239,7 +257,7 @@ export function NotificationList({
         {sortedCompleted.map((group) => (
           <div
             key={`${group.periodType}-${group.periodStart}`}
-            className="rounded-xl border border-border-default bg-bg-raised p-4"
+            className="rounded-xl border border-border-default card-surface p-4"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -288,7 +306,7 @@ export function NotificationList({
         return (
           <div
             key={`${group.periodType}-${group.periodStart}`}
-            className="rounded-xl border border-border-default bg-bg-elevated p-4"
+            className="rounded-xl border border-border-default card-surface p-4"
           >
             <div className="flex items-start justify-between gap-4">
               <div>

@@ -28,7 +28,7 @@ export default async function FundDetailPage({
     return (
       <div className="space-y-4">
         <Link
-          href="/lp-reports"
+          href="/funds"
           className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
@@ -94,7 +94,7 @@ export default async function FundDetailPage({
   return (
     <div className="space-y-6">
       <Link
-        href="/lp-reports"
+        href="/funds"
         className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
       >
         <ArrowLeft className="h-3.5 w-3.5" />

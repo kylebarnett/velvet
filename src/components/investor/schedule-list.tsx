@@ -128,7 +128,7 @@ export function ScheduleList({ initialSchedules }: ScheduleListProps) {
       )}
 
       {schedules.length === 0 ? (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
           <div className="text-sm text-text-tertiary">
             No schedules yet. Create your first schedule to automate metric
             requests.

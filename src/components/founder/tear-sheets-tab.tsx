@@ -54,7 +54,7 @@ function LoadingSkeleton() {
       {[0, 1].map((i) => (
         <div
           key={i}
-          className="animate-pulse rounded-xl border border-border-default bg-bg-elevated p-4"
+          className="animate-pulse rounded-xl border border-border-default card-surface p-4"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 space-y-2">
@@ -260,16 +260,16 @@ export function TearSheetsTab() {
       )}
 
       {!loading && !error && tearSheets.length === 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
-          <p className="text-text-tertiary">No tear sheets yet.</p>
-          <p className="mt-2 text-sm text-text-muted">
-            Create your first quarterly summary to share with investors.
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
+          <p className="text-text-tertiary">No tear sheets yet</p>
+          <p className="mt-2 max-w-md mx-auto text-sm text-text-muted">
+            Tear sheets are quarterly summary documents that highlight your company&apos;s key metrics, milestones, and narrative. Create one to share a polished overview with your investors.
           </p>
         </div>
       )}
 
       {!loading && displayed.length === 0 && tearSheets.length > 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <p className="text-sm text-text-tertiary">
             No tear sheets match the selected filters.
           </p>

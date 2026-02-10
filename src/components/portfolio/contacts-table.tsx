@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check, ArrowUp, ArrowDown, ArrowUpDown, Building2 } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Select,
   SelectContent,
@@ -120,7 +121,7 @@ function ContactsDesktopTable({
           className="rounded border-border-default"
         />
       </td>
-      <td className="p-3 font-medium">{getCompanyName(contact)}</td>
+      <td className="p-3 font-semibold text-text-primary">{getCompanyName(contact)}</td>
       <td className="p-3">
         {editingId === contact.id ? (
           <div className="flex gap-2">
@@ -209,7 +210,7 @@ function ContactsDesktopTable({
   );
 
   const theadContent = (
-    <tr className="border-b border-border-default text-left text-text-tertiary">
+    <tr className="border-b border-border-default text-left text-xs uppercase tracking-wider text-text-muted">
       <th className="p-3">
         <input
           type="checkbox"
@@ -242,12 +243,12 @@ function ContactsDesktopTable({
 
   if (!shouldVirtualize) {
     return (
-      <div className={`hidden sm:block overflow-x-auto rounded-xl border border-border-default bg-bg-elevated ${fetching ? "opacity-60" : ""}`}>
+      <div className={`hidden sm:block overflow-x-auto ${fetching ? "opacity-60" : ""}`}>
         <table className="w-full text-sm">
           <thead>{theadContent}</thead>
           <tbody>
             {sortedContacts.map((contact) => (
-              <tr key={contact.id} className="border-b border-border-subtle hover:bg-bg-elevated">
+              <tr key={contact.id} className="border-b border-border-default last:border-b-0 hover:bg-bg-raised transition-colors">
                 {renderRow(contact)}
               </tr>
             ))}
@@ -263,10 +264,10 @@ function ContactsDesktopTable({
   return (
     <div
       ref={parentRef}
-      className={`hidden sm:block max-h-[600px] overflow-auto rounded-xl border border-border-default bg-bg-elevated ${fetching ? "opacity-60" : ""}`}
+      className={`hidden sm:block max-h-[600px] overflow-auto ${fetching ? "opacity-60" : ""}`}
     >
       <table className="w-full text-sm">
-        <thead className="sticky top-0 z-10 bg-bg-elevated">
+        <thead className="sticky top-0 z-10 bg-[var(--card-bg)]">
           {theadContent}
         </thead>
         <tbody>
@@ -286,7 +287,7 @@ function ContactsDesktopTable({
                 key={virtualRow.key}
                 data-index={virtualRow.index}
                 ref={virtualizer.measureElement}
-                className="border-b border-border-subtle hover:bg-bg-elevated"
+                className="border-b border-border-default last:border-b-0 hover:bg-bg-raised transition-colors"
               >
                 {renderRow(contact)}
               </tr>
@@ -676,98 +677,8 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Filters and actions */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-[260px]">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
-          <input
-            type="text"
-            placeholder="Search contacts..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPagination((prev) => ({ ...prev, page: 1 }));
-            }}
-            className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-8 pr-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
-          />
-        </div>
-        <div className="flex gap-2">
-          <Select
-            value={statusFilter}
-            onValueChange={(v) => {
-              setStatusFilter(v);
-              setPagination((prev) => ({ ...prev, page: 1 }));
-            }}
-          >
-            <SelectTrigger size="sm" className="w-auto min-w-[130px] flex-1 sm:flex-none">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="sent">Sent</SelectItem>
-              <SelectItem value="accepted">Accepted</SelectItem>
-            </SelectContent>
-          </Select>
-          {pendingCount > 0 && (
-            <button
-              onClick={sendAllPending}
-              disabled={loading}
-              className="hidden sm:inline-flex h-9 items-center gap-2 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
-            >
-              <Send className="h-4 w-4" />
-              Send All ({pendingCount})
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile send all button */}
-      {pendingCount > 0 && (
-        <button
-          onClick={sendAllPending}
-          disabled={loading}
-          className="flex sm:hidden w-full h-10 items-center justify-center gap-2 rounded-md bg-btn-primary-bg text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
-        >
-          <Send className="h-4 w-4" />
-          Send All Pending ({pendingCount})
-        </button>
-      )}
-
-      {/* Bulk actions */}
-      {selectedIds.size > 0 && (
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 rounded-lg border border-border-default bg-bg-elevated px-3 sm:px-4 py-2">
-          <span className="text-sm text-text-tertiary">{selectedIds.size} selected</span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => sendInvite(Array.from(selectedIds))}
-              disabled={loading}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-bg-hover px-3 text-sm hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
-            >
-              <Mail className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Send Invitations</span>
-              <span className="sm:hidden">Send</span>
-            </button>
-            <button
-              onClick={bulkDelete}
-              disabled={loading}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-red-500/20 px-3 text-sm text-[var(--status-error-text)] hover:bg-red-500/30 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-red-500/50"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Delete</span>
-            </button>
-            <button
-              onClick={() => setSelectedIds(new Set())}
-              className="text-sm text-text-muted hover:text-text-tertiary"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Messages */}
+    <div className="space-y-3">
+      {/* Messages — float above the card */}
       {error && (
         <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-2 text-sm text-[var(--status-error-text)]">
           {error}
@@ -806,207 +717,306 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
         </div>
       )}
 
-      {/* Empty state */}
-      {contacts.length === 0 && !fetching ? (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
-          <p className="text-text-tertiary">No contacts found.</p>
-          {pagination.total === 0 && (
-            <p className="mt-1 text-sm text-text-muted">
-              Import a CSV to add portfolio companies.
-            </p>
-          )}
-        </div>
-      ) : (
-        <>
-          {/* Mobile Card View */}
-          <div className={`space-y-3 sm:hidden ${fetching ? "opacity-60" : ""}`}>
-            {sortedContacts.map((contact) => (
-              <div
-                key={contact.id}
-                className="rounded-xl border border-border-default bg-bg-elevated p-4"
+      {/* Main card container — filters + table + pagination */}
+      <div className="rounded-xl border border-border-default card-surface overflow-hidden">
+        {/* Filters header */}
+        <div className="flex flex-col gap-3 border-b border-border-subtle px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full sm:max-w-[260px]">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
+            <input
+              type="text"
+              placeholder="Search contacts..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPagination((prev) => ({ ...prev, page: 1 }));
+              }}
+              className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-8 pr-3 text-sm outline-none placeholder:text-text-faint focus:border-accent focus:ring-2 focus:ring-[var(--ring-focus)]"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => {
+                setStatusFilter(v);
+                setPagination((prev) => ({ ...prev, page: 1 }));
+              }}
+            >
+              <SelectTrigger size="sm" className="w-auto min-w-[130px] flex-1 sm:flex-none">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="sent">Sent</SelectItem>
+                <SelectItem value="accepted">Accepted</SelectItem>
+              </SelectContent>
+            </Select>
+            {pendingCount > 0 && (
+              <button
+                onClick={sendAllPending}
+                disabled={loading}
+                className="hidden sm:inline-flex h-9 items-center gap-2 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
               >
-                {editingId === contact.id ? (
-                  /* Mobile Edit Form */
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-2">
+                <Send className="h-4 w-4" />
+                Send All ({pendingCount})
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile send all button */}
+        {pendingCount > 0 && (
+          <div className="border-b border-border-subtle px-4 py-2 sm:hidden">
+            <button
+              onClick={sendAllPending}
+              disabled={loading}
+              className="flex w-full h-10 items-center justify-center gap-2 rounded-md bg-btn-primary-bg text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+            >
+              <Send className="h-4 w-4" />
+              Send All Pending ({pendingCount})
+            </button>
+          </div>
+        )}
+
+        {/* Bulk actions bar */}
+        {selectedIds.size > 0 && (
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 border-b border-border-subtle bg-[var(--accent-subtle)] px-4 py-2">
+            <span className="text-sm text-text-secondary font-medium">{selectedIds.size} selected</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => sendInvite(Array.from(selectedIds))}
+                disabled={loading}
+                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-bg-hover px-3 text-sm hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+              >
+                <Mail className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Send Invitations</span>
+                <span className="sm:hidden">Send</span>
+              </button>
+              <button
+                onClick={bulkDelete}
+                disabled={loading}
+                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-red-500/20 px-3 text-sm text-[var(--status-error-text)] hover:bg-red-500/30 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Delete</span>
+              </button>
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                className="text-sm text-text-muted hover:text-text-tertiary"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Content area */}
+        {contacts.length === 0 && !fetching ? (
+          <div className="px-4 py-8">
+            <EmptyState
+              icon={Building2}
+              title="No contacts found"
+              description={
+                pagination.total === 0
+                  ? "Import a CSV to add portfolio companies."
+                  : undefined
+              }
+              className="border-0 bg-transparent"
+            />
+          </div>
+        ) : (
+          <>
+            {/* Mobile Card View */}
+            <div className={`divide-y divide-border-subtle sm:hidden ${fetching ? "opacity-60" : ""}`}>
+              {sortedContacts.map((contact) => (
+                <div
+                  key={contact.id}
+                  className="px-4 py-3"
+                >
+                  {editingId === contact.id ? (
+                    /* Mobile Edit Form */
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          value={editForm.first_name}
+                          onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
+                          className="h-10 rounded border border-border-default bg-bg-input px-3 text-sm"
+                          placeholder="First name"
+                        />
+                        <input
+                          value={editForm.last_name}
+                          onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+                          className="h-10 rounded border border-border-default bg-bg-input px-3 text-sm"
+                          placeholder="Last name"
+                        />
+                      </div>
                       <input
-                        value={editForm.first_name}
-                        onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
-                        className="h-10 rounded border border-border-default bg-bg-input px-3 text-sm"
-                        placeholder="First name"
+                        type="email"
+                        value={editForm.email}
+                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                        className="h-10 w-full rounded border border-border-default bg-bg-input px-3 text-sm"
+                        placeholder="Email"
                       />
-                      <input
-                        value={editForm.last_name}
-                        onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
-                        className="h-10 rounded border border-border-default bg-bg-input px-3 text-sm"
-                        placeholder="Last name"
-                      />
-                    </div>
-                    <input
-                      type="email"
-                      value={editForm.email}
-                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                      className="h-10 w-full rounded border border-border-default bg-bg-input px-3 text-sm"
-                      placeholder="Email"
-                    />
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setEditingId(null)}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border-default px-3 text-sm text-text-tertiary"
-                      >
-                        <X className="h-4 w-4" />
-                        Cancel
-                      </button>
-                      <button
-                        onClick={saveEdit}
-                        disabled={loading}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text disabled:opacity-60"
-                      >
-                        <Check className="h-4 w-4" />
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  /* Mobile Contact Card */
-                  <>
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(contact.id)}
-                        onChange={() => toggleSelect(contact.id)}
-                        className="mt-1 rounded border-border-default"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="font-medium truncate">
-                              {contact.first_name} {contact.last_name}
-                            </div>
-                            <div className="text-sm text-text-tertiary truncate">{contact.email}</div>
-                          </div>
-                          {statusBadge(contact.status)}
-                        </div>
-                        <div className="mt-2 text-sm text-text-tertiary truncate">
-                          {getCompanyName(contact)}
-                        </div>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border-default px-3 text-sm text-text-tertiary"
+                        >
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </button>
+                        <button
+                          onClick={saveEdit}
+                          disabled={loading}
+                          className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text disabled:opacity-60"
+                        >
+                          <Check className="h-4 w-4" />
+                          Save
+                        </button>
                       </div>
                     </div>
-                    <div className="mt-3 flex items-center justify-end gap-1 border-t border-border-subtle pt-3">
-                      {contact.status !== "accepted" && (
+                  ) : (
+                    /* Mobile Contact Row */
+                    <>
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(contact.id)}
+                          onChange={() => toggleSelect(contact.id)}
+                          className="mt-1 rounded border-border-default"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="font-medium truncate">
+                                {contact.first_name} {contact.last_name}
+                              </div>
+                              <div className="text-sm text-text-tertiary truncate">{contact.email}</div>
+                            </div>
+                            {statusBadge(contact.status)}
+                          </div>
+                          <div className="mt-1 text-sm text-text-muted truncate">
+                            {getCompanyName(contact)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center justify-end gap-1 pt-2">
+                        {contact.status !== "accepted" && (
+                          <button
+                            onClick={() => sendInvite([contact.id])}
+                            disabled={loading}
+                            className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm hover:bg-bg-hover disabled:opacity-60"
+                            title={contact.status === "sent" ? "Resend" : "Send"}
+                          >
+                            <Mail className="h-4 w-4 text-text-tertiary" />
+                            <span className="text-text-tertiary">{contact.status === "sent" ? "Resend" : "Send"}</span>
+                          </button>
+                        )}
                         <button
-                          onClick={() => sendInvite([contact.id])}
-                          disabled={loading}
-                          className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm hover:bg-bg-hover disabled:opacity-60"
-                          title={contact.status === "sent" ? "Resend" : "Send"}
+                          onClick={() => startEdit(contact)}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                          title="Edit"
+                          aria-label="Edit contact"
                         >
-                          <Mail className="h-4 w-4 text-text-tertiary" />
-                          <span className="text-text-tertiary">{contact.status === "sent" ? "Resend" : "Send"}</span>
+                          <Pencil className="h-4 w-4 text-text-tertiary" />
                         </button>
-                      )}
-                      <button
-                        onClick={() => startEdit(contact)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
-                        title="Edit"
-                        aria-label="Edit contact"
-                      >
-                        <Pencil className="h-4 w-4 text-text-tertiary" />
-                      </button>
-                      <button
-                        onClick={() => openDeleteModal(contact)}
-                        disabled={loading}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
-                        title="Delete"
-                        aria-label="Delete contact"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-400/60" />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Desktop Table View */}
-          <ContactsDesktopTable
-            sortedContacts={sortedContacts}
-            contacts={contacts}
-            selectedIds={selectedIds}
-            toggleSelectAll={toggleSelectAll}
-            toggleSelect={toggleSelect}
-            toggleSort={toggleSort}
-            sortIcon={sortIcon}
-            editingId={editingId}
-            editForm={editForm}
-            setEditForm={setEditForm}
-            saveEdit={saveEdit}
-            setEditingId={setEditingId}
-            startEdit={startEdit}
-            openDeleteModal={openDeleteModal}
-            sendInvite={sendInvite}
-            loading={loading}
-            fetching={fetching}
-            getCompanyName={getCompanyName}
-            statusBadge={statusBadge}
-          />
-        </>
-      )}
-
-      {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-sm text-text-tertiary text-center sm:text-left">
-            {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => goToPage(pagination.page - 1)}
-              disabled={pagination.page === 1 || fetching}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border-default bg-bg-elevated hover:bg-bg-hover disabled:opacity-40 disabled:cursor-not-allowed"
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                let pageNum: number;
-                if (pagination.totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (pagination.page <= 3) {
-                  pageNum = i + 1;
-                } else if (pagination.page >= pagination.totalPages - 2) {
-                  pageNum = pagination.totalPages - 4 + i;
-                } else {
-                  pageNum = pagination.page - 2 + i;
-                }
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => goToPage(pageNum)}
-                    disabled={fetching}
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-md text-sm ${
-                      pageNum === pagination.page
-                        ? "bg-btn-primary-bg text-btn-primary-text"
-                        : "border border-border-default bg-bg-elevated hover:bg-bg-hover"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
+                        <button
+                          onClick={() => openDeleteModal(contact)}
+                          disabled={loading}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                          title="Delete"
+                          aria-label="Delete contact"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-400/60" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
-            <button
-              onClick={() => goToPage(pagination.page + 1)}
-              disabled={pagination.page === pagination.totalPages || fetching}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border-default bg-bg-elevated hover:bg-bg-hover disabled:opacity-40 disabled:cursor-not-allowed"
-              aria-label="Next page"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
+
+            {/* Desktop Table View */}
+            <ContactsDesktopTable
+              sortedContacts={sortedContacts}
+              contacts={contacts}
+              selectedIds={selectedIds}
+              toggleSelectAll={toggleSelectAll}
+              toggleSelect={toggleSelect}
+              toggleSort={toggleSort}
+              sortIcon={sortIcon}
+              editingId={editingId}
+              editForm={editForm}
+              setEditForm={setEditForm}
+              saveEdit={saveEdit}
+              setEditingId={setEditingId}
+              startEdit={startEdit}
+              openDeleteModal={openDeleteModal}
+              sendInvite={sendInvite}
+              loading={loading}
+              fetching={fetching}
+              getCompanyName={getCompanyName}
+              statusBadge={statusBadge}
+            />
+          </>
+        )}
+
+        {/* Pagination footer */}
+        {pagination.totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-border-subtle px-4 py-3">
+            <div className="text-sm text-text-tertiary text-center sm:text-left">
+              {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => goToPage(pagination.page - 1)}
+                disabled={pagination.page === 1 || fetching}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (pagination.totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (pagination.page <= 3) {
+                    pageNum = i + 1;
+                  } else if (pagination.page >= pagination.totalPages - 2) {
+                    pageNum = pagination.totalPages - 4 + i;
+                  } else {
+                    pageNum = pagination.page - 2 + i;
+                  }
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => goToPage(pageNum)}
+                      disabled={fetching}
+                      className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-sm ${
+                        pageNum === pagination.page
+                          ? "bg-btn-primary-bg text-btn-primary-text"
+                          : "hover:bg-bg-hover text-text-secondary"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                onClick={() => goToPage(pagination.page + 1)}
+                disabled={pagination.page === pagination.totalPages || fetching}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Next page"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Delete confirmation modal */}
       <ConfirmModal

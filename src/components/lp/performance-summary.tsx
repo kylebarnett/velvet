@@ -1,6 +1,7 @@
 "use client";
 
-import * as React from "react";
+import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils/cn";
 
 type PerformanceSummaryProps = {
@@ -59,51 +60,56 @@ function KpiTooltip({
   formula: string;
   children: React.ReactNode;
 }) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const [pos, setPos] = React.useState<{ top: number; left: number } | null>(null);
+  const ref = useRef<HTMLSpanElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [rect, setRect] = useState<DOMRect | null>(null);
 
   function show() {
     if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    setPos({ top: rect.top, left: rect.left + rect.width / 2 });
+    setRect(ref.current.getBoundingClientRect());
+    setVisible(true);
   }
 
   function hide() {
-    setPos(null);
+    setVisible(false);
   }
 
   return (
-    <div ref={ref} onMouseEnter={show} onMouseLeave={hide} className="inline-block">
-      {children}
-      {pos && (
+    <>
+      <span ref={ref} onMouseEnter={show} onMouseLeave={hide} className="inline-block">
+        {children}
+      </span>
+      {visible && rect && createPortal(
         <div
-          className="fixed z-[100] rounded-lg shadow-xl"
           style={{
-            top: pos.top - 8,
-            left: pos.left,
-            transform: "translate(-50%, -100%)",
-            width: "14rem",
-            padding: "8px 12px",
-            backgroundColor: "#1c1c20",
-            border: "1px solid rgba(255,255,255,0.12)",
+            position: "fixed",
+            zIndex: 99999,
+            bottom: window.innerHeight - rect.top + 8,
+            left: rect.left,
+            width: 220,
+            padding: "10px 12px",
+            borderRadius: 8,
+            backgroundColor: "var(--card-bg)",
+            border: "1px solid var(--border-default)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
           }}
         >
-          <p className="text-xs font-medium text-white">{tooltip}</p>
-          <p className="mt-1 font-mono text-[11px] text-white/50">{formula}</p>
+          <p className="text-xs font-medium text-text-primary">{tooltip}</p>
+          <p className="mt-1 font-mono text-[11px] text-text-muted">{formula}</p>
           <div
             style={{
               position: "absolute",
-              left: "50%",
+              left: 12,
               top: "100%",
-              transform: "translateX(-50%)",
-              borderWidth: "4px",
+              borderWidth: 6,
               borderStyle: "solid",
-              borderColor: "#1c1c20 transparent transparent transparent",
+              borderColor: "var(--card-bg) transparent transparent transparent",
             }}
           />
-        </div>
+        </div>,
+        document.body,
       )}
-    </div>
+    </>
   );
 }
 
@@ -161,9 +167,9 @@ export function PerformanceSummary({
       {/* KPI cards */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div key={kpi.label} className="rounded-xl border border-border-default card-surface p-4">
             <KpiTooltip tooltip={kpi.tooltip} formula={kpi.formula}>
-              <p className="inline-flex cursor-help text-[10px] uppercase tracking-wider text-text-muted border-b border-dashed border-text-muted/30">
+              <p className="inline-flex cursor-help text-xs uppercase tracking-wider text-text-muted border-b border-dashed border-text-muted/30">
                 {kpi.label}
               </p>
             </KpiTooltip>
@@ -191,7 +197,7 @@ export function PerformanceSummary({
 function SummaryItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wider text-text-muted">{label}</p>
+      <p className="text-xs uppercase tracking-wider text-text-muted">{label}</p>
       <p className="mt-0.5 text-sm font-medium text-text-primary">{value}</p>
     </div>
   );

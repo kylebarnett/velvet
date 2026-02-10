@@ -80,7 +80,7 @@ export function ComparisonChart({
   if (!data.length) {
     return (
       <div
-        className="flex items-center justify-center rounded-xl border border-border-default bg-bg-elevated text-text-muted"
+        className="flex items-center justify-center rounded-xl border border-border-default card-surface text-text-muted"
         style={{ height }}
       >
         No data available for the selected parameters
@@ -92,7 +92,7 @@ export function ComparisonChart({
   const yAxisLabel = getYAxisLabel(normalization);
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+    <div className="rounded-xl border border-border-default card-surface p-4">
       <h3 className="mb-3 text-sm font-medium text-text-primary">{metricName}</h3>
       <ResponsiveContainer width="100%" height={height}>
         <RechartsLineChart

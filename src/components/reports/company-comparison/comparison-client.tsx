@@ -132,17 +132,25 @@ function MultiSelectDropdown({
                     className="inline-flex items-center gap-1 rounded-md bg-bg-hover px-2 py-0.5 text-xs text-text-primary"
                   >
                     {name}
-                    <button
-                      type="button"
+                    <span
+                      role="button"
+                      tabIndex={0}
                       onClick={(e) => {
                         e.stopPropagation();
                         removeOption(value);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          removeOption(value);
+                        }
                       }}
                       className="text-text-muted hover:text-text-secondary"
                       aria-label={`Remove ${name}`}
                     >
                       <X className="h-3 w-3" />
-                    </button>
+                    </span>
                   </span>
                 );
               })}
@@ -437,7 +445,7 @@ export function ComparisonClient({
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+      <div className="rounded-xl border border-border-default card-surface p-4">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Company selector */}
           <div>
@@ -571,7 +579,7 @@ export function ComparisonClient({
 
       {/* Empty state */}
       {!isLoading && !error && !hasResults && canFetch && companiesData.length === 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
           <p className="text-text-tertiary">
             No metric data found for the selected companies and parameters.
           </p>

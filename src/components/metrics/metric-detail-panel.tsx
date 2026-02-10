@@ -322,7 +322,7 @@ export function MetricDetailPanel({
           {/* Close button */}
           <button
             onClick={handleClose}
-            className="absolute right-7 top-7 flex h-8 w-8 items-center justify-center rounded-lg border border-border-subtle bg-bg-raised text-text-muted transition-all duration-200 hover:border-border-default hover:bg-bg-elevated hover:text-text-primary active:scale-95"
+            className="absolute right-7 top-7 flex h-8 w-8 items-center justify-center rounded-lg border border-border-subtle bg-bg-raised text-text-muted transition-all duration-200 hover:border-border-default hover:bg-bg-hover hover:text-text-primary active:scale-95"
             aria-label="Close panel"
           >
             <X className="h-3.5 w-3.5" />
@@ -346,7 +346,7 @@ export function MetricDetailPanel({
               <button
                 type="button"
                 onClick={() => setPeriodDropdownOpen((p) => !p)}
-                className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-1.5 text-[13px] text-text-secondary transition-all duration-200 hover:border-border-default hover:bg-bg-elevated hover:text-text-primary"
+                className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-1.5 text-[13px] text-text-secondary transition-all duration-200 hover:border-border-default hover:bg-bg-hover hover:text-text-primary"
               >
                 <Calendar className="h-3.5 w-3.5 text-text-muted" />
                 <span className="tabular-nums">{selectedPeriodLabel}</span>
@@ -659,7 +659,7 @@ export function MetricDetailPanel({
                         setEditValue(getValueString(current.value));
                         setEditing(true);
                       }}
-                      className="inline-flex h-9 items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-4 text-sm text-text-tertiary transition-all duration-200 hover:border-border-default hover:bg-bg-elevated hover:text-text-secondary"
+                      className="inline-flex h-9 items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-4 text-sm text-text-tertiary transition-all duration-200 hover:border-border-default hover:bg-bg-hover hover:text-text-secondary"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                       Override current value

@@ -8,7 +8,7 @@ export default function Loading() {
       </div>
 
       {/* Controls skeleton */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+      <div className="rounded-xl border border-border-default card-surface p-4">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i}>
@@ -20,7 +20,7 @@ export default function Loading() {
       </div>
 
       {/* Chart skeleton */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+      <div className="rounded-xl border border-border-default card-surface p-4">
         <div className="mb-3 h-4 w-32 animate-pulse rounded bg-bg-hover" />
         <div className="h-[360px] animate-pulse rounded-lg bg-bg-raised" />
       </div>

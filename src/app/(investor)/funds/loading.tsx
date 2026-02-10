@@ -12,7 +12,7 @@ export default function LPReportsLoading() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border border-border-default bg-bg-elevated p-5"
+            className="rounded-xl border border-border-default card-surface p-5"
           >
             <div className="h-5 w-32 animate-pulse rounded bg-bg-hover" />
             <div className="mt-2 h-3 w-20 animate-pulse rounded bg-bg-elevated" />

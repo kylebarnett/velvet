@@ -175,7 +175,7 @@ export function BenchmarksClient() {
       </div>
 
       {/* Controls */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+      <div className="rounded-xl border border-border-default card-surface p-4">
         <div className="grid gap-4 md:grid-cols-3">
           {/* Metric selector */}
           <div>
@@ -281,7 +281,7 @@ export function BenchmarksClient() {
           ).map(({ label, key }) => (
             <div
               key={key}
-              className="rounded-xl border border-border-default bg-bg-elevated p-4"
+              className="rounded-xl border border-border-default card-surface p-4"
             >
               <div className="text-xs font-medium text-text-muted">{label}</div>
               <div className="mt-1 text-lg font-semibold tabular-nums text-text-primary">
@@ -333,7 +333,7 @@ export function BenchmarksClient() {
         selectedMetric &&
         !hasCompanies &&
         !isLoadingData && (
-          <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+          <div className="rounded-xl border border-border-default card-surface p-8 text-center">
             <p className="text-text-tertiary">
               None of your portfolio companies have submitted data for this
               metric.

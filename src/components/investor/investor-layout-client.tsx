@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 
 import { OnboardingProvider } from "@/contexts/onboarding-context";
 import { MetricDefinitionsProvider } from "@/contexts/metric-definitions-context";
@@ -18,6 +19,9 @@ export function InvestorLayoutClient({
   initialOnboardingStep,
   isOnboardingComplete,
 }: InvestorLayoutClientProps) {
+  const pathname = usePathname();
+  const hideChatbot = pathname.startsWith("/funds");
+
   return (
     <MetricDefinitionsProvider>
       <OnboardingProvider
@@ -26,7 +30,7 @@ export function InvestorLayoutClient({
       >
         {children}
         <OnboardingOverlay />
-        <ChatbotWidget />
+        {!hideChatbot && <ChatbotWidget />}
       </OnboardingProvider>
     </MetricDefinitionsProvider>
   );

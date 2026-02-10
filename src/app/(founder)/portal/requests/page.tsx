@@ -12,15 +12,30 @@ const BatchSubmissionTable = React.lazy(() =>
 
 type TabValue = "pending" | "completed";
 
-const tabs: TabItem<TabValue>[] = [
-  { value: "pending", label: "Pending" },
-  { value: "completed", label: "Completed" },
-];
+type RequestCounts = {
+  pending: number;
+  completed: number;
+};
+
+function buildTabs(counts: RequestCounts | null): TabItem<TabValue>[] {
+  return [
+    {
+      value: "pending" as const,
+      label: counts && counts.pending > 0 ? `Pending (${counts.pending})` : "Pending",
+    },
+    {
+      value: "completed" as const,
+      label: counts && counts.completed > 0 ? `Completed (${counts.completed})` : "Completed",
+    },
+  ];
+}
 
 export default function FounderRequestsPage() {
   const [companyId, setCompanyId] = React.useState<string | null>(null);
   const [tab, setTab] = React.useState<TabValue>("pending");
   const [refreshKey, setRefreshKey] = React.useState(0);
+  const [counts, setCounts] = React.useState<RequestCounts | null>(null);
+  const tabs = React.useMemo(() => buildTabs(counts), [counts]);
   const [submitPeriod, setSubmitPeriod] = React.useState<{
     periodType: string;
     periodStart: string;
@@ -45,7 +60,7 @@ export default function FounderRequestsPage() {
     return (
       <div className="space-y-6">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight">Requests</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Metric Requests</h1>
           <p className="text-sm text-text-tertiary">
             Submit metrics for the selected period.
           </p>
@@ -57,7 +72,7 @@ export default function FounderRequestsPage() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-xl border border-border-default bg-bg-elevated p-4"
+                  className="rounded-xl border border-border-default card-surface p-4"
                 >
                   <div className="flex items-center justify-between">
                     <div className="h-5 w-48 animate-pulse rounded bg-bg-hover" />
@@ -85,9 +100,9 @@ export default function FounderRequestsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1" data-onboarding="requests-title">
-        <h1 className="text-xl font-semibold tracking-tight">Requests</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Metric Requests</h1>
         <p className="text-sm text-text-tertiary">
-          View pending metric requests from your investors.
+          Metrics your investors have requested. Submit values here or from your dashboard.
         </p>
       </div>
 
@@ -106,6 +121,7 @@ export default function FounderRequestsPage() {
           mode="pending"
           onCompanyId={setCompanyId}
           onSubmitGroup={handleSubmitGroup}
+          onCounts={setCounts}
         />
       )}
 
@@ -114,6 +130,7 @@ export default function FounderRequestsPage() {
           key={`completed-${refreshKey}`}
           mode="completed"
           onCompanyId={setCompanyId}
+          onCounts={setCounts}
         />
       )}
     </div>

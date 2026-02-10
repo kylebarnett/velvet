@@ -151,7 +151,7 @@ export function ReportFormModal({
 
       const reportId = json.report?.id;
       if (reportId) {
-        router.push(`/lp-reports/${fundId}/reports/${reportId}`);
+        router.push(`/funds/${fundId}/reports/${reportId}`);
       } else {
         onSaved();
       }

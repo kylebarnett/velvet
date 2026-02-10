@@ -1,12 +1,10 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CompanySwitcher } from "@/components/investor/company-switcher";
 import { InlineTags } from "@/components/investor/inline-tag";
 import { InlineWebsite } from "@/components/investor/inline-website";
 import { CompanyDashboardTabs } from "@/components/investor/company-dashboard-tabs";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import type { MetricValue } from "@/components/dashboard";
 import { CompanyDashboardClient } from "./company-dashboard-client";
 
@@ -120,16 +118,10 @@ export default async function CompanyDashboardPage({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">All Companies</span>
-              <span className="sm:hidden">Back</span>
-            </Link>
-          </div>
+          <Breadcrumbs items={[
+            { label: "Companies", href: "/dashboard" },
+            { label: company.name },
+          ]} />
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <CompanySwitcher
               currentCompanyId={companyId}
@@ -143,6 +135,15 @@ export default async function CompanyDashboardPage({
             ) : (
               <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-[var(--status-warning-text)]">
                 Pending signup
+              </span>
+            )}
+            {isApproved ? (
+              <span className="rounded-full bg-[var(--status-success-bg)] px-2 py-0.5 text-xs text-[var(--status-success-text)]">
+                Approved
+              </span>
+            ) : (
+              <span className="rounded-full bg-[var(--status-warning-bg)] px-2 py-0.5 text-xs text-[var(--status-warning-text)]">
+                {relationship.approval_status === "denied" ? "Access denied" : "Pending approval"}
               </span>
             )}
           </div>
@@ -165,7 +166,9 @@ export default async function CompanyDashboardPage({
 
       {!isApproved && (
         <div className="rounded-md border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] px-3 py-2 text-sm text-[var(--status-warning-text)]">
-          Your access is {relationship.approval_status}. The founder needs to approve your access before you can see metric data.
+          {relationship.approval_status === "denied"
+            ? "The founder has denied access to their data. Metric data is not available."
+            : "Pending founder approval. The founder needs to approve your access before you can view their metrics and documents."}
         </div>
       )}
 
@@ -181,7 +184,7 @@ export default async function CompanyDashboardPage({
       )}
 
       {!isApproved && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <p className="text-text-tertiary">Metrics will appear here once your access is approved.</p>
         </div>
       )}

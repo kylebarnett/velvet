@@ -7,7 +7,7 @@ export default function FounderDocumentsLoading() {
       </div>
 
       {/* Document list */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated">
+      <div className="rounded-xl border border-border-default card-surface">
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}

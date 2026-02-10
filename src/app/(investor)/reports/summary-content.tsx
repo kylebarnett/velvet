@@ -1,5 +1,9 @@
+import Link from "next/link";
+import { BarChart3 } from "lucide-react";
+
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ReportsClient } from "./reports-client";
 import {
   extractNumericValue,
@@ -134,15 +138,19 @@ export async function SummaryContent({
 
   if (companyIds.length === 0) {
     return (
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
-        <p className="text-text-tertiary">No companies in your portfolio yet.</p>
-        <a
-          href="/portfolio/import"
-          className="mt-2 inline-block text-sm underline underline-offset-4 hover:text-text-primary"
-        >
-          Import contacts to get started
-        </a>
-      </div>
+      <EmptyState
+        icon={BarChart3}
+        title="No companies in your portfolio yet"
+        description="Import contacts to start viewing portfolio reports."
+        action={
+          <Link
+            href="/portfolio/import"
+            className="inline-flex items-center gap-2 rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+          >
+            Import contacts
+          </Link>
+        }
+      />
     );
   }
 

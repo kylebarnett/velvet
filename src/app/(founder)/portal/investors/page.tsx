@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Search } from "lucide-react";
+import { Search, Users, CheckCircle2, Loader2 } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { InvestorApprovalCard } from "@/components/founder/investor-approval-card";
 
 type Investor = {
@@ -23,7 +24,7 @@ function LoadingSkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="animate-pulse rounded-xl border border-border-default bg-bg-elevated p-4"
+          className="animate-pulse rounded-xl border border-border-default card-surface p-4"
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-2">
@@ -47,6 +48,7 @@ export default function FounderInvestorsPage() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [bulkApproving, setBulkApproving] = React.useState(false);
 
   React.useEffect(() => {
     async function load() {
@@ -76,18 +78,95 @@ export default function FounderInvestorsPage() {
     });
   }, [investors, searchQuery]);
 
+  const statusCounts = React.useMemo(() => {
+    const counts = { approved: 0, pending: 0, denied: 0 };
+    for (const inv of investors) {
+      const s = inv.approval_status;
+      if (s === "approved" || s === "auto_approved") counts.approved++;
+      else if (s === "pending") counts.pending++;
+      else if (s === "denied") counts.denied++;
+    }
+    return counts;
+  }, [investors]);
+
+  const pendingInvestors = React.useMemo(
+    () => investors.filter((inv) => inv.approval_status === "pending"),
+    [investors]
+  );
+
+  async function handleBulkApprove() {
+    if (pendingInvestors.length === 0) return;
+    setBulkApproving(true);
+    try {
+      await Promise.all(
+        pendingInvestors.map((inv) =>
+          fetch(`/api/founder/investors/${inv.id}/approval`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "approved" }),
+          })
+        )
+      );
+      // Reload page to reflect changes
+      window.location.reload();
+    } catch {
+      setError("Failed to approve all investors. Please try again.");
+    } finally {
+      setBulkApproving(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-1" data-onboarding="investors-title">
-        <h1 className="text-xl font-semibold tracking-tight">Investors</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-xl font-semibold tracking-tight">Investors</h1>
+          {!loading && investors.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center rounded-full bg-bg-elevated px-2.5 py-0.5 text-xs font-medium text-text-secondary">
+                {investors.length} total
+              </span>
+              {statusCounts.approved > 0 && (
+                <span className="inline-flex items-center rounded-full bg-[var(--status-success-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--status-success-text)]">
+                  {statusCounts.approved} approved
+                </span>
+              )}
+              {statusCounts.pending > 0 && (
+                <span className="inline-flex items-center rounded-full bg-[var(--status-warning-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--status-warning-text)]">
+                  {statusCounts.pending} pending
+                </span>
+              )}
+              {statusCounts.denied > 0 && (
+                <span className="inline-flex items-center rounded-full bg-[var(--status-error-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--status-error-text)]">
+                  {statusCounts.denied} denied
+                </span>
+              )}
+            </div>
+          )}
+        </div>
         <p className="text-sm text-text-tertiary">
-          Manage which investors can view your metrics. Approve or deny access
-          for each investor.
+          Control which investors can access your data. Approved investors can see all your submitted metrics and uploaded documents.
         </p>
         <p className="text-xs text-text-muted">
-          Approved investors can view your submitted metrics and documents.
+          Access is all-or-nothing — approved investors see everything you submit. You can change access at any time.
         </p>
       </div>
+
+      {pendingInvestors.length >= 2 && (
+        <button
+          type="button"
+          onClick={handleBulkApprove}
+          disabled={bulkApproving}
+          className="inline-flex items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+        >
+          {bulkApproving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4" />
+          )}
+          Approve all pending ({pendingInvestors.length})
+        </button>
+      )}
 
       {loading && <LoadingSkeleton />}
 
@@ -98,11 +177,11 @@ export default function FounderInvestorsPage() {
       )}
 
       {!loading && !error && investors.length === 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
-          <div className="text-sm text-text-tertiary">
-            No investors have been linked to your company yet.
-          </div>
-        </div>
+        <EmptyState
+          icon={Users}
+          title="No investors connected yet"
+          description="Investors will appear here when they add your company to their portfolio. You'll be able to approve or deny each one before they can see your data. If you were invited by an investor, they'll appear here automatically."
+        />
       )}
 
       {investors.length > 0 && (
@@ -115,7 +194,7 @@ export default function FounderInvestorsPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search investors..."
-                className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default sm:w-64"
+                className="h-11 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm text-text-primary outline-none placeholder:text-text-faint focus:border-border-default sm:w-64"
               />
             </div>
           )}
@@ -125,7 +204,7 @@ export default function FounderInvestorsPage() {
               <InvestorApprovalCard key={inv.id} investor={inv} />
             ))}
             {filteredInvestors.length === 0 && searchQuery && (
-              <div className="rounded-xl border border-border-default bg-bg-elevated p-4 text-sm text-text-tertiary">
+              <div className="rounded-xl border border-border-default card-surface p-4 text-sm text-text-tertiary">
                 No investors match your search.
               </div>
             )}

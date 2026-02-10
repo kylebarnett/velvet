@@ -68,7 +68,7 @@ function TearSheetCard({
     <button
       type="button"
       onClick={onClick}
-      className="w-full text-left rounded-xl border border-border-default bg-bg-elevated p-4 hover:border-border-default hover:bg-bg-elevated transition-colors group"
+      className="w-full text-left rounded-xl border border-border-default card-surface p-4 hover:border-border-default hover:bg-bg-hover transition-colors group"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -322,7 +322,7 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
           {[1, 2].map((i) => (
             <div
               key={i}
-              className="animate-pulse rounded-xl border border-border-default bg-bg-elevated p-4"
+              className="animate-pulse rounded-xl border border-border-default card-surface p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 space-y-2">
@@ -342,7 +342,7 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
 
       {/* Empty state */}
       {!loading && tearSheets.length === 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
           <FileSpreadsheet className="mx-auto h-8 w-8 text-text-faint" />
           <p className="mt-2 text-sm text-text-tertiary">No tear sheets available.</p>
           <p className="mt-1 text-xs text-text-muted">
@@ -353,7 +353,7 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
 
       {/* No results after filter */}
       {!loading && filteredTearSheets.length === 0 && tearSheets.length > 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <p className="text-sm text-text-tertiary">
             No tear sheets match the selected filters.
           </p>

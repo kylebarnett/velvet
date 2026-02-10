@@ -810,7 +810,7 @@ export function BatchSubmissionTable({
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <p className="text-text-tertiary">No metrics requested yet.</p>
           <p className="mt-1 text-sm text-text-muted">
             Metrics will appear here when an investor sends you a request.

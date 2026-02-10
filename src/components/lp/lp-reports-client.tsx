@@ -31,7 +31,7 @@ export function LPReportsClient({ funds: initialFunds }: LPReportsClientProps) {
         <div data-onboarding="funds-title">
           <h1 className="text-xl font-semibold tracking-tight">Funds</h1>
           <p className="mt-0.5 text-sm text-text-tertiary">
-            Manage funds, track performance, and generate LP reports.
+            Manage funds, track portfolio performance, and generate LP reports for your limited partners.
           </p>
         </div>
         <button

@@ -98,7 +98,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   // Funds
   {
     id: "funds-intro",
-    page: "/lp-reports",
+    page: "/funds",
     target: '[data-onboarding="funds-title"]',
     title: "LP Fund Reporting",
     message:

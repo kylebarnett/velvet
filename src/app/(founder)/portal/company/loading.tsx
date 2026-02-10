@@ -5,7 +5,7 @@ export default function Loading() {
         <div className="h-7 w-40 animate-pulse rounded-md bg-bg-elevated" />
         <div className="h-4 w-64 animate-pulse rounded-md bg-bg-elevated" />
       </div>
-      <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
+      <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">

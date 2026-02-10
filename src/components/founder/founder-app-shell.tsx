@@ -28,6 +28,7 @@ export function FounderAppShell({
       nav={nav}
       company={company}
       user={user}
+      role="founder"
       showTakeTour={true}
       onTakeTour={startTour}
     >

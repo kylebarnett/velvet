@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Select,
   SelectContent,
@@ -66,7 +67,7 @@ function LoadingSkeleton() {
   return (
     <div className="space-y-4">
       <div className="h-9 w-48 animate-pulse rounded-md bg-bg-hover" />
-      <div className="hidden sm:block overflow-hidden rounded-xl border border-border-default bg-bg-elevated">
+      <div className="hidden sm:block overflow-hidden rounded-xl border border-border-default card-surface">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border-default text-left text-text-tertiary">
@@ -443,17 +444,15 @@ export function FounderDocumentList() {
 
       {/* Empty state */}
       {filteredDocuments.length === 0 ? (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 sm:p-8 text-center">
-          <FileText className="mx-auto h-10 w-10 text-text-muted" />
-          <p className="mt-3 text-text-tertiary">
-            {searchQuery ? "No documents match your search." : "No documents found."}
-          </p>
-          {!searchQuery && (
-            <p className="mt-1 text-sm text-text-tertiary">
-              Upload your first document to get started.
-            </p>
-          )}
-        </div>
+        <EmptyState
+          icon={FileText}
+          title={searchQuery ? "No documents match your search" : "No documents uploaded yet"}
+          description={
+            searchQuery
+              ? undefined
+              : "Upload pitch decks, financial statements, cap tables, and other documents. Approved investors will be able to view them."
+          }
+        />
       ) : (
         <>
           {/* ============================================ */}
@@ -479,7 +478,7 @@ export function FounderDocumentList() {
               {filteredDocuments.map((doc) => (
                 <div
                   key={doc.id}
-                  className="cursor-pointer rounded-xl border border-border-default bg-bg-elevated p-4 active:bg-bg-hover"
+                  className="cursor-pointer rounded-xl border border-border-default card-surface p-4 active:bg-bg-hover"
                   onClick={() => setPreviewDoc(doc)}
                 >
                   <div className="flex items-start gap-3">
@@ -513,7 +512,7 @@ export function FounderDocumentList() {
           <div className="hidden sm:flex gap-4" style={{ height: "calc(100vh - 14rem)" }}>
             {/* Left pane — document list */}
             <div
-              className={`shrink-0 overflow-hidden rounded-xl border border-border-default bg-bg-elevated transition-all duration-200 ${
+              className={`shrink-0 overflow-hidden rounded-xl border border-border-default card-surface transition-all duration-200 ${
                 hasPreview ? "w-80" : "flex-1"
               }`}
             >
@@ -655,7 +654,7 @@ export function FounderDocumentList() {
 
             {/* Right pane — preview */}
             {hasPreview && (
-              <div className="flex-1 overflow-hidden rounded-xl border border-border-default bg-bg-elevated">
+              <div className="flex-1 overflow-hidden rounded-xl border border-border-default card-surface">
                 <PreviewPane
                   key={previewDoc.id}
                   doc={previewDoc}

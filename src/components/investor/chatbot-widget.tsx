@@ -401,7 +401,7 @@ export function ChatbotWidget() {
                       <button
                         key={suggestion.text}
                         onClick={() => handleSuggestionClick(suggestion.text)}
-                        className="flex w-full items-start gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-2 text-left text-xs text-text-secondary transition-colors hover:border-border-default hover:bg-bg-elevated hover:text-text-primary"
+                        className="flex w-full items-start gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-2 text-left text-xs text-text-secondary transition-colors hover:border-border-default hover:bg-bg-hover hover:text-text-primary"
                         type="button"
                       >
                         <Icon className="mt-0.5 h-3 w-3 shrink-0 text-text-faint" />

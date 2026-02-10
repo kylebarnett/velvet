@@ -12,7 +12,7 @@ export default function DocumentsLoading() {
       </div>
 
       {/* Table skeleton */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated">
+      <div className="rounded-xl border border-border-default card-surface">
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}

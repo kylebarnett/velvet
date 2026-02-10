@@ -10,7 +10,7 @@ export default function Loading() {
       </div>
 
       {/* Report rows placeholder */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
+      <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 px-4 py-3">
             <div className="h-4 w-4 animate-pulse rounded bg-bg-hover" />

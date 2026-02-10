@@ -1,5 +1,9 @@
+import { Building2 } from "lucide-react";
+
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { EmptyState } from "@/components/ui/empty-state";
+import { GettingStartedChecklist } from "@/components/ui/getting-started-checklist";
 import { FounderPortalTabs } from "@/components/founder/founder-portal-tabs";
 
 export const dynamic = "force-dynamic";
@@ -21,12 +25,11 @@ export default async function FounderDashboardPage() {
         <div className="space-y-1">
           <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
         </div>
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
-          <p className="text-text-tertiary">No company linked to your account yet.</p>
-          <p className="mt-2 text-sm text-text-muted">
-            Ask an investor to invite you to get started.
-          </p>
-        </div>
+        <EmptyState
+          icon={Building2}
+          title="No company linked to your account yet"
+          description="Your company will appear here once an investor invites you. If you signed up independently, ask your investor to add your email to their portfolio."
+        />
       </div>
     );
   }
@@ -66,7 +69,50 @@ export default async function FounderDashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("company_id", company.id);
 
+  // Fetch investor count for checklist
+  const { count: investorCount } = await supabase
+    .from("investor_company_relationships")
+    .select("*", { count: "exact", head: true })
+    .eq("company_id", company.id);
+
+  const hasProfile = !!(company.industry || company.stage);
+  const hasMetrics = (metricValues ?? []).length > 0;
+
   return (
+    <div className="space-y-6">
+      <GettingStartedChecklist
+        role="founder"
+        items={[
+          {
+            id: "profile",
+            label: "Complete your company profile",
+            description: "Add your industry, stage, and website so investors can find you",
+            href: "/portal/company",
+            completed: hasProfile,
+          },
+          {
+            id: "investors",
+            label: "Review investor access",
+            description: "Approve or deny investors who want to view your data",
+            href: "/portal/investors",
+            completed: (investorCount ?? 0) > 0,
+          },
+          {
+            id: "metrics",
+            label: "Submit your first metrics",
+            description: "Enter your key metrics so approved investors can track progress",
+            href: "/portal/requests",
+            completed: hasMetrics,
+          },
+          {
+            id: "documents",
+            label: "Upload documents",
+            description: "Share pitch decks, financials, and other materials with investors",
+            href: "/portal",
+            completed: (documentCount ?? 0) > 0,
+          },
+        ]}
+      />
     <FounderPortalTabs
       companyId={company.id}
       companyName={company.name}
@@ -80,5 +126,6 @@ export default async function FounderDashboardPage() {
       documentCount={documentCount ?? 0}
       tearSheetCount={tearSheetCount ?? 0}
     />
+    </div>
   );
 }

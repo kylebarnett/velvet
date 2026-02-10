@@ -370,7 +370,7 @@ function CompanyHeader({
                     setEditingWebsite(false);
                     setWebsiteInput(website ?? "");
                   }}
-                  className="flex h-8 items-center rounded-md border border-border-default px-2.5 text-xs text-text-tertiary hover:bg-bg-elevated"
+                  className="flex h-8 items-center rounded-md border border-border-default px-2.5 text-xs text-text-tertiary hover:bg-bg-hover"
                 >
                   <X className="h-3 w-3" />
                 </button>

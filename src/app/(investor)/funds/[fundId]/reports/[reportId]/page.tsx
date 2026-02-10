@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 const ReportEditor = nextDynamic(
   () =>
@@ -28,16 +29,16 @@ const ReportEditor = nextDynamic(
         {/* Two-column skeleton */}
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-4">
-            <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+            <div className="rounded-xl border border-border-default card-surface p-4">
               <div className="h-3 w-24 animate-pulse rounded bg-bg-hover" />
               <div className="mt-4 h-11 w-full animate-pulse rounded-md bg-bg-elevated" />
             </div>
-            <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+            <div className="rounded-xl border border-border-default card-surface p-4">
               <div className="h-3 w-32 animate-pulse rounded bg-bg-hover" />
               <div className="mt-3 h-24 w-full animate-pulse rounded-md bg-bg-elevated" />
             </div>
           </div>
-          <div className="rounded-xl border border-border-default bg-bg-elevated p-6">
+          <div className="rounded-xl border border-border-default card-surface p-6">
             <div className="h-3 w-20 animate-pulse rounded bg-bg-hover" />
             <div className="mt-2 h-6 w-48 animate-pulse rounded bg-bg-elevated" />
           </div>
@@ -70,7 +71,7 @@ export default async function ReportEditorPage({
     return (
       <div className="space-y-4">
         <Link
-          href="/lp-reports"
+          href="/funds"
           className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
@@ -95,7 +96,7 @@ export default async function ReportEditorPage({
     return (
       <div className="space-y-4">
         <Link
-          href={`/lp-reports/${fundId}?tab=reports`}
+          href={`/funds/${fundId}?tab=reports`}
           className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
@@ -131,6 +132,12 @@ export default async function ReportEditorPage({
   });
 
   return (
+    <div className="space-y-6">
+      <Breadcrumbs items={[
+        { label: "Funds", href: "/funds" },
+        { label: fund.name as string, href: `/funds/${fundId}` },
+        { label: report.title as string },
+      ]} />
     <ReportEditor
       fund={{
         id: fund.id as string,
@@ -150,5 +157,6 @@ export default async function ReportEditorPage({
       }}
       investments={investments}
     />
+    </div>
   );
 }

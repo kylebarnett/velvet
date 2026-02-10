@@ -14,8 +14,10 @@ import {
   Clock,
   AlertTriangle,
   Loader2,
+  Inbox,
 } from "lucide-react";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+import { EmptyState } from "@/components/ui/empty-state";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
 import { formatDate } from "@/lib/utils/format-date";
 
@@ -526,19 +528,21 @@ export function CampaignsTabContent() {
     <div className="space-y-5">
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+        <div className="rounded-xl border border-border-default card-surface p-4">
           <div className="flex items-center gap-2 text-xs text-text-tertiary">
             <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
-            Active campaigns
+            Active requests
           </div>
           <div className="mt-2 text-2xl font-semibold">{summary.activeCampaigns}</div>
+          <div className="mt-0.5 text-[11px] text-text-faint">Open metric request periods</div>
         </div>
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+        <div className="rounded-xl border border-border-default card-surface p-4">
           <div className="flex items-center gap-2 text-xs text-text-tertiary">
             <Clock className="h-3.5 w-3.5" aria-hidden="true" />
             Companies awaiting
           </div>
           <div className="mt-2 text-2xl font-semibold">{summary.companiesAwaiting}</div>
+          <div className="mt-0.5 text-[11px] text-text-faint">Haven&apos;t submitted yet</div>
         </div>
       </div>
 
@@ -574,23 +578,29 @@ export function CampaignsTabContent() {
           ))}
         </div>
       ) : campaigns.length === 0 ? (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
-          <div className="text-sm text-text-tertiary">
-            {periodFilter !== "all"
-              ? "No campaigns match the selected filter."
-              : "No campaigns yet. Create a request or set up a schedule to start tracking."}
-          </div>
-          {periodFilter === "all" && (
-            <div className="mt-2">
+        <EmptyState
+          icon={Inbox}
+          title={
+            periodFilter !== "all"
+              ? "No requests match the selected filter"
+              : "No metric requests yet"
+          }
+          description={
+            periodFilter !== "all"
+              ? undefined
+              : "Send metric requests to your portfolio companies. Each request asks specific founders to submit data for a given period. You can also create templates for reusable metric sets, or schedules to automate recurring requests."
+          }
+          action={
+            periodFilter === "all" ? (
               <Link
                 href="/campaigns/new"
-                className="text-sm text-text-primary underline underline-offset-4 hover:text-text-secondary"
+                className="inline-flex items-center gap-2 rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
               >
-                Create your first request
+                Send your first request
               </Link>
-            </div>
-          )}
-        </div>
+            ) : undefined
+          }
+        />
       ) : (
         <>
           <div className="space-y-3">
@@ -614,7 +624,7 @@ export function CampaignsTabContent() {
                   type="button"
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-hover disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -627,7 +637,7 @@ export function CampaignsTabContent() {
                     setPage((p) => Math.min(totalPages - 1, p + 1))
                   }
                   disabled={page >= totalPages - 1}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-hover disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>

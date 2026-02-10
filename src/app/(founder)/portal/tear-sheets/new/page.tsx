@@ -69,9 +69,12 @@ export default function NewTearSheetPage() {
         <h1 className="text-xl font-semibold tracking-tight">
           New Tear Sheet
         </h1>
+        <p className="text-sm text-text-tertiary">
+          A tear sheet is a one-page quarterly summary of your company&apos;s performance. It includes key metrics, milestones, and a narrative update. Once published, approved investors can view it.
+        </p>
       </div>
 
-      <div className="max-w-md rounded-xl border border-border-default bg-bg-elevated p-5">
+      <div className="max-w-md rounded-xl border border-border-default card-surface p-5">
         <div className="space-y-4">
           <div className="grid gap-2">
             <label className="text-sm font-medium">Quarter</label>

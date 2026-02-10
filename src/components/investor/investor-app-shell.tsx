@@ -28,6 +28,7 @@ export function InvestorAppShell({
       nav={nav}
       company={company}
       user={user}
+      role="investor"
       showTakeTour={true}
       onTakeTour={startTour}
     >

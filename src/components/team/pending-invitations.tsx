@@ -66,7 +66,7 @@ export function PendingInvitations({
       <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
         Pending Invitations ({pending.length})
       </h3>
-      <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
+      <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
         {pending.map((inv) => {
           const isExpired = new Date(inv.expires_at) < new Date();
           return (

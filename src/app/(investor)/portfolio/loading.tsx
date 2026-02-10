@@ -11,7 +11,7 @@ export default function PortfolioLoading() {
       </div>
 
       {/* Table skeleton */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated">
+      <div className="rounded-xl border border-border-default card-surface">
         <div className="border-b border-border-default px-4 py-3">
           <div className="flex gap-4">
             {Array.from({ length: 5 }).map((_, i) => (

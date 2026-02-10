@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Pencil, FileText, Calendar, Plus, ChevronRight } from "lucide-react";
 
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { PerformanceSummary } from "./performance-summary";
 import { InvestmentTable, type InvestmentRow } from "./investment-table";
 import { FundPerformanceChart } from "./fund-performance-chart";
@@ -84,7 +85,7 @@ export function FundDetailClient({
     }
     const query = params.toString();
     router.push(
-      `/lp-reports/${fund.id}${query ? `?${query}` : ""}`,
+      `/funds/${fund.id}${query ? `?${query}` : ""}`,
       { scroll: false },
     );
   }
@@ -144,24 +145,29 @@ export function FundDetailClient({
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[
+        { label: "Funds", href: "/funds" },
+        { label: fund.name },
+      ]} />
+
       {/* Fund header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+      <div>
+        <div className="flex items-center gap-2">
           <h1 className="text-xl font-semibold tracking-tight">{fund.name}</h1>
-          <p className="mt-0.5 text-sm text-text-tertiary">
-            Vintage {fund.vintage_year}
-            {fund.fund_size != null && (
-              <> &middot; {formatCurrency(fund.fund_size, fund.currency)} fund</>
-            )}
-          </p>
+          <button
+            onClick={() => setShowEdit(true)}
+            className="rounded-md p-1 text-text-faint transition-colors hover:bg-bg-hover hover:text-text-secondary"
+            aria-label="Edit fund"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
         </div>
-        <button
-          onClick={() => setShowEdit(true)}
-          className="flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-          Edit Fund
-        </button>
+        <p className="mt-0.5 text-sm text-text-tertiary">
+          Vintage {fund.vintage_year}
+          {fund.fund_size != null && (
+            <> &middot; {formatCurrency(fund.fund_size, fund.currency)} fund</>
+          )}
+        </p>
       </div>
 
       {/* Tabs */}
@@ -170,7 +176,7 @@ export function FundDetailClient({
       {/* Tab content */}
       <div key={activeTab} className="animate-fade-in">
         {activeTab === "reports" && (
-          <div className="rounded-xl border border-border-default bg-bg-elevated">
+          <div className="rounded-xl border border-border-default card-surface">
             <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
               <h3 className="text-sm font-medium text-text-secondary">LP Reports</h3>
               <button
@@ -192,7 +198,7 @@ export function FundDetailClient({
                     key={report.id}
                     type="button"
                     onClick={() =>
-                      router.push(`/lp-reports/${fund.id}/reports/${report.id}`)
+                      router.push(`/funds/${fund.id}/reports/${report.id}`)
                     }
                     className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-bg-raised"
                   >
@@ -233,7 +239,7 @@ export function FundDetailClient({
             {loadingPerf ? (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="rounded-xl border border-border-default bg-bg-elevated p-4">
+                  <div key={i} className="rounded-xl border border-border-default card-surface p-4">
                     <div className="h-3 w-12 animate-pulse rounded bg-bg-hover" />
                     <div className="mt-2 h-7 w-16 animate-pulse rounded bg-bg-hover" />
                   </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Building2, Clock, FileText } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -85,7 +86,7 @@ export default async function PortfolioPage() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div data-onboarding="portfolio-title">
@@ -105,7 +106,7 @@ export default async function PortfolioPage() {
           </Link>
           <Link
             href="/portfolio/import"
-            className="inline-flex items-center gap-2 rounded-md border border-border-default bg-bg-elevated px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
+            className="inline-flex items-center gap-2 rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
             data-onboarding="import-csv"
           >
             Import CSV
@@ -117,23 +118,32 @@ export default async function PortfolioPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
         <Link
           href="/dashboard"
-          className="rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 hover:bg-bg-hover transition-colors"
+          className="rounded-xl card-surface kpi-gradient-blue p-3 sm:p-4 hover:opacity-80 transition-opacity"
         >
-          <div className="text-xs sm:text-sm text-text-tertiary">Companies</div>
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
+            <Building2 className="h-4 w-4 text-blue-400" aria-hidden="true" />
+            Companies
+          </div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{companyCount ?? 0}</div>
         </Link>
         <Link
           href="/campaigns"
-          className="rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 hover:bg-bg-hover transition-colors"
+          className="rounded-xl card-surface kpi-gradient-amber p-3 sm:p-4 hover:opacity-80 transition-opacity"
         >
-          <div className="text-xs sm:text-sm text-text-tertiary">Pending</div>
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
+            <Clock className="h-4 w-4 text-amber-400" aria-hidden="true" />
+            Pending
+          </div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{pendingRequests ?? 0}</div>
         </Link>
         <Link
           href="/documents"
-          className="rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 hover:bg-bg-hover transition-colors"
+          className="rounded-xl card-surface kpi-gradient-emerald p-3 sm:p-4 hover:opacity-80 transition-opacity"
         >
-          <div className="text-xs sm:text-sm text-text-tertiary">New Docs</div>
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
+            <FileText className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+            New Docs
+          </div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{newDocuments ?? 0}</div>
         </Link>
       </div>

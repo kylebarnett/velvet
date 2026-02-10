@@ -31,6 +31,7 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
 
   const investorUser = investor.users;
   const displayName = investorUser?.full_name || investorUser?.email || "Unknown";
+  const initial = (investorUser?.full_name?.[0] || investorUser?.email?.[0] || "?").toUpperCase();
 
   async function handleApproval(newStatus: "approved" | "denied") {
     setLoading(true);
@@ -61,18 +62,25 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
   }[status] ?? "bg-bg-hover text-text-tertiary";
 
   const statusLabel = {
-    auto_approved: "Auto-approved",
+    auto_approved: "Approved",
     approved: "Approved",
-    pending: "Pending",
-    denied: "Denied",
+    pending: "Pending review",
+    denied: "Access denied",
   }[status] ?? status;
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+    <div className="rounded-xl border border-border-default card-surface p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <div className="min-w-0">
+        <div className="flex min-w-0 gap-3">
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-elevated text-sm font-medium text-text-secondary"
+            aria-hidden="true"
+          >
+            {initial}
+          </div>
+          <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium">{displayName}</span>
+            <span className="text-sm font-medium text-text-primary">{displayName}</span>
             {investor.is_inviting_investor && (
               <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs text-[var(--status-info-text)]">
                 Invited you
@@ -90,11 +98,18 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
               {statusLabel}
             </span>
             {status === "auto_approved" && (
-              <HelpTooltip text="This investor invited you to Velvet. They were automatically approved." />
+              <HelpTooltip text="This investor invited you to Velvet and was automatically approved. They can see all your submitted metrics and documents." />
             )}
             {status === "pending" && (
-              <HelpTooltip text="This investor has imported your company but hasn't been approved yet. They can't see your metrics until you approve." />
+              <HelpTooltip text="This investor added your company to their portfolio and is waiting for your approval. They cannot see any of your data until you approve access." />
             )}
+            {status === "approved" && (
+              <HelpTooltip text="This investor can view all your submitted metrics and documents. You can revoke access at any time." />
+            )}
+            {status === "denied" && (
+              <HelpTooltip text="This investor cannot see your metrics or documents. You can approve them at any time to grant access." />
+            )}
+          </div>
           </div>
         </div>
 
@@ -126,7 +141,7 @@ export function InvestorApprovalCard({ investor }: { investor: Investor }) {
             disabled={loading}
             type="button"
           >
-            Revoke
+            Deny access
           </button>
         )}
 

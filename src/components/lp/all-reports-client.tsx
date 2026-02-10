@@ -150,7 +150,7 @@ export function AllReportsClient({ funds }: { funds: FundOption[] }) {
 
       {/* Report list */}
       {loading ? (
-        <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
+        <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 px-4 py-3">
               <div className="h-4 w-4 animate-pulse rounded bg-bg-hover" />
@@ -163,19 +163,19 @@ export function AllReportsClient({ funds }: { funds: FundOption[] }) {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-xl border border-border-default bg-bg-elevated px-4 py-8 text-center text-sm text-text-muted">
+        <div className="rounded-xl border border-border-default card-surface px-4 py-8 text-center text-sm text-text-muted">
           {reports.length === 0
             ? "No LP reports yet. Create reports from individual fund pages."
             : "No reports match the selected filters."}
         </div>
       ) : (
-        <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
+        <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
           {filtered.map((report) => (
             <button
               key={report.id}
               type="button"
               onClick={() =>
-                router.push(`/lp-reports/${report.fund_id}/reports/${report.id}`)
+                router.push(`/funds/${report.fund_id}/reports/${report.id}`)
               }
               className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-bg-raised"
             >

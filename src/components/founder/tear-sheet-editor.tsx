@@ -167,7 +167,7 @@ export function TearSheetEditor({
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
-      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
+      <section className="rounded-xl border border-border-default card-surface p-5">
         <h2 className="text-sm font-medium">Key Metrics</h2>
         <p className="mt-1 text-xs text-text-tertiary">
           Auto-populated from your {tearSheet.quarter} {tearSheet.year}{" "}
@@ -215,7 +215,7 @@ export function TearSheetEditor({
       </section>
 
       {/* Highlights */}
-      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
+      <section className="rounded-xl border border-border-default card-surface p-5">
         <label className="text-sm font-medium">
           Highlights
         </label>
@@ -232,7 +232,7 @@ export function TearSheetEditor({
       </section>
 
       {/* Milestones */}
-      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
+      <section className="rounded-xl border border-border-default card-surface p-5">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-medium">Milestones</h2>
@@ -291,7 +291,7 @@ export function TearSheetEditor({
       </section>
 
       {/* Challenges */}
-      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
+      <section className="rounded-xl border border-border-default card-surface p-5">
         <label className="text-sm font-medium">
           Challenges
         </label>
@@ -308,7 +308,7 @@ export function TearSheetEditor({
       </section>
 
       {/* Team Updates */}
-      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
+      <section className="rounded-xl border border-border-default card-surface p-5">
         <label className="text-sm font-medium">
           Team Updates
         </label>
@@ -325,7 +325,7 @@ export function TearSheetEditor({
       </section>
 
       {/* Outlook */}
-      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
+      <section className="rounded-xl border border-border-default card-surface p-5">
         <label className="text-sm font-medium">
           Outlook
         </label>
@@ -342,7 +342,7 @@ export function TearSheetEditor({
       </section>
 
       {/* Ask of Investors */}
-      <section className="rounded-xl border border-border-default bg-bg-elevated p-5">
+      <section className="rounded-xl border border-border-default card-surface p-5">
         <label className="text-sm font-medium">
           Ask of Investors
         </label>

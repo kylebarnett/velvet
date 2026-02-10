@@ -2,7 +2,7 @@ export default function BenchmarksLoading() {
   return (
     <div className="space-y-6">
       {/* Selectors */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+      <div className="rounded-xl border border-border-default card-surface p-4">
         <div className="grid gap-4 md:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i}>
@@ -18,7 +18,7 @@ export default function BenchmarksLoading() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border border-border-default bg-bg-elevated p-4"
+            className="rounded-xl border border-border-default card-surface p-4"
           >
             <div className="h-3 w-12 animate-pulse rounded bg-bg-hover" />
             <div className="mt-2 h-6 w-20 animate-pulse rounded bg-bg-hover" />
@@ -27,13 +27,13 @@ export default function BenchmarksLoading() {
       </div>
 
       {/* Chart placeholder */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+      <div className="rounded-xl border border-border-default card-surface p-4">
         <div className="mb-3 h-4 w-48 animate-pulse rounded bg-bg-hover" />
         <div className="h-80 animate-pulse rounded-xl bg-bg-raised" />
       </div>
 
       {/* Table placeholder */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+      <div className="rounded-xl border border-border-default card-surface p-4">
         <div className="mb-3 h-4 w-32 animate-pulse rounded bg-bg-hover" />
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (

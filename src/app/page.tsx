@@ -25,7 +25,7 @@ export default function Home() {
             Login
           </Link>
           <Link
-            className="inline-flex h-11 items-center justify-center rounded-md border border-border-default bg-transparent px-5 text-sm font-medium text-text-primary hover:bg-bg-elevated focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+            className="inline-flex h-11 items-center justify-center rounded-md border border-border-default bg-transparent px-5 text-sm font-medium text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             href="/signup"
           >
             Sign up

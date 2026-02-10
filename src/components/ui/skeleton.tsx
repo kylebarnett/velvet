@@ -44,7 +44,7 @@ export function SkeletonCard({ className }: SkeletonCardProps) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-border-default bg-bg-elevated p-4",
+        "rounded-xl border border-border-default card-surface p-4",
         className
       )}
     >
@@ -71,7 +71,7 @@ export function SkeletonTable({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border-default bg-bg-elevated overflow-hidden",
+        "rounded-xl border border-border-default card-surface overflow-hidden",
         className
       )}
     >

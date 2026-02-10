@@ -163,13 +163,18 @@ export function CompanyCard({
   return (
     <Link
       href={`/dashboard/${id}`}
-      className="card-hover-lift flex flex-col rounded-xl border border-border-subtle bg-bg-raised p-5 hover:border-border-default"
+      className="card-hover-lift flex flex-col rounded-xl border border-border-subtle card-surface p-5 hover:border-border-default"
     >
       <div className="flex items-start justify-between">
         <CompanyLogoDisplay name={name} logoUrl={logoUrl} />
-        {!isApproved && (
-          <span className="rounded-full bg-[var(--status-warning-bg)] px-2 py-0.5 text-xs text-[var(--status-warning-text)]">
-            Pending
+        {!isApproved && approvalStatus === "pending" && (
+          <span className="rounded-full bg-[var(--status-warning-bg)] px-2 py-0.5 text-xs text-[var(--status-warning-text)]" title="Awaiting founder approval — they need to approve access before you can see their metrics">
+            Pending approval
+          </span>
+        )}
+        {!isApproved && approvalStatus === "denied" && (
+          <span className="rounded-full bg-[var(--status-error-bg)] px-2 py-0.5 text-xs text-[var(--status-error-text)]" title="The founder has denied access to their metrics">
+            Access denied
           </span>
         )}
       </div>

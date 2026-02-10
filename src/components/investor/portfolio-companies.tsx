@@ -96,7 +96,7 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
           )}
           {(filterStage || filterIndustry || filterModel) && (
             <button
-              className="h-9 rounded-md border border-border-default px-3 text-xs text-text-tertiary hover:bg-bg-elevated"
+              className="h-9 rounded-md border border-border-default px-3 text-xs text-text-tertiary hover:bg-bg-hover"
               onClick={() => { setFilterStage(""); setFilterIndustry(""); setFilterModel(""); }}
               type="button"
             >
@@ -109,7 +109,7 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
       {/* Company cards */}
       <div className="space-y-3">
         {filtered.map((company) => (
-          <div key={company.id} className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div key={company.id} className="rounded-xl border border-border-default card-surface p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <CompanyLogo
@@ -185,7 +185,7 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
       </div>
 
       {filtered.length === 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-4 text-center">
           <p className="text-sm text-text-tertiary">No companies match the selected filters.</p>
         </div>
       )}

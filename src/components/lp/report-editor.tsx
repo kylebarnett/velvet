@@ -526,7 +526,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
       if (!res.ok) throw new Error(json?.error ?? "Failed to save report.");
 
       resetInitialRef();
-      router.push("/lp-reports/reports");
+      router.push("/funds/lp-reports");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred.");
       setSaving(false);
@@ -615,7 +615,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         throw new Error(json?.error ?? "Failed to delete report.");
       }
 
-      router.push(`/lp-reports/${fund.id}?tab=reports`);
+      router.push(`/funds/${fund.id}?tab=reports`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred.");
       setDeleting(false);
@@ -687,7 +687,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
       {/* Back link */}
       <button
         type="button"
-        onClick={() => router.push(`/lp-reports/${fund.id}?tab=reports`)}
+        onClick={() => router.push(`/funds/${fund.id}?tab=reports`)}
         className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
@@ -794,7 +794,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           data-no-print
         >
           {/* Metadata */}
-          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="rounded-xl border border-border-default card-surface p-4">
             <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
               Report Details
             </h3>
@@ -836,7 +836,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           </div>
 
           {/* Report Theme */}
-          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="rounded-xl border border-border-default card-surface p-4">
             <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
               Report Theme
             </h3>
@@ -844,7 +844,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           </div>
 
           {/* Investment Selection */}
-          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="rounded-xl border border-border-default card-surface p-4">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-xs font-medium uppercase tracking-wider text-text-muted">
                 Investments ({selectedIds.size}/{investments.length})
@@ -905,7 +905,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
                               "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
                               hasMetricPage
                                 ? "border border-emerald-500/30 bg-emerald-500/10 text-[var(--status-success-text)]"
-                                : "border border-border-default text-text-muted hover:bg-bg-elevated hover:text-text-secondary",
+                                : "border border-border-default text-text-muted hover:bg-bg-hover hover:text-text-secondary",
                             )}
                           >
                             {isFetching ? (
@@ -948,7 +948,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           </div>
 
           {/* Live Performance KPIs */}
-          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="rounded-xl border border-border-default card-surface p-4">
             <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
               Live Performance
             </h3>
@@ -966,7 +966,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           </div>
 
           {/* Quarterly Summary - Rich Text */}
-          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="rounded-xl border border-border-default card-surface p-4">
             <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
               Quarterly Summary
             </h3>

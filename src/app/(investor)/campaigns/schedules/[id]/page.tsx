@@ -7,6 +7,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ScheduleRun } from "@/components/investor/schedule-run-history";
 import { getCadenceDescription } from "@/lib/schedules";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ScheduleDetailActions } from "./actions";
 
 const ScheduleRunHistory = dynamic(
@@ -20,7 +21,7 @@ const ScheduleRunHistory = dynamic(
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="rounded-xl border border-border-default bg-bg-elevated p-4"
+            className="rounded-xl border border-border-default card-surface p-4"
           >
             <div className="flex items-center justify-between">
               <div className="h-4 w-32 animate-pulse rounded bg-bg-hover" />
@@ -156,34 +157,32 @@ export default async function ScheduleDetailPage({
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[
+        { label: "Metric Requests", href: "/campaigns" },
+        { label: "Schedules", href: "/campaigns?tab=schedules" },
+        { label: schedule.name },
+      ]} />
+
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-3">
-          <Link
-            href="/campaigns?tab=schedules"
-            className="mt-1 flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-elevated"
-          >
-            <ArrowLeft className="h-4 w-4 text-text-muted" />
-          </Link>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl font-semibold tracking-tight">
-                {schedule.name}
-              </h1>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs ${
-                  schedule.is_active
-                    ? "bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
-                    : "bg-bg-hover text-text-secondary"
-                }`}
-              >
-                {schedule.is_active ? "Active" : "Paused"}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-text-tertiary">
-              Created {format(new Date(schedule.created_at), "MMM d, yyyy")}
-            </p>
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-semibold tracking-tight">
+              {schedule.name}
+            </h1>
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs ${
+                schedule.is_active
+                  ? "bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
+                  : "bg-bg-hover text-text-secondary"
+              }`}
+            >
+              {schedule.is_active ? "Active" : "Paused"}
+            </span>
           </div>
+          <p className="mt-1 text-sm text-text-tertiary">
+            Created {format(new Date(schedule.created_at), "MMM d, yyyy")}
+          </p>
         </div>
 
         <ScheduleDetailActions
@@ -197,7 +196,7 @@ export default async function ScheduleDetailPage({
       {/* Overview cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Cadence */}
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+        <div className="rounded-xl border border-border-default card-surface p-4">
           <div className="flex items-center gap-2 text-text-tertiary">
             <Calendar className="h-4 w-4" />
             <span className="text-xs">Cadence</span>
@@ -209,7 +208,7 @@ export default async function ScheduleDetailPage({
         </div>
 
         {/* Next run */}
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+        <div className="rounded-xl border border-border-default card-surface p-4">
           <div className="flex items-center gap-2 text-text-tertiary">
             <Clock className="h-4 w-4" />
             <span className="text-xs">Next Run</span>
@@ -231,7 +230,7 @@ export default async function ScheduleDetailPage({
         </div>
 
         {/* Companies */}
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+        <div className="rounded-xl border border-border-default card-surface p-4">
           <div className="flex items-center gap-2 text-text-tertiary">
             <Building2 className="h-4 w-4" />
             <span className="text-xs">Companies</span>
@@ -247,7 +246,7 @@ export default async function ScheduleDetailPage({
         </div>
 
         {/* Reminders */}
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+        <div className="rounded-xl border border-border-default card-surface p-4">
           <div className="flex items-center gap-2 text-text-tertiary">
             <Bell className="h-4 w-4" />
             <span className="text-xs">Reminders</span>
@@ -268,7 +267,7 @@ export default async function ScheduleDetailPage({
 
       {/* Template details */}
       {template && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-5">
+        <div className="rounded-xl border border-border-default card-surface p-4 sm:p-5">
           <h2 className="text-sm font-medium text-text-secondary">Template</h2>
           <div className="mt-2">
             <div className="font-medium">{template.name}</div>
@@ -302,7 +301,7 @@ export default async function ScheduleDetailPage({
 
       {/* Target companies */}
       {companies.length > 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-5">
+        <div className="rounded-xl border border-border-default card-surface p-4 sm:p-5">
           <h2 className="text-sm font-medium text-text-secondary">
             Target Companies ({companies.length})
           </h2>
@@ -311,7 +310,7 @@ export default async function ScheduleDetailPage({
               <Link
                 key={company.id}
                 href={`/dashboard/${company.id}`}
-                className="rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
+                className="rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
               >
                 {company.name}
               </Link>
@@ -327,7 +326,7 @@ export default async function ScheduleDetailPage({
       </div>
 
       {/* Configuration summary */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-5">
+      <div className="rounded-xl border border-border-default card-surface p-4 sm:p-5">
         <h2 className="text-sm font-medium text-text-secondary">Configuration</h2>
         <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
           <div className="flex justify-between">

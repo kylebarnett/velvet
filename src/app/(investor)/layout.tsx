@@ -45,18 +45,28 @@ export default async function InvestorLayout({
             children: [
               { href: "/dashboard", label: "Companies", icon: "building2" },
               { href: "/portfolio", label: "Contacts", icon: "users" },
-              { href: "/campaigns", label: "Campaigns", icon: "send" },
+              { href: "/campaigns", label: "Metric Requests", icon: "send" },
             ],
           },
-          { href: "/reports", label: "Reports", icon: "bar-chart-3", divider: true },
+          {
+            href: "/reports",
+            label: "Reports",
+            icon: "bar-chart-3",
+            divider: true,
+            children: [
+              { href: "/reports", label: "Summary", icon: "bar-chart-3" },
+              { href: "/reports/compare", label: "Compare", icon: "bar-chart-3" },
+              { href: "/reports/benchmarks", label: "Benchmarks", icon: "bar-chart-3" },
+            ],
+          },
           { href: "/documents", label: "Documents", icon: "file-text" },
           {
-            href: "/lp-reports",
+            href: "/funds",
             label: "Funds",
             icon: "landmark",
             children: [
-              { href: "/lp-reports", label: "Overview", icon: "landmark" },
-              { href: "/lp-reports/reports", label: "LP Reports", icon: "file-text" },
+              { href: "/funds", label: "Overview", icon: "landmark" },
+              { href: "/funds/lp-reports", label: "LP Reports", icon: "file-text" },
             ],
           },
           { href: "/team", label: "Team", icon: "user-plus" },

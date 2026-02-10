@@ -12,7 +12,7 @@ export default function RequestsLoading() {
         {[1, 2].map((i) => (
           <div
             key={i}
-            className="rounded-xl border border-border-default bg-bg-elevated p-4"
+            className="rounded-xl border border-border-default card-surface p-4"
           >
             <div className="h-3 w-24 animate-pulse rounded bg-bg-hover" />
             <div className="mt-3 h-7 w-12 animate-pulse rounded bg-bg-hover" />

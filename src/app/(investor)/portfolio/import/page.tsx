@@ -46,7 +46,7 @@ export default async function ImportPage() {
       <CsvImportForm />
 
       {/* CSV Format Help */}
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-6">
+      <div className="rounded-xl border border-border-default card-surface p-6">
         <h3 className="text-sm font-medium">CSV Format</h3>
         <p className="mt-2 text-sm text-text-tertiary">
           Your CSV file should include the following columns. Column names are flexible

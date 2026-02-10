@@ -92,7 +92,7 @@ export function ScheduleCard({
   const hasMoreMetrics = metrics.length > maxVisibleMetrics;
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-5">
+    <div className="rounded-xl border border-border-default card-surface p-4 sm:p-5">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">

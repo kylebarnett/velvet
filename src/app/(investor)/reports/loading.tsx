@@ -21,7 +21,7 @@ export default function ReportsLoading() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border border-border-default bg-bg-elevated p-4"
+            className="rounded-xl border border-border-default card-surface p-4"
           >
             <div className="h-3 w-20 animate-pulse rounded bg-bg-hover" />
             <div className="mt-2 h-7 w-28 animate-pulse rounded bg-bg-hover" />
@@ -31,7 +31,7 @@ export default function ReportsLoading() {
       </div>
 
       {/* Chart placeholder */}
-      <div className="h-64 animate-pulse rounded-xl border border-border-default bg-bg-elevated" />
+      <div className="h-64 animate-pulse rounded-xl border border-border-default card-surface" />
     </div>
   );
 }

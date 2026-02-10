@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Download, FileText, Search, X } from "lucide-react";
+import { Download, Eye, FileText, Search, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,10 +11,11 @@ import {
 } from "@/components/ui/select";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import {
-  DOCUMENT_TYPE_LABELS,
+  DOCUMENT_TYPE_SHORT_LABELS,
   DOCUMENT_TYPES,
   getDocumentTypeColor,
 } from "@/lib/utils/document-colors";
+import { DocumentPreviewModal } from "@/components/investor/document-preview-modal";
 
 type DateFilterValue = "all" | "7" | "30" | "90";
 
@@ -25,11 +26,10 @@ const DATE_FILTER_TABS: TabItem<DateFilterValue>[] = [
   { value: "90", label: "90d" },
 ];
 
-const TYPE_LABELS = DOCUMENT_TYPE_LABELS;
-
 type Document = {
   id: string;
   file_name: string;
+  file_path: string;
   file_type: string | null;
   file_size: number;
   document_type: string;
@@ -76,6 +76,9 @@ export default function DocumentsPage() {
   // Selection
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [downloading, setDownloading] = React.useState(false);
+
+  // Preview
+  const [previewDoc, setPreviewDoc] = React.useState<Document | null>(null);
 
   // Fetch companies for filter dropdown
   React.useEffect(() => {
@@ -370,7 +373,7 @@ export default function DocumentsPage() {
 
       {/* Loading skeleton */}
       {loading && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+        <div className="rounded-xl border border-border-default card-surface p-4">
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
               <div
@@ -390,7 +393,7 @@ export default function DocumentsPage() {
 
       {/* Documents table */}
       {!loading && filteredDocuments.length === 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
           <FileText className="mx-auto h-8 w-8 text-text-faint" />
           <p className="mt-2 text-sm text-text-tertiary">No documents found.</p>
           <p className="mt-1 text-xs text-text-tertiary">
@@ -400,6 +403,15 @@ export default function DocumentsPage() {
           </p>
         </div>
       )}
+
+      {/* Document Preview Modal */}
+      <DocumentPreviewModal
+        document={previewDoc}
+        onClose={() => setPreviewDoc(null)}
+        onDownload={(doc) => {
+          downloadSingle(doc as Document);
+        }}
+      />
 
       {!loading && filteredDocuments.length > 0 && (
         <>
@@ -419,15 +431,18 @@ export default function DocumentsPage() {
             {filteredDocuments.map((doc) => (
               <div
                 key={doc.id}
-                className="rounded-xl border border-border-default bg-bg-elevated p-4"
+                className="cursor-pointer rounded-xl border border-border-default card-surface p-4 active:bg-bg-hover"
+                onClick={() => setPreviewDoc(doc)}
               >
                 <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.has(doc.id)}
-                    onChange={() => toggleSelect(doc.id)}
-                    className="mt-1 h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
-                  />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(doc.id)}
+                      onChange={() => toggleSelect(doc.id)}
+                      className="mt-1 h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
+                    />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start gap-2">
                       <FileText className="h-4 w-4 shrink-0 text-text-muted mt-0.5" />
@@ -440,7 +455,7 @@ export default function DocumentsPage() {
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getDocumentTypeColor(doc.document_type)}`}>
-                        {TYPE_LABELS[doc.document_type] ?? doc.document_type}
+                        {DOCUMENT_TYPE_SHORT_LABELS[doc.document_type] ?? doc.document_type}
                       </span>
                       <span className="text-xs text-text-tertiary">{formatFileSize(doc.file_size)}</span>
                     </div>
@@ -448,22 +463,33 @@ export default function DocumentsPage() {
                       {doc.company?.name ?? "Unknown"} · {formatDate(doc.uploaded_at)}
                     </div>
                   </div>
-                  <button
-                    onClick={() => downloadSingle(doc)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
-                    type="button"
-                    title="Download"
-                    aria-label={`Download ${doc.file_name}`}
-                  >
-                    <Download className="h-4 w-4 text-text-muted" />
-                  </button>
+                  <div className="flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => setPreviewDoc(doc)}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                      type="button"
+                      title="Preview"
+                      aria-label={`Preview ${doc.file_name}`}
+                    >
+                      <Eye className="h-4 w-4 text-text-muted" />
+                    </button>
+                    <button
+                      onClick={() => downloadSingle(doc)}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                      type="button"
+                      title="Download"
+                      aria-label={`Download ${doc.file_name}`}
+                    >
+                      <Download className="h-4 w-4 text-text-muted" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden sm:block rounded-xl border border-border-default bg-bg-elevated">
+          <div className="hidden sm:block rounded-xl border border-border-default card-surface">
             {/* Table header */}
             <div className="flex items-center gap-4 border-b border-border-default px-4 py-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">
               <div className="w-6">
@@ -476,10 +502,10 @@ export default function DocumentsPage() {
               </div>
               <div className="flex-1 min-w-0">Name</div>
               <div className="w-32">Company</div>
-              <div className="w-28">Type</div>
+              <div className="w-36">Type</div>
               <div className="w-20">Size</div>
               <div className="w-24">Date</div>
-              <div className="w-10"></div>
+              <div className="w-20"></div>
             </div>
 
             {/* Table rows */}
@@ -487,9 +513,10 @@ export default function DocumentsPage() {
               {filteredDocuments.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center gap-4 px-4 py-3 hover:bg-bg-elevated"
+                  className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-bg-elevated"
+                  onClick={() => setPreviewDoc(doc)}
                 >
-                  <div className="w-6">
+                  <div className="w-6" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={selectedIds.has(doc.id)}
@@ -506,9 +533,9 @@ export default function DocumentsPage() {
                   <div className="w-32 truncate text-sm text-text-secondary">
                     {doc.company?.name ?? "Unknown"}
                   </div>
-                  <div className="w-28">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getDocumentTypeColor(doc.document_type)}`}>
-                      {TYPE_LABELS[doc.document_type] ?? doc.document_type}
+                  <div className="w-36">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${getDocumentTypeColor(doc.document_type)}`}>
+                      {DOCUMENT_TYPE_SHORT_LABELS[doc.document_type] ?? doc.document_type}
                     </span>
                   </div>
                   <div className="w-20 text-sm text-text-tertiary">
@@ -517,7 +544,16 @@ export default function DocumentsPage() {
                   <div className="w-24 text-sm text-text-tertiary">
                     {formatDate(doc.uploaded_at)}
                   </div>
-                  <div className="w-10">
+                  <div className="flex w-20 items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => setPreviewDoc(doc)}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                      type="button"
+                      title="Preview"
+                      aria-label={`Preview ${doc.file_name}`}
+                    >
+                      <Eye className="h-4 w-4 text-text-muted" />
+                    </button>
                     <button
                       onClick={() => downloadSingle(doc)}
                       className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"

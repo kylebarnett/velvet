@@ -152,7 +152,7 @@ function CompanyListRow({
   return (
     <Link
       href={`/dashboard/${company.id}`}
-      className="card-hover-lift flex items-center gap-4 rounded-xl border border-border-subtle bg-bg-raised px-5 py-3.5 hover:border-border-default"
+      className="card-hover-lift flex items-center gap-4 rounded-xl border border-border-subtle card-surface px-5 py-3.5 hover:border-border-default"
     >
       <CompanyLogoSmall name={company.name} logoUrl={company.logoUrl} />
 
@@ -314,7 +314,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
       </div>
 
       {filteredCompanies.length === 0 ? (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <p className="text-text-tertiary">
             {statusFilter !== "all"
               ? "No companies match your search and filter criteria."

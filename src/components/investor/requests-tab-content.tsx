@@ -300,7 +300,7 @@ export function RequestsTabContent({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
         <button
           onClick={() => setStatusFilter("")}
-          className={`rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 text-left hover:bg-bg-hover transition-colors ${
+          className={`rounded-xl border border-border-default card-surface p-3 sm:p-4 text-left hover:bg-bg-hover transition-colors ${
             statusFilter === "" ? "ring-1 ring-border-default" : ""
           }`}
           type="button"
@@ -310,7 +310,7 @@ export function RequestsTabContent({
         </button>
         <button
           onClick={() => setStatusFilter("pending")}
-          className={`rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 text-left hover:bg-bg-hover transition-colors ${
+          className={`rounded-xl border border-border-default card-surface p-3 sm:p-4 text-left hover:bg-bg-hover transition-colors ${
             statusFilter === "pending" ? "ring-1 ring-amber-500/50" : ""
           }`}
           type="button"
@@ -320,7 +320,7 @@ export function RequestsTabContent({
         </button>
         <button
           onClick={() => setStatusFilter("submitted")}
-          className={`rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 text-left hover:bg-bg-hover transition-colors ${
+          className={`rounded-xl border border-border-default card-surface p-3 sm:p-4 text-left hover:bg-bg-hover transition-colors ${
             statusFilter === "submitted" ? "ring-1 ring-emerald-500/50" : ""
           }`}
           type="button"
@@ -419,7 +419,7 @@ export function RequestsTabContent({
                 setCompanyFilter("");
                 setSearchInput("");
               }}
-              className="h-10 rounded-md border border-border-default px-3 text-sm text-text-tertiary hover:bg-bg-elevated"
+              className="h-10 rounded-md border border-border-default px-3 text-sm text-text-tertiary hover:bg-bg-hover"
               type="button"
             >
               Clear filters
@@ -436,7 +436,7 @@ export function RequestsTabContent({
           ))}
         </div>
       ) : requests.length === 0 && !statusFilter && !companyFilter && !debouncedSearch ? (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <div className="text-sm text-text-tertiary">No requests yet.</div>
           <div className="mt-2">
             <Link
@@ -448,7 +448,7 @@ export function RequestsTabContent({
           </div>
         </div>
       ) : requests.length === 0 ? (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <div className="text-sm text-text-tertiary">No requests match the selected filters.</div>
         </div>
       ) : (
@@ -471,7 +471,7 @@ export function RequestsTabContent({
               return (
                 <div
                   key={req.id}
-                  className="rounded-xl border border-border-default bg-bg-elevated p-4"
+                  className="rounded-xl border border-border-default card-surface p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
@@ -629,7 +629,7 @@ export function RequestsTabContent({
                   type="button"
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-hover disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -640,7 +640,7 @@ export function RequestsTabContent({
                   type="button"
                   onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                   disabled={page >= totalPages - 1}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-elevated disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-hover disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>

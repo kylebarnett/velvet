@@ -74,7 +74,7 @@ export function InvestmentTable({
   }
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated">
+    <div className="rounded-xl border border-border-default card-surface">
       <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
         <h3 className="text-sm font-medium text-text-primary">Investments</h3>
         <button

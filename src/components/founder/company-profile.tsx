@@ -150,7 +150,7 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
         </div>
       )}
 
-      <div className="rounded-xl border border-border-default bg-bg-elevated divide-y divide-border-subtle">
+      <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
         {/* Company Name (read-only) */}
         <div className="flex items-center justify-between px-5 py-4">
           <div className="flex items-center gap-3">
@@ -207,7 +207,7 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
                       setEditingWebsite(false);
                       setWebsiteInput(data.website ?? "");
                     }}
-                    className="flex h-9 items-center rounded-md border border-border-default px-3 text-sm text-text-tertiary hover:bg-bg-elevated"
+                    className="flex h-9 items-center rounded-md border border-border-default px-3 text-sm text-text-tertiary hover:bg-bg-hover"
                   >
                     Cancel
                   </button>

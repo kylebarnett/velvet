@@ -312,7 +312,7 @@ function EmptyMetricsState({
 
   if (pendingRequests.length > 0) {
     return (
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-6">
+      <div className="rounded-xl border border-border-default card-surface p-6">
         <div className="flex flex-col items-center text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--tag-blue-bg)]">
             <BarChart3 className="h-6 w-6 text-[var(--tag-blue-text)]" />
@@ -356,7 +356,7 @@ function EmptyMetricsState({
   }
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated p-6">
+    <div className="rounded-xl border border-border-default card-surface p-6">
       <div className="flex flex-col items-center text-center">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated">
           <Clock className="h-6 w-6 text-text-muted" />
@@ -571,7 +571,7 @@ export function FounderDashboardClient({
           return (
             <div
               key={widget.id}
-              className={`rounded-xl border border-border-default bg-bg-elevated p-3 sm:p-4 ${colSpanClass}`}
+              className={`rounded-xl border border-border-default card-surface p-3 sm:p-4 ${colSpanClass}`}
               style={{ minHeight: `${widget.h * 80}px` } as React.CSSProperties}
             >
               <DashboardWidget
@@ -589,7 +589,7 @@ export function FounderDashboardClient({
       </div>
 
       {widgets.length === 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <p className="text-text-tertiary">No widgets configured for this dashboard.</p>
           <p className="mt-2 text-sm text-text-muted">
             Click &quot;Edit Dashboard&quot; to add charts and metrics.

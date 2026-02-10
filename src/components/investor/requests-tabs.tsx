@@ -13,10 +13,16 @@ import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 type Tab = "campaigns" | "templates" | "schedules";
 
 const TABS: TabItem<Tab>[] = [
-  { value: "campaigns", label: "Campaigns" },
+  { value: "campaigns", label: "Requests" },
   { value: "templates", label: "Templates", dataOnboarding: "templates-tab" },
   { value: "schedules", label: "Schedules", dataOnboarding: "schedules-tab" },
 ];
+
+const TAB_DESCRIPTIONS: Record<Tab, string> = {
+  campaigns: "One-time or recurring metric requests sent to your portfolio companies.",
+  templates: "Reusable sets of metrics you can apply when creating new requests.",
+  schedules: "Automated recurring requests that run on a monthly, quarterly, or annual cadence.",
+};
 
 export function RequestsTabs() {
   const router = useRouter();
@@ -36,13 +42,13 @@ export function RequestsTabs() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1" data-onboarding="requests-title">
-          <h1 className="text-xl font-semibold tracking-tight">Campaigns</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Metric Requests</h1>
           <p className="text-sm text-text-tertiary">
-            Create and track metric collection campaigns across your portfolio.
+            Request metrics from portfolio companies. Use templates for reusable sets and schedules for recurring collection.
           </p>
         </div>
         <Link
@@ -64,6 +70,8 @@ export function RequestsTabs() {
         size="sm"
         showIcons={false}
       />
+
+      <p className="text-xs text-text-muted -mt-3">{TAB_DESCRIPTIONS[activeTab]}</p>
 
       {/* Tab content */}
       {activeTab === "campaigns" && <CampaignsTabContent />}

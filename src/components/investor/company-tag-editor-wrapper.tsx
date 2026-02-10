@@ -25,7 +25,7 @@ export function CompanyTagEditorWrapper({
   const hasTags = stage || industry || businessModel;
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+    <div className="rounded-xl border border-border-default card-surface p-4">
       <div className="flex items-center justify-between">
         <div className="text-sm font-medium">Company Tags</div>
         <button

@@ -120,7 +120,7 @@ export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) 
         }}
       />
 
-      <div className="tear-sheet-preview mx-auto max-w-2xl rounded-xl border border-border-default bg-bg-elevated p-6 print:border-none print:bg-white print:p-0 sm:p-8">
+      <div className="tear-sheet-preview mx-auto max-w-2xl rounded-xl border border-border-default card-surface p-6 print:border-none print:bg-white print:p-0 sm:p-8">
         {/* Header */}
         <div className="border-b border-border-default pb-5 print:border-gray-200">
           {tearSheet.companyName && (

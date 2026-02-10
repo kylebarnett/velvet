@@ -42,7 +42,7 @@ export class ErrorBoundary extends React.Component<
 
       return (
         <div className="flex items-center justify-center p-8">
-          <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+          <div className="w-full max-w-md rounded-xl border border-border-default card-surface p-6 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

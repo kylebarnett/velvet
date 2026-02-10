@@ -22,7 +22,7 @@ export default function Loading() {
         {/* Editor column */}
         <div className="space-y-4">
           {/* Metadata card */}
-          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="rounded-xl border border-border-default card-surface p-4">
             <div className="h-3 w-24 animate-pulse rounded bg-bg-hover" />
             <div className="mt-4 space-y-3">
               <div className="h-11 w-full animate-pulse rounded-md bg-bg-elevated" />
@@ -35,7 +35,7 @@ export default function Loading() {
           </div>
 
           {/* Investment selection card */}
-          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="rounded-xl border border-border-default card-surface p-4">
             <div className="h-3 w-32 animate-pulse rounded bg-bg-hover" />
             <div className="mt-4 space-y-2">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -49,7 +49,7 @@ export default function Loading() {
           </div>
 
           {/* KPI card */}
-          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="rounded-xl border border-border-default card-surface p-4">
             <div className="h-3 w-28 animate-pulse rounded bg-bg-hover" />
             <div className="mt-3 grid grid-cols-5 gap-2">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -62,14 +62,14 @@ export default function Loading() {
           </div>
 
           {/* Rich text card */}
-          <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+          <div className="rounded-xl border border-border-default card-surface p-4">
             <div className="h-3 w-32 animate-pulse rounded bg-bg-hover" />
             <div className="mt-3 h-24 w-full animate-pulse rounded-md bg-bg-elevated" />
           </div>
         </div>
 
         {/* Preview column */}
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6">
+        <div className="rounded-xl border border-border-default card-surface p-6">
           <div className="h-3 w-20 animate-pulse rounded bg-bg-hover" />
           <div className="mt-2 h-6 w-48 animate-pulse rounded bg-bg-elevated" />
           <div className="mt-1 h-4 w-32 animate-pulse rounded bg-bg-elevated" />

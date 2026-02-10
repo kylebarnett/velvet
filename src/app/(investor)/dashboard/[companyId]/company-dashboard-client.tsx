@@ -304,7 +304,7 @@ function MetricsTabContent({
 
   if (!hasMetrics) {
     return (
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+      <div className="rounded-xl border border-border-default card-surface p-6 text-center">
         <p className="text-text-tertiary">No metrics have been submitted for this company yet.</p>
         <p className="mt-2 text-sm text-text-muted">
           Metrics will appear here once the founder submits data.
@@ -389,7 +389,7 @@ function MetricsTabContent({
       </div>
 
       {widgets.length === 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <p className="text-text-tertiary">No widgets configured for this dashboard.</p>
           <p className="mt-2 text-sm text-text-muted">
             Click "Edit Dashboard" to add charts and metrics.

@@ -91,7 +91,7 @@ export function BenchmarkTable({
   }
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated">
+    <div className="rounded-xl border border-border-default card-surface">
       <div className="p-4 pb-2">
         <h3 className="text-sm font-medium text-text-primary">
           Company Rankings

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Download, FileText, Search, X } from "lucide-react";
+import { Download, Eye, FileText, Search, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,10 +11,11 @@ import {
 } from "@/components/ui/select";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import {
-  DOCUMENT_TYPE_LABELS,
+  DOCUMENT_TYPE_SHORT_LABELS,
   DOCUMENT_TYPES,
   getDocumentTypeColor,
 } from "@/lib/utils/document-colors";
+import { DocumentPreviewModal } from "./document-preview-modal";
 
 type DateFilterValue = "all" | "7" | "30" | "90";
 
@@ -25,11 +26,10 @@ const DATE_FILTER_TABS: TabItem<DateFilterValue>[] = [
   { value: "90", label: "90d" },
 ];
 
-const TYPE_LABELS = DOCUMENT_TYPE_LABELS;
-
 type Document = {
   id: string;
   file_name: string;
+  file_path: string;
   file_type: string | null;
   file_size: number;
   document_type: string;
@@ -70,6 +70,9 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
   // Selection
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [downloading, setDownloading] = React.useState(false);
+
+  // Preview
+  const [previewDoc, setPreviewDoc] = React.useState<Document | null>(null);
 
   // Fetch documents for this company
   React.useEffect(() => {
@@ -315,7 +318,7 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
 
       {/* Empty state */}
       {!loading && filteredDocuments.length === 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
           <FileText className="mx-auto h-8 w-8 text-text-faint" />
           <p className="mt-2 text-sm text-text-tertiary">No documents found.</p>
           <p className="mt-1 text-xs text-text-tertiary">
@@ -325,6 +328,15 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
           </p>
         </div>
       )}
+
+      {/* Document Preview Modal */}
+      <DocumentPreviewModal
+        document={previewDoc}
+        onClose={() => setPreviewDoc(null)}
+        onDownload={(doc) => {
+          downloadSingle(doc as Document);
+        }}
+      />
 
       {/* Documents list */}
       {!loading && filteredDocuments.length > 0 && (
@@ -343,14 +355,17 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
           {filteredDocuments.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center gap-3 rounded-lg border border-border-default bg-bg-elevated p-3 hover:bg-bg-elevated transition-colors"
+              className="flex items-center gap-3 rounded-lg border border-border-default bg-bg-elevated p-3 cursor-pointer hover:bg-bg-hover transition-colors"
+              onClick={() => setPreviewDoc(doc)}
             >
-              <input
-                type="checkbox"
-                checked={selectedIds.has(doc.id)}
-                onChange={() => toggleSelect(doc.id)}
-                className="h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
-              />
+              <div onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(doc.id)}
+                  onChange={() => toggleSelect(doc.id)}
+                  className="h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
+                />
+              </div>
               <FileText className="h-4 w-4 shrink-0 text-text-muted" />
               <div className="min-w-0 flex-1">
                 <p className="font-medium truncate text-sm">{doc.file_name}</p>
@@ -358,8 +373,8 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
                   <p className="text-xs text-text-tertiary truncate">{doc.description}</p>
                 )}
               </div>
-              <span className={`hidden sm:inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getDocumentTypeColor(doc.document_type)}`}>
-                {TYPE_LABELS[doc.document_type] ?? doc.document_type}
+              <span className={`hidden sm:inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${getDocumentTypeColor(doc.document_type)}`}>
+                {DOCUMENT_TYPE_SHORT_LABELS[doc.document_type] ?? doc.document_type}
               </span>
               <span className="hidden sm:inline shrink-0 text-xs text-text-tertiary">
                 {formatFileSize(doc.file_size)}
@@ -367,15 +382,26 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
               <span className="shrink-0 text-xs text-text-tertiary">
                 {formatDate(doc.uploaded_at)}
               </span>
-              <button
-                onClick={() => downloadSingle(doc)}
-                className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
-                type="button"
-                title="Download"
-                aria-label={`Download ${doc.file_name}`}
-              >
-                <Download className="h-4 w-4 text-text-muted" />
-              </button>
+              <div className="flex shrink-0 items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => setPreviewDoc(doc)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                  type="button"
+                  title="Preview"
+                  aria-label={`Preview ${doc.file_name}`}
+                >
+                  <Eye className="h-4 w-4 text-text-muted" />
+                </button>
+                <button
+                  onClick={() => downloadSingle(doc)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                  type="button"
+                  title="Download"
+                  aria-label={`Download ${doc.file_name}`}
+                >
+                  <Download className="h-4 w-4 text-text-muted" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

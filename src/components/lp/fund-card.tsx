@@ -57,7 +57,7 @@ export function FundCard({ fund }: FundCardProps) {
   }, [fund.id]);
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated p-5 transition-colors hover:bg-bg-hover">
+    <div className="rounded-xl border border-border-default card-surface p-5 transition-colors hover:bg-bg-hover">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-base font-medium text-text-primary">{fund.name}</h3>
@@ -83,7 +83,7 @@ export function FundCard({ fund }: FundCardProps) {
       </div>
 
       <Link
-        href={`/lp-reports/${fund.id}`}
+        href={`/funds/${fund.id}`}
         className="mt-4 flex h-9 items-center justify-center gap-1.5 rounded-md border border-border-default bg-bg-elevated text-sm text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
       >
         View Details
@@ -104,7 +104,7 @@ function KpiMini({
 }) {
   return (
     <div className="min-w-0 flex-1">
-      <p className="text-[10px] uppercase tracking-wider text-text-muted">{label}</p>
+      <p className="text-xs uppercase tracking-wider text-text-muted">{label}</p>
       <p
         className={cn(
           "mt-0.5 text-lg font-semibold",

@@ -387,7 +387,7 @@ export function UnifiedRequestWizard() {
         key={tmpl.id}
         type="button"
         onClick={() => selectTemplate(tmpl.id)}
-        className="w-full rounded-xl border border-border-default bg-bg-elevated p-4 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
+        className="w-full rounded-xl border border-border-default card-surface p-4 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
@@ -458,7 +458,7 @@ export function UnifiedRequestWizard() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="rounded-xl border border-border-default bg-bg-elevated p-4"
+              className="rounded-xl border border-border-default card-surface p-4"
             >
               <div className="h-4 w-40 animate-pulse rounded bg-bg-hover" />
               <div className="mt-2 flex gap-2">
@@ -585,7 +585,7 @@ export function UnifiedRequestWizard() {
           <button
             type="button"
             onClick={selectCustomMetric}
-            className="w-full rounded-xl border border-dashed border-border-default bg-bg-elevated p-4 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
+            className="w-full rounded-xl border border-dashed border-border-default card-surface p-4 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -663,7 +663,7 @@ export function UnifiedRequestWizard() {
 
           {/* Custom metric form */}
           {useCustomMetric && (
-            <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+            <div className="rounded-xl border border-border-default card-surface p-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
                   <label className="text-sm text-text-secondary" htmlFor="customMetricName">
@@ -711,7 +711,7 @@ export function UnifiedRequestWizard() {
             </div>
 
             {sortedCompanies.length === 0 ? (
-              <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+              <div className="rounded-xl border border-border-default card-surface p-6 text-center">
                 <p className="text-sm text-text-tertiary">No companies in your portfolio.</p>
                 <Link
                   href="/portfolio"
@@ -721,7 +721,7 @@ export function UnifiedRequestWizard() {
                 </Link>
               </div>
             ) : (
-              <div className="max-h-80 space-y-1 overflow-y-auto rounded-xl border border-border-default bg-bg-elevated p-2">
+              <div className="max-h-80 space-y-1 overflow-y-auto rounded-xl border border-border-default card-surface p-2">
                 {sortedCompanies.map((c) => (
                   <label
                     key={c.id}
@@ -802,7 +802,7 @@ export function UnifiedRequestWizard() {
               <button
                 type="button"
                 onClick={() => setFrequency("one-time")}
-                className="flex flex-col items-start rounded-xl border border-border-default bg-bg-elevated p-5 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
+                className="flex flex-col items-start rounded-xl border border-border-default card-surface p-5 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
                   <Send className="h-5 w-5 text-blue-300" />
@@ -817,7 +817,7 @@ export function UnifiedRequestWizard() {
                 <button
                   type="button"
                   onClick={() => setFrequency("recurring")}
-                  className="flex flex-col items-start rounded-xl border border-border-default bg-bg-elevated p-5 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
+                  className="flex flex-col items-start rounded-xl border border-border-default card-surface p-5 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--tag-violet-bg)]">
                     <CalendarClock className="h-5 w-5 text-[var(--tag-violet-text)]" />
@@ -834,7 +834,7 @@ export function UnifiedRequestWizard() {
           {/* One-time: period and due date */}
           {frequency === "one-time" && (
             <>
-              <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-5">
+              <div className="rounded-xl border border-border-default card-surface p-4 sm:p-5">
                 <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {/* Period type selector */}
                   <div className="grid gap-1.5 sm:gap-2">
@@ -979,7 +979,7 @@ export function UnifiedRequestWizard() {
           {/* Recurring: schedule configuration */}
           {frequency === "recurring" && (
             <>
-              <div className="rounded-xl border border-border-default bg-bg-elevated p-4 sm:p-6 space-y-6">
+              <div className="rounded-xl border border-border-default card-surface p-4 sm:p-6 space-y-6">
                 {/* Schedule name */}
                 <div>
                   <label className="text-sm font-medium text-text-secondary">
@@ -998,7 +998,7 @@ export function UnifiedRequestWizard() {
                 </div>
 
                 {/* All companies toggle */}
-                <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
+                <div className="flex items-start gap-3 rounded-xl border border-border-default card-surface p-4">
                   <input
                     type="checkbox"
                     id="all-companies-recurring"
@@ -1020,7 +1020,7 @@ export function UnifiedRequestWizard() {
                 </div>
 
                 {allCompanies && (
-                  <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
+                  <div className="flex items-start gap-3 rounded-xl border border-border-default card-surface p-4">
                     <input
                       type="checkbox"
                       id="include-future"
@@ -1074,7 +1074,7 @@ export function UnifiedRequestWizard() {
                 </div>
 
                 {/* Reminders */}
-                <div className="flex items-start gap-3 rounded-xl border border-border-default bg-bg-elevated p-4">
+                <div className="flex items-start gap-3 rounded-xl border border-border-default card-surface p-4">
                   <input
                     type="checkbox"
                     id="reminder-enabled"

@@ -74,7 +74,7 @@ export function AddContactForm() {
 
   return (
     <form
-      className="max-w-xl rounded-xl border border-border-default bg-bg-elevated p-5"
+      className="max-w-xl rounded-xl border border-border-default card-surface p-5"
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <div className="grid gap-4">

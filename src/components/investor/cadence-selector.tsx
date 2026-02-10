@@ -85,7 +85,7 @@ export function CadenceSelector({
                 className={`flex flex-col items-start rounded-xl border p-4 text-left transition-colors ${
                   isSelected
                     ? "border-border-default bg-bg-hover"
-                    : "border-border-default bg-bg-elevated hover:border-border-default hover:bg-bg-elevated"
+                    : "border-border-default bg-bg-elevated hover:border-border-default hover:bg-bg-hover"
                 }`}
               >
                 <div className="flex items-center gap-2">

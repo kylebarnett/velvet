@@ -53,7 +53,7 @@ export function CompanyMetricsClient({
       )}
 
       {isApproved && metricValues.length === 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+        <div className="rounded-xl border border-border-default card-surface p-4">
           <div className="text-sm text-text-tertiary">No metric data submitted yet.</div>
         </div>
       )}

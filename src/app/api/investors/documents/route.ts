@@ -24,6 +24,7 @@ export async function GET(req: Request) {
     .select(`
       id,
       file_name,
+      file_path,
       file_type,
       file_size,
       document_type,
@@ -90,6 +91,7 @@ export async function GET(req: Request) {
     return {
       id: doc.id,
       file_name: doc.file_name,
+      file_path: doc.file_path,
       file_type: doc.file_type,
       file_size: doc.file_size,
       document_type: doc.document_type,

@@ -46,7 +46,7 @@ export function SchedulesTabContent() {
         {[1, 2].map((i) => (
           <div
             key={i}
-            className="rounded-xl border border-border-default bg-bg-elevated p-4"
+            className="rounded-xl border border-border-default card-surface p-4"
           >
             <div className="space-y-3">
               <div className="h-5 w-40 animate-pulse rounded bg-bg-hover" />

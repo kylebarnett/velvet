@@ -147,7 +147,7 @@ export function TeamSettings({ currentUserId }: Props) {
   if (!org) {
     return (
       <div className="space-y-6">
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-8 text-center">
+        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
           <Users className="mx-auto h-10 w-10 text-text-faint" />
           <h3 className="mt-4 text-base font-semibold">Create a Team</h3>
           <p className="mt-2 text-sm text-text-tertiary max-w-sm mx-auto">

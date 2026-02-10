@@ -96,7 +96,7 @@ export function BenchmarkChart({
   if (companies.length === 0) {
     return (
       <div
-        className="flex items-center justify-center rounded-xl border border-border-default bg-bg-elevated text-text-muted"
+        className="flex items-center justify-center rounded-xl border border-border-default card-surface text-text-muted"
         style={{ height }}
       >
         No company data available
@@ -118,7 +118,7 @@ export function BenchmarkChart({
     }));
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+    <div className="rounded-xl border border-border-default card-surface p-4">
       <div className="mb-1 flex items-center justify-between">
         <h3 className="text-sm font-medium text-text-primary">
           {metricName} - Portfolio vs Benchmarks

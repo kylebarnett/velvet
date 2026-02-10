@@ -77,7 +77,7 @@ export function TearSheetCard({
 
   return (
     <>
-      <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+      <div className="rounded-xl border border-border-default card-surface p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1 space-y-1">
             <Link

@@ -277,7 +277,7 @@ export function TemplatesTabContent() {
     return (
       <div
         key={tmpl.id}
-        className={`rounded-xl border border-border-default bg-bg-elevated p-4 ${isHidden ? "opacity-60" : ""}`}
+        className={`rounded-xl border border-border-default card-surface p-4 ${isHidden ? "opacity-60" : ""}`}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
@@ -493,7 +493,7 @@ export function TemplatesTabContent() {
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="rounded-xl border border-border-default bg-bg-elevated p-4"
+                  className="rounded-xl border border-border-default card-surface p-4"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-3">
@@ -522,7 +522,7 @@ export function TemplatesTabContent() {
           </div>
           <div className="space-y-3">
             <div className="h-5 w-28 animate-pulse rounded bg-bg-hover" />
-            <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+            <div className="rounded-xl border border-border-default card-surface p-4">
               <div className="h-4 w-40 animate-pulse rounded bg-bg-hover" />
             </div>
           </div>
@@ -637,7 +637,7 @@ export function TemplatesTabContent() {
               )}
             </div>
             {userTemplates.length === 0 ? (
-              <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
+              <div className="rounded-xl border border-border-default card-surface p-6 text-center">
                 <div className="text-sm text-text-tertiary">
                   No custom templates yet.
                 </div>

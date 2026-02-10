@@ -332,7 +332,7 @@ export function CsvImportForm() {
 
       {/* Preview table */}
       {parsedData && parsedData.rows.length > 0 && (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+        <div className="rounded-xl border border-border-default card-surface p-4">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-sm font-medium">
               Preview ({parsedData.rows.length} {parsedData.rows.length === 1 ? "company" : "companies"})

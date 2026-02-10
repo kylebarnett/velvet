@@ -22,7 +22,7 @@ export function EmptyState({
     <div
       role="status"
       className={cn(
-        "flex flex-col items-center justify-center rounded-xl border border-border-default bg-bg-elevated p-6 text-center",
+        "flex flex-col items-center justify-center rounded-xl border border-border-default card-surface p-6 text-center",
         className
       )}
     >

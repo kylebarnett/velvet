@@ -40,7 +40,7 @@ export function FundPerformanceChart({
 
   if (totalInvested === 0 && totalCurrentValue === 0 && totalRealizedValue === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-xl border border-border-default bg-bg-elevated text-sm text-text-muted">
+      <div className="flex h-64 items-center justify-center rounded-xl border border-border-default card-surface text-sm text-text-muted">
         Add investments to see the performance chart.
       </div>
     );
@@ -53,7 +53,7 @@ export function FundPerformanceChart({
   ];
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+    <div className="rounded-xl border border-border-default card-surface p-4">
       <h3 className="mb-3 text-sm font-medium text-text-primary">Fund Value Breakdown</h3>
       <ResponsiveContainer width="100%" height={280}>
         <RechartsBarChart

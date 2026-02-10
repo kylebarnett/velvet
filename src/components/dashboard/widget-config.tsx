@@ -44,7 +44,7 @@ export function WidgetConfig({
   }
 
   return (
-    <div className="rounded-xl border border-border-default bg-bg-elevated p-4">
+    <div className="rounded-xl border border-border-default card-surface p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-medium text-text-secondary">Configure Widget</h3>
         <button

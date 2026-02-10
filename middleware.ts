@@ -9,7 +9,7 @@ const PROTECTED_PATHS = [
   "/documents",
   "/team",
   "/portal",
-  "/lp-reports",
+  "/funds",
   "/query",
   "/app",
 ];

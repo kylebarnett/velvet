@@ -23,7 +23,7 @@ const UnifiedRequestWizard = dynamic(
           ))}
         </div>
         {/* Form skeleton */}
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6">
+        <div className="rounded-xl border border-border-default card-surface p-6">
           <div className="space-y-4">
             <div className="h-5 w-40 animate-pulse rounded bg-bg-hover" />
             <div className="h-11 w-full animate-pulse rounded-md bg-bg-hover" />

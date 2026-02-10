@@ -135,6 +135,7 @@ export function AppShell({
   nav,
   company,
   user,
+  role,
   children,
   showTakeTour,
   onTakeTour,
@@ -143,6 +144,7 @@ export function AppShell({
   nav: NavItem[];
   company?: CompanyInfo;
   user?: UserInfo;
+  role?: "investor" | "founder";
   children: React.ReactNode;
   showTakeTour?: boolean;
   onTakeTour?: () => void;
@@ -310,7 +312,14 @@ export function AppShell({
             <p className="truncate text-sm font-medium text-text-primary">
               {user.fullName || user.email.split("@")[0]}
             </p>
-            <p className="truncate text-xs text-text-muted">{user.email}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="truncate text-xs text-text-muted">{user.email}</p>
+            </div>
+            {role && (
+              <span className="mt-0.5 inline-flex rounded-full bg-bg-hover px-2 py-0.5 text-[10px] font-medium capitalize text-text-tertiary">
+                {role}
+              </span>
+            )}
           </div>
           <button
             className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
@@ -357,7 +366,7 @@ export function AppShell({
                         "relative flex h-9 items-center justify-center rounded-md transition-colors",
                         "text-text-tertiary hover:bg-bg-raised hover:text-text-secondary",
                         (active || isChildActive) &&
-                          "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-text-primary",
+                          "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-accent",
                       )}
                       href={firstChild?.href ?? item.href}
                       onClick={() => setSidebarCollapsed(false)}
@@ -404,7 +413,7 @@ export function AppShell({
                             mobile ? "h-11" : "h-8",
                             "text-text-tertiary hover:bg-bg-raised hover:text-text-secondary",
                             childActive &&
-                              "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-text-secondary",
+                              "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-accent",
                           )}
                           href={child.href}
                           onClick={mobile ? () => setMobileMenuOpen(false) : undefined}
@@ -433,7 +442,7 @@ export function AppShell({
                 mobile && "h-12",
                 "text-text-tertiary hover:bg-bg-raised hover:text-text-secondary",
                 active &&
-                  "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-text-primary",
+                  "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-accent",
               )}
               href={item.href}
               onClick={mobile ? () => setMobileMenuOpen(false) : collapsed ? () => setSidebarCollapsed(false) : undefined}

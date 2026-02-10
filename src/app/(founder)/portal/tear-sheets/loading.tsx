@@ -11,7 +11,7 @@ export default function TearSheetsLoading() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border border-border-default bg-bg-elevated p-4"
+            className="rounded-xl border border-border-default card-surface p-4"
           >
             <div className="h-5 w-40 animate-pulse rounded bg-bg-hover" />
             <div className="mt-2 h-3 w-24 animate-pulse rounded bg-bg-elevated" />

@@ -4,6 +4,7 @@ import { Building2, CheckCircle2 } from "lucide-react";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { PortfolioCompletionCard } from "@/components/investor/portfolio-completion-card";
+import { GettingStartedChecklist } from "@/components/ui/getting-started-checklist";
 import { DashboardContent } from "./dashboard-content";
 
 export const dynamic = "force-dynamic";
@@ -372,7 +373,7 @@ export default async function InvestorDashboardPage() {
   const quarterLabel = `Q${currentQuarter} ${currentYear}`;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="space-y-1">
         <h1 className="text-xl sm:text-2xl font-semibold tracking-tight" data-onboarding="dashboard-title">Dashboard</h1>
         <p className="text-sm text-text-tertiary">
@@ -382,9 +383,9 @@ export default async function InvestorDashboardPage() {
 
       <div className="grid gap-5 md:grid-cols-3">
         {[
-          { label: "Portfolio companies", value: String(companies.length), href: "/portfolio", icon: Building2, gradient: "kpi-gradient-blue" },
-          { label: "Awaiting submission", value: String(awaitingCompanyCount), href: "/campaigns", icon: Building2, gradient: "kpi-gradient-amber" },
-          { label: "Submitted this week", value: String(submittedThisWeekCount), href: "/campaigns", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
+          { label: "Portfolio companies", subtitle: "Total companies you're tracking", value: String(companies.length), href: "/portfolio", icon: Building2, gradient: "kpi-gradient-blue" },
+          { label: "Awaiting submission", subtitle: "Companies with pending metric requests", value: String(awaitingCompanyCount), href: "/campaigns", icon: Building2, gradient: "kpi-gradient-amber" },
+          { label: "Submitted this week", subtitle: "Companies that submitted metrics in the last 7 days", value: String(submittedThisWeekCount), href: "/campaigns", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
         ].map((card) => (
           <Link
             key={card.label}
@@ -396,9 +397,45 @@ export default async function InvestorDashboardPage() {
               <card.icon className="h-4 w-4 text-text-faint" />
             </div>
             <div className="mt-3 text-3xl font-semibold tracking-tight">{card.value}</div>
+            <div className="mt-1 text-[11px] text-text-faint">{card.subtitle}</div>
           </Link>
         ))}
       </div>
+
+      {/* Getting Started Checklist */}
+      <GettingStartedChecklist
+        role="investor"
+        items={[
+          {
+            id: "import",
+            label: "Import portfolio companies",
+            description: "Add companies via CSV or manually to start tracking",
+            href: "/portfolio/import",
+            completed: companies.length > 0,
+          },
+          {
+            id: "founder-connected",
+            label: "Connect with a founder",
+            description: "Wait for a founder to join and approve your access",
+            href: "/dashboard",
+            completed: companies.some((c) => c.founder_id !== null),
+          },
+          {
+            id: "request",
+            label: "Send your first metric request",
+            description: "Ask portfolio companies to submit their metrics",
+            href: "/campaigns/new",
+            completed: awaitingCompanyCount > 0 || submittedThisWeekCount > 0 || completionTotal > 0,
+          },
+          {
+            id: "reports",
+            label: "View portfolio reports",
+            description: "Explore summary analytics, comparisons, and benchmarks",
+            href: "/reports",
+            completed: submittedThisWeekCount > 0,
+          },
+        ]}
+      />
 
       {/* Portfolio Completion */}
       {completionTotal > 0 && (
@@ -411,14 +448,31 @@ export default async function InvestorDashboardPage() {
       )}
 
       {companies.length === 0 ? (
-        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
-          <p className="text-text-tertiary">No companies in your portfolio yet.</p>
-          <Link
-            href="/portfolio/import"
-            className="mt-2 inline-block text-sm underline underline-offset-4 hover:text-text-primary"
-          >
-            Import contacts to get started
-          </Link>
+        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated">
+            <Building2 className="h-6 w-6 text-text-muted" />
+          </div>
+          <h3 className="text-sm font-medium text-text-primary">No companies in your portfolio yet</h3>
+          <p className="mx-auto mt-2 max-w-md text-sm text-text-tertiary">
+            Import your portfolio companies to start collecting metrics. Once imported, invite founders to connect and begin submitting data.
+          </p>
+          <div className="mt-5 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+            <Link
+              href="/portfolio/import"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+            >
+              Import contacts
+            </Link>
+          </div>
+          <div className="mx-auto mt-6 max-w-sm rounded-lg bg-bg-elevated/50 p-4">
+            <p className="text-xs font-medium text-text-secondary mb-2">How it works</p>
+            <ol className="space-y-1.5 text-left text-xs text-text-tertiary">
+              <li className="flex gap-2"><span className="shrink-0 font-medium text-text-secondary">1.</span> Import your portfolio companies via CSV or add them manually</li>
+              <li className="flex gap-2"><span className="shrink-0 font-medium text-text-secondary">2.</span> Founders receive an invitation to join and connect their company</li>
+              <li className="flex gap-2"><span className="shrink-0 font-medium text-text-secondary">3.</span> Send metric requests to collect data on the cadence you choose</li>
+              <li className="flex gap-2"><span className="shrink-0 font-medium text-text-secondary">4.</span> View reports and track performance across your portfolio</li>
+            </ol>
+          </div>
         </div>
       ) : (
         <DashboardContent companies={companies} latestMetrics={latestMetrics} secondaryMetrics={secondaryMetrics} lastSubmittedAt={lastSubmittedAt} />
