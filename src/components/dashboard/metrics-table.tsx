@@ -153,7 +153,7 @@ function CellTooltip({
   return createPortal(
     <div
       ref={tooltipRef}
-      className="z-[100] w-56 rounded-lg border border-white/10 bg-zinc-900 p-3 shadow-xl"
+      className="z-[100] w-56 rounded-lg border border-border-default bg-bg-secondary p-3 shadow-xl"
       style={style}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -166,14 +166,14 @@ function CellTooltip({
 
       <div className="space-y-2 text-xs">
         <div className="flex items-center justify-between">
-          <span className="text-white/60">Source</span>
+          <span className="text-text-tertiary">Source</span>
           <span
             className={`rounded px-1.5 py-0.5 font-medium ${
               isAi
-                ? "bg-violet-500/20 text-violet-300"
+                ? "bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)]"
                 : periodData.source === "override"
-                  ? "bg-amber-500/20 text-amber-300"
-                  : "bg-zinc-500/20 text-zinc-300"
+                  ? "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]"
+                  : "bg-bg-hover text-text-secondary"
             }`}
           >
             {formatSourceLabel(periodData.source)}
@@ -182,8 +182,8 @@ function CellTooltip({
 
         {isAi && periodData.aiConfidence != null && (
           <div className="flex items-center justify-between">
-            <span className="text-white/60">Confidence</span>
-            <span className="text-white/80">
+            <span className="text-text-tertiary">Confidence</span>
+            <span className="text-text-secondary">
               {Math.round(periodData.aiConfidence * 100)}%
             </span>
           </div>
@@ -191,8 +191,8 @@ function CellTooltip({
 
         {displayDate && (
           <div className="flex items-center justify-between">
-            <span className="text-white/60">Last updated</span>
-            <span className="text-white/80">{formatDate(displayDate)}</span>
+            <span className="text-text-tertiary">Last updated</span>
+            <span className="text-text-secondary">{formatDate(displayDate)}</span>
           </div>
         )}
 
@@ -202,7 +202,7 @@ function CellTooltip({
             e.stopPropagation();
             onViewDetails();
           }}
-          className="mt-1 w-full rounded-md border border-white/10 bg-white/5 px-2 py-1.5 text-center text-xs font-medium text-white/80 hover:bg-white/10"
+          className="mt-1 w-full rounded-md border border-border-default bg-bg-elevated px-2 py-1.5 text-center text-xs font-medium text-text-secondary hover:bg-bg-hover"
         >
           View details
         </button>
@@ -276,13 +276,13 @@ function SortableMetricRow({
     <tr
       ref={setNodeRef}
       style={style}
-      className={`group border-b border-white/[0.04] transition-colors ${isDragging ? "bg-white/5" : "hover:bg-white/[0.02]"}`}
+      className={`group border-b border-border-subtle transition-colors ${isDragging ? "bg-bg-elevated" : "hover:bg-bg-raised"}`}
     >
       {isReorderMode && (
-        <td className="sticky left-0 z-10 w-8 bg-[var(--table-bg,#09090b)] py-2.5">
+        <td className="sticky left-0 z-10 w-8 bg-[var(--table-bg)] py-3 pl-2">
           <button
             type="button"
-            className="flex h-6 w-6 cursor-grab items-center justify-center rounded text-white/40 hover:bg-white/10 hover:text-white/60 active:cursor-grabbing"
+            className="flex h-6 w-6 cursor-grab items-center justify-center rounded text-text-muted hover:bg-bg-hover hover:text-text-tertiary active:cursor-grabbing"
             {...attributes}
             {...listeners}
           >
@@ -291,19 +291,19 @@ function SortableMetricRow({
         </td>
       )}
       <td
-        className={`sticky ${isReorderMode ? "left-8" : "left-0"} z-10 overflow-hidden bg-[var(--table-bg,#09090b)] py-2.5 pr-4`}
+        className={`sticky ${isReorderMode ? "left-8" : "left-0"} z-10 overflow-hidden bg-[var(--table-bg)] py-3 pl-3 pr-4`}
         style={{ boxShadow: "4px 0 6px -4px rgba(0,0,0,0.2)" }}
       >
-        <span className="inline-flex max-w-full items-center gap-1.5 text-white/80" title={metric.metricName}>
+        <span className="inline-flex max-w-full items-center gap-1.5 text-text-secondary" title={metric.metricName}>
           {isAiExtracted && (
-            <Sparkles className="h-3.5 w-3.5 shrink-0 text-violet-400" />
+            <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--tag-violet-text)]" />
           )}
           <span className="truncate">{metric.metricName}</span>
           <button
             ref={infoBtnRef}
             type="button"
             onClick={handleInfoClick}
-            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-white/25 hover:text-white/50"
+            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-text-faint hover:text-text-muted"
           >
             <Info className="h-3 w-3" />
           </button>
@@ -321,19 +321,19 @@ function SortableMetricRow({
         // Color-coded cell background based on source
         const cellBgColor =
           periodData?.source === "ai_extracted"
-            ? "bg-violet-500/10"
+            ? "bg-[var(--tag-violet-bg)]"
             : periodData?.source === "override"
-              ? "bg-amber-500/10"
+              ? "bg-[var(--tag-amber-bg)]"
               : "";
 
         return (
           <td
             key={period}
-            className={`overflow-hidden px-3 py-2.5 text-right font-mono text-[13px] ${cellBgColor} ${
+            className={`overflow-hidden px-3 py-3 text-right font-mono text-[13px] ${cellBgColor} ${
               hasData
-                ? "cursor-default rounded transition-colors hover:bg-white/[0.06]"
+                ? "cursor-default rounded transition-colors hover:bg-bg-elevated"
                 : ""
-            } ${isHovered ? "bg-white/[0.06]" : ""}`}
+            } ${isHovered ? "bg-bg-elevated" : ""}`}
             onMouseEnter={
               hasData && !isReorderMode
                 ? (e) =>
@@ -365,11 +365,11 @@ function SortableMetricRow({
 
         return (
           <td
-            className="sticky right-0 z-10 overflow-hidden bg-[var(--table-bg,#09090b)] py-2.5 px-2 text-right font-mono text-[13px]"
+            className="sticky right-0 z-10 overflow-hidden bg-[var(--table-bg)] py-3 px-3 text-right font-mono text-[13px]"
             style={{ boxShadow: "-4px 0 6px -4px rgba(0,0,0,0.2)" }}
           >
             {total !== null ? (
-              <span className="block truncate whitespace-nowrap text-white/90" title={`${aggSymbol} ${aggregationType === "sum" ? "Sum" : "Latest"}: ${formatValue(total, metric.metricName)}`}>
+              <span className="block truncate whitespace-nowrap text-text-primary" title={`${aggSymbol} ${aggregationType === "sum" ? "Sum" : "Latest"}: ${formatValue(total, metric.metricName)}`}>
                 {formatValue(total, metric.metricName)}
               </span>
             ) : (
@@ -400,7 +400,7 @@ function TotalColumnTooltip({ periodType, periodsVisible }: { periodType: string
       <button
         ref={buttonRef}
         type="button"
-        className="text-white/40 hover:text-white/60"
+        className="text-text-muted hover:text-text-tertiary"
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
         onClick={() => setIsOpen(!isOpen)}
@@ -409,18 +409,18 @@ function TotalColumnTooltip({ periodType, periodsVisible }: { periodType: string
       </button>
       {isOpen && pos && createPortal(
         <div
-          className="fixed z-[100] w-64 rounded-lg border border-white/10 bg-zinc-900 p-3 text-xs shadow-xl"
+          className="fixed z-[100] w-64 rounded-lg border border-border-default bg-bg-secondary p-3 text-xs shadow-xl"
           style={{ top: pos.top, right: pos.right }}
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
         >
-          <p className="font-medium text-white/90">Total</p>
-          <p className="mt-1 text-white/60">
+          <p className="font-medium text-text-primary">Total</p>
+          <p className="mt-1 text-text-tertiary">
             Calculated across the {periodsVisible} visible {periodLabel}. Updates as you scroll.
           </p>
-          <div className="mt-2 space-y-1.5 border-t border-white/10 pt-2 text-white/60">
-            <p><span className="text-white/80">Σ Flow metrics</span> (Revenue, Expenses) are summed.</p>
-            <p><span className="text-white/80">● Point-in-time metrics</span> (ARR, Burn Rate) show the most recent value.</p>
+          <div className="mt-2 space-y-1.5 border-t border-border-default pt-2 text-text-tertiary">
+            <p><span className="text-text-secondary">Σ Flow metrics</span> (Revenue, Expenses) are summed.</p>
+            <p><span className="text-text-secondary">● Point-in-time metrics</span> (ARR, Burn Rate) show the most recent value.</p>
           </div>
         </div>,
         document.body
@@ -475,7 +475,6 @@ export function MetricsTable({
   const [savedOrder, setSavedOrder] = useState<string[] | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isOverTooltipRef = useRef(false);
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const justDraggedRef = useRef(false); // Track if we just completed a drag
   const scrollRef = useRef<HTMLDivElement>(null);
   const [periodColWidth, setPeriodColWidth] = useState<number | null>(null);
@@ -483,7 +482,7 @@ export function MetricsTable({
   const periodHeaderRefs = useRef<Map<string, HTMLTableCellElement>>(new Map());
 
   // Resizable metric column
-  const DEFAULT_METRIC_COL_WIDTH = 170;
+  const DEFAULT_METRIC_COL_WIDTH = 200;
   const MIN_METRIC_COL_WIDTH = 120;
   const MAX_METRIC_COL_WIDTH = 400;
   const [metricColWidth, setMetricColWidth] = useState(DEFAULT_METRIC_COL_WIDTH);
@@ -689,36 +688,17 @@ export function MetricsTable({
     })
   );
 
-  // Save order to API (debounced)
+  // Save order to API immediately (no debounce — drag-end fires once per reorder)
   const saveOrderToApi = useCallback((order: string[]) => {
     if (!storageKey) return;
 
-    // Clear any pending save
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    // Debounce the save
-    saveTimeoutRef.current = setTimeout(() => {
-      const prefKey = getPreferenceKey(storageKey);
-      fetch("/api/user/preferences", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: prefKey, value: order }),
-      }).catch(() => {
-        // Silently fail - the order is still saved in local state
-      });
-    }, 500);
+    const prefKey = getPreferenceKey(storageKey);
+    fetch("/api/user/preferences", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: prefKey, value: order }),
+    }).catch(() => {});
   }, [storageKey]);
-
-  // Cleanup debounce timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
@@ -880,14 +860,14 @@ export function MetricsTable({
   if ((savedOrder === null || !metricColLoaded) && storageKey) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-border-default border-t-text-tertiary" />
       </div>
     );
   }
 
   if (!displayData.length) {
     return (
-      <div className="flex h-full items-center justify-center text-white/60">
+      <div className="flex h-full items-center justify-center text-text-tertiary">
         No data available
       </div>
     );
@@ -922,15 +902,15 @@ export function MetricsTable({
   return (
     <div className="flex h-full flex-col">
       {title && (
-        <h3 className="mb-3 text-sm font-medium text-white/80">{title}</h3>
+        <h3 className="mb-3 text-sm font-medium text-text-secondary">{title}</h3>
       )}
 
       {/* Source summary */}
       {sourceCounts.total > 0 && (
         <div className="mb-3">
-          <div className="flex items-center gap-4 text-xs text-white/60">
+          <div className="flex items-center gap-4 text-xs text-text-tertiary">
             {sourceCounts.ai > 0 && (
-              <span className="flex items-center gap-1.5 text-violet-300">
+              <span className="flex items-center gap-1.5 text-[var(--tag-violet-text)]">
                 <Sparkles className="h-3 w-3" />
                 {sourceCounts.ai} AI-extracted
               </span>
@@ -942,22 +922,22 @@ export function MetricsTable({
               </span>
             )}
             {sourceCounts.override > 0 && (
-              <span className="flex items-center gap-1.5 text-amber-300">
+              <span className="flex items-center gap-1.5 text-[var(--tag-amber-text)]">
                 <RotateCcw className="h-3 w-3" />
                 {sourceCounts.override} Override
               </span>
             )}
-            <span className="ml-auto text-white/60">
+            <span className="ml-auto text-text-tertiary">
               {sourceCounts.total} values
             </span>
           </div>
 
           {/* Segmented progress bar */}
-          <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/5">
+          <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-bg-elevated">
             <div className="flex h-full">
               {sourceCounts.ai > 0 && (
                 <div
-                  className="bg-violet-500/60"
+                  className="bg-[var(--tag-violet-text)]"
                   style={{
                     width: `${(sourceCounts.ai / sourceCounts.total) * 100}%`,
                   }}
@@ -965,7 +945,7 @@ export function MetricsTable({
               )}
               {sourceCounts.manual > 0 && (
                 <div
-                  className="bg-white/30"
+                  className="bg-text-faint"
                   style={{
                     width: `${(sourceCounts.manual / sourceCounts.total) * 100}%`,
                   }}
@@ -973,7 +953,7 @@ export function MetricsTable({
               )}
               {sourceCounts.override > 0 && (
                 <div
-                  className="bg-amber-500/60"
+                  className="bg-[var(--tag-amber-text)]"
                   style={{
                     width: `${(sourceCounts.override / sourceCounts.total) * 100}%`,
                   }}
@@ -986,7 +966,7 @@ export function MetricsTable({
 
       {/* Toolbar */}
       <div className="mb-3 flex items-center gap-3">
-        <div className="text-xs text-white/60">
+        <div className="text-xs text-text-tertiary">
           {sortedPeriods.length} period{sortedPeriods.length !== 1 ? "s" : ""}
         </div>
         {allowReorder && (
@@ -995,8 +975,8 @@ export function MetricsTable({
             onClick={() => setIsReorderMode(!isReorderMode)}
             className={`flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs transition-colors ${
               isReorderMode
-                ? "border-blue-500/50 bg-blue-500/20 text-blue-300"
-                : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
+                ? "border-[var(--tag-blue-text)] bg-[var(--tag-blue-bg)] text-[var(--tag-blue-text)]"
+                : "border-border-default bg-bg-elevated text-text-tertiary hover:bg-bg-hover"
             }`}
             title={isReorderMode ? "Exit reorder mode" : "Reorder metrics"}
           >
@@ -1036,12 +1016,12 @@ export function MetricsTable({
                 {showTotals && <col style={{ width: TOTAL_COL_WIDTH }} />}
               </colgroup>
               <thead>
-                <tr className="border-b border-white/[0.06]">
+                <tr className="border-b border-border-subtle">
                   {isReorderMode && (
-                    <th className="sticky left-0 z-10 w-8 bg-[var(--table-bg,#09090b)] pb-2.5" />
+                    <th className="sticky left-0 z-10 w-8 bg-[var(--table-bg)] py-2.5 pl-2" />
                   )}
                   <th
-                    className={`group/header relative sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-[var(--table-bg,#09090b)] pb-2.5 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider text-white/40`}
+                    className={`group/header relative sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-[var(--table-bg)] py-2.5 pl-3 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider text-text-muted`}
                     style={{ boxShadow: "4px 0 6px -4px rgba(0,0,0,0.2)" }}
                   >
                     Metric
@@ -1050,7 +1030,7 @@ export function MetricsTable({
                       onMouseDown={handleResizeStart}
                       className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize opacity-0 transition-opacity group-hover/header:opacity-100 hover:!opacity-100"
                     >
-                      <div className="absolute right-0 top-0 bottom-0 w-px bg-white/20" />
+                      <div className="absolute right-0 top-0 bottom-0 w-px bg-border-default" />
                     </div>
                   </th>
                   {displayPeriods.map((period) => (
@@ -1067,7 +1047,7 @@ export function MetricsTable({
                           periodHeaderRefs.current.delete(period);
                         }
                       }}
-                      className="overflow-hidden px-3 pb-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-white/40"
+                      className="overflow-hidden px-3 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-text-muted"
                     >
                       <span className="block truncate whitespace-nowrap">
                         {formatPeriod(period, displayData[0]?.periodType ?? "quarterly")}
@@ -1076,7 +1056,7 @@ export function MetricsTable({
                   ))}
                   {showTotals && (
                     <th
-                      className="sticky right-0 z-10 bg-[var(--table-bg,#09090b)] pb-2.5 px-2 text-right text-[11px] font-semibold uppercase tracking-wider text-white/40"
+                      className="sticky right-0 z-10 bg-[var(--table-bg)] py-2.5 px-3 text-right text-[11px] font-semibold uppercase tracking-wider text-text-muted"
                       style={{ boxShadow: "-4px 0 6px -4px rgba(0,0,0,0.2)" }}
                     >
                       <span className="inline-flex items-center justify-end gap-1">

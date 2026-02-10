@@ -6,6 +6,7 @@ import { LayoutGrid, List, TrendingUp, TrendingDown, Minus } from "lucide-react"
 import { CompanyCard } from "@/components/investor/company-card";
 import { CompanySearch } from "@/components/investor/company-search";
 import { TileSettingsMenu } from "@/components/investor/tile-settings-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
 
 type Company = {
@@ -213,14 +214,37 @@ function CompanyListRow({
 export function DashboardContent({ companies, latestMetrics, secondaryMetrics = {}, lastSubmittedAt = {} }: DashboardContentProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [viewMode, setViewMode] = React.useState<ViewMode>("grid");
+  const [statusFilter, setStatusFilter] = React.useState<string>("all");
 
-  // Filter companies based on search query
+  const statusGroups = React.useMemo(() => {
+    const groups = new Set<string>();
+    for (const c of companies) {
+      if (["auto_approved", "approved"].includes(c.approvalStatus)) groups.add("approved");
+      else if (c.approvalStatus === "pending") groups.add("pending");
+      else if (c.approvalStatus === "denied") groups.add("denied");
+    }
+    return groups;
+  }, [companies]);
+
+  const showStatusFilter = statusGroups.size > 1;
+
   const filteredCompanies = React.useMemo(() => {
-    if (!searchQuery.trim()) return companies;
+    let filtered = companies;
 
-    const query = searchQuery.toLowerCase();
-    return companies.filter((company) => company.name.toLowerCase().includes(query));
-  }, [companies, searchQuery]);
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((c) => {
+        if (statusFilter === "approved") return ["auto_approved", "approved"].includes(c.approvalStatus);
+        return c.approvalStatus === statusFilter;
+      });
+    }
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((c) => c.name.toLowerCase().includes(query));
+    }
+
+    return filtered;
+  }, [companies, searchQuery, statusFilter]);
 
   return (
     <div className="space-y-5">
@@ -233,6 +257,19 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
           />
         </div>
         <div className="flex items-center justify-between gap-3 sm:justify-end">
+          {showStatusFilter && (
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger size="sm" className="w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="denied">Denied</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
           <div className="rounded-full bg-bg-elevated px-2.5 py-1 text-xs text-text-tertiary">
             {filteredCompanies.length} of {companies.length}
           </div>
@@ -278,7 +315,11 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
 
       {filteredCompanies.length === 0 ? (
         <div className="rounded-xl border border-border-default bg-bg-elevated p-6 text-center">
-          <p className="text-text-tertiary">No companies match your search.</p>
+          <p className="text-text-tertiary">
+            {statusFilter !== "all"
+              ? "No companies match your search and filter criteria."
+              : "No companies match your search."}
+          </p>
         </div>
       ) : viewMode === "grid" ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
