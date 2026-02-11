@@ -273,6 +273,29 @@ export type MetricValueType = "currency" | "percent" | "number" | "ratio" | "tim
 export function inferMetricValueType(metricName: string): MetricValueType {
   const lower = metricName.toLowerCase();
 
+  // Currency metrics (check before percentage — "Burn Rate" is currency, not %)
+  if (
+    lower.includes("revenue") ||
+    lower.includes("mrr") ||
+    lower.includes("arr") ||
+    lower.includes("cac") ||
+    lower.includes("ltv") ||
+    lower.includes("burn") ||
+    lower.includes("cost") ||
+    lower.includes("expense") ||
+    lower.includes("gmv") ||
+    lower.includes("aov") ||
+    lower.includes("arpu") ||
+    lower.includes("spend") ||
+    lower.includes("income") ||
+    lower.includes("cogs") ||
+    lower.includes("opex") ||
+    lower.includes("salary") ||
+    lower.includes("payroll")
+  ) {
+    return "currency";
+  }
+
   // Percentage metrics
   if (
     lower.includes("rate") ||
@@ -298,29 +321,6 @@ export function inferMetricValueType(metricName: string): MetricValueType {
     lower.includes("processing time")
   ) {
     return "time";
-  }
-
-  // Currency metrics
-  if (
-    lower.includes("revenue") ||
-    lower.includes("mrr") ||
-    lower.includes("arr") ||
-    lower.includes("cac") ||
-    lower.includes("ltv") ||
-    lower.includes("burn") ||
-    lower.includes("cost") ||
-    lower.includes("expense") ||
-    lower.includes("gmv") ||
-    lower.includes("aov") ||
-    lower.includes("arpu") ||
-    lower.includes("spend") ||
-    lower.includes("income") ||
-    lower.includes("cogs") ||
-    lower.includes("opex") ||
-    lower.includes("salary") ||
-    lower.includes("payroll")
-  ) {
-    return "currency";
   }
 
   return "number";

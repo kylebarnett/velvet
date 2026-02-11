@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Inbox, CheckCircle2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatPeriod } from "@/components/charts/types";
@@ -206,19 +207,31 @@ export function NotificationList({
 
   if (displayRequests.length === 0) {
     return (
-      <EmptyState
-        icon={mode === "completed" ? CheckCircle2 : Inbox}
-        title={
-          mode === "completed"
-            ? "No completed submissions yet"
-            : "No pending metric requests"
-        }
-        description={
-          mode === "completed"
-            ? "Completed submissions will appear here after you submit metrics. You can also submit metrics proactively from your dashboard."
-            : "You're all caught up! When investors request metrics from your company, they'll appear here grouped by period. You can also submit metrics proactively from your dashboard."
-        }
-      />
+      <div className="space-y-3">
+        <EmptyState
+          icon={mode === "completed" ? CheckCircle2 : Inbox}
+          title={
+            mode === "completed"
+              ? "No completed submissions yet"
+              : "No pending metric requests"
+          }
+          description={
+            mode === "completed"
+              ? "Completed submissions will appear here after you submit metrics. You can also submit metrics proactively from your dashboard."
+              : "You're all caught up! When investors request metrics from your company, they'll appear here grouped by period. You can also submit metrics proactively from your dashboard."
+          }
+        />
+        {mode === "pending" && (
+          <div className="text-center">
+            <Link
+              href="/portal/historical-upload"
+              className="text-sm text-text-tertiary hover:text-text-secondary underline underline-offset-2"
+            >
+              Import historical metrics
+            </Link>
+          </div>
+        )}
+      </div>
     );
   }
 

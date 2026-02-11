@@ -44,17 +44,7 @@ function formatValue(value: number | null, metricName?: string): string {
 
   const lowerName = metricName?.toLowerCase() ?? "";
 
-  // Percentage metrics
-  if (
-    lowerName.includes("rate") ||
-    lowerName.includes("margin") ||
-    lowerName.includes("retention") ||
-    lowerName.includes("churn")
-  ) {
-    return `${value.toFixed(1)}%`;
-  }
-
-  // Currency/revenue metrics
+  // Currency metrics (check before percentage — "Burn Rate" is currency, not %)
   if (
     lowerName.includes("revenue") ||
     lowerName.includes("mrr") ||
@@ -70,6 +60,16 @@ function formatValue(value: number | null, metricName?: string): string {
       return `$${(value / 1_000).toFixed(0)}K`;
     }
     return `$${value.toFixed(0)}`;
+  }
+
+  // Percentage metrics
+  if (
+    lowerName.includes("rate") ||
+    lowerName.includes("margin") ||
+    lowerName.includes("retention") ||
+    lowerName.includes("churn")
+  ) {
+    return `${value.toFixed(1)}%`;
   }
 
   // Large numbers
@@ -232,8 +232,16 @@ export function CompanyCard({
       )}
 
       {!hasAnyMetric && hasFounder && isApproved && (
-        <div className="mt-auto flex items-center border-t border-border-subtle pt-4">
+        <div className="mt-auto border-t border-border-subtle pt-4">
           <span className="text-xs text-text-muted">No metrics submitted yet</span>
+          <span
+            className="mt-1 block text-xs text-text-tertiary hover:text-text-secondary"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Link href="/historical-upload" className="underline underline-offset-2">
+              Import historical data
+            </Link>
+          </span>
         </div>
       )}
 

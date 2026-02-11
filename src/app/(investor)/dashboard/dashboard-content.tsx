@@ -43,15 +43,7 @@ function formatValue(value: number | null, metricName?: string): string {
 
   const lowerName = metricName?.toLowerCase() ?? "";
 
-  if (
-    lowerName.includes("rate") ||
-    lowerName.includes("margin") ||
-    lowerName.includes("retention") ||
-    lowerName.includes("churn")
-  ) {
-    return `${value.toFixed(1)}%`;
-  }
-
+  // Currency metrics (check before percentage — "Burn Rate" is currency, not %)
   if (
     lowerName.includes("revenue") ||
     lowerName.includes("mrr") ||
@@ -67,6 +59,16 @@ function formatValue(value: number | null, metricName?: string): string {
       return `$${(value / 1_000).toFixed(0)}K`;
     }
     return `$${value.toFixed(0)}`;
+  }
+
+  // Percentage metrics
+  if (
+    lowerName.includes("rate") ||
+    lowerName.includes("margin") ||
+    lowerName.includes("retention") ||
+    lowerName.includes("churn")
+  ) {
+    return `${value.toFixed(1)}%`;
   }
 
   if (Math.abs(value) >= 1_000_000) {

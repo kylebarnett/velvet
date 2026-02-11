@@ -45,18 +45,7 @@ export function formatValue(value: number | null | undefined, metricName?: strin
 
   const lowerName = metricName?.toLowerCase() ?? "";
 
-  // Percentage metrics
-  if (
-    lowerName.includes("rate") ||
-    lowerName.includes("margin") ||
-    lowerName.includes("retention") ||
-    lowerName.includes("churn") ||
-    lowerName.includes("conversion")
-  ) {
-    return `${formatWithCommas(value)}%`;
-  }
-
-  // Currency/revenue metrics - show full value with $
+  // Currency metrics (check before percentage — "Burn Rate" is currency, not %)
   if (
     lowerName.includes("revenue") ||
     lowerName.includes("mrr") ||
@@ -71,6 +60,17 @@ export function formatValue(value: number | null | undefined, metricName?: strin
     lowerName.includes("arpu")
   ) {
     return `$${formatWithCommas(value)}`;
+  }
+
+  // Percentage metrics
+  if (
+    lowerName.includes("rate") ||
+    lowerName.includes("margin") ||
+    lowerName.includes("retention") ||
+    lowerName.includes("churn") ||
+    lowerName.includes("conversion")
+  ) {
+    return `${formatWithCommas(value)}%`;
   }
 
   // Default - show with commas, decimals only if needed

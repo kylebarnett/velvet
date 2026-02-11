@@ -105,6 +105,13 @@ export default async function FounderDashboardPage() {
             completed: hasMetrics,
           },
           {
+            id: "historical_upload",
+            label: "Import historical metrics",
+            description: "Bulk import past metrics from Excel or CSV files",
+            href: "/portal/historical-upload",
+            completed: false,
+          },
+          {
             id: "documents",
             label: "Upload documents",
             description: "Share pitch decks, financials, and other materials with investors",

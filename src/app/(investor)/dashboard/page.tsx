@@ -428,6 +428,13 @@ export default async function InvestorDashboardPage() {
             completed: awaitingCompanyCount > 0 || submittedThisWeekCount > 0 || completionTotal > 0,
           },
           {
+            id: "historical_upload",
+            label: "Import historical data",
+            description: "Bulk import past metrics from Excel or CSV files",
+            href: "/historical-upload",
+            completed: false,
+          },
+          {
             id: "reports",
             label: "View portfolio reports",
             description: "Explore summary analytics, comparisons, and benchmarks",
@@ -462,6 +469,12 @@ export default async function InvestorDashboardPage() {
               className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
             >
               Import contacts
+            </Link>
+            <Link
+              href="/historical-upload"
+              className="text-sm text-text-tertiary hover:text-text-secondary underline underline-offset-2"
+            >
+              Or import historical metrics
             </Link>
           </div>
           <div className="mx-auto mt-6 max-w-sm rounded-lg bg-bg-elevated/50 p-4">

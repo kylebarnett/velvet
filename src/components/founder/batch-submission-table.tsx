@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import Link from "next/link";
 import { AlertTriangle, ArrowLeft, CheckCircle2, Info } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
@@ -165,7 +166,7 @@ function generateMonthlyPeriods(
 /** Return a placeholder hint appropriate for the metric type. */
 function getFormatHint(metricName: string): string {
   const lower = metricName.toLowerCase();
-  // Currency / absolute-dollar metrics
+  // Currency metrics (check before percentage — "Burn Rate" is currency, not %)
   if (
     /revenue|mrr|arr|burn|cost|expense|spend|salary|cogs|gmv|aov|arpu|ltv|cac|cash|invested|valuation/.test(
       lower,
@@ -815,6 +816,12 @@ export function BatchSubmissionTable({
           <p className="mt-1 text-sm text-text-muted">
             Metrics will appear here when an investor sends you a request.
           </p>
+          <Link
+            href="/portal/historical-upload"
+            className="mt-3 inline-block text-sm text-text-tertiary hover:text-text-secondary underline underline-offset-2"
+          >
+            Import historical metrics instead
+          </Link>
         </div>
       ) : (
         <>

@@ -4,6 +4,7 @@ import { getApiUser, jsonError } from "@/lib/api/auth";
 import { logger } from "@/lib/logger";
 
 // GET - Get all metric values for a company (investor view)
+// Merges founder data (company_metric_values) with investor private data (investor_metric_values)
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -30,30 +31,75 @@ export async function GET(
     return jsonError("Access pending approval.", 403);
   }
 
-  // Fetch all metric values for this company
-  const { data: metrics, error } = await supabase
-    .from("company_metric_values")
-    .select(`
-      id,
-      metric_name,
-      period_type,
-      period_start,
-      period_end,
-      value,
-      notes,
-      submitted_at,
-      updated_at
-    `)
-    .eq("company_id", companyId)
-    .order("period_start", { ascending: false });
+  // Fetch founder data and investor private data in parallel
+  const [founderResult, investorResult] = await Promise.all([
+    supabase
+      .from("company_metric_values")
+      .select(`
+        id,
+        metric_name,
+        period_type,
+        period_start,
+        period_end,
+        value,
+        notes,
+        submitted_at,
+        updated_at
+      `)
+      .eq("company_id", companyId)
+      .order("period_start", { ascending: false }),
+    supabase
+      .from("investor_metric_values")
+      .select(`
+        id,
+        metric_name,
+        period_type,
+        period_start,
+        period_end,
+        value,
+        notes,
+        submitted_at,
+        updated_at
+      `)
+      .eq("investor_id", user.id)
+      .eq("company_id", companyId)
+      .order("period_start", { ascending: false }),
+  ]);
 
-  if (error) {
-    logger.error("Failed to fetch company metrics:", error.message);
+  if (founderResult.error) {
+    logger.error("Failed to fetch company metrics:", founderResult.error.message);
     return jsonError("Failed to process request.", 500);
   }
 
+  const founderMetrics = (founderResult.data ?? []).map((m) => ({
+    ...m,
+    data_source: "founder" as const,
+  }));
+
+  const investorMetrics = investorResult.data ?? [];
+
+  // Build a set of founder metric keys for dedup
+  const founderKeys = new Set(
+    founderMetrics.map(
+      (m) => `${m.metric_name.toLowerCase()}:${m.period_type}:${m.period_start}`,
+    ),
+  );
+
+  // Add investor values where founder doesn't have data
+  const investorFillGaps = investorMetrics
+    .filter((m) => {
+      const key = `${m.metric_name.toLowerCase()}:${m.period_type}:${m.period_start}`;
+      return !founderKeys.has(key);
+    })
+    .map((m) => ({
+      ...m,
+      data_source: "investor_historical" as const,
+    }));
+
+  const mergedMetrics = [...founderMetrics, ...investorFillGaps];
+
   return NextResponse.json({
-    metrics: metrics ?? [],
+    metrics: mergedMetrics,
     companyId,
   });
 }
