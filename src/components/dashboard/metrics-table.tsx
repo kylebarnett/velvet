@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { createPortal } from "react-dom";
 import { formatValue, formatPeriod } from "@/components/charts/types";
-import { Sparkles, PenLine, RotateCcw, Info, GripVertical, ArrowUpDown } from "lucide-react";
+import { Sparkles, Info, GripVertical, ArrowUpDown } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -230,6 +230,7 @@ type SortableMetricRowProps = {
   onCellMouseLeave: () => void;
   onMetricInfoHover: (metricName: string, periodType: string, rect: DOMRect) => void;
   onMetricInfoLeave: () => void;
+  rowIndex?: number;
 };
 
 function SortableMetricRow({
@@ -243,6 +244,7 @@ function SortableMetricRow({
   onCellMouseLeave,
   onMetricInfoHover,
   onMetricInfoLeave,
+  rowIndex,
 }: SortableMetricRowProps) {
   const {
     attributes,
@@ -277,7 +279,7 @@ function SortableMetricRow({
     <tr
       ref={setNodeRef}
       style={style}
-      className={`group border-b border-border-subtle transition-colors ${isDragging ? "bg-bg-elevated" : "hover:bg-bg-raised"}`}
+      className={`group border-b border-border-subtle transition-colors duration-100 ${isDragging ? "bg-bg-elevated" : "hover:bg-bg-elevated"} ${!isDragging && rowIndex != null && rowIndex % 2 === 1 ? "bg-[var(--table-row-alt)]" : ""}`}
     >
       {isReorderMode && (
         <td className="sticky left-0 z-10 w-8 bg-[var(--table-bg)] py-3 pl-2">
@@ -293,18 +295,18 @@ function SortableMetricRow({
       )}
       <td
         className={`sticky ${isReorderMode ? "left-8" : "left-0"} z-10 overflow-hidden bg-[var(--table-bg)] py-3 pl-3 pr-4`}
-        style={{ boxShadow: "4px 0 6px -4px rgba(0,0,0,0.2)" }}
+        style={{ boxShadow: "4px 0 6px -4px var(--table-sticky-shadow)" }}
       >
-        <span className="inline-flex max-w-full items-center gap-1.5 text-text-secondary" title={metric.metricName}>
+        <span className="inline-flex max-w-full items-center gap-1.5" title={metric.metricName}>
           {isAiExtracted && (
-            <Sparkles className="h-3.5 w-3.5 shrink-0 text-[var(--tag-violet-text)]" />
+            <Sparkles className="h-3 w-3 shrink-0 text-[var(--tag-violet-text)]" />
           )}
-          <span className="truncate">{metric.metricName}</span>
+          <span className="truncate font-medium text-text-primary">{metric.metricName}</span>
           <button
             ref={infoBtnRef}
             type="button"
             onClick={handleInfoClick}
-            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-text-faint hover:text-text-muted"
+            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 text-text-faint hover:text-text-muted"
           >
             <Info className="h-3 w-3" />
           </button>
@@ -332,7 +334,7 @@ function SortableMetricRow({
             key={period}
             className={`overflow-hidden px-3 py-3 text-right font-mono text-[13px] ${cellBgColor} ${
               hasData
-                ? "cursor-default rounded transition-colors hover:bg-bg-elevated"
+                ? "cursor-default text-text-primary transition-colors duration-100 hover:bg-bg-elevated"
                 : ""
             } ${isHovered ? "bg-bg-elevated" : ""}`}
             onMouseEnter={
@@ -350,7 +352,7 @@ function SortableMetricRow({
             <span className="block truncate whitespace-nowrap">
               {periodData
                 ? formatValue(periodData.value, metric.metricName)
-                : "—"}
+                : <span className="text-text-faint">—</span>}
             </span>
           </td>
         );
@@ -367,14 +369,14 @@ function SortableMetricRow({
         return (
           <td
             className="sticky right-0 z-10 overflow-hidden bg-[var(--table-bg)] py-3 px-3 text-right font-mono text-[13px]"
-            style={{ boxShadow: "-4px 0 6px -4px rgba(0,0,0,0.2)" }}
+            style={{ boxShadow: "-4px 0 6px -4px var(--table-sticky-shadow)" }}
           >
             {total !== null ? (
-              <span className="block truncate whitespace-nowrap text-text-primary" title={`${aggSymbol} ${aggregationType === "sum" ? "Sum" : "Latest"}: ${formatValue(total, metric.metricName)}`}>
+              <span className="block truncate whitespace-nowrap font-semibold text-text-primary" title={`${aggSymbol} ${aggregationType === "sum" ? "Sum" : "Latest"}: ${formatValue(total, metric.metricName)}`}>
                 {formatValue(total, metric.metricName)}
               </span>
             ) : (
-              "—"
+              <span className="text-text-faint">—</span>
             )}
           </td>
         );
@@ -526,13 +528,13 @@ function MetricsTableBody({
     TOTAL_COL_WIDTH;
 
   const theadContent = (
-    <tr className="border-b border-border-subtle">
+    <tr className="border-b border-border-default">
       {isReorderMode && (
-        <th className="sticky left-0 z-10 w-8 bg-[var(--table-bg)] py-2.5 pl-2" />
+        <th className="sticky left-0 z-10 w-8 bg-[var(--table-bg)] py-2 pl-2" />
       )}
       <th
-        className={`group/header relative sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-[var(--table-bg)] py-2.5 pl-3 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider text-text-muted`}
-        style={{ boxShadow: "4px 0 6px -4px rgba(0,0,0,0.2)" }}
+        className={`group/header relative sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-[var(--table-bg)] py-2 pl-3 pr-4 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted`}
+        style={{ boxShadow: "4px 0 6px -4px var(--table-sticky-shadow)" }}
       >
         Metric
         {/* Resize handle */}
@@ -557,7 +559,7 @@ function MetricsTableBody({
               periodHeaderRefs.current.delete(period);
             }
           }}
-          className="overflow-hidden px-3 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-text-muted"
+          className="overflow-hidden px-3 py-2 text-right text-[11px] font-medium uppercase tracking-wider text-text-muted"
         >
           <span className="block truncate whitespace-nowrap">
             {formatPeriod(period, displayData[0]?.periodType ?? "quarterly")}
@@ -566,8 +568,8 @@ function MetricsTableBody({
       ))}
       {showTotals && (
         <th
-          className="sticky right-0 z-10 bg-[var(--table-bg)] py-2.5 px-3 text-right text-[11px] font-semibold uppercase tracking-wider text-text-muted"
-          style={{ boxShadow: "-4px 0 6px -4px rgba(0,0,0,0.2)" }}
+          className="sticky right-0 z-10 bg-[var(--table-bg)] py-2 px-3 text-right text-[11px] font-medium uppercase tracking-wider text-text-muted"
+          style={{ boxShadow: "-4px 0 6px -4px var(--table-sticky-shadow)" }}
         >
           <span className="inline-flex items-center justify-end gap-1">
             Total
@@ -583,7 +585,7 @@ function MetricsTableBody({
 
   if (!shouldVirtualize) {
     return (
-      <div ref={scrollRef} className="overflow-x-auto">
+      <div ref={scrollRef} className="overflow-x-auto rounded-lg">
         <table
           className="text-sm"
           style={{ tableLayout: "fixed", width: tableWidth }}
@@ -598,7 +600,7 @@ function MetricsTableBody({
           </colgroup>
           <thead>{theadContent}</thead>
           <tbody>
-            {displayData.map((metric) => (
+            {displayData.map((metric, index) => (
               <SortableMetricRow
                 key={metric.metricName}
                 metric={metric}
@@ -611,6 +613,7 @@ function MetricsTableBody({
                 onCellMouseLeave={handleCellMouseLeave}
                 onMetricInfoHover={handleMetricInfoHover}
                 onMetricInfoLeave={handleMetricInfoLeave}
+                rowIndex={index}
               />
             ))}
           </tbody>
@@ -623,7 +626,7 @@ function MetricsTableBody({
   const virtualItems = virtualizer.getVirtualItems();
 
   return (
-    <div ref={scrollRef} className="max-h-[600px] overflow-auto">
+    <div ref={scrollRef} className="max-h-[600px] overflow-auto rounded-lg">
       <table
         className="text-sm"
         style={{ tableLayout: "fixed", width: tableWidth }}
@@ -636,7 +639,7 @@ function MetricsTableBody({
           ))}
           {showTotals && <col style={{ width: TOTAL_COL_WIDTH }} />}
         </colgroup>
-        <thead className="sticky top-0 z-20 bg-[var(--table-bg)]">
+        <thead className="sticky top-0 z-20 bg-[var(--table-bg)] shadow-[0_1px_0_var(--border-default)]">
           {theadContent}
         </thead>
         <tbody>
@@ -664,6 +667,7 @@ function MetricsTableBody({
                 onCellMouseLeave={handleCellMouseLeave}
                 onMetricInfoHover={handleMetricInfoHover}
                 onMetricInfoLeave={handleMetricInfoLeave}
+                rowIndex={virtualRow.index}
               />
             );
           })}
@@ -957,23 +961,6 @@ export function MetricsTable({
   // Use orderedData for rendering
   const displayData = orderedData;
 
-  // Calculate source counts for summary
-  const sourceCounts = useMemo(() => {
-    let ai = 0,
-      manual = 0,
-      override = 0;
-    displayData.forEach((metric) => {
-      metric.periods.forEach((p) => {
-        if (p.value != null) {
-          if (p.source === "ai_extracted") ai++;
-          else if (p.source === "override") override++;
-          else manual++;
-        }
-      });
-    });
-    return { ai, manual, override, total: ai + manual + override };
-  }, [displayData]);
-
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
@@ -1162,71 +1149,12 @@ export function MetricsTable({
   return (
     <div className="flex h-full flex-col">
       {title && (
-        <h3 className="mb-3 text-sm font-medium text-text-secondary">{title}</h3>
-      )}
-
-      {/* Source summary */}
-      {sourceCounts.total > 0 && (
-        <div className="mb-3">
-          <div className="flex items-center gap-4 text-xs text-text-tertiary">
-            {sourceCounts.ai > 0 && (
-              <span className="flex items-center gap-1.5 text-[var(--tag-violet-text)]">
-                <Sparkles className="h-3 w-3" />
-                {sourceCounts.ai} AI-extracted
-              </span>
-            )}
-            {sourceCounts.manual > 0 && (
-              <span className="flex items-center gap-1.5">
-                <PenLine className="h-3 w-3" />
-                {sourceCounts.manual} Manual
-              </span>
-            )}
-            {sourceCounts.override > 0 && (
-              <span className="flex items-center gap-1.5 text-[var(--tag-amber-text)]">
-                <RotateCcw className="h-3 w-3" />
-                {sourceCounts.override} Override
-              </span>
-            )}
-            <span className="ml-auto text-text-tertiary">
-              {sourceCounts.total} values
-            </span>
-          </div>
-
-          {/* Segmented progress bar */}
-          <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-bg-elevated">
-            <div className="flex h-full">
-              {sourceCounts.ai > 0 && (
-                <div
-                  className="bg-[var(--tag-violet-text)]"
-                  style={{
-                    width: `${(sourceCounts.ai / sourceCounts.total) * 100}%`,
-                  }}
-                />
-              )}
-              {sourceCounts.manual > 0 && (
-                <div
-                  className="bg-text-faint"
-                  style={{
-                    width: `${(sourceCounts.manual / sourceCounts.total) * 100}%`,
-                  }}
-                />
-              )}
-              {sourceCounts.override > 0 && (
-                <div
-                  className="bg-[var(--tag-amber-text)]"
-                  style={{
-                    width: `${(sourceCounts.override / sourceCounts.total) * 100}%`,
-                  }}
-                />
-              )}
-            </div>
-          </div>
-        </div>
+        <h3 className="mb-2 text-sm font-medium text-text-primary">{title}</h3>
       )}
 
       {/* Toolbar */}
-      <div className="mb-3 flex items-center gap-3">
-        <div className="text-xs text-text-tertiary">
+      <div className="mb-2 flex items-center justify-between">
+        <div className="text-xs tabular-nums text-text-muted">
           {sortedPeriods.length} period{sortedPeriods.length !== 1 ? "s" : ""}
         </div>
         {allowReorder && (
@@ -1236,11 +1164,11 @@ export function MetricsTable({
             className={`flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs transition-colors ${
               isReorderMode
                 ? "border-[var(--tag-blue-text)] bg-[var(--tag-blue-bg)] text-[var(--tag-blue-text)]"
-                : "border-border-default bg-bg-elevated text-text-tertiary hover:bg-bg-hover"
+                : "border-border-subtle text-text-muted hover:border-border-default hover:text-text-tertiary"
             }`}
             title={isReorderMode ? "Exit reorder mode" : "Reorder metrics"}
           >
-            <ArrowUpDown className="h-3.5 w-3.5" />
+            <ArrowUpDown className="h-3 w-3" />
             {isReorderMode ? "Done" : "Reorder"}
           </button>
         )}

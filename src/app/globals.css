@@ -77,6 +77,8 @@
 
   /* Table */
   --table-bg: #f0f1f6;
+  --table-row-alt: rgba(0, 0, 0, 0.02);
+  --table-sticky-shadow: rgba(0, 0, 0, 0.08);
 
   /* Z-index scale */
   --z-dropdown: 30;
@@ -164,6 +166,8 @@
 
   /* Table */
   --table-bg: #111114;
+  --table-row-alt: rgba(255, 255, 255, 0.02);
+  --table-sticky-shadow: rgba(0, 0, 0, 0.3);
 }
 
 @theme inline {
