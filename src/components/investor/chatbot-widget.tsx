@@ -8,6 +8,7 @@ import {
   AlertCircle,
   Clock,
   X,
+  Trash2,
   TrendingUp,
   BarChart3,
   Target,
@@ -16,6 +17,8 @@ import {
 import {
   BarChart as RechartsBarChart,
   Bar,
+  LineChart as RechartsLineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -40,6 +43,7 @@ type ConversationEntry = {
   queryType: string;
   data?: Record<string, unknown>[];
   chartData?: { label: string; value: number }[];
+  chartType?: "bar" | "line";
   timestamp: number;
 };
 
@@ -49,7 +53,7 @@ type ConversationEntry = {
 
 const SUGGESTED_QUERIES = [
   { text: "Top performers this quarter", icon: TrendingUp },
-  { text: "Average burn rate by stage", icon: BarChart3 },
+  { text: "Revenue trend over last 4 quarters", icon: TrendingUp },
   { text: "Companies with the highest growth", icon: Zap },
   { text: "What is the total ARR across my portfolio?", icon: Target },
   { text: "Top 5 companies by revenue", icon: BarChart3 },
@@ -157,6 +161,77 @@ function ResultBarChart({
             ))}
           </Bar>
         </RechartsBarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Inline line chart for time series results                           */
+/* ------------------------------------------------------------------ */
+
+function ResultLineChart({
+  chartData,
+  metricName,
+}: {
+  chartData: { label: string; value: number }[];
+  metricName?: string;
+}) {
+  const chartTheme = useChartTheme();
+
+  return (
+    <div className="mt-3 rounded-lg border border-border-default bg-bg-input p-2">
+      <ResponsiveContainer width="100%" height={180}>
+        <RechartsLineChart
+          data={chartData}
+          margin={{ top: 8, right: 12, left: 4, bottom: 4 }}
+        >
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke={chartTheme.grid}
+            vertical={false}
+          />
+          <XAxis
+            dataKey="label"
+            tick={{ fill: chartTheme.tick, fontSize: 10 }}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            tick={{ fill: chartTheme.tick, fontSize: 10 }}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(v) => formatValue(v, metricName)}
+            width={60}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: chartTheme.tooltipBg,
+              border: `1px solid ${chartTheme.tooltipBorder}`,
+              borderRadius: "8px",
+              padding: "8px 12px",
+              boxShadow: `0 4px 12px ${chartTheme.tooltipShadow}`,
+            }}
+            itemStyle={{ color: chartTheme.tooltipText, fontSize: 12 }}
+            labelStyle={{
+              color: chartTheme.tooltipLabel,
+              fontSize: 11,
+              marginBottom: 4,
+            }}
+            formatter={(value) => [
+              formatValue(value as number, metricName),
+              metricName ?? "Value",
+            ]}
+          />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke={getChartColor(0)}
+            strokeWidth={2}
+            dot={{ r: 3, fill: getChartColor(0), strokeWidth: 0 }}
+            activeDot={{ r: 5, fill: getChartColor(0), strokeWidth: 0 }}
+          />
+        </RechartsLineChart>
       </ResponsiveContainer>
     </div>
   );
@@ -275,10 +350,16 @@ export function ChatbotWidget() {
     setError(null);
 
     try {
+      // Send last 3 conversation turns for context
+      const history = conversation.slice(-3).map((entry) => ({
+        query: entry.query,
+        answer: entry.answer.slice(0, 2000),
+      }));
+
       const res = await fetch("/api/investors/portfolio/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: q }),
+        body: JSON.stringify({ query: q, history: history.length > 0 ? history : undefined }),
       });
 
       const data = await res.json();
@@ -294,6 +375,7 @@ export function ChatbotWidget() {
         queryType: data.queryType,
         data: data.data,
         chartData: data.chartData,
+        chartType: data.chartType,
         timestamp: Date.now(),
       };
 
@@ -366,14 +448,30 @@ export function ChatbotWidget() {
               </div>
               <span className="text-sm font-medium">Ask AI</span>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-hover hover:text-text-secondary"
-              aria-label="Close chat"
-              type="button"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              {conversation.length > 0 && (
+                <button
+                  onClick={() => {
+                    setConversation([]);
+                    setError(null);
+                    setState("idle");
+                  }}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-hover hover:text-text-secondary"
+                  aria-label="Clear chat"
+                  type="button"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-hover hover:text-text-secondary"
+                aria-label="Close chat"
+                type="button"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {/* Scrollable conversation area */}
@@ -462,12 +560,21 @@ export function ChatbotWidget() {
                           ))}
 
                           {entry.chartData && entry.chartData.length > 0 && (
-                            <ResultBarChart
-                              chartData={entry.chartData}
-                              metricName={
-                                entry.data?.[0]?.metric as string | undefined
-                              }
-                            />
+                            entry.chartType === "line" ? (
+                              <ResultLineChart
+                                chartData={entry.chartData}
+                                metricName={
+                                  entry.data?.[0]?.metric as string | undefined
+                                }
+                              />
+                            ) : (
+                              <ResultBarChart
+                                chartData={entry.chartData}
+                                metricName={
+                                  entry.data?.[0]?.metric as string | undefined
+                                }
+                              />
+                            )
                           )}
 
                           {entry.data &&

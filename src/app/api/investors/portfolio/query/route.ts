@@ -9,8 +9,14 @@ import {
   formatQueryResult,
 } from "@/lib/ai/portfolio-query";
 
+const historyTurnSchema = z.object({
+  query: z.string(),
+  answer: z.string().max(2000),
+});
+
 const querySchema = z.object({
   query: z.string().min(3, "Query must be at least 3 characters.").max(500, "Query must be at most 500 characters."),
+  history: z.array(historyTurnSchema).max(3).optional(),
 });
 
 export async function POST(req: Request) {
@@ -40,10 +46,10 @@ export async function POST(req: Request) {
       return jsonError(parsed.error.issues[0]?.message ?? "Invalid input.", 400);
     }
 
-    const { query } = parsed.data;
+    const { query, history } = parsed.data;
 
     // Parse natural language → structured query via AI
-    const structuredQuery = await parseNaturalLanguageQuery(query);
+    const structuredQuery = await parseNaturalLanguageQuery(query, history);
 
     // Execute structured query against the database
     const result = await executeStructuredQuery(
@@ -56,6 +62,7 @@ export async function POST(req: Request) {
       answer: formatQueryResult(result),
       data: result.data,
       chartData: result.chartData,
+      chartType: result.chartType,
       queryType: result.type,
     });
   } catch (e: unknown) {
