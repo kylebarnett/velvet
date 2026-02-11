@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Building2, Clock, FileText } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { unwrapJoin } from "@/lib/api/utils";
@@ -23,7 +22,8 @@ export default async function PortfolioPage() {
 
   const total = totalCount ?? 0;
 
-  // Get all contacts for proper alphabetical sorting by company name
+  // Fetch all contacts — referencedTable ordering only sorts embedded rows,
+  // NOT parent rows by the joined column, so we must sort in JS.
   const { data: allContacts } = await supabase
     .from("portfolio_invitations")
     .select(`
@@ -45,12 +45,10 @@ export default async function PortfolioPage() {
     `)
     .eq("investor_id", user.id);
 
-  // Sort A-Z by company name, then last name
+  // Sort A→Z by company name, then last name
   const sorted = (allContacts ?? []).sort((a, b) => {
-    const aCompany = unwrapJoin(a.companies) as { name: string } | null;
-    const bCompany = unwrapJoin(b.companies) as { name: string } | null;
-    const companyA = aCompany?.name ?? "";
-    const companyB = bCompany?.name ?? "";
+    const companyA = (unwrapJoin(a.companies) as { name: string } | null)?.name ?? "";
+    const companyB = (unwrapJoin(b.companies) as { name: string } | null)?.name ?? "";
     const cmp = companyA.localeCompare(companyB, undefined, { sensitivity: "base" });
     if (cmp !== 0) return cmp;
     return (a.last_name ?? "").localeCompare(b.last_name ?? "", undefined, { sensitivity: "base" });
@@ -58,26 +56,19 @@ export default async function PortfolioPage() {
 
   const contacts = sorted.slice(0, PAGE_LIMIT);
 
-  // Count companies
-  const { count: companyCount } = await supabase
-    .from("investor_company_relationships")
-    .select("id", { count: "exact", head: true })
-    .eq("investor_id", user.id);
-
-  // Count pending requests
-  const { count: pendingRequests } = await supabase
-    .from("metric_requests")
+  // Count accepted invitations
+  const { count: acceptedCount } = await supabase
+    .from("portfolio_invitations")
     .select("id", { count: "exact", head: true })
     .eq("investor_id", user.id)
-    .eq("status", "pending");
+    .eq("status", "accepted");
 
-  // Count new documents this week
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const { count: newDocuments } = await supabase
-    .from("documents")
+  // Count awaiting response (pending + sent)
+  const { count: awaitingCount } = await supabase
+    .from("portfolio_invitations")
     .select("id", { count: "exact", head: true })
-    .gte("uploaded_at", weekAgo.toISOString());
+    .eq("investor_id", user.id)
+    .in("status", ["pending", "sent"]);
 
   const initialPagination = {
     page: 1,
@@ -115,43 +106,13 @@ export default async function PortfolioPage() {
         </div>
       </div>
 
-      {/* Portfolio Insights */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-        <Link
-          href="/dashboard"
-          className="rounded-xl card-surface kpi-gradient-blue p-3 sm:p-4 hover:opacity-80 transition-opacity"
-        >
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
-            <Building2 className="h-4 w-4 text-blue-400" aria-hidden="true" />
-            Companies
-          </div>
-          <div className="mt-1 text-lg sm:text-2xl font-semibold">{companyCount ?? 0}</div>
-        </Link>
-        <Link
-          href="/campaigns"
-          className="rounded-xl card-surface kpi-gradient-amber p-3 sm:p-4 hover:opacity-80 transition-opacity"
-        >
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
-            <Clock className="h-4 w-4 text-amber-400" aria-hidden="true" />
-            Pending
-          </div>
-          <div className="mt-1 text-lg sm:text-2xl font-semibold">{pendingRequests ?? 0}</div>
-        </Link>
-        <Link
-          href="/documents"
-          className="rounded-xl card-surface kpi-gradient-emerald p-3 sm:p-4 hover:opacity-80 transition-opacity"
-        >
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
-            <FileText className="h-4 w-4 text-emerald-400" aria-hidden="true" />
-            New Docs
-          </div>
-          <div className="mt-1 text-lg sm:text-2xl font-semibold">{newDocuments ?? 0}</div>
-        </Link>
-      </div>
-
       <ContactsTable
         initialContacts={contacts ?? []}
         initialPagination={initialPagination}
+        initialStats={{
+          accepted: acceptedCount ?? 0,
+          awaiting: awaitingCount ?? 0,
+        }}
       />
     </div>
   );

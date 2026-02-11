@@ -110,18 +110,19 @@ function formatMetricValue(value: string | number, metricName: string): string {
   if (isNaN(num)) return String(value);
 
   const lower = metricName.toLowerCase();
-  const isPercent = /(rate|margin|churn|retention|conversion|nrr|grr)/.test(lower);
+  // Currency check first — "Burn Rate" is currency, not percentage
   const isCurrency = /(revenue|mrr|arr|burn|runway|cac|ltv|arpu|aov|expense|cost|spend|income|profit|ebitda|cash|gmv|invested|salary|valuation)/.test(lower);
+  const isPercent = !isCurrency && /(rate|margin|churn|retention|conversion|nrr|grr)/.test(lower);
 
-  if (isPercent) {
-    return `${num.toFixed(1)}%`;
-  }
   if (isCurrency) {
     const abs = Math.abs(num);
     if (abs >= 1_000_000_000) return `$${(num / 1_000_000_000).toFixed(1)}B`;
     if (abs >= 1_000_000) return `$${(num / 1_000_000).toFixed(1)}M`;
     if (abs >= 1_000) return `$${(num / 1_000).toFixed(1)}K`;
     return `$${num.toLocaleString()}`;
+  }
+  if (isPercent) {
+    return `${num.toFixed(1)}%`;
   }
   return num.toLocaleString();
 }
@@ -671,7 +672,19 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
                   >
                     Quarterly Summary
                   </h2>
+                  <style>{`
+                    .report-summary p { margin: 0 0 8px 0; }
+                    .report-summary p:last-child { margin-bottom: 0; }
+                    .report-summary ul { list-style-type: disc; padding-left: 24px; margin: 8px 0; }
+                    .report-summary ol { list-style-type: decimal; padding-left: 24px; margin: 8px 0; }
+                    .report-summary li { margin: 4px 0; }
+                    .report-summary li p { margin: 0; }
+                    .report-summary strong { font-weight: 700; }
+                    .report-summary em { font-style: italic; }
+                    .report-summary a { color: ${colors.sectionHeading}; text-decoration: underline; }
+                  `}</style>
                   <div
+                    className="report-summary"
                     style={{
                       color: colors.bodyText,
                       fontSize: "13px",

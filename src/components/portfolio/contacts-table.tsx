@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check, ArrowUp, ArrowDown, ArrowUpDown, Building2 } from "lucide-react";
+import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check, ArrowUp, ArrowDown, ArrowUpDown, Building2, Users, CheckCircle2, Clock } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -46,9 +46,15 @@ type Pagination = {
 type SortField = "company" | "contact" | "email" | "status";
 type SortDir = "asc" | "desc";
 
+type Stats = {
+  accepted: number;
+  awaiting: number;
+};
+
 type Props = {
   initialContacts: Contact[];
   initialPagination: Pagination;
+  initialStats: Stats;
 };
 
 /** Virtualization threshold — only virtualize when row count exceeds this */
@@ -313,9 +319,10 @@ function ContactsDesktopTable({
   );
 }
 
-export function ContactsTable({ initialContacts, initialPagination }: Props) {
+export function ContactsTable({ initialContacts, initialPagination, initialStats }: Props) {
   const [contacts, setContacts] = React.useState(initialContacts);
   const [pagination, setPagination] = React.useState(initialPagination);
+  const [stats, setStats] = React.useState(initialStats);
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [sortField, setSortField] = React.useState<SortField>("company");
@@ -584,6 +591,10 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
 
       setContacts((prev) => prev.filter((c) => c.id !== id));
       setPagination((prev) => ({ ...prev, total: prev.total - 1 }));
+      setStats((prev) => ({
+        accepted: contact.status === "accepted" ? prev.accepted - 1 : prev.accepted,
+        awaiting: contact.status === "pending" || contact.status === "sent" ? prev.awaiting - 1 : prev.awaiting,
+      }));
       setSuccess("Contact deleted.");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -623,8 +634,17 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
     }
 
     if (deleted > 0) {
+      // Count status breakdown of successfully deleted contacts
+      const deletedContacts = contacts.filter((c) => selectedIds.has(c.id));
+      const deletedAccepted = deletedContacts.filter((c) => c.status === "accepted").length;
+      const deletedAwaiting = deletedContacts.filter((c) => c.status === "pending" || c.status === "sent").length;
+
       setContacts((prev) => prev.filter((c) => !selectedIds.has(c.id)));
       setPagination((prev) => ({ ...prev, total: prev.total - deleted }));
+      setStats((prev) => ({
+        accepted: prev.accepted - deletedAccepted,
+        awaiting: prev.awaiting - deletedAwaiting,
+      }));
       setSuccess(`Deleted ${deleted} contact${deleted === 1 ? "" : "s"}.`);
     }
     if (errors.length > 0) {
@@ -650,6 +670,31 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
 
   return (
     <div className="space-y-3">
+      {/* Contact Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+        <div className="rounded-xl card-surface kpi-gradient-blue p-3 sm:p-4">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
+            <Users className="h-4 w-4 text-blue-400" aria-hidden="true" />
+            Total Contacts
+          </div>
+          <div className="mt-1 text-lg sm:text-2xl font-semibold">{pagination.total}</div>
+        </div>
+        <div className="rounded-xl card-surface kpi-gradient-emerald p-3 sm:p-4">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+            Accepted
+          </div>
+          <div className="mt-1 text-lg sm:text-2xl font-semibold">{stats.accepted}</div>
+        </div>
+        <div className="rounded-xl card-surface kpi-gradient-amber p-3 sm:p-4">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
+            <Clock className="h-4 w-4 text-amber-400" aria-hidden="true" />
+            Awaiting Response
+          </div>
+          <div className="mt-1 text-lg sm:text-2xl font-semibold">{stats.awaiting}</div>
+        </div>
+      </div>
+
       {/* Messages — float above the card */}
       {error && (
         <div role="alert" className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-2 text-sm text-[var(--status-error-text)]">

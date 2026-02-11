@@ -6,6 +6,20 @@ import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 
+type ContactRow = {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  status: string;
+  invite_token: string;
+  sent_at: string | null;
+  accepted_at: string | null;
+  created_at: string;
+  company_id: string;
+  companies: { id: string; name: string; founder_id: string | null } | { id: string; name: string; founder_id: string | null }[] | null;
+};
+
 // GET - List contacts for investor with pagination and search
 export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
@@ -90,27 +104,26 @@ export async function GET(req: Request) {
     return jsonError("Failed to process request.", 500);
   }
 
-  // Apply database-level sorting
+  // Sorting by company name requires in-memory sort because Supabase
+  // referencedTable ordering only sorts the embedded rows, not parent rows.
+  const isCompanySort = sortField === "company" || !["contact", "email", "status"].includes(sortField);
   const ascending = sortDir !== "desc";
-  switch (sortField) {
-    case "contact":
-      dataQuery = dataQuery.order("last_name", { ascending }).order("first_name", { ascending });
-      break;
-    case "email":
-      dataQuery = dataQuery.order("email", { ascending });
-      break;
-    case "status":
-      dataQuery = dataQuery.order("status", { ascending });
-      break;
-    case "company":
-    default:
-      // Sort by company name via foreign table
-      dataQuery = dataQuery.order("name", { referencedTable: "companies", ascending });
-      break;
-  }
 
-  // Apply database-level pagination
-  dataQuery = dataQuery.range(offset, offset + limit - 1);
+  if (!isCompanySort) {
+    // Direct-column sorts can use DB-level ordering + pagination
+    switch (sortField) {
+      case "contact":
+        dataQuery = dataQuery.order("last_name", { ascending }).order("first_name", { ascending });
+        break;
+      case "email":
+        dataQuery = dataQuery.order("email", { ascending });
+        break;
+      case "status":
+        dataQuery = dataQuery.order("status", { ascending });
+        break;
+    }
+    dataQuery = dataQuery.range(offset, offset + limit - 1);
+  }
 
   const { data, error } = await dataQuery;
 
@@ -119,11 +132,24 @@ export async function GET(req: Request) {
     return jsonError("Failed to process request.", 500);
   }
 
+  let results = (data ?? []) as ContactRow[];
+
+  if (isCompanySort) {
+    // Sort by company name in JS, then paginate in JS
+    const dir = ascending ? 1 : -1;
+    results.sort((a, b) => {
+      const nameA = (unwrapJoin(a.companies) as { name: string } | null)?.name ?? "";
+      const nameB = (unwrapJoin(b.companies) as { name: string } | null)?.name ?? "";
+      return dir * nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+    });
+    results = results.slice(offset, offset + limit);
+  }
+
   const total = totalCount ?? 0;
   const totalPages = Math.ceil(total / limit);
 
   return NextResponse.json({
-    contacts: data ?? [],
+    contacts: results,
     pagination: {
       page,
       limit,
