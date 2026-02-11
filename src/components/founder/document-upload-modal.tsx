@@ -157,7 +157,7 @@ export function DocumentUploadModal({
               <SelectTrigger>
                 <SelectValue placeholder="Select type..." />
               </SelectTrigger>
-              <SelectContent className="[&_[role=option]]:py-2.5 [&_[role=option]]:pr-4">
+              <SelectContent portal={false} className="[&_[role=option]]:py-2.5 [&_[role=option]]:pr-4">
                 <SelectItem value="income_statement">Income Statement</SelectItem>
                 <SelectItem value="balance_sheet">Balance Sheet</SelectItem>
                 <SelectItem value="cash_flow_statement">Cash Flow Statement</SelectItem>
@@ -180,7 +180,7 @@ export function DocumentUploadModal({
                 <SelectTrigger className="w-[100px]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent portal={false}>
                   <SelectItem value="Q1">Q1</SelectItem>
                   <SelectItem value="Q2">Q2</SelectItem>
                   <SelectItem value="Q3">Q3</SelectItem>
@@ -191,7 +191,7 @@ export function DocumentUploadModal({
                 <SelectTrigger className="w-[100px]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent portal={false}>
                   {yearOptions.map((y) => (
                     <SelectItem key={y} value={y}>{y}</SelectItem>
                   ))}

@@ -53,11 +53,10 @@ type CampaignCompany = {
   metrics: { name: string; status: string }[];
 };
 
-type PeriodFilter = "all" | "monthly" | "quarterly" | "annual";
+type PeriodFilter = "all" | "quarterly" | "annual";
 
 const PERIOD_TABS: TabItem<PeriodFilter>[] = [
   { value: "all", label: "All" },
-  { value: "monthly", label: "Monthly" },
   { value: "quarterly", label: "Quarterly" },
   { value: "annual", label: "Annual" },
 ];
@@ -82,12 +81,10 @@ function getPeriodBadgeClasses(periodType: string): string {
   switch (periodType) {
     case "quarterly":
       return "bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)]";
-    case "monthly":
-      return "bg-[var(--tag-blue-bg)] text-[var(--tag-blue-text)]";
     case "annual":
       return "bg-[var(--tag-amber-bg)] text-[var(--tag-amber-text)]";
     default:
-      return "bg-bg-hover text-text-tertiary";
+      return "bg-[var(--tag-blue-bg)] text-[var(--tag-blue-text)]";
   }
 }
 

@@ -12,7 +12,7 @@ export default function Home() {
             Performance metrics for investors and founders.
           </h1>
           <p className="max-w-2xl text-pretty text-base text-text-secondary">
-            Collect monthly, quarterly, and annual metrics across your portfolio
+            Collect quarterly and annual metrics across your portfolio
             companies — with founder portals, dashboards, and document uploads.
           </p>
         </div>

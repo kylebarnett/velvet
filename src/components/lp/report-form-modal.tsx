@@ -219,7 +219,7 @@ export function ReportFormModal({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent portal={false}>
                 <SelectItem value="quarterly">Quarterly</SelectItem>
                 <SelectItem value="annual">Annual</SelectItem>
                 <SelectItem value="ad_hoc">Ad Hoc</SelectItem>

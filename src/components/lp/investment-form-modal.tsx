@@ -198,7 +198,7 @@ export function InvestmentFormModal({
               <SelectTrigger>
                 <SelectValue placeholder="Select a company..." />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent portal={false}>
                 <SelectItem value={NONE}>Select a company...</SelectItem>
                 {companies.map((c) => (
                   <SelectItem key={c.id} value={c.id}>

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Calendar, CalendarDays, CalendarClock } from "lucide-react";
+import { CalendarDays, CalendarClock } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type Cadence = "monthly" | "quarterly" | "annual";
+type Cadence = "quarterly" | "annual";
 
 interface CadenceSelectorProps {
   value: Cadence;
@@ -23,14 +23,8 @@ const CADENCE_OPTIONS: {
   value: Cadence;
   label: string;
   description: string;
-  icon: typeof Calendar;
+  icon: typeof CalendarDays;
 }[] = [
-  {
-    value: "monthly",
-    label: "Monthly",
-    description: "Request metrics every month",
-    icon: Calendar,
-  },
   {
     value: "quarterly",
     label: "Quarterly",
@@ -72,7 +66,7 @@ export function CadenceSelector({
       {/* Cadence selection */}
       <div>
         <label className="text-sm font-medium text-text-secondary">Frequency</label>
-        <div className="mt-2 grid gap-3 sm:grid-cols-3">
+        <div className="mt-2 grid gap-3 sm:grid-cols-2">
           {CADENCE_OPTIONS.map((option) => {
             const Icon = option.icon;
             const isSelected = value === option.value;
@@ -115,19 +109,15 @@ export function CadenceSelector({
       <div>
         <label className="text-sm font-medium text-text-secondary">
           Day of the{" "}
-          {value === "monthly"
-            ? "month"
-            : value === "quarterly"
-              ? "quarter's first month"
-              : "year (January)"}
+          {value === "quarterly"
+            ? "quarter's first month"
+            : "year (January)"}
         </label>
         <p className="mt-1 text-xs text-text-tertiary">
           Requests will be created on this day to request data for the previous{" "}
-          {value === "monthly"
-            ? "month"
-            : value === "quarterly"
-              ? "quarter"
-              : "year"}
+          {value === "quarterly"
+            ? "quarter"
+            : "year"}
         </p>
         <div className="mt-3">
           <Select value={String(dayOfMonth)} onValueChange={(v) => onDayOfMonthChange(Number(v))}>
@@ -139,11 +129,9 @@ export function CadenceSelector({
                 <SelectItem key={day} value={String(day)}>
                   {day}
                   {getOrdinalSuffix(day)} of each{" "}
-                  {value === "monthly"
-                    ? "month"
-                    : value === "quarterly"
-                      ? "quarter"
-                      : "year"}
+                  {value === "quarterly"
+                    ? "quarter"
+                    : "year"}
                 </SelectItem>
               ))}
             </SelectContent>

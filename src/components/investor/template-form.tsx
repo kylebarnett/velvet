@@ -169,7 +169,6 @@ export function TemplateForm({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent portal={false}>
-                    <SelectItem value="monthly">Monthly</SelectItem>
                     <SelectItem value="quarterly">Quarterly</SelectItem>
                     <SelectItem value="annual">Annual</SelectItem>
                   </SelectContent>

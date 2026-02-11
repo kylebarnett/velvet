@@ -21,7 +21,7 @@ const TABS: TabItem<Tab>[] = [
 const TAB_DESCRIPTIONS: Record<Tab, string> = {
   campaigns: "One-time or recurring metric requests sent to your portfolio companies.",
   templates: "Reusable sets of metrics you can apply when creating new requests.",
-  schedules: "Automated recurring requests that run on a monthly, quarterly, or annual cadence.",
+  schedules: "Automated recurring requests that run on a quarterly or annual cadence.",
 };
 
 export function RequestsTabs() {

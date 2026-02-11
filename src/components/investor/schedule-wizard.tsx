@@ -67,7 +67,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
   const [selectedCompanies, setSelectedCompanies] = React.useState<string[]>([]);
   const [allCompanies, setAllCompanies] = React.useState(true);
   const [includeFutureCompanies, setIncludeFutureCompanies] = React.useState(true);
-  const [cadence, setCadence] = React.useState<"monthly" | "quarterly" | "annual">("monthly");
+  const [cadence, setCadence] = React.useState<"quarterly" | "annual">("quarterly");
   const [dayOfMonth, setDayOfMonth] = React.useState(5);
   const [dueDaysOffset, setDueDaysOffset] = React.useState(7);
   const [reminderEnabled, setReminderEnabled] = React.useState(true);

@@ -15,7 +15,7 @@ import {
 const schema = z.object({
   companyId: z.string().min(1, "Select a company."),
   metricName: z.string().min(2, "Enter a metric name."),
-  periodType: z.enum(["monthly", "quarterly", "annual"]),
+  periodType: z.enum(["quarterly", "annual"]),
   periodStart: z.string().min(1, "Select a start date."),
   periodEnd: z.string().min(1, "Select an end date."),
   dueDate: z.string().min(1, "Select a due date."),
@@ -60,7 +60,7 @@ export function MetricRequestForm() {
     defaultValues: {
       companyId: "",
       metricName: "",
-      periodType: "monthly",
+      periodType: "quarterly",
       periodStart: "",
       periodEnd: "",
       dueDate: "",
@@ -150,7 +150,6 @@ export function MetricRequestForm() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monthly">Monthly</SelectItem>
                   <SelectItem value="quarterly">Quarterly</SelectItem>
                   <SelectItem value="annual">Annual</SelectItem>
                 </SelectContent>

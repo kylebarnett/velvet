@@ -70,23 +70,29 @@ function MetricChip({ name }: { name: string }) {
   const metricInfo = getMetricDefinition(name);
 
   return (
-    <div className="relative inline-block">
-      <span
-        className="rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-secondary cursor-default"
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
+    <div
+      className="relative inline-block"
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <span className="rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-secondary cursor-default">
         {name}
       </span>
-      {showTooltip && metricInfo && (
+      {showTooltip && (
         <div className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-lg border border-border-default bg-bg-secondary p-3 shadow-xl">
           <p className="text-xs font-medium text-text-primary">{name}</p>
-          <p className="mt-1 text-xs text-text-tertiary">{metricInfo.description}</p>
-          {metricInfo.formula && (
-            <div className="mt-2 rounded bg-bg-elevated px-2 py-1.5">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-text-tertiary">Formula</p>
-              <p className="mt-0.5 text-xs text-emerald-400">{metricInfo.formula}</p>
-            </div>
+          {metricInfo ? (
+            <>
+              <p className="mt-1 text-xs text-text-tertiary">{metricInfo.description}</p>
+              {metricInfo.formula && (
+                <div className="mt-2 rounded bg-bg-elevated px-2 py-1.5">
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-text-tertiary">Formula</p>
+                  <p className="mt-0.5 text-xs text-emerald-400">{metricInfo.formula}</p>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="mt-1 text-xs text-text-tertiary">Custom metric</p>
           )}
         </div>
       )}
@@ -140,7 +146,7 @@ export function UnifiedRequestWizard() {
 
   // Recurring schedule fields
   const [scheduleName, setScheduleName] = React.useState("");
-  const [cadence, setCadence] = React.useState<"monthly" | "quarterly" | "annual">("monthly");
+  const [cadence, setCadence] = React.useState<"quarterly" | "annual">("quarterly");
   const [dayOfMonth, setDayOfMonth] = React.useState(5);
   const [dueDaysOffset, setDueDaysOffset] = React.useState(7);
   const [reminderEnabled, setReminderEnabled] = React.useState(true);
@@ -520,7 +526,7 @@ export function UnifiedRequestWizard() {
                 setCustomPeriodType("quarterly");
                 setFrequency(null);
                 setScheduleName("");
-                setCadence("monthly");
+                setCadence("quarterly");
                 setDayOfMonth(5);
                 setDueDaysOffset(7);
                 setReminderEnabled(true);
@@ -816,7 +822,12 @@ export function UnifiedRequestWizard() {
               {!useCustomMetric && (
                 <button
                   type="button"
-                  onClick={() => setFrequency("recurring")}
+                  onClick={() => {
+                    setFrequency("recurring");
+                    if (!scheduleName.trim()) {
+                      setScheduleName(`${selectedTemplate?.name ?? "Metrics"} - ${cadence}`);
+                    }
+                  }}
                   className="flex flex-col items-start rounded-xl border border-border-default card-surface p-5 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--tag-violet-bg)]">
