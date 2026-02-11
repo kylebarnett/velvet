@@ -1,14 +1,21 @@
 import { NextResponse } from "next/server";
 
 import { jsonError } from "@/lib/api/auth";
+import { checkRateLimit, getClientIp } from "@/lib/api/rate-limit";
 import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 // GET - Public tear sheet by share token (no auth required)
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ token: string }> },
 ) {
+  const ip = getClientIp(req);
+  const { allowed } = checkRateLimit(`tear-sheet:${ip}`, 30, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429);
+  }
+
   const { token } = await params;
 
   if (

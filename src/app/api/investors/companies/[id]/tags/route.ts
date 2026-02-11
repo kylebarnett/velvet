@@ -28,6 +28,10 @@ export async function PUT(
 
   const { id: companyId } = await params;
 
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(companyId)) {
+    return jsonError("Invalid company ID.", 400);
+  }
+
   // Verify investor has a relationship with this company
   const { data: relationship } = await supabase
     .from("investor_company_relationships")

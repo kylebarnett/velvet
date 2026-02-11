@@ -12,6 +12,7 @@ const PROTECTED_PATHS = [
   "/funds",
   "/query",
   "/app",
+  "/historical-upload",
 ];
 
 const AUTH_PATHS = ["/login", "/signup"];
@@ -50,9 +51,7 @@ export async function middleware(request: NextRequest) {
   // Redirect unauthenticated users away from protected routes
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
   if (isProtected && !user) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // Redirect authenticated users away from auth pages
