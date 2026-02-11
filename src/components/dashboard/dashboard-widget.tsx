@@ -71,13 +71,18 @@ export function DashboardWidget({
   }
 
   if (isMetricCardConfig(config)) {
-    const metricData = getLatestMetricValues(metrics, config.metric);
+    const metricData = getLatestMetricValues(metrics, config.metric, periodTypeOverride);
+    const periodLabel =
+      metricData.currentPeriodStart && metricData.currentPeriodType
+        ? formatPeriod(metricData.currentPeriodStart, metricData.currentPeriodType)
+        : undefined;
     return (
       <MetricCard
         title={config.title ?? config.metric}
         value={metricData.current}
         previousValue={metricData.previous}
         showTrend={config.showTrend}
+        periodLabel={periodLabel}
       />
     );
   }
@@ -249,17 +254,26 @@ function prepareTableData(
 
 function getLatestMetricValues(
   metrics: MetricValue[],
-  metricName: string
-): { current: number | null; previous: number | null } {
-  const filtered = metrics
-    .filter((m) => m.metric_name.toLowerCase() === metricName.toLowerCase())
-    .sort(
-      (a, b) =>
-        new Date(b.period_start).getTime() - new Date(a.period_start).getTime()
-    );
+  metricName: string,
+  periodType?: PeriodType
+): { current: number | null; previous: number | null; currentPeriodStart: string | null; currentPeriodType: string | null } {
+  let filtered = metrics.filter(
+    (m) => m.metric_name.toLowerCase() === metricName.toLowerCase()
+  );
+
+  if (periodType) {
+    filtered = filtered.filter((m) => m.period_type === periodType);
+  }
+
+  filtered.sort(
+    (a, b) =>
+      new Date(b.period_start).getTime() - new Date(a.period_start).getTime()
+  );
 
   return {
     current: filtered.length > 0 ? getNumericValue(filtered[0].value) : null,
     previous: filtered.length > 1 ? getNumericValue(filtered[1].value) : null,
+    currentPeriodStart: filtered.length > 0 ? filtered[0].period_start : null,
+    currentPeriodType: filtered.length > 0 ? filtered[0].period_type : null,
   };
 }

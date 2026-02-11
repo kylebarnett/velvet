@@ -8,6 +8,7 @@ type MetricCardProps = {
   value: number | null;
   previousValue: number | null;
   showTrend?: boolean;
+  periodLabel?: string;
   onClick?: () => void;
 };
 
@@ -16,6 +17,7 @@ export function MetricCard({
   value,
   previousValue,
   showTrend = true,
+  periodLabel,
   onClick,
 }: MetricCardProps) {
   const percentChange =
@@ -31,7 +33,14 @@ export function MetricCard({
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") onClick(); } : undefined}
     >
-      <div className="text-xs font-medium uppercase tracking-wider text-text-muted">{title}</div>
+      <div className="text-xs font-medium uppercase tracking-wider text-text-muted">
+        {title}
+        {periodLabel && (
+          <span className="ml-1.5 font-normal normal-case tracking-normal text-text-faint">
+            · {periodLabel}
+          </span>
+        )}
+      </div>
       <div className="mt-2 flex items-end justify-between">
         <span className="text-2xl font-semibold">
           {formatValue(value, title)}
