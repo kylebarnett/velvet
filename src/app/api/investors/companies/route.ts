@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { parsePagination } from "@/lib/api/pagination";
+import { unwrapJoin } from "@/lib/api/utils";
 import { logger } from "@/lib/logger";
 
 // GET - List all companies in investor's portfolio with tags
@@ -43,7 +44,7 @@ export async function GET(req: Request) {
   }
 
   const companies = (relationships ?? []).map((r) => {
-    const company = Array.isArray(r.companies) ? r.companies[0] : r.companies;
+    const company = unwrapJoin(r.companies);
     return {
       relationshipId: r.id,
       approvalStatus: r.approval_status,

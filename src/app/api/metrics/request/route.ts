@@ -35,10 +35,10 @@ export async function POST(req: Request) {
   if (!parsed.success) return jsonError("Invalid request body.", 400);
 
   const { supabase, user } = await getApiUser();
-  if (!user) return jsonError("Unauthorized", 401);
+  if (!user) return jsonError("Unauthorized.", 401);
 
   const role = (user.user_metadata?.role as string | undefined) ?? null;
-  if (role !== "investor") return jsonError("Forbidden", 403);
+  if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const { companyId, metricName, periodType, year, quarter, dueDate } =
     parsed.data;

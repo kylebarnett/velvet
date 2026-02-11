@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Play, Pause, Trash2, RefreshCw } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { useToast } from "@/hooks/use-toast";
 import { calculateNextRunDate } from "@/lib/schedules";
 
 interface ScheduleDetailActionsProps {
@@ -22,21 +23,9 @@ export function ScheduleDetailActions({
 }: ScheduleDetailActionsProps) {
   const router = useRouter();
   const [loading, setLoading] = React.useState<string | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
-  const [success, setSuccess] = React.useState<string | null>(null);
+  const { error, success, setError, setSuccess } = useToast();
   const [active, setActive] = React.useState(isActive);
   const [deleteModal, setDeleteModal] = React.useState(false);
-
-  // Auto-dismiss messages
-  React.useEffect(() => {
-    if (error || success) {
-      const timer = setTimeout(() => {
-        setError(null);
-        setSuccess(null);
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, success]);
 
   const handlePause = async () => {
     setLoading("pause");
@@ -109,7 +98,7 @@ export function ScheduleDetailActions({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to delete schedule");
 
-      router.push("/campaigns?tab=schedules");
+      router.push("/campaigns");
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to delete schedule");

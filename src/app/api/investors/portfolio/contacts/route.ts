@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 
@@ -219,7 +220,7 @@ export async function DELETE(req: Request) {
 
   // Only delete company if no founder has signed up AND no other investors are linked
   const companiesRaw = invitation.companies;
-  const company = (Array.isArray(companiesRaw) ? companiesRaw[0] : companiesRaw) as { founder_id: string | null } | null;
+  const company = unwrapJoin(companiesRaw) as { founder_id: string | null } | null;
   if (!company?.founder_id) {
     const { count } = await adminClient
       .from("investor_company_relationships")

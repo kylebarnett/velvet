@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 
@@ -20,7 +21,7 @@ export async function GET() {
     .eq("user_id", user.id);
 
   const orgs = (memberships ?? []).map((m) => {
-    const org = Array.isArray(m.organizations) ? m.organizations[0] : m.organizations;
+    const org = unwrapJoin(m.organizations);
     return {
       id: org?.id,
       name: org?.name,

@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { INDUSTRY_LABELS } from "@/lib/constants/industries";
 
 type TemplateItem = {
   id: string;
@@ -55,16 +56,6 @@ type Company = {
   industry: string | null;
 };
 
-const INDUSTRY_LABELS: Record<string, string> = {
-  saas: "SaaS",
-  fintech: "Fintech",
-  healthcare: "Healthcare",
-  ecommerce: "E-commerce",
-  edtech: "EdTech",
-  ai_ml: "AI/ML",
-  other: "General",
-};
-
 function MetricChip({ name }: { name: string }) {
   const [showTooltip, setShowTooltip] = React.useState(false);
   const metricInfo = getMetricDefinition(name);
@@ -74,6 +65,9 @@ function MetricChip({ name }: { name: string }) {
       className="relative inline-block"
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
+      onFocus={() => setShowTooltip(true)}
+      onBlur={() => setShowTooltip(false)}
+      tabIndex={0}
     >
       <span className="rounded-full bg-bg-hover px-2 py-0.5 text-xs text-text-secondary cursor-default">
         {name}
@@ -505,11 +499,11 @@ export function UnifiedRequestWizard() {
           )}
           <div className="mt-6 flex items-center justify-center gap-3">
             <button
-              onClick={() => router.push(result.type === "recurring" ? "/campaigns?tab=schedules" : "/campaigns")}
+              onClick={() => router.push("/campaigns")}
               className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
-              {result.type === "recurring" ? "View Schedules" : "View Campaigns"}
+              View Requests
             </button>
             <button
               onClick={() => {
@@ -620,7 +614,7 @@ export function UnifiedRequestWizard() {
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-medium text-text-secondary">My Templates</h2>
                 <Link
-                  href="/campaigns?tab=templates"
+                  href="/campaigns/templates"
                   className="text-xs text-text-muted hover:text-text-secondary"
                 >
                   Manage templates

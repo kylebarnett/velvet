@@ -162,18 +162,24 @@ export function MetricDetailPanel({
     }
   }, [periodDropdownOpen]);
 
-  // Fetch data
+  // Fetch data with abort support to prevent state updates on unmounted component
   React.useEffect(() => {
+    const controller = new AbortController();
+
     async function load() {
       try {
         const res = await fetch(
           `/api/metrics/detail?companyId=${encodeURIComponent(companyId)}&metricName=${encodeURIComponent(metricName)}`,
+          { signal: controller.signal },
         );
+        if (controller.signal.aborted) return;
         if (!res.ok) {
           const json = await res.json().catch(() => null);
           throw new Error(json?.error ?? "Failed to load metric details.");
         }
         const json = await res.json();
+        if (controller.signal.aborted) return;
+
         const loadedValues: MetricValue[] = json.values ?? [];
         setValues(loadedValues);
         setHistory(json.history ?? []);
@@ -191,12 +197,15 @@ export function MetricDetailPanel({
           );
         }
       } catch (err: unknown) {
+        if (controller.signal.aborted) return;
         setError(err instanceof Error ? err.message : "Something went wrong.");
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }
     load();
+
+    return () => controller.abort();
   }, [companyId, metricName, initialPeriod]);
 
   // Compute chart data
@@ -346,16 +355,28 @@ export function MetricDetailPanel({
               <button
                 type="button"
                 onClick={() => setPeriodDropdownOpen((p) => !p)}
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                    e.preventDefault();
+                    if (!periodDropdownOpen) setPeriodDropdownOpen(true);
+                  }
+                }}
                 className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-1.5 text-[13px] text-text-secondary transition-all duration-200 hover:border-border-default hover:bg-bg-hover hover:text-text-primary"
+                aria-haspopup="listbox"
+                aria-expanded={periodDropdownOpen}
               >
-                <Calendar className="h-3.5 w-3.5 text-text-muted" />
+                <Calendar className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" />
                 <span className="tabular-nums">{selectedPeriodLabel}</span>
                 <ChevronDown
                   className={`h-3 w-3 text-text-muted transition-transform duration-150 ${periodDropdownOpen ? "rotate-180" : ""}`}
+                  aria-hidden="true"
                 />
               </button>
               {periodDropdownOpen && (
-                <div className="absolute left-0 top-full z-50 mt-1.5 max-h-64 w-56 overflow-y-auto rounded-xl border border-border-subtle bg-bg-secondary py-1 shadow-xl">
+                <div
+                  role="listbox"
+                  className="absolute left-0 top-full z-50 mt-1.5 max-h-64 w-56 overflow-y-auto rounded-xl border border-border-subtle bg-bg-secondary py-1 shadow-xl"
+                >
                   {[...values].reverse().map((v, revIdx) => {
                     const realIdx = values.length - 1 - revIdx;
                     const label = formatPeriod(v.period_start, v.period_type);
@@ -364,6 +385,8 @@ export function MetricDetailPanel({
                       <button
                         key={v.id}
                         type="button"
+                        role="option"
+                        aria-selected={isSelected}
                         onClick={() => {
                           setSelectedPeriodIndex(realIdx);
                           setPeriodDropdownOpen(false);

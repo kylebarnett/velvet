@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { unwrapJoin } from "@/lib/api/utils";
 import { sendEmailBatchWithRetry } from "@/lib/email/retry";
 import { escapeHtml } from "@/lib/utils/html";
 import { z } from "zod";
@@ -51,10 +52,8 @@ export async function POST(req: Request) {
   >();
 
   for (const r of requests) {
-    const company = Array.isArray(r.companies) ? r.companies[0] : r.companies;
-    const def = Array.isArray(r.metric_definitions)
-      ? r.metric_definitions[0]
-      : r.metric_definitions;
+    const company = unwrapJoin(r.companies);
+    const def = unwrapJoin(r.metric_definitions);
     if (!company?.founder_email || !def) continue;
 
     const email = company.founder_email;

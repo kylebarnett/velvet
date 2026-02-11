@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { INDUSTRY_LABELS, STAGE_LABELS } from "@/lib/constants/industries";
 
 type TopPerformersProps = {
   companies: Array<{
@@ -13,30 +14,12 @@ type TopPerformersProps = {
   }>;
 };
 
-const INDUSTRY_LABELS: Record<string, string> = {
-  saas: "SaaS",
-  fintech: "Fintech",
-  healthcare: "Healthcare",
-  ecommerce: "E-commerce",
-  edtech: "EdTech",
-  ai_ml: "AI/ML",
-  other: "Other",
-};
-
 const STAGE_COLORS: Record<string, string> = {
   seed: "bg-[var(--tag-amber-bg)] text-[var(--tag-amber-text)] ring-[var(--tag-amber-bg)]",
   series_a: "bg-[var(--tag-blue-bg)] text-[var(--tag-blue-text)] ring-[var(--tag-blue-bg)]",
   series_b: "bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)] ring-[var(--tag-violet-bg)]",
   series_c: "bg-[var(--tag-pink-bg)] text-[var(--tag-pink-text)] ring-[var(--tag-pink-bg)]",
   growth: "bg-[var(--tag-emerald-bg)] text-[var(--tag-emerald-text)] ring-[var(--tag-emerald-bg)]",
-};
-
-const STAGE_LABELS: Record<string, string> = {
-  seed: "Seed",
-  series_a: "Series A",
-  series_b: "Series B",
-  series_c: "Series C",
-  growth: "Growth",
 };
 
 // Medal colors for top 3

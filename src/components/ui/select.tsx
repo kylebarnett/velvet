@@ -24,7 +24,7 @@ const SelectTrigger = React.forwardRef<
       "hover:border-border-default/150 focus:border-[var(--ring-focus)]",
       "disabled:cursor-not-allowed disabled:opacity-50",
       "data-[placeholder]:text-text-muted",
-      size === "sm" ? "h-9" : "h-10",
+      size === "sm" ? "h-9" : "h-11",
       className
     )}
     {...props}

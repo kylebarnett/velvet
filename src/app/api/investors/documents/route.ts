@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { parsePagination } from "@/lib/api/pagination";
+import { unwrapJoin } from "@/lib/api/utils";
 import { logger } from "@/lib/logger";
 
 // GET - List all documents across investor's portfolio
@@ -87,7 +88,7 @@ export async function GET(req: Request) {
   const result = (documents ?? []).map((doc) => {
     // Handle Supabase join type (may be array or single object)
     const companyRaw = doc.companies;
-    const company = (Array.isArray(companyRaw) ? companyRaw[0] : companyRaw) as { id: string; name: string } | null;
+    const company = unwrapJoin(companyRaw) as { id: string; name: string } | null;
     return {
       id: doc.id,
       file_name: doc.file_name,

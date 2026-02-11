@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { INDUSTRY_LABELS } from "@/lib/constants/industries";
 
 type Template = {
   id: string;
@@ -44,16 +45,6 @@ const STEPS = [
   { id: "cadence", label: "Configure Cadence" },
   { id: "reminders", label: "Set Reminders" },
 ];
-
-const INDUSTRY_LABELS: Record<string, string> = {
-  saas: "SaaS",
-  fintech: "Fintech",
-  healthcare: "Healthcare",
-  ecommerce: "E-commerce",
-  edtech: "EdTech",
-  ai_ml: "AI/ML",
-  other: "General",
-};
 
 export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
   const router = useRouter();
@@ -143,7 +134,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to create schedule");
 
-      router.push("/campaigns?tab=schedules");
+      router.push("/campaigns");
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create schedule");

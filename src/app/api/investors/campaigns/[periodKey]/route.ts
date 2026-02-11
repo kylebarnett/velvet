@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { unwrapJoin } from "@/lib/api/utils";
 
 type RawRequest = {
   id: string;
@@ -101,11 +102,11 @@ export async function GET(
 
   for (const r of requests) {
     const companyRaw = r.companies;
-    const company = Array.isArray(companyRaw) ? companyRaw[0] : companyRaw;
+    const company = unwrapJoin(companyRaw);
     if (!company) continue;
 
     const defRaw = r.metric_definitions;
-    const def = Array.isArray(defRaw) ? defRaw[0] : defRaw;
+    const def = unwrapJoin(defRaw);
     const metricName = def?.name ?? "Unknown metric";
 
     let bucket = companyMap.get(company.id);

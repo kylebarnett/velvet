@@ -58,13 +58,14 @@ async function handler(req: Request) {
     companyMap.set(c.id, c);
   }
 
-  // Fetch all metric values in batches to prevent memory exhaustion at scale.
+  // Fetch metric values in batches with a hard cap to prevent OOM.
   // We take the most recent value per company per metric to avoid double-counting.
   const FETCH_BATCH_SIZE = 5000;
+  const MAX_TOTAL_ROWS = 50_000;
   let fetchOffset = 0;
   const metricValues: MetricValueRow[] = [];
 
-  while (true) {
+  while (metricValues.length < MAX_TOTAL_ROWS) {
     const { data: batch, error: mvError } = await adminClient
       .from("company_metric_values")
       .select("metric_name, period_type, value, company_id")
@@ -83,6 +84,10 @@ async function handler(req: Request) {
     metricValues.push(...(batch as MetricValueRow[]));
     fetchOffset += FETCH_BATCH_SIZE;
     if (batch.length < FETCH_BATCH_SIZE) break;
+  }
+
+  if (metricValues.length >= MAX_TOTAL_ROWS) {
+    logger.warn(`Benchmark calculation capped at ${MAX_TOTAL_ROWS} rows`);
   }
 
   // Deduplicate: keep only the most recent value per company per metric+periodType
@@ -233,6 +238,3 @@ export async function POST(req: Request) {
   return handler(req);
 }
 
-export async function GET(req: Request) {
-  return handler(req);
-}

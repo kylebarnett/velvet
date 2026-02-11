@@ -116,8 +116,8 @@ function SidebarTooltip({ label, children }: { label: string; children: React.Re
       {children}
       {pos && (
         <div
-          className="fixed z-[100] whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-medium text-white shadow-lg"
-          style={{ top: pos.top, left: pos.left, transform: "translateY(-50%)", backgroundColor: "#1c1c20", border: "1px solid rgba(255,255,255,0.12)" }}
+          className="fixed z-[100] whitespace-nowrap rounded-md border border-border-default bg-bg-elevated px-2.5 py-1.5 text-xs font-medium text-text-primary shadow-lg"
+          style={{ top: pos.top, left: pos.left, transform: "translateY(-50%)" }}
         >
           {label}
         </div>

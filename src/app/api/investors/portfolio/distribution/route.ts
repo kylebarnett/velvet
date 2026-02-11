@@ -2,25 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { logger } from "@/lib/logger";
-
-// Display labels for tag values
-const INDUSTRY_LABELS: Record<string, string> = {
-  saas: "SaaS",
-  fintech: "Fintech",
-  healthcare: "Healthcare",
-  ecommerce: "E-commerce",
-  edtech: "EdTech",
-  ai_ml: "AI/ML",
-  other: "Other",
-};
-
-const STAGE_LABELS: Record<string, string> = {
-  seed: "Seed",
-  series_a: "Series A",
-  series_b: "Series B",
-  series_c: "Series C",
-  growth: "Growth",
-};
+import { INDUSTRY_LABELS, STAGE_LABELS } from "@/lib/constants/industries";
 
 const BUSINESS_MODEL_LABELS: Record<string, string> = {
   b2b: "B2B",

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { addDays } from "date-fns";
 
+import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   calculateReportingPeriod,
@@ -147,9 +148,7 @@ export async function POST(req: Request) {
     }
 
     // Get template items
-    const template = Array.isArray(schedule.metric_templates)
-      ? schedule.metric_templates[0]
-      : schedule.metric_templates;
+    const template = unwrapJoin(schedule.metric_templates);
 
     if (!template || !template.metric_template_items || template.metric_template_items.length === 0) {
       continue;
@@ -273,7 +272,7 @@ export async function POST(req: Request) {
 
     // Process each company
     for (const company of companies ?? []) {
-      const founder = Array.isArray(company.users) ? company.users[0] : company.users;
+      const founder = unwrapJoin(company.users);
 
       // Skip companies without founders
       if (!company.founder_id || !founder) {
@@ -323,20 +322,28 @@ export async function POST(req: Request) {
       }
     }
 
-    // Create reminders for the created requests
+    // Batch-insert reminders for all created requests
     if (schedule.reminder_enabled && createdRequestIds.length > 0) {
       const reminderDates = calculateReminderDates(
         dueDate,
         schedule.reminder_days_before_due
       );
 
-      for (const requestId of createdRequestIds) {
-        for (const reminderDate of reminderDates) {
-          await adminClient.from("metric_request_reminders").insert({
-            metric_request_id: requestId,
-            schedule_id: schedule.id,
-            scheduled_for: reminderDate.toISOString(),
-          });
+      const remindersToInsert = createdRequestIds.flatMap((requestId) =>
+        reminderDates.map((reminderDate) => ({
+          metric_request_id: requestId,
+          schedule_id: schedule.id,
+          scheduled_for: reminderDate.toISOString(),
+        }))
+      );
+
+      if (remindersToInsert.length > 0) {
+        const { error: reminderError } = await adminClient
+          .from("metric_request_reminders")
+          .insert(remindersToInsert);
+
+        if (reminderError) {
+          errors.push({ message: `Reminder insert failed: ${reminderError.message}` });
         }
       }
     }
@@ -352,7 +359,7 @@ export async function POST(req: Request) {
     >();
 
     for (const company of companies ?? []) {
-      const founder = Array.isArray(company.users) ? company.users[0] : company.users;
+      const founder = unwrapJoin(company.users);
       if (!founder?.email) continue;
 
       const existing = founderCompanies.get(founder.id);

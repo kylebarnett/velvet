@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { addDays } from "date-fns";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   calculateReportingPeriod,
@@ -102,9 +103,7 @@ export async function POST(
   }
 
   // Get template items
-  const template = Array.isArray(schedule.metric_templates)
-    ? schedule.metric_templates[0]
-    : schedule.metric_templates;
+  const template = unwrapJoin(schedule.metric_templates);
 
   if (!template || !template.metric_template_items || template.metric_template_items.length === 0) {
     return jsonError("Template has no metrics.", 400);
@@ -137,7 +136,7 @@ export async function POST(
 
   // Process each company
   for (const company of companies ?? []) {
-    const founder = Array.isArray(company.users) ? company.users[0] : company.users;
+    const founder = unwrapJoin(company.users);
 
     // Skip companies without founders (not signed up yet)
     if (!company.founder_id || !founder) {
@@ -277,7 +276,7 @@ export async function POST(
   >();
 
   for (const company of companies ?? []) {
-    const founder = Array.isArray(company.users) ? company.users[0] : company.users;
+    const founder = unwrapJoin(company.users);
     if (!founder?.email) continue;
 
     const existing = founderCompanies.get(founder.id);

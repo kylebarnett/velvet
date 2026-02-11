@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { X, ArrowUpRight, ArrowDownRight, TrendingUp, Building2, ArrowUpDown } from "lucide-react";
 import { formatValue } from "@/components/charts/types";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
+import { INDUSTRY_LABELS, STAGE_LABELS_SHORT } from "@/lib/constants/industries";
 
 export type CompanyMetricBreakdown = {
   companyId: string;
@@ -27,24 +28,6 @@ type Props = {
 
 type SortKey = "value" | "growth" | "name";
 type SortDirection = "asc" | "desc";
-
-const INDUSTRY_LABELS: Record<string, string> = {
-  saas: "SaaS",
-  fintech: "Fintech",
-  healthcare: "Healthcare",
-  ecommerce: "E-commerce",
-  edtech: "EdTech",
-  ai_ml: "AI/ML",
-  other: "Other",
-};
-
-const STAGE_LABELS: Record<string, string> = {
-  seed: "Seed",
-  series_a: "A",
-  series_b: "B",
-  series_c: "C",
-  growth: "Growth",
-};
 
 export function MetricDrilldownPanel({
   metricName,
@@ -258,7 +241,7 @@ function CompanyRow({
     ? INDUSTRY_LABELS[company.industry] ?? company.industry
     : null;
   const stageLabel = company.stage
-    ? STAGE_LABELS[company.stage] ?? company.stage
+    ? STAGE_LABELS_SHORT[company.stage] ?? company.stage
     : null;
 
   return (

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { escapeHtml } from "@/lib/utils/html";
 import { sendEmailBatchWithRetry } from "@/lib/email/retry";
@@ -116,18 +117,16 @@ export async function POST(req: Request) {
     }
   >();
 
+  // Collect reminder IDs to batch-cancel instead of updating one-by-one
+  const cancelIds: string[] = [];
+
   for (const rawReminder of reminders) {
     const reminder = rawReminder as unknown as ReminderWithDetails;
-    const request = Array.isArray(reminder.metric_requests)
-      ? reminder.metric_requests[0]
-      : reminder.metric_requests;
+    const request = unwrapJoin(reminder.metric_requests);
 
     if (!request) {
       // Request was deleted, cancel reminder
-      await adminClient
-        .from("metric_request_reminders")
-        .update({ status: "cancelled", cancelled_at: now.toISOString() })
-        .eq("id", reminder.id);
+      cancelIds.push(reminder.id);
       cancelled++;
       continue;
     }
@@ -135,26 +134,17 @@ export async function POST(req: Request) {
     // Check if request is still pending
     if (request.status !== "pending") {
       // Request already submitted, cancel reminder
-      await adminClient
-        .from("metric_request_reminders")
-        .update({ status: "cancelled", cancelled_at: now.toISOString() })
-        .eq("id", reminder.id);
+      cancelIds.push(reminder.id);
       cancelled++;
       continue;
     }
 
-    const company = Array.isArray(request.companies)
-      ? request.companies[0]
-      : request.companies;
+    const company = unwrapJoin(request.companies);
     const founder = company?.users
-      ? (Array.isArray(company.users) ? company.users[0] : company.users)
+      ? unwrapJoin(company.users)
       : null;
-    const metricDef = Array.isArray(request.metric_definitions)
-      ? request.metric_definitions[0]
-      : request.metric_definitions;
-    const investor = Array.isArray(request.users)
-      ? request.users[0]
-      : request.users;
+    const metricDef = unwrapJoin(request.metric_definitions);
+    const investor = unwrapJoin(request.users);
 
     if (!founder?.email || !company || !metricDef) {
       skipped++;
@@ -185,6 +175,14 @@ export async function POST(req: Request) {
         ],
       });
     }
+  }
+
+  // Batch-cancel all reminders that need cancellation
+  if (cancelIds.length > 0) {
+    await adminClient
+      .from("metric_request_reminders")
+      .update({ status: "cancelled", cancelled_at: now.toISOString() })
+      .in("id", cancelIds);
   }
 
   // Send emails
@@ -266,25 +264,25 @@ export async function POST(req: Request) {
       const result = await sendEmailBatchWithRetry(apiKey, batchPayload);
       sent += result.sent;
 
-      // Mark reminders as sent if the batch succeeded
+      // Batch-mark all reminders as sent
       if (result.sent > 0) {
-        for (const email of batch) {
-          await adminClient
-            .from("metric_request_reminders")
-            .update({ status: "sent", sent_at: now.toISOString() })
-            .in("id", email.reminderIds);
-        }
+        const allSentIds = batch.flatMap((email) => email.reminderIds);
+        await adminClient
+          .from("metric_request_reminders")
+          .update({ status: "sent", sent_at: now.toISOString() })
+          .in("id", allSentIds);
       }
     }
   } else if (!apiKey) {
-    // No API key, mark all as sent for development
-    for (const founder of founderReminders.values()) {
+    // No API key, batch-mark all as sent for development
+    const allDevIds = Array.from(founderReminders.values()).flatMap((f) => f.reminderIds);
+    if (allDevIds.length > 0) {
       await adminClient
         .from("metric_request_reminders")
         .update({ status: "sent", sent_at: now.toISOString() })
-        .in("id", founder.reminderIds);
-      sent++;
+        .in("id", allDevIds);
     }
+    sent = founderReminders.size;
     logger.info(`[DEV] Would send ${founderReminders.size} reminder emails`);
   }
 

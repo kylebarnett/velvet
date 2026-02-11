@@ -13,6 +13,7 @@ import {
   REVENUE_PRIORITY,
 } from "@/lib/reports/aggregation";
 import type { CompanyMetricBreakdown } from "@/components/reports/metric-drilldown-panel";
+import { INDUSTRY_LABELS, STAGE_LABELS } from "@/lib/constants/industries";
 
 type SummaryContentProps = {
   industries?: string;
@@ -35,24 +36,6 @@ type CompanyInfo = {
   industry: string | null;
   stage: string | null;
   logoUrl: string | null;
-};
-
-const INDUSTRY_LABELS: Record<string, string> = {
-  saas: "SaaS",
-  fintech: "Fintech",
-  healthcare: "Healthcare",
-  ecommerce: "E-commerce",
-  edtech: "EdTech",
-  ai_ml: "AI/ML",
-  other: "Other",
-};
-
-const STAGE_LABELS: Record<string, string> = {
-  seed: "Seed",
-  series_a: "Series A",
-  series_b: "Series B",
-  series_c: "Series C",
-  growth: "Growth",
 };
 
 // Priority KPIs that can be drilled down

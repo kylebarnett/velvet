@@ -97,7 +97,7 @@ export function TemplateForm({
       if (onSaved) {
         onSaved();
       } else {
-        router.push("/campaigns?tab=templates");
+        router.push("/campaigns/templates");
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
@@ -208,7 +208,7 @@ export function TemplateForm({
         </button>
         <button
           type="button"
-          onClick={() => onCancel ? onCancel() : router.push("/campaigns?tab=templates")}
+          onClick={() => onCancel ? onCancel() : router.push("/campaigns/templates")}
           className="inline-flex h-10 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-4 text-sm text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
         >
           Cancel

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { unwrapJoin } from "@/lib/api/utils";
 import { logger } from "@/lib/logger";
 
 // GET - List all LP reports across investor's funds
@@ -24,7 +25,7 @@ export async function GET() {
   // Flatten fund name from join
   const formatted = (reports ?? []).map((r) => {
     const fundsRaw = r.funds;
-    const fund = Array.isArray(fundsRaw) ? fundsRaw[0] : fundsRaw;
+    const fund = unwrapJoin(fundsRaw);
     return {
       id: r.id,
       fund_id: r.fund_id,

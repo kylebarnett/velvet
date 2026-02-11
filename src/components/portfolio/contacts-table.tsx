@@ -6,6 +6,7 @@ import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -324,8 +325,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
   const [editForm, setEditForm] = React.useState({ first_name: "", last_name: "", email: "" });
   const [loading, setLoading] = React.useState(false);
   const [fetching, setFetching] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [success, setSuccess] = React.useState<string | null>(null);
+  const { error, success, setError, setSuccess } = useToast();
   const [inviteLinks, setInviteLinks] = React.useState<{ email: string; url: string }[] | null>(null);
   const [deleteModal, setDeleteModal] = React.useState<{ open: boolean; contact: Contact | null }>({
     open: false,
@@ -337,14 +337,6 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
 
   // Track if this is the initial render to avoid unnecessary fetch
   const isInitialMount = React.useRef(true);
-
-  // Auto-dismiss success message after 4 seconds
-  React.useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
 
   // Fetch contacts when pagination, search, or status changes
   React.useEffect(() => {
@@ -385,7 +377,7 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
 
     fetchContacts();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.page, pagination.limit, debouncedSearch, statusFilter]);
+  }, [pagination.page, pagination.limit, debouncedSearch, statusFilter, sortField, sortDir]);
 
   const getCompanyName = (contact: Contact): string => {
     if (!contact.companies) return "";
@@ -411,28 +403,8 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
       : <ArrowDown className="h-3 w-3 text-text-tertiary" />;
   }
 
-  const sortedContacts = React.useMemo(() => {
-    const arr = [...contacts];
-    arr.sort((a, b) => {
-      let cmp = 0;
-      switch (sortField) {
-        case "company":
-          cmp = getCompanyName(a).localeCompare(getCompanyName(b), undefined, { sensitivity: "base" });
-          break;
-        case "contact":
-          cmp = `${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`, undefined, { sensitivity: "base" });
-          break;
-        case "email":
-          cmp = a.email.localeCompare(b.email, undefined, { sensitivity: "base" });
-          break;
-        case "status":
-          cmp = a.status.localeCompare(b.status, undefined, { sensitivity: "base" });
-          break;
-      }
-      return sortDir === "desc" ? -cmp : cmp;
-    });
-    return arr;
-  }, [contacts, sortField, sortDir]);
+  // Server-side sorting via API — contacts are already sorted
+  const sortedContacts = contacts;
 
   const pendingCount = React.useMemo(
     () => contacts.filter((c) => c.status === "pending").length,
@@ -680,12 +652,12 @@ export function ContactsTable({ initialContacts, initialPagination }: Props) {
     <div className="space-y-3">
       {/* Messages — float above the card */}
       {error && (
-        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-2 text-sm text-[var(--status-error-text)]">
+        <div role="alert" className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-4 py-2 text-sm text-[var(--status-success-text)]">
+        <div role="alert" className="rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-4 py-2 text-sm text-[var(--status-success-text)]">
           {success}
         </div>
       )}

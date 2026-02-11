@@ -8,9 +8,8 @@ import {
   ChevronLeft,
   Bell,
   X,
-  Calendar,
+  BarChart3,
   Building2,
-  CheckCircle2,
   Clock,
   AlertTriangle,
   Loader2,
@@ -32,8 +31,11 @@ type Campaign = {
   submittedRequests: number;
   completionPercent: number;
   companyCount: number;
-  companiesSubmitted: number;
-  companiesPending: number;
+  companiesResponded: number;
+  companiesNotResponded: number;
+  companiesPartial: number;
+  companiesFullyComplete: number;
+  responseRate: number;
   dueDate: string | null;
   isOverdue: boolean;
   scheduleName: string | null;
@@ -51,6 +53,53 @@ type CampaignCompany = {
   dueDate: string | null;
   pendingRequestIds: string[];
   metrics: { name: string; status: string }[];
+};
+
+type UrgentCampaign = {
+  periodStart: string;
+  periodEnd: string;
+  periodLabel: string;
+  completionPercent: number;
+  responseRate: number;
+  companiesResponded: number;
+  companyCount: number;
+  dueDate: string | null;
+  isOverdue: boolean;
+};
+
+type AwaitingCompany = {
+  companyId: string;
+  companyName: string;
+  logoUrl: string | null;
+  pendingCount: number;
+  submittedCount: number;
+  totalCount: number;
+  responseStatus: "not_responded" | "partial";
+  earliestDueDate: string | null;
+  isOverdue: boolean;
+};
+
+type CampaignSummary = {
+  activeCampaigns: number;
+
+  // Primary KPIs: response rate
+  portfolioResponseRate: number;
+  totalCompaniesActive: number;
+  respondedCompaniesActive: number;
+  notRespondedCount: number;
+  partialCount: number;
+
+  // Secondary: metric-level completion
+  overallCompletionPercent: number;
+  totalActiveRequests: number;
+  submittedActiveRequests: number;
+
+  // Unchanged
+  overdueCampaigns: number;
+  overdueCompanyCount: number;
+  companiesAwaiting: number;
+  urgentCampaigns: UrgentCampaign[];
+  awaitingCompanies: AwaitingCompany[];
 };
 
 type PeriodFilter = "all" | "quarterly" | "annual";
@@ -154,6 +203,283 @@ function CompanyInitial({ name, logoUrl }: { name: string; logoUrl: string | nul
   );
 }
 
+// ---------- Response Rate Tile (was Collection Health) ----------
+
+function ResponseRateTile({
+  summary,
+  onScrollToCampaign,
+}: {
+  summary: CampaignSummary;
+  onScrollToCampaign: (periodStart: string, periodEnd: string) => void;
+}) {
+  const [expanded, setExpanded] = React.useState(false);
+  const pct = summary.portfolioResponseRate;
+  const hasContent = summary.activeCampaigns > 0;
+
+  return (
+    <div className="rounded-xl border border-border-subtle bg-bg-raised">
+      <button
+        type="button"
+        onClick={() => hasContent && setExpanded((v) => !v)}
+        className={`flex w-full items-start justify-between p-4 text-left transition-colors ${hasContent ? "hover:bg-bg-hover/50 cursor-pointer" : "cursor-default"}`}
+        aria-expanded={hasContent ? expanded : undefined}
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-text-muted">
+            <BarChart3 className="h-3.5 w-3.5" aria-hidden="true" />
+            Response rate
+          </div>
+          <div className="mt-2 flex items-baseline gap-3">
+            <span
+              className={`text-2xl font-semibold tracking-tight ${hasContent ? getProgressTextColor(pct) : "text-text-muted"}`}
+            >
+              {hasContent ? `${pct}%` : "—"}
+            </span>
+            {summary.overdueCampaigns > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-medium text-[var(--status-error-text)]">
+                <AlertTriangle className="h-3 w-3" />
+                {summary.overdueCampaigns} overdue
+              </span>
+            )}
+          </div>
+          {hasContent ? (
+            <div className="mt-2">
+              <div className="h-1.5 w-full rounded-full bg-bg-hover">
+                <div
+                  className={`h-1.5 rounded-full transition-all duration-500 ${getProgressColor(pct)}`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <div className="mt-1 text-xs text-text-muted">
+                {summary.respondedCompaniesActive}/{summary.totalCompaniesActive} companies responded
+              </div>
+              <div className="mt-0.5 text-[11px] text-text-faint">
+                {summary.submittedActiveRequests}/{summary.totalActiveRequests} metrics
+              </div>
+            </div>
+          ) : (
+            <div className="mt-2 text-xs text-text-muted">
+              No active request periods
+            </div>
+          )}
+        </div>
+        {hasContent && (
+          <div className="ml-3 mt-1 shrink-0 text-text-faint">
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            />
+          </div>
+        )}
+      </button>
+
+      <div
+        className="grid transition-all duration-200"
+        style={{ gridTemplateRows: expanded ? "1fr" : "0fr" }}
+      >
+        <div className="overflow-hidden">
+          <div className="border-t border-border-subtle px-4 pb-4 pt-3">
+            {summary.urgentCampaigns.length > 0 ? (
+              <>
+                <div className="mb-2 text-xs font-medium uppercase tracking-wider text-text-faint">
+                  Active request periods
+                </div>
+                <div className="flex flex-col gap-1">
+                  {summary.urgentCampaigns.map((c) => {
+                    const dueDateCtx = getDueDateContext(c.dueDate, c.isOverdue);
+                    return (
+                      <button
+                        key={`${c.periodStart}_${c.periodEnd}`}
+                        type="button"
+                        onClick={() => onScrollToCampaign(c.periodStart, c.periodEnd)}
+                        className="group flex items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-bg-hover/50"
+                      >
+                        <span className="min-w-0 shrink-0 text-sm font-medium text-text-primary">
+                          {c.periodLabel}
+                        </span>
+                        <div className="flex flex-1 items-center gap-2">
+                          <div className="h-1 flex-1 rounded-full bg-bg-hover">
+                            <div
+                              className={`h-1 rounded-full transition-all ${getProgressColor(c.responseRate)}`}
+                              style={{ width: `${c.responseRate}%` }}
+                            />
+                          </div>
+                          <span
+                            className={`shrink-0 text-[11px] font-medium tabular-nums ${getProgressTextColor(c.responseRate)}`}
+                          >
+                            {c.companiesResponded}/{c.companyCount}
+                          </span>
+                        </div>
+                        {dueDateCtx && (
+                          <span className={`shrink-0 text-[11px] ${dueDateCtx.className}`}>
+                            {dueDateCtx.label}
+                          </span>
+                        )}
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0 text-text-faint transition-colors group-hover:text-text-muted" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className="py-4 text-center text-sm text-text-muted">
+                All caught up — no active requests.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Needs Attention Tile (was Awaiting Companies) ----------
+
+function NeedsAttentionTile({ summary }: { summary: CampaignSummary }) {
+  const [expanded, setExpanded] = React.useState(false);
+  const needsAttentionTotal = summary.notRespondedCount + summary.partialCount;
+  const hasContent = needsAttentionTotal > 0;
+
+  return (
+    <div className="rounded-xl border border-border-subtle bg-bg-raised">
+      <button
+        type="button"
+        onClick={() => hasContent && setExpanded((v) => !v)}
+        className={`flex w-full items-start justify-between p-4 text-left transition-colors ${hasContent ? "hover:bg-bg-hover/50 cursor-pointer" : "cursor-default"}`}
+        aria-expanded={hasContent ? expanded : undefined}
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-text-muted">
+            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+            Needs attention
+          </div>
+          <div className="mt-2 flex items-baseline gap-3">
+            <span className="text-2xl font-semibold tracking-tight text-text-primary">
+              {needsAttentionTotal}
+            </span>
+            {summary.overdueCompanyCount > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-medium text-[var(--status-error-text)]">
+                <AlertTriangle className="h-3 w-3" />
+                {summary.overdueCompanyCount} overdue
+              </span>
+            )}
+          </div>
+          {hasContent ? (
+            <div className="mt-2">
+              {/* Segmented bar: no response (red) vs partial (amber) */}
+              <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-bg-hover">
+                {summary.notRespondedCount > 0 && (
+                  <div
+                    className="h-full bg-red-500"
+                    style={{
+                      width: `${(summary.notRespondedCount / needsAttentionTotal) * 100}%`,
+                    }}
+                  />
+                )}
+                {summary.partialCount > 0 && (
+                  <div
+                    className="h-full bg-amber-500"
+                    style={{
+                      width: `${(summary.partialCount / needsAttentionTotal) * 100}%`,
+                    }}
+                  />
+                )}
+              </div>
+              <div className="mt-1 flex items-center gap-1.5 text-xs text-text-muted">
+                {summary.notRespondedCount > 0 && (
+                  <span>{summary.notRespondedCount} no response</span>
+                )}
+                {summary.notRespondedCount > 0 && summary.partialCount > 0 && (
+                  <span className="text-text-faint">&middot;</span>
+                )}
+                {summary.partialCount > 0 && (
+                  <span>{summary.partialCount} partial</span>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-2 text-xs text-text-muted">
+              All companies have responded
+            </div>
+          )}
+        </div>
+        {hasContent && (
+          <div className="ml-3 mt-1 shrink-0 text-text-faint">
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            />
+          </div>
+        )}
+      </button>
+
+      <div
+        className="grid transition-all duration-200"
+        style={{ gridTemplateRows: expanded ? "1fr" : "0fr" }}
+      >
+        <div className="overflow-hidden">
+          <div className="border-t border-border-subtle px-4 pb-4 pt-3">
+            {summary.awaitingCompanies.length > 0 ? (
+              <>
+                <div className="mb-2 text-xs font-medium uppercase tracking-wider text-text-faint">
+                  Outstanding companies
+                </div>
+                <div className="flex flex-col gap-1">
+                  {summary.awaitingCompanies.map((company) => {
+                    const dueDateCtx = getDueDateContext(
+                      company.earliestDueDate,
+                      company.isOverdue,
+                    );
+                    const isNoResponse = company.responseStatus === "not_responded";
+                    return (
+                      <div
+                        key={company.companyId}
+                        className="flex items-center gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-bg-hover/50"
+                      >
+                        <CompanyInitial
+                          name={company.companyName}
+                          logoUrl={company.logoUrl}
+                        />
+                        <Link
+                          href={`/dashboard/${company.companyId}`}
+                          className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary hover:underline"
+                        >
+                          {company.companyName}
+                        </Link>
+                        <span
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                            isNoResponse
+                              ? "bg-[var(--status-error-bg)] text-[var(--status-error-text)]"
+                              : "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]"
+                          }`}
+                        >
+                          {isNoResponse ? "No response" : "Partial"}
+                        </span>
+                        <span className="shrink-0 text-xs tabular-nums text-text-muted">
+                          {company.submittedCount}/{company.totalCount} metrics
+                        </span>
+                        {dueDateCtx && (
+                          <span
+                            className={`hidden shrink-0 text-xs sm:block ${dueDateCtx.className}`}
+                          >
+                            {dueDateCtx.label}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className="py-4 text-center text-sm text-text-muted">
+                All companies have responded.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ---------- Campaign Card ----------
 
 function CampaignCard({ campaign }: { campaign: Campaign }) {
@@ -228,7 +554,7 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
   }
 
   const dueDateCtx = getDueDateContext(campaign.dueDate, campaign.isOverdue);
-  const pendingCompanyCount = campaign.companiesPending;
+  const pendingCompanyCount = campaign.companiesNotResponded + campaign.companiesPartial;
 
   return (
     <div className="rounded-xl border border-border-subtle bg-bg-raised transition-colors">
@@ -261,42 +587,56 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
             )}
           </div>
 
-          {/* Progress bar */}
+          {/* Progress bar — driven by response rate */}
           <div className="space-y-1.5">
             <div className="h-1.5 w-full rounded-full bg-bg-hover">
               <div
-                className={`h-1.5 rounded-full transition-all duration-500 ${getProgressColor(campaign.completionPercent)}`}
-                style={{ width: `${campaign.completionPercent}%` }}
+                className={`h-1.5 rounded-full transition-all duration-500 ${getProgressColor(campaign.responseRate)}`}
+                style={{ width: `${campaign.responseRate}%` }}
               />
             </div>
             <div className="flex items-center justify-between">
-              <span className={`text-xs font-medium tabular-nums ${getProgressTextColor(campaign.completionPercent)}`}>
-                {campaign.completionPercent}%
+              <span className={`text-xs font-medium tabular-nums ${getProgressTextColor(campaign.responseRate)}`}>
+                {campaign.companiesResponded}/{campaign.companyCount} responded ({campaign.responseRate}%)
               </span>
-              <span className="text-xs text-text-muted tabular-nums">
-                {campaign.submittedRequests}/{campaign.totalRequests} requests
+              <span className="text-xs text-text-faint tabular-nums">
+                {campaign.submittedRequests}/{campaign.totalRequests} metrics
               </span>
             </div>
           </div>
 
-          {/* Company summary */}
+          {/* Company breakdown: complete / partial / no response */}
           <div className="flex items-center gap-1.5 text-xs text-text-tertiary">
             <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>
-              {campaign.companyCount} {campaign.companyCount === 1 ? "company" : "companies"}
-            </span>
-            <span className="text-text-faint">&middot;</span>
-            <span className="text-[var(--status-success-text)]">
-              {campaign.companiesSubmitted} submitted
-            </span>
-            {campaign.companiesPending > 0 && (
-              <>
-                <span className="text-text-faint">&middot;</span>
-                <span className="text-[var(--status-warning-text)]">
-                  {campaign.companiesPending} pending
-                </span>
-              </>
+            {campaign.companiesFullyComplete > 0 && (
+              <span className="text-[var(--status-success-text)]">
+                {campaign.companiesFullyComplete} complete
+              </span>
             )}
+            {campaign.companiesFullyComplete > 0 && campaign.companiesPartial > 0 && (
+              <span className="text-text-faint">&middot;</span>
+            )}
+            {campaign.companiesPartial > 0 && (
+              <span className="text-[var(--status-warning-text)]">
+                {campaign.companiesPartial} partial
+              </span>
+            )}
+            {(campaign.companiesFullyComplete > 0 || campaign.companiesPartial > 0) &&
+              campaign.companiesNotResponded > 0 && (
+                <span className="text-text-faint">&middot;</span>
+              )}
+            {campaign.companiesNotResponded > 0 && (
+              <span className="text-[var(--status-error-text)]">
+                {campaign.companiesNotResponded} no response
+              </span>
+            )}
+            {campaign.companiesFullyComplete === 0 &&
+              campaign.companiesPartial === 0 &&
+              campaign.companiesNotResponded === 0 && (
+                <span>
+                  {campaign.companyCount} {campaign.companyCount === 1 ? "company" : "companies"}
+                </span>
+              )}
           </div>
         </div>
 
@@ -336,8 +676,9 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
                   type="button"
                   onClick={() => setRemindResult(null)}
                   className="ml-2 rounded p-0.5 hover:bg-bg-hover"
+                  aria-label="Dismiss"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-3 w-3" aria-hidden="true" />
                 </button>
               </div>
             )}
@@ -483,7 +824,22 @@ function getCompanyStatusBadge(status: string): { label: string; className: stri
 export function CampaignsTabContent() {
   const [campaigns, setCampaigns] = React.useState<Campaign[]>([]);
   const [total, setTotal] = React.useState(0);
-  const [summary, setSummary] = React.useState({ activeCampaigns: 0, companiesAwaiting: 0 });
+  const [summary, setSummary] = React.useState<CampaignSummary>({
+    activeCampaigns: 0,
+    portfolioResponseRate: 0,
+    totalCompaniesActive: 0,
+    respondedCompaniesActive: 0,
+    notRespondedCount: 0,
+    partialCount: 0,
+    overallCompletionPercent: 0,
+    totalActiveRequests: 0,
+    submittedActiveRequests: 0,
+    overdueCampaigns: 0,
+    overdueCompanyCount: 0,
+    companiesAwaiting: 0,
+    urgentCampaigns: [],
+    awaitingCompanies: [],
+  });
   const [loading, setLoading] = React.useState(true);
   const [periodFilter, setPeriodFilter] = React.useState<PeriodFilter>("all");
   const [page, setPage] = React.useState(0);
@@ -521,26 +877,25 @@ export function CampaignsTabContent() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  function handleScrollToCampaign(periodStart: string, periodEnd: string) {
+    const el = document.getElementById(`campaign-${periodStart}_${periodEnd}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      // Flash highlight
+      el.classList.add("ring-2", "ring-[var(--tag-blue-text)]");
+      setTimeout(() => el.classList.remove("ring-2", "ring-[var(--tag-blue-text)]"), 2000);
+    }
+  }
+
   return (
     <div className="space-y-5">
       {/* Summary cards */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-border-default card-surface p-4">
-          <div className="flex items-center gap-2 text-xs text-text-tertiary">
-            <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
-            Active requests
-          </div>
-          <div className="mt-2 text-2xl font-semibold">{summary.activeCampaigns}</div>
-          <div className="mt-0.5 text-[11px] text-text-faint">Open metric request periods</div>
-        </div>
-        <div className="rounded-xl border border-border-default card-surface p-4">
-          <div className="flex items-center gap-2 text-xs text-text-tertiary">
-            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-            Companies awaiting
-          </div>
-          <div className="mt-2 text-2xl font-semibold">{summary.companiesAwaiting}</div>
-          <div className="mt-0.5 text-[11px] text-text-faint">Haven&apos;t submitted yet</div>
-        </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <ResponseRateTile
+          summary={summary}
+          onScrollToCampaign={handleScrollToCampaign}
+        />
+        <NeedsAttentionTile summary={summary} />
       </div>
 
       {/* Period filter tabs */}
@@ -602,10 +957,13 @@ export function CampaignsTabContent() {
         <>
           <div className="space-y-3">
             {campaigns.map((campaign) => (
-              <CampaignCard
+              <div
                 key={`${campaign.periodStart}_${campaign.periodEnd}`}
-                campaign={campaign}
-              />
+                id={`campaign-${campaign.periodStart}_${campaign.periodEnd}`}
+                className="rounded-sm transition-shadow duration-500"
+              >
+                <CampaignCard campaign={campaign} />
+              </div>
             ))}
           </div>
 

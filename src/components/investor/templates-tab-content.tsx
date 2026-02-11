@@ -7,6 +7,7 @@ import { TemplateAssignModal } from "@/components/investor/template-assign-modal
 import { TemplateFormModal } from "@/components/investor/template-form-modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { getMetricDefinition } from "@/lib/metric-definitions";
+import { INDUSTRY_LABELS } from "@/lib/constants/industries";
 
 type TemplateItem = {
   id: string;
@@ -24,16 +25,6 @@ type Template = {
   targetIndustry: string | null;
   created_at: string;
   metric_template_items: TemplateItem[];
-};
-
-const INDUSTRY_LABELS: Record<string, string> = {
-  saas: "SaaS",
-  fintech: "Fintech",
-  healthcare: "Healthcare",
-  ecommerce: "E-commerce",
-  edtech: "EdTech",
-  ai_ml: "AI/ML",
-  other: "General",
 };
 
 function MetricChip({ name }: { name: string }) {

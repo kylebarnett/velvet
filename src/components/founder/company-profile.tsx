@@ -9,6 +9,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 type TagType = "stage" | "industry" | "businessModel";
 
@@ -64,15 +65,7 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
   const [editingWebsite, setEditingWebsite] = React.useState(false);
   const [websiteInput, setWebsiteInput] = React.useState(data.website ?? "");
   const [saving, setSaving] = React.useState(false);
-  const [success, setSuccess] = React.useState<string | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
+  const { success, error, setSuccess, setError } = useToast();
 
   async function saveField(field: string, value: string | null) {
     setSaving(true);

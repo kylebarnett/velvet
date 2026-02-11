@@ -1,18 +1,17 @@
 import { NextResponse } from "next/server";
 
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function GET() {
   try {
-    const adminClient = createSupabaseAdminClient();
-    const { error } = await adminClient
-      .from("users")
+    const supabase = await createSupabaseServerClient();
+    // Simple query to verify DB connectivity — no admin client needed
+    const { error } = await supabase
+      .from("organizations")
       .select("id")
-      .limit(1)
-      .single();
+      .limit(1);
 
-    // We only care that the DB responded, not whether a row was found
-    if (error && error.code !== "PGRST116") {
+    if (error) {
       return NextResponse.json(
         { ok: false, timestamp: new Date().toISOString(), error: "DB unreachable" },
         { status: 503 },

@@ -3,6 +3,7 @@ import {
   aggregateMetricValues,
   extractNumericValue,
 } from "@/lib/reports/aggregation";
+import { unwrapJoin } from "@/lib/api/utils";
 import { formatValue } from "@/components/charts/types";
 
 /* ------------------------------------------------------------------ */
@@ -168,7 +169,7 @@ async function findCompany(
   const lowerName = companyName.toLowerCase();
   for (const row of data) {
     const raw = row.companies;
-    const company = (Array.isArray(raw) ? raw[0] : raw) as CompanyRow | null;
+    const company = unwrapJoin(raw) as CompanyRow | null;
     if (company && company.name.toLowerCase() === lowerName) {
       return company;
     }
@@ -215,7 +216,7 @@ async function getMetricAcrossPortfolio(
   const companies: CompanyRow[] = [];
   for (const row of relData) {
     const raw = row.companies;
-    const company = (Array.isArray(raw) ? raw[0] : raw) as CompanyRow | null;
+    const company = unwrapJoin(raw) as CompanyRow | null;
     if (!company) continue;
 
     // Apply optional filters

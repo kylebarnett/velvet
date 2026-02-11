@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { jsonError } from "@/lib/api/auth";
+import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 // GET - Public tear sheet by share token (no auth required)
@@ -46,9 +47,7 @@ export async function GET(
 
   // Extract company name from join
   const companyRaw = tearSheet.companies;
-  const company = (
-    Array.isArray(companyRaw) ? companyRaw[0] : companyRaw
-  ) as { name: string } | null;
+  const company = unwrapJoin(companyRaw) as { name: string } | null;
 
   // Only expose metrics the founder explicitly selected in the tear sheet
   const contentObj = (tearSheet.content ?? {}) as Record<string, unknown>;

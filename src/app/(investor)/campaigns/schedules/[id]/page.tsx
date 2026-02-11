@@ -159,7 +159,6 @@ export default async function ScheduleDetailPage({
     <div className="space-y-6">
       <Breadcrumbs items={[
         { label: "Metric Requests", href: "/campaigns" },
-        { label: "Schedules", href: "/campaigns?tab=schedules" },
         { label: schedule.name },
       ]} />
 

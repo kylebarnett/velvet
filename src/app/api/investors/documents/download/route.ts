@@ -3,6 +3,7 @@ import archiver from "archiver";
 import { PassThrough } from "stream";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 
@@ -95,7 +96,7 @@ export async function GET(req: Request) {
   for (const doc of documents) {
     // Handle Supabase join type (may be array or single object)
     const companyRaw = doc.companies;
-    const company = (Array.isArray(companyRaw) ? companyRaw[0] : companyRaw) as { name: string } | null;
+    const company = unwrapJoin(companyRaw) as { name: string } | null;
     const companyName = company?.name ?? "Unknown";
 
     // Download file from Supabase Storage
@@ -137,7 +138,7 @@ export async function GET(req: Request) {
   let zipFilename = "velvet-documents";
   if (companyId && documents.length > 0) {
     const companyRaw = documents[0].companies;
-    const company = (Array.isArray(companyRaw) ? companyRaw[0] : companyRaw) as { name: string } | null;
+    const company = unwrapJoin(companyRaw) as { name: string } | null;
     if (company?.name) {
       zipFilename = company.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
     }

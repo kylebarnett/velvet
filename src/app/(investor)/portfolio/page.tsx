@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Building2, Clock, FileText } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
+import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ContactsTable } from "@/components/portfolio/contacts-table";
 import { DownloadCsvButton } from "@/components/portfolio/download-csv-button";
@@ -46,10 +47,10 @@ export default async function PortfolioPage() {
 
   // Sort A-Z by company name, then last name
   const sorted = (allContacts ?? []).sort((a, b) => {
-    const aCompanies = a.companies as { name: string } | { name: string }[] | null;
-    const bCompanies = b.companies as { name: string } | { name: string }[] | null;
-    const companyA = (Array.isArray(aCompanies) ? aCompanies[0]?.name : aCompanies?.name) ?? "";
-    const companyB = (Array.isArray(bCompanies) ? bCompanies[0]?.name : bCompanies?.name) ?? "";
+    const aCompany = unwrapJoin(a.companies) as { name: string } | null;
+    const bCompany = unwrapJoin(b.companies) as { name: string } | null;
+    const companyA = aCompany?.name ?? "";
+    const companyB = bCompany?.name ?? "";
     const cmp = companyA.localeCompare(companyB, undefined, { sensitivity: "base" });
     if (cmp !== 0) return cmp;
     return (a.last_name ?? "").localeCompare(b.last_name ?? "", undefined, { sensitivity: "base" });
