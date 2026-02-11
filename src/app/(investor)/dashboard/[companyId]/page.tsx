@@ -128,24 +128,42 @@ export default async function CompanyDashboardPage({
               currentCompanyName={company.name}
               companies={portfolioCompanies}
             />
-            {company.founder_id ? (
-              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-[var(--status-success-text)]">
-                Founder joined
-              </span>
-            ) : (
-              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-[var(--status-warning-text)]">
-                Pending signup
-              </span>
-            )}
-            {isApproved ? (
-              <span className="rounded-full bg-[var(--status-success-bg)] px-2 py-0.5 text-xs text-[var(--status-success-text)]">
-                Approved
-              </span>
-            ) : (
-              <span className="rounded-full bg-[var(--status-warning-bg)] px-2 py-0.5 text-xs text-[var(--status-warning-text)]">
-                {relationship.approval_status === "denied" ? "Access denied" : "Pending approval"}
-              </span>
-            )}
+            {(() => {
+              const isDenied = relationship.approval_status === "denied";
+
+              const dotColor = isDenied
+                ? "bg-[var(--status-error-text)]"
+                : isApproved
+                  ? "bg-[var(--status-success-text)]"
+                  : "bg-[var(--status-warning-text)]";
+
+              const pillBg = isDenied
+                ? "bg-[var(--status-error-bg)]"
+                : isApproved
+                  ? "bg-[var(--status-success-bg)]"
+                  : "bg-[var(--status-warning-bg)]";
+
+              const pillText = isDenied
+                ? "text-[var(--status-error-text)]"
+                : isApproved
+                  ? "text-[var(--status-success-text)]"
+                  : "text-[var(--status-warning-text)]";
+
+              const label = isDenied
+                ? "Access denied"
+                : isApproved
+                  ? "Connected"
+                  : !company.founder_id
+                    ? "Awaiting founder signup"
+                    : "Pending approval";
+
+              return (
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${pillBg} ${pillText}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
+                  {label}
+                </span>
+              );
+            })()}
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
             <InlineTags
