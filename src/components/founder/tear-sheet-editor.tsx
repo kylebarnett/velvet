@@ -66,9 +66,9 @@ function formatMetricValue(value: string | null, metricName: string): string {
 
 const TrendIcon = ({ trend }: { trend: "up" | "down" | "flat" }) => {
   if (trend === "up")
-    return <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />;
+    return <TrendingUp className="h-3.5 w-3.5 text-[var(--success-accent)]" />;
   if (trend === "down")
-    return <TrendingDown className="h-3.5 w-3.5 text-red-400" />;
+    return <TrendingDown className="h-3.5 w-3.5 text-[var(--error-accent)]" />;
   return <Minus className="h-3.5 w-3.5 text-text-muted" />;
 };
 

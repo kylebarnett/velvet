@@ -46,8 +46,8 @@ export default function DashboardLoading() {
               <div className="flex-1 space-y-2">
                 <div className="h-4 w-28 animate-pulse rounded bg-bg-elevated" />
                 <div className="flex gap-1.5">
-                  <div className="h-5 w-14 animate-pulse rounded-full bg-blue-500/5" />
-                  <div className="h-5 w-16 animate-pulse rounded-full bg-violet-500/5" />
+                  <div className="h-5 w-14 animate-pulse rounded-full bg-[var(--info-bg-subtle)]" />
+                  <div className="h-5 w-16 animate-pulse rounded-full bg-[var(--violet-bg-subtle)]" />
                 </div>
               </div>
             </div>

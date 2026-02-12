@@ -133,7 +133,7 @@ export function DashboardCanvas({
             key={widget.id}
             className={`
               rounded-lg border bg-bg-elevated overflow-hidden
-              ${selectedWidgetId === widget.id ? "border-blue-500/50 ring-1 ring-blue-500/30" : "border-border-default"}
+              ${selectedWidgetId === widget.id ? "border-[var(--info-accent)] ring-1 ring-[var(--ring-focus)]" : "border-border-default"}
             `}
           >
             {/* Widget header */}

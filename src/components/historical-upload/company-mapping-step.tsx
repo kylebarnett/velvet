@@ -159,9 +159,9 @@ export function CompanyMappingStep({
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-300" />
-          <p className="text-sm text-red-200">{error}</p>
+        <div className="flex items-start gap-2 rounded-lg border border-[var(--error-border)] bg-[var(--error-bg-subtle)] p-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--error-accent)]" />
+          <p className="text-sm text-[var(--status-error-text)]">{error}</p>
         </div>
       )}
 
@@ -178,7 +178,7 @@ export function CompanyMappingStep({
                   {mapping.detectedName}
                 </p>
                 {mapping.autoMatched && (
-                  <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
+                  <span className="inline-flex items-center gap-1 text-xs text-[var(--success-accent)]">
                     <CheckCircle2 className="h-3 w-3" />
                     Auto-matched
                   </span>
@@ -194,7 +194,7 @@ export function CompanyMappingStep({
                   e.target.value || null,
                 )
               }
-              className="h-11 min-w-[200px] rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+              className="h-11 min-w-[200px] rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary transition-colors hover:border-border-default focus:border-border-default focus:outline-none"
             >
               <option value="">Skip (exclude)</option>
               {portfolioCompanies.map((pc) => (
@@ -225,7 +225,7 @@ export function CompanyMappingStep({
             className={cn(
               "rounded-md px-4 py-2 text-sm font-medium disabled:opacity-60",
               mappedCount > 0
-                ? "bg-white text-black hover:bg-white/90"
+                ? "bg-btn-primary-bg text-btn-primary-text hover:bg-btn-primary-hover"
                 : "bg-bg-tertiary text-text-tertiary",
             )}
           >

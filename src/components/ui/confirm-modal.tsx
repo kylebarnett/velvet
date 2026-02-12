@@ -83,16 +83,16 @@ export function ConfirmModal({
 
   const iconBgColor =
     variant === "danger"
-      ? "bg-red-500/10"
+      ? "bg-[var(--error-bg-subtle)]"
       : variant === "warning"
-        ? "bg-amber-500/10"
+        ? "bg-[var(--warning-bg-subtle)]"
         : "bg-bg-hover";
 
   const iconColor =
     variant === "danger"
-      ? "text-red-400"
+      ? "text-[var(--error-accent)]"
       : variant === "warning"
-        ? "text-amber-400"
+        ? "text-[var(--warning-accent)]"
         : "text-text-tertiary";
 
   return (
@@ -132,7 +132,7 @@ export function ConfirmModal({
           </Button>
           <Button
             variant={variant === "danger" ? "danger" : "primary"}
-            className={variant === "warning" ? "bg-amber-500 text-white hover:bg-amber-600" : undefined}
+            className={variant === "warning" ? "bg-[var(--warning-solid)] text-white hover:bg-[var(--warning-accent)]" : undefined}
             onClick={onConfirm}
           >
             {confirmLabel}

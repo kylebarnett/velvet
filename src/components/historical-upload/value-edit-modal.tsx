@@ -57,7 +57,7 @@ export function ValueEditModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -65,12 +65,12 @@ export function ValueEditModal({
       aria-modal="true"
       aria-label="Edit metric value"
     >
-      <div className="w-full max-w-md rounded-xl border border-white/10 bg-zinc-900 p-6">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-medium text-text-primary">Edit Value</h3>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-text-tertiary hover:bg-white/10 hover:text-text-secondary"
+            className="rounded-md p-1 text-text-tertiary hover:bg-bg-elevated hover:text-text-secondary"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -86,7 +86,7 @@ export function ValueEditModal({
               type="text"
               value={metricName}
               onChange={(e) => setMetricName(e.target.value)}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+              className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary transition-colors hover:border-border-default focus:border-border-default focus:outline-none"
             />
           </div>
 
@@ -98,7 +98,7 @@ export function ValueEditModal({
               type="text"
               value={rawValue}
               onChange={(e) => setRawValue(e.target.value)}
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+              className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary transition-colors hover:border-border-default focus:border-border-default focus:outline-none"
             />
             {value.value?.unit && (
               <p className="mt-1 text-xs text-text-tertiary">
@@ -116,7 +116,7 @@ export function ValueEditModal({
                 type="date"
                 value={periodStart}
                 onChange={(e) => setPeriodStart(e.target.value)}
-                className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+                className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary transition-colors hover:border-border-default focus:border-border-default focus:outline-none"
               />
             </div>
             <div>
@@ -127,7 +127,7 @@ export function ValueEditModal({
                 type="date"
                 value={periodEnd}
                 onChange={(e) => setPeriodEnd(e.target.value)}
-                className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+                className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary transition-colors hover:border-border-default focus:border-border-default focus:outline-none"
               />
             </div>
           </div>
@@ -146,7 +146,7 @@ export function ValueEditModal({
             </button>
             <button
               type="submit"
-              className="rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90"
+              className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
             >
               Save & Approve
             </button>

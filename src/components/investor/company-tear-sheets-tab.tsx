@@ -11,6 +11,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import { logActivity } from "@/lib/activity/log-activity";
 import { logger } from "@/lib/logger";
 
 type QuarterFilter = "All" | "Q1" | "Q2" | "Q3" | "Q4";
@@ -76,7 +77,7 @@ function TearSheetCard({
             {tearSheet.title}
           </h3>
           <div className="mt-1 flex items-center gap-2">
-            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-[var(--status-success-text)]">
+            <span className="rounded-full bg-[var(--success-bg-muted)] px-2 py-0.5 text-xs text-[var(--status-success-text)]">
               Published
             </span>
             <span className="text-xs text-text-tertiary">
@@ -96,11 +97,13 @@ function TearSheetCard({
 function TearSheetViewer({
   tearSheet,
   metrics,
+  companyId,
   companyName,
   onClose,
 }: {
   tearSheet: TearSheet;
   metrics: TearSheetMetric[];
+  companyId: string;
   companyName: string;
   onClose: () => void;
 }) {
@@ -117,6 +120,12 @@ function TearSheetViewer({
         previewRef.current,
         `${tearSheet.title}.pdf`
       );
+
+      logActivity({
+        companyId,
+        action: "view_tear_sheet",
+        metadata: { tear_sheet_title: tearSheet.title, format: "pdf" },
+      });
     } catch (e: unknown) {
       logger.error("PDF export failed:", e);
     } finally {
@@ -215,6 +224,12 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
     setLoadingMetrics(true);
     setSelectedMetrics([]);
 
+    logActivity({
+      companyId,
+      action: "view_tear_sheet",
+      metadata: { tear_sheet_title: tearSheet.title, quarter: tearSheet.quarter, year: tearSheet.year },
+    });
+
     try {
       const res = await fetch(`/api/investors/companies/${companyId}/tear-sheets/${tearSheet.id}/metrics`);
       const json = await res.json().catch(() => null);
@@ -268,6 +283,7 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
       <TearSheetViewer
         tearSheet={selectedTearSheet}
         metrics={loadingMetrics ? [] : selectedMetrics}
+        companyId={companyId}
         companyName={companyName}
         onClose={handleClose}
       />

@@ -299,7 +299,7 @@ export function CsvImportForm() {
             {[...parsedData.duplicates].map((email) => (
               <span
                 key={email}
-                className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-[var(--status-warning-text)]"
+                className="rounded-full bg-[var(--status-warning-bg)] px-2 py-0.5 text-xs text-[var(--status-warning-text)]"
               >
                 {email}
               </span>
@@ -362,7 +362,7 @@ export function CsvImportForm() {
                   return (
                     <tr
                       key={i}
-                      className={`border-b border-border-subtle ${isDuplicate ? "bg-amber-500/10" : ""}`}
+                      className={`border-b border-border-subtle ${isDuplicate ? "bg-[var(--warning-bg-subtle)]" : ""}`}
                     >
                       <td className="py-2 pr-4 text-text-muted">{i + 1}</td>
                       <td className="py-2 pr-4">{row.company_name}</td>

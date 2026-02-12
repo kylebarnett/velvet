@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Inbox, CheckCircle2 } from "lucide-react";
+import { Inbox, CheckCircle2, Info } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatPeriod } from "@/components/charts/types";
+import { getMetricDefinition, inferMetricValueType } from "@/lib/metric-definitions";
 
 type GroupedRequest = {
   metricName: string;
@@ -17,6 +18,7 @@ type GroupedRequest = {
   investorNames: string[];
   requestIds: string[];
   hasSubmission: boolean;
+  submittedValue?: unknown;
 };
 
 type PeriodGroup = {
@@ -41,15 +43,17 @@ type NotificationListProps = {
 };
 
 function formatPeriodLabel(periodType: string, periodStart: string): string {
+  // Use UTC methods — date-only strings parse as midnight UTC.
   const date = new Date(periodStart);
   if (periodType === "quarterly") {
-    const q = Math.floor(date.getMonth() / 3) + 1;
-    return `Q${q} ${date.getFullYear()} Metrics`;
+    const q = Math.floor(date.getUTCMonth() / 3) + 1;
+    return `Q${q} ${date.getUTCFullYear()} Metrics`;
   }
   if (periodType === "monthly") {
-    return `${date.toLocaleDateString("en-US", { month: "long", year: "numeric" })} Metrics`;
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    return `${monthNames[date.getUTCMonth()]} ${date.getUTCFullYear()} Metrics`;
   }
-  return `${date.getFullYear()} Metrics`;
+  return `${date.getUTCFullYear()} Metrics`;
 }
 
 function getDueUrgency(dueDate: string | null): {
@@ -64,11 +68,11 @@ function getDueUrgency(dueDate: string | null): {
   );
 
   if (diffDays < 0) {
-    return { color: "text-[var(--status-error-text)] bg-red-500/20", label: "Overdue" };
+    return { color: "text-[var(--status-error-text)] bg-[var(--status-error-bg)]", label: "Overdue" };
   }
   if (diffDays <= 3) {
     return {
-      color: "text-[var(--status-warning-text)] bg-amber-500/20",
+      color: "text-[var(--status-warning-text)] bg-[var(--status-warning-bg)]",
       label: `Due in ${diffDays} day${diffDays !== 1 ? "s" : ""}`,
     };
   }
@@ -76,6 +80,64 @@ function getDueUrgency(dueDate: string | null): {
     color: "text-text-tertiary bg-bg-elevated",
     label: `Due ${due.toLocaleDateString()}`,
   };
+}
+
+function formatSubmittedValue(metricName: string, value: unknown): string | null {
+  if (value == null) return null;
+  let raw: string | number;
+  if (typeof value === "object" && value !== null) {
+    const obj = value as Record<string, unknown>;
+    raw = (obj.raw ?? obj.value ?? "") as string | number;
+  } else {
+    raw = value as string | number;
+  }
+
+  const num = typeof raw === "number" ? raw : parseFloat(String(raw));
+  if (isNaN(num)) return String(raw);
+
+  const valueType = inferMetricValueType(metricName);
+  if (valueType === "currency") {
+    if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(1)}M`;
+    if (num >= 1_000) return `$${(num / 1_000).toFixed(0)}K`;
+    return `$${num.toFixed(0)}`;
+  }
+  if (valueType === "percent") return `${num.toFixed(1)}%`;
+  if (valueType === "ratio") return num.toFixed(2);
+  if (valueType === "time") return `${num.toFixed(1)} mo`;
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
+  if (num >= 1_000) return `${(num / 1_000).toFixed(0)}K`;
+  return num.toLocaleString();
+}
+
+function MetricInfoBadge({ metricName }: { metricName: string }) {
+  const [show, setShow] = React.useState(false);
+  const info = getMetricDefinition(metricName);
+  if (!info) return null;
+
+  return (
+    <span className="relative inline-block align-middle">
+      <button
+        type="button"
+        className="text-text-faint hover:text-text-tertiary transition-colors"
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        onClick={(e) => { e.stopPropagation(); setShow(!show); }}
+        aria-label={`Info about ${metricName}`}
+      >
+        <Info className="h-3 w-3" />
+      </button>
+      {show && (
+        <span className="absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 w-56 rounded-lg border border-border-default bg-bg-secondary p-2.5 shadow-xl">
+          <span className="block text-xs text-text-tertiary">{info.description}</span>
+          {info.formula && (
+            <span className="mt-1.5 block rounded bg-bg-elevated px-2 py-1 text-[10px] text-[var(--success-accent)] font-mono">
+              {info.formula}
+            </span>
+          )}
+        </span>
+      )}
+    </span>
+  );
 }
 
 function LoadingSkeleton() {
@@ -278,19 +340,26 @@ export function NotificationList({
                   <span className="text-sm font-medium text-text-secondary">
                     {group.label}
                   </span>
-                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-[var(--status-success-text)]">
+                  <span className="rounded-full bg-[var(--success-bg-muted)] px-2 py-0.5 text-xs font-medium text-[var(--status-success-text)]">
                     Submitted
                   </span>
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {group.metrics.map((m) => (
-                    <span
-                      key={m.metricName}
-                      className="rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-tertiary"
-                    >
-                      {m.metricName}
-                    </span>
-                  ))}
+                  {group.metrics.map((m) => {
+                    const formatted = formatSubmittedValue(m.metricName, m.submittedValue);
+                    return (
+                      <span
+                        key={m.metricName}
+                        className="inline-flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-tertiary"
+                      >
+                        {m.metricName}
+                        {formatted && (
+                          <span className="font-mono text-text-secondary">{formatted}</span>
+                        )}
+                        <MetricInfoBadge metricName={m.metricName} />
+                      </span>
+                    );
+                  })}
                 </div>
                 <div className="mt-2 text-xs text-text-muted">
                   {group.metrics.length} metric
@@ -339,9 +408,10 @@ export function NotificationList({
                   {group.metrics.map((m) => (
                     <span
                       key={m.metricName}
-                      className="rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary"
+                      className="inline-flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary"
                     >
                       {m.metricName}
+                      <MetricInfoBadge metricName={m.metricName} />
                     </span>
                   ))}
                 </div>

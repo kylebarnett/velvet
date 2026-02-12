@@ -47,7 +47,7 @@ function MetricChip({ name }: { name: string }) {
           {metricInfo.formula && (
             <div className="mt-2 rounded bg-bg-elevated px-2 py-1.5">
               <p className="text-[10px] font-medium uppercase tracking-wide text-text-tertiary">Formula</p>
-              <p className="mt-0.5 text-xs text-emerald-400">{metricInfo.formula}</p>
+              <p className="mt-0.5 text-xs text-[var(--success-accent)]">{metricInfo.formula}</p>
             </div>
           )}
         </div>
@@ -450,7 +450,7 @@ export function TemplatesTabContent() {
               title="Delete template"
               aria-label={`Delete ${tmpl.name} template`}
             >
-              <Trash2 className="h-4 w-4 text-red-400/60" />
+              <Trash2 className="h-4 w-4 text-[var(--error-accent)]" />
             </button>
           </div>
         </div>
@@ -489,7 +489,7 @@ export function TemplatesTabContent() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-2">
-                        <div className="h-5 w-16 animate-pulse rounded-full bg-violet-500/20" />
+                        <div className="h-5 w-16 animate-pulse rounded-full bg-[var(--violet-bg-muted)]" />
                         <div className="h-4 w-32 animate-pulse rounded bg-bg-hover" />
                       </div>
                       <div className="h-3 w-48 animate-pulse rounded bg-bg-hover" />
@@ -608,7 +608,7 @@ export function TemplatesTabContent() {
                             label: `${selectedIds.size} template${selectedIds.size > 1 ? "s" : ""}`,
                           })
                         }
-                        className="inline-flex h-7 items-center gap-1 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-2 text-xs text-[var(--status-error-text)] hover:bg-red-500/20 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                        className="inline-flex h-7 items-center gap-1 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-2 text-xs text-[var(--status-error-text)] hover:bg-[var(--error-bg-subtle)] disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--error-ring)]"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         {bulkDeleting ? "Deleting..." : "Delete selected"}

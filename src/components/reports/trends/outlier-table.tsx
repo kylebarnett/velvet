@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { ExportButton } from "@/components/ui/export-button";
+import { downloadCsv } from "@/lib/utils/csv-export";
+import { downloadExcel } from "@/lib/utils/excel-export";
 
 type Outlier = {
   companyId: string;
@@ -15,14 +18,30 @@ type OutlierTableProps = {
 };
 
 export function OutlierTable({ outliers, metricName }: OutlierTableProps) {
+  function handleExport(format: "csv" | "excel" | "pdf") {
+    const headers = ["Company", "Growth (%)", "Direction"];
+    const rows = outliers.map((o) => [
+      o.companyName,
+      o.growth.toFixed(1),
+      o.direction,
+    ]);
+    const dateStr = new Date().toISOString().split("T")[0];
+    const baseName = `outliers-${metricName}-${dateStr}`;
+    if (format === "excel") {
+      downloadExcel({ filename: baseName, headers, rows });
+    } else {
+      downloadCsv(`${baseName}.csv`, headers, rows);
+    }
+  }
+
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent transition-all duration-300 hover:border-border-default">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-violet-500/[0.05] via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[var(--violet-bg-subtle)] via-transparent to-transparent" />
 
       <div className="relative p-5">
         {/* Header */}
         <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 ring-1 ring-violet-500/20 text-violet-400">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--tag-violet-bg)] to-[var(--violet-bg-subtle)] ring-1 ring-[var(--violet-border)] text-[var(--tag-violet-text)]">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -37,13 +56,14 @@ export function OutlierTable({ outliers, metricName }: OutlierTableProps) {
               />
             </svg>
           </div>
-          <div>
+          <div className="flex-1">
             <h3 className="font-semibold text-text-primary">Outliers</h3>
             <p className="text-xs text-text-muted">
               Companies with {metricName} growth &gt;2 standard deviations from
               the mean
             </p>
           </div>
+          {outliers.length > 0 && <ExportButton onExport={handleExport} formats={["csv", "excel"]} />}
         </div>
 
         {outliers.length === 0 ? (
@@ -86,8 +106,8 @@ export function OutlierTable({ outliers, metricName }: OutlierTableProps) {
                       <span
                         className={`text-sm font-semibold tabular-nums ${
                           outlier.growth >= 0
-                            ? "text-emerald-400"
-                            : "text-red-400"
+                            ? "text-[var(--success-accent)]"
+                            : "text-[var(--error-accent)]"
                         }`}
                       >
                         {outlier.growth >= 0 ? "+" : ""}

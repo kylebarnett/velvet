@@ -1,7 +1,9 @@
 "use client";
 
-import { formatValue } from "@/components/charts/types";
-import { getChartColor } from "@/components/charts/types";
+import { formatValue, getChartColor } from "@/components/charts/types";
+import { ExportButton } from "@/components/ui/export-button";
+import { downloadCsv } from "@/lib/utils/csv-export";
+import { downloadExcel } from "@/lib/utils/excel-export";
 import type { NormalizationMode } from "./normalization-toggle";
 
 type ComparisonTableProps = {
@@ -39,6 +41,30 @@ export function ComparisonTable({
   metricName,
   normalization,
 }: ComparisonTableProps) {
+  function getExportData() {
+    const headers = ["Period", ...companies];
+    const rows = data.map((row) => [
+      String(row.period ?? ""),
+      ...companies.map((c) => {
+        const val = row[c];
+        if (val === null || val === undefined) return "";
+        return String(val);
+      }),
+    ]);
+    return { headers, rows };
+  }
+
+  function handleExport(format: "csv" | "excel" | "pdf") {
+    const { headers, rows } = getExportData();
+    const dateStr = new Date().toISOString().split("T")[0];
+    const baseName = `comparison-${metricName}-${dateStr}`;
+    if (format === "excel") {
+      downloadExcel({ filename: baseName, headers, rows });
+    } else {
+      downloadCsv(`${baseName}.csv`, headers, rows);
+    }
+  }
+
   if (!data.length) {
     return (
       <div className="flex h-32 items-center justify-center rounded-xl border border-border-default card-surface text-text-muted">
@@ -49,6 +75,9 @@ export function ComparisonTable({
 
   return (
     <div className="rounded-xl border border-border-default card-surface">
+      <div className="flex items-center justify-end px-4 pt-3">
+        <ExportButton onExport={handleExport} formats={["csv", "excel"]} />
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>

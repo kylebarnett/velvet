@@ -368,13 +368,13 @@ export function EmailPasteModal({
             {/* Confidence legend */}
             <div className="flex items-center gap-4 text-[11px] text-text-muted">
               <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" /> High (&ge;80%)
+                <span className="h-2 w-2 rounded-full bg-[var(--success-accent)]" /> High (&ge;80%)
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-amber-400" /> Verify (50-80%)
+                <span className="h-2 w-2 rounded-full bg-[var(--warning-accent)]" /> Verify (50-80%)
               </span>
               <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-red-400" /> Check (&lt;50%)
+                <span className="h-2 w-2 rounded-full bg-[var(--error-accent)]" /> Check (&lt;50%)
               </span>
             </div>
 
@@ -536,7 +536,7 @@ export function EmailPasteModal({
         {/* Done: Success state */}
         {state === "done" && (
           <div className="flex flex-col items-center justify-center py-12">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--success-bg-muted)]">
               <CheckCircle2 className="h-6 w-6 text-[var(--status-success-text)]" />
             </div>
             <p className="mt-4 text-sm font-medium text-text-primary">

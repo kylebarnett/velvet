@@ -45,7 +45,7 @@ export function MetricHistoryTimeline({ history }: Props) {
     <div className="relative">
       {/* Vertical connector line */}
       {history.length > 1 && (
-        <div className="absolute left-[9px] top-4 bottom-4 w-px bg-gradient-to-b from-blue-400/15 via-white/[0.06] to-transparent" />
+        <div className="absolute left-[9px] top-4 bottom-4 w-px bg-gradient-to-b from-[var(--info-border)] via-[var(--border-subtle)] to-transparent" />
       )}
 
       <div className="space-y-0">
@@ -71,7 +71,7 @@ export function MetricHistoryTimeline({ history }: Props) {
                 <div
                   className={`rounded-full ${
                     isFirst
-                      ? "h-2.5 w-2.5 bg-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.5)] ring-2 ring-blue-400/15"
+                      ? "h-2.5 w-2.5 bg-[var(--info-accent)] shadow-[0_0_10px_var(--info-glow)] ring-2 ring-[var(--info-border)]"
                       : "h-2 w-2 bg-bg-hover ring-1 ring-border-subtle"
                   }`}
                 />

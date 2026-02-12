@@ -126,7 +126,7 @@ export function MemberList({
                     {member.name || member.email}
                   </span>
                   {isOwner && (
-                    <Crown className="h-3.5 w-3.5 text-amber-400" aria-label="Owner" />
+                    <Crown className="h-3.5 w-3.5 text-[var(--warning-accent)]" aria-label="Owner" />
                   )}
                   {isSelf && (
                     <span className="text-[10px] text-text-muted">(you)</span>
@@ -153,7 +153,7 @@ export function MemberList({
                         onClick={() =>
                           setRemoveModal({ open: true, member })
                         }
-                        className="rounded-md p-1.5 text-red-400/60 hover:bg-red-500/10 hover:text-[var(--status-error-text)] focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                        className="rounded-md p-1.5 text-[var(--error-accent)] hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)] focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                         title="Remove member"
                         aria-label={`Remove ${member.name || member.email}`}
                       >

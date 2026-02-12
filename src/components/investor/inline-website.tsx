@@ -108,7 +108,7 @@ export function InlineWebsite({ companyId, website: initialWebsite }: Props) {
         <button
           onMouseDown={(e) => e.preventDefault()}
           onClick={handleSave}
-          className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+          className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--success-bg-muted)] text-[var(--success-accent)] hover:bg-[var(--success-bg-muted-hover)]"
         >
           <Check className="h-3.5 w-3.5" />
         </button>

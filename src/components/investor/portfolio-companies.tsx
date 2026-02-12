@@ -130,7 +130,7 @@ export function PortfolioCompanies({ companies: initialCompanies }: { companies:
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{company.name}</span>
                     {company.founder_id && (
-                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-[var(--status-success-text)]">
+                      <span className="rounded-full bg-[var(--success-bg-muted)] px-2 py-0.5 text-xs text-[var(--status-success-text)]">
                         Founder joined
                       </span>
                     )}

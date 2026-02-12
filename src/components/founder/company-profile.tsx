@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Building2, Globe, Check, X, Pencil } from "lucide-react";
+import { Globe, Check, X, Pencil, MapPin, Users, Calendar, DollarSign, FileText, ExternalLink } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -9,47 +9,9 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import { FounderCompanyLogo } from "@/components/founder/company-logo";
 import { useToast } from "@/hooks/use-toast";
-
-type TagType = "stage" | "industry" | "businessModel";
-
-const TAG_OPTIONS: Record<TagType, { value: string; label: string }[]> = {
-  stage: [
-    { value: "seed", label: "Seed" },
-    { value: "series_a", label: "Series A" },
-    { value: "series_b", label: "Series B" },
-    { value: "series_c", label: "Series C" },
-    { value: "growth", label: "Growth" },
-  ],
-  industry: [
-    { value: "saas", label: "SaaS" },
-    { value: "fintech", label: "Fintech" },
-    { value: "healthcare", label: "Healthcare" },
-    { value: "ecommerce", label: "E-commerce" },
-    { value: "edtech", label: "EdTech" },
-    { value: "ai_ml", label: "AI/ML" },
-    { value: "other", label: "Other" },
-  ],
-  businessModel: [
-    { value: "b2b", label: "B2B" },
-    { value: "b2c", label: "B2C" },
-    { value: "b2b2c", label: "B2B2C" },
-    { value: "marketplace", label: "Marketplace" },
-    { value: "other", label: "Other" },
-  ],
-};
-
-const TAG_COLORS: Record<TagType, string> = {
-  stage: "bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)] border-[var(--tag-violet-bg)]",
-  industry: "bg-[var(--tag-blue-bg)] text-[var(--tag-blue-text)] border-[var(--tag-blue-bg)]",
-  businessModel: "bg-[var(--tag-emerald-bg)] text-[var(--tag-emerald-text)] border-[var(--tag-emerald-bg)]",
-};
-
-function getTagLabel(type: TagType, value: string | null): string {
-  if (!value) return "Not set";
-  const opt = TAG_OPTIONS[type].find((o) => o.value === value);
-  return opt?.label ?? value;
-}
+import { TAG_OPTIONS, TAG_COLORS, getTagLabel, type TagType } from "@/lib/company/constants";
 
 type CompanyData = {
   id: string;
@@ -58,7 +20,17 @@ type CompanyData = {
   industry: string | null;
   stage: string | null;
   business_model: string | null;
+  description?: string | null;
+  founded_date?: string | null;
+  hq_location?: string | null;
+  headcount?: number | null;
+  total_funding_raised?: number | null;
+  last_round_amount?: number | null;
+  last_round_date?: string | null;
+  logo_url?: string | null;
 };
+
+const NONE = "__none__";
 
 export function CompanyProfile({ company }: { company: CompanyData }) {
   const [data, setData] = React.useState(company);
@@ -67,7 +39,7 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
   const [saving, setSaving] = React.useState(false);
   const { success, error, setSuccess, setError } = useToast();
 
-  async function saveField(field: string, value: string | null) {
+  async function saveField(field: string, value: string | number | null) {
     setSaving(true);
     setError(null);
     try {
@@ -106,16 +78,18 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
   async function handleTagChange(type: TagType, value: string | null) {
     const field = type === "businessModel" ? "business_model" : type;
     const prev = type === "businessModel" ? data.business_model : data[type as keyof CompanyData] as string | null;
-    // Optimistic update
-    setData((d) => ({
-      ...d,
-      [field]: value,
-    }));
+    setData((d) => ({ ...d, [field]: value }));
     const ok = await saveField(field, value);
     if (!ok) {
       setData((d) => ({ ...d, [field]: prev }));
     }
   }
+
+  const tags: { type: TagType; value: string | null; label: string }[] = [
+    { type: "stage", value: data.stage, label: "Stage" },
+    { type: "industry", value: data.industry, label: "Industry" },
+    { type: "businessModel", value: data.business_model, label: "Model" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -143,39 +117,37 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
         </div>
       )}
 
-      <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
-        {/* Company Name (read-only) */}
-        <div className="flex items-center justify-between px-5 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-bg-hover">
-              <Building2 className="h-5 w-5 text-text-tertiary" />
-            </div>
-            <div>
-              <div className="text-xs text-text-tertiary">Company Name</div>
-              <div className="font-medium">{data.name}</div>
-            </div>
-          </div>
-          <span className="rounded-full bg-bg-elevated px-2.5 py-1 text-xs text-text-muted">
-            Locked
-          </span>
-        </div>
+      {/* Hero section — Logo + Name + Website + Tags */}
+      <div className="rounded-xl border border-border-default card-surface px-6 py-5">
+        <div className="flex items-start gap-5">
+          <FounderCompanyLogo
+            companyId={data.id}
+            companyName={data.name}
+            logoUrl={data.logo_url ?? null}
+            editable
+            size="xl"
+            onLogoChange={(url) => setData((d) => ({ ...d, logo_url: url }))}
+          />
 
-        {/* Website (editable) */}
-        <div className="flex items-center justify-between px-5 py-4">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-bg-hover">
-              <Globe className="h-5 w-5 text-text-tertiary" />
+          <div className="min-w-0 flex-1">
+            {/* Name (locked) */}
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold tracking-tight truncate">{data.name}</h2>
+              <span className="rounded-full bg-bg-elevated px-2 py-0.5 text-[10px] font-medium text-text-muted">
+                Locked
+              </span>
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xs text-text-tertiary">Website</div>
+
+            {/* Website — click to edit */}
+            <div className="mt-1">
               {editingWebsite ? (
-                <div className="mt-1 flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <input
                     type="text"
                     value={websiteInput}
                     onChange={(e) => setWebsiteInput(e.target.value)}
                     placeholder="example.com"
-                    className="h-9 flex-1 rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
+                    className="h-8 w-64 rounded-md border border-border-default bg-bg-input px-2.5 text-sm focus:border-border-default focus:outline-none"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === "Enter") handleWebsiteSave();
@@ -189,7 +161,7 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
                     type="button"
                     onClick={handleWebsiteSave}
                     disabled={saving}
-                    className="flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+                    className="flex h-8 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
                   >
                     <Check className="h-3.5 w-3.5" />
                     Save
@@ -200,109 +172,332 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
                       setEditingWebsite(false);
                       setWebsiteInput(data.website ?? "");
                     }}
-                    className="flex h-9 items-center rounded-md border border-border-default px-3 text-sm text-text-tertiary hover:bg-bg-hover"
+                    className="flex h-8 items-center rounded-md border border-border-default px-3 text-sm text-text-tertiary hover:bg-bg-hover"
                   >
                     Cancel
                   </button>
                 </div>
+              ) : data.website ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setWebsiteInput(data.website ?? "");
+                    setEditingWebsite(true);
+                  }}
+                  className="group flex items-center gap-1 text-sm text-text-muted hover:text-text-secondary transition-colors"
+                >
+                  <Globe className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span className="truncate max-w-[240px]">{data.website.replace(/^https?:\/\//, "")}</span>
+                  <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                </button>
               ) : (
-                <div className="flex items-center gap-2">
-                  {data.website ? (
-                    <a
-                      href={data.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-text-secondary hover:text-text-primary hover:underline truncate"
-                    >
-                      {data.website}
-                    </a>
-                  ) : (
-                    <span className="text-sm text-text-muted">Not set</span>
-                  )}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditingWebsite(true)}
+                  className="text-sm text-text-faint hover:text-text-tertiary transition-colors italic"
+                >
+                  + Add website
+                </button>
               )}
             </div>
+
+            {/* Tags — inline editable badges */}
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              {tags.map((tag) => (
+                <InlineTagBadge
+                  key={tag.type}
+                  type={tag.type}
+                  value={tag.value}
+                  label={tag.label}
+                  saving={saving}
+                  onChange={(v) => handleTagChange(tag.type, v)}
+                />
+              ))}
+            </div>
           </div>
-          {!editingWebsite && (
-            <button
-              type="button"
-              onClick={() => {
-                setWebsiteInput(data.website ?? "");
-                setEditingWebsite(true);
+        </div>
+      </div>
+
+      {/* Details — two-column grid */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Left: Company Details */}
+        <div className="space-y-1">
+          <h2 className="text-base font-medium">Company Details</h2>
+          <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
+            <EditableTextField
+              label="Description"
+              icon={FileText}
+              value={data.description ?? ""}
+              placeholder="Brief description of your company..."
+              multiline
+              saving={saving}
+              onSave={async (v) => {
+                const ok = await saveField("description", v || null);
+                if (ok) setData((d) => ({ ...d, description: v || null }));
+                return ok;
               }}
-              className="shrink-0 rounded-md p-2 text-text-muted hover:text-text-secondary hover:bg-bg-elevated transition-colors"
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-          )}
+            />
+            <EditableTextField
+              label="HQ Location"
+              icon={MapPin}
+              value={data.hq_location ?? ""}
+              placeholder="e.g. San Francisco, CA"
+              saving={saving}
+              onSave={async (v) => {
+                const ok = await saveField("hq_location", v || null);
+                if (ok) setData((d) => ({ ...d, hq_location: v || null }));
+                return ok;
+              }}
+            />
+            <EditableTextField
+              label="Founded"
+              icon={Calendar}
+              value={data.founded_date ?? ""}
+              placeholder="YYYY-MM-DD"
+              inputType="date"
+              saving={saving}
+              onSave={async (v) => {
+                const ok = await saveField("founded_date", v || null);
+                if (ok) setData((d) => ({ ...d, founded_date: v || null }));
+                return ok;
+              }}
+            />
+            <EditableTextField
+              label="Headcount"
+              icon={Users}
+              value={data.headcount != null ? String(data.headcount) : ""}
+              placeholder="e.g. 25"
+              inputType="number"
+              saving={saving}
+              onSave={async (v) => {
+                const num = v ? parseInt(v, 10) : null;
+                const ok = await saveField("headcount", num);
+                if (ok) setData((d) => ({ ...d, headcount: num }));
+                return ok;
+              }}
+            />
+          </div>
         </div>
 
-        {/* Tags Section */}
-        <TagRow
-          label="Stage"
-          type="stage"
-          value={data.stage}
-          onChange={(v) => handleTagChange("stage", v)}
-          saving={saving}
-        />
-        <TagRow
-          label="Industry"
-          type="industry"
-          value={data.industry}
-          onChange={(v) => handleTagChange("industry", v)}
-          saving={saving}
-        />
-        <TagRow
-          label="Business Model"
-          type="businessModel"
-          value={data.business_model}
-          onChange={(v) => handleTagChange("businessModel", v)}
-          saving={saving}
-        />
+        {/* Right: Funding */}
+        <div className="space-y-1">
+          <h2 className="text-base font-medium">Funding</h2>
+          <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
+            <EditableTextField
+              label="Total Funding Raised"
+              icon={DollarSign}
+              value={data.total_funding_raised != null ? String(data.total_funding_raised) : ""}
+              placeholder="e.g. 5000000"
+              inputType="number"
+              saving={saving}
+              formatDisplay={(v) => {
+                const num = parseInt(v, 10);
+                if (isNaN(num)) return v;
+                if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(1)}M`;
+                if (num >= 1_000) return `$${Math.round(num / 1_000)}K`;
+                return `$${num}`;
+              }}
+              onSave={async (v) => {
+                const num = v ? parseInt(v, 10) : null;
+                const ok = await saveField("total_funding_raised", num);
+                if (ok) setData((d) => ({ ...d, total_funding_raised: num }));
+                return ok;
+              }}
+            />
+            <EditableTextField
+              label="Last Round Amount"
+              icon={DollarSign}
+              value={data.last_round_amount != null ? String(data.last_round_amount) : ""}
+              placeholder="e.g. 2000000"
+              inputType="number"
+              saving={saving}
+              formatDisplay={(v) => {
+                const num = parseInt(v, 10);
+                if (isNaN(num)) return v;
+                if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(1)}M`;
+                if (num >= 1_000) return `$${Math.round(num / 1_000)}K`;
+                return `$${num}`;
+              }}
+              onSave={async (v) => {
+                const num = v ? parseInt(v, 10) : null;
+                const ok = await saveField("last_round_amount", num);
+                if (ok) setData((d) => ({ ...d, last_round_amount: num }));
+                return ok;
+              }}
+            />
+            <EditableTextField
+              label="Last Round Date"
+              icon={Calendar}
+              value={data.last_round_date ?? ""}
+              placeholder="YYYY-MM-DD"
+              inputType="date"
+              saving={saving}
+              onSave={async (v) => {
+                const ok = await saveField("last_round_date", v || null);
+                if (ok) setData((d) => ({ ...d, last_round_date: v || null }));
+                return ok;
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-const NONE = "__none__";
+/* ------------------------------------------------------------------ */
+/* EditableTextField — cleaner label-above, value-below layout          */
+/* ------------------------------------------------------------------ */
 
-function TagRow({
+function EditableTextField({
   label,
-  type,
+  icon: Icon,
   value,
-  onChange,
+  placeholder,
+  inputType = "text",
+  multiline = false,
   saving,
+  formatDisplay,
+  onSave,
 }: {
   label: string;
-  type: TagType;
-  value: string | null;
-  onChange: (value: string | null) => void;
+  icon: React.ElementType;
+  value: string;
+  placeholder: string;
+  inputType?: string;
+  multiline?: boolean;
   saving: boolean;
+  formatDisplay?: (value: string) => string;
+  onSave: (value: string) => Promise<boolean>;
 }) {
+  const [editing, setEditing] = React.useState(false);
+  const [input, setInput] = React.useState(value);
+
+  async function handleSave() {
+    const ok = await onSave(input.trim());
+    if (ok) setEditing(false);
+  }
+
+  const displayValue = value
+    ? formatDisplay
+      ? formatDisplay(value)
+      : value
+    : null;
+
   return (
-    <div className="flex items-center justify-between px-5 py-4">
-      <div>
-        <div className="text-xs text-text-tertiary">{label}</div>
-        <div className="mt-1">
-          {value ? (
-            <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${TAG_COLORS[type]}`}>
-              {getTagLabel(type, value)}
-            </span>
+    <div className="group relative px-4 py-3.5">
+      <div className="flex items-start gap-3 min-w-0">
+        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-text-muted" aria-hidden="true" />
+        <div className="min-w-0 flex-1">
+          <div className="text-xs font-medium text-text-muted">{label}</div>
+          {editing ? (
+            <div className="mt-1.5 flex items-center gap-2">
+              {multiline ? (
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={placeholder}
+                  rows={3}
+                  className="flex-1 resize-none rounded-md border border-border-default bg-bg-input px-3 py-2 text-sm focus:border-border-default focus:outline-none"
+                  autoFocus
+                />
+              ) : (
+                <input
+                  type={inputType}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={placeholder}
+                  className="h-8 flex-1 rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSave();
+                    if (e.key === "Escape") {
+                      setEditing(false);
+                      setInput(value);
+                    }
+                  }}
+                />
+              )}
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                className="flex h-8 items-center gap-1 rounded-md bg-btn-primary-bg px-2.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+              >
+                <Check className="h-3 w-3" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(false);
+                  setInput(value);
+                }}
+                className="flex h-8 items-center rounded-md border border-border-default px-2.5 text-xs text-text-tertiary hover:bg-bg-hover"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
           ) : (
-            <span className="text-sm text-text-muted">Not set</span>
+            <div className="mt-0.5 text-sm text-text-secondary">
+              {displayValue ?? <span className="text-text-muted italic">Not set</span>}
+            </div>
           )}
         </div>
+        {!editing && (
+          <button
+            type="button"
+            onClick={() => {
+              setInput(value);
+              setEditing(true);
+            }}
+            className="shrink-0 rounded-md p-1.5 text-text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:text-text-secondary hover:bg-bg-elevated"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Inline Tag Badge — same pattern as portal tabs                      */
+/* ------------------------------------------------------------------ */
+
+function InlineTagBadge({
+  type,
+  value,
+  label,
+  saving,
+  onChange,
+}: {
+  type: TagType;
+  value: string | null;
+  label: string;
+  saving: boolean;
+  onChange: (value: string | null) => void;
+}) {
+  const [editing, setEditing] = React.useState(false);
+
+  if (editing) {
+    return (
       <Select
         value={value ?? NONE}
-        onValueChange={(v) => onChange(v === NONE ? null : v)}
+        onValueChange={(v) => {
+          onChange(v === NONE ? null : v);
+          setEditing(false);
+        }}
         disabled={saving}
+        open
+        onOpenChange={(open) => {
+          if (!open) setEditing(false);
+        }}
       >
-        <SelectTrigger>
-          <SelectValue placeholder="Not set" />
+        <SelectTrigger size="sm" className="h-7 min-w-[100px] text-xs">
+          <SelectValue placeholder={label} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={NONE}>Not set</SelectItem>
+          <SelectItem value={NONE}>None</SelectItem>
           {TAG_OPTIONS[type].map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
               {opt.label}
@@ -310,6 +505,30 @@ function TagRow({
           ))}
         </SelectContent>
       </Select>
-    </div>
+    );
+  }
+
+  if (value) {
+    return (
+      <button
+        type="button"
+        onClick={() => setEditing(true)}
+        className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium transition-opacity hover:opacity-80 ${TAG_COLORS[type]}`}
+        title={`Change ${label.toLowerCase()}`}
+      >
+        {getTagLabel(type, value)}
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setEditing(true)}
+      className="inline-flex rounded-full border border-dashed border-border-default px-2.5 py-0.5 text-xs text-text-faint hover:text-text-tertiary hover:border-border-default transition-colors"
+      title={`Set ${label.toLowerCase()}`}
+    >
+      + {label}
+    </button>
   );
 }

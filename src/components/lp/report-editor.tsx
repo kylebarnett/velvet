@@ -699,12 +699,12 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-semibold tracking-tight">{title || "Untitled Report"}</h1>
           {status === "published" && (
-            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-[var(--status-success-text)]">
+            <span className="rounded-full bg-[var(--success-bg-muted)] px-2 py-0.5 text-xs font-medium text-[var(--status-success-text)]">
               Published
             </span>
           )}
           {isDirty && (
-            <span className="text-xs text-amber-300/80">Unsaved changes</span>
+            <span className="text-xs text-[var(--warning-accent)]">Unsaved changes</span>
           )}
         </div>
         <div className="flex items-center gap-2" data-no-print>
@@ -718,7 +718,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           <button
             onClick={() => setShowDeleteConfirm(true)}
             disabled={deleting}
-            className="flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-[var(--status-error-text)] hover:bg-red-500/10 hover:text-[var(--status-error-text)] disabled:opacity-60"
+            className="flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-[var(--status-error-text)] hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)] disabled:opacity-60"
           >
             <Trash2 className="h-3.5 w-3.5" />
             Delete
@@ -734,7 +734,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             <button
               onClick={() => setShowPublishConfirm(true)}
               disabled={publishing}
-              className="flex h-9 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-sm font-medium text-text-primary hover:bg-emerald-500 disabled:opacity-60"
+              className="flex h-9 items-center gap-1.5 rounded-md bg-[var(--success-solid)] px-3 text-sm font-medium text-text-primary hover:bg-[var(--success-solid)] disabled:opacity-60"
             >
               <Send className="h-3.5 w-3.5" />
               Publish
@@ -743,7 +743,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             <button
               onClick={() => setShowUnpublishConfirm(true)}
               disabled={publishing}
-              className="flex h-9 items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 text-sm font-medium text-[var(--status-warning-text)] hover:bg-amber-500/20 disabled:opacity-60"
+              className="flex h-9 items-center gap-1.5 rounded-md border border-[var(--warning-border)] bg-[var(--warning-bg-subtle)] px-3 text-sm font-medium text-[var(--status-warning-text)] hover:bg-[var(--status-warning-bg)] disabled:opacity-60"
             >
               Unpublish
             </button>
@@ -904,7 +904,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
                             className={cn(
                               "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
                               hasMetricPage
-                                ? "border border-emerald-500/30 bg-emerald-500/10 text-[var(--status-success-text)]"
+                                ? "border border-[var(--success-border)] bg-[var(--success-bg-subtle)] text-[var(--status-success-text)]"
                                 : "border border-border-default text-text-muted hover:bg-bg-hover hover:text-text-secondary",
                             )}
                           >
@@ -915,7 +915,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
                             )}
                             {hasMetricPage ? "Metrics included" : "Include metrics page"}
                             {hasMetricPage && cachedMetrics && (
-                              <span className="ml-1 rounded-full bg-emerald-500/20 px-1.5 text-[10px] font-medium">
+                              <span className="ml-1 rounded-full bg-[var(--success-bg-muted)] px-1.5 text-[10px] font-medium">
                                 {filterMetricsByQuarters(cachedMetrics, metricQuarters[inv.company_id] ?? []).length}
                               </span>
                             )}
@@ -1239,7 +1239,7 @@ function QuarterPicker({
                 className={cn(
                   "rounded px-2 py-0.5 text-[10px] font-medium transition-colors",
                   selectedSet.has(q)
-                    ? "bg-emerald-500/20 text-[var(--status-success-text)] border border-emerald-500/30"
+                    ? "bg-[var(--success-bg-muted)] text-[var(--status-success-text)] border border-[var(--success-border)]"
                     : "bg-bg-elevated text-text-muted border border-transparent hover:bg-bg-hover hover:text-text-secondary",
                 )}
               >

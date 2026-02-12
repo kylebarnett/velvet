@@ -23,6 +23,8 @@ type MetricValue = {
 type CompanyRow = {
   id: string;
   name: string;
+  industry: string | null;
+  stage: string | null;
 };
 
 const GROWTH_BUCKETS = [
@@ -48,6 +50,8 @@ export async function GET(req: Request) {
   const periodType = url.searchParams.get("periodType") ?? "quarterly";
   const periodsParam = url.searchParams.get("periods");
   const periods = periodsParam ? Math.min(Math.max(parseInt(periodsParam, 10) || 8, 1), 24) : 8;
+  const industryFilter = url.searchParams.get("industry") ?? "";
+  const stageFilter = url.searchParams.get("stage") ?? "";
 
   // Escape ILIKE wildcards to prevent injection
   const escapedMetric = metric ? metric.replace(/[%_]/g, "\\$&") : null;
@@ -68,7 +72,9 @@ export async function GET(req: Request) {
       approval_status,
       companies (
         id,
-        name
+        name,
+        industry,
+        stage
       )
     `)
     .eq("investor_id", user.id)
@@ -89,6 +95,11 @@ export async function GET(req: Request) {
       : companyRaw) as CompanyRow | null;
 
     if (!company) continue;
+
+    // Apply cohort filters
+    if (industryFilter && company.industry !== industryFilter) continue;
+    if (stageFilter && company.stage !== stageFilter) continue;
+
     companyMap.set(company.id, company.name);
     companyIds.push(company.id);
   }
@@ -200,17 +211,18 @@ export async function GET(req: Request) {
     const numValue = extractNumericValue(mv.value);
     if (numValue === null) continue;
 
+    // Use UTC methods — date-only strings parse as midnight UTC.
     const periodDate = new Date(mv.period_start);
-    const year = periodDate.getFullYear();
+    const year = periodDate.getUTCFullYear();
     const periodKey = formatPeriodKey(mv.period_start, periodType);
 
     // Create a year-agnostic key for matching
     let subKey: string;
     if (periodType === "quarterly") {
-      const quarter = Math.floor(periodDate.getMonth() / 3) + 1;
+      const quarter = Math.floor(periodDate.getUTCMonth() / 3) + 1;
       subKey = `Q${quarter}`;
     } else if (periodType === "monthly") {
-      subKey = String(periodDate.getMonth() + 1).padStart(2, "0");
+      subKey = String(periodDate.getUTCMonth() + 1).padStart(2, "0");
     } else {
       // Yearly: YoY is just year vs year
       subKey = "annual";

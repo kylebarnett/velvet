@@ -38,12 +38,20 @@ function generateWidgetId(): string {
 }
 
 function parseLayout(layout: unknown): Widget[] {
-  if (!layout) return [];
-  if (Array.isArray(layout)) return layout as Widget[];
-  if (typeof layout === "object" && layout !== null && "widgets" in layout) {
-    return (layout as DashboardLayout).widgets;
+  let widgets: Widget[] = [];
+  if (!layout) return widgets;
+  if (Array.isArray(layout)) {
+    widgets = layout as Widget[];
+  } else if (typeof layout === "object" && layout !== null && "widgets" in layout) {
+    widgets = (layout as DashboardLayout).widgets;
   }
-  return [];
+  // Ensure all table widgets have showAllMetrics so they cannot be deleted
+  return widgets.map((w) => {
+    if (w.type === "table" && w.config && typeof w.config === "object") {
+      return { ...w, config: { ...w.config, showAllMetrics: true } };
+    }
+    return w;
+  });
 }
 
 export function DashboardBuilderClient({

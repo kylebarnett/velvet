@@ -114,7 +114,7 @@ export function DocumentPreviewModal({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-bg-backdrop backdrop-blur-sm"
         onClick={onClose}
       />
 

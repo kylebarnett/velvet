@@ -15,6 +15,7 @@ import {
   DOCUMENT_TYPES,
   getDocumentTypeColor,
 } from "@/lib/utils/document-colors";
+import { logActivity } from "@/lib/activity/log-activity";
 import { DocumentPreviewModal } from "@/components/investor/document-preview-modal";
 
 type DateFilterValue = "all" | "7" | "30" | "90";
@@ -187,6 +188,14 @@ export default function DocumentsPage() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    if (doc.company?.id) {
+      logActivity({
+        companyId: doc.company.id,
+        action: "download_document",
+        metadata: { document_name: doc.file_name, count: 1 },
+      });
+    }
   }
 
   async function downloadSelected() {
@@ -212,6 +221,22 @@ export default function DocumentsPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      // Log per company — each founder sees their own activity
+      const selectedDocs = filteredDocuments.filter((d) => selectedIds.has(d.id));
+      const byCompany = new Map<string, number>();
+      for (const doc of selectedDocs) {
+        if (doc.company?.id) {
+          byCompany.set(doc.company.id, (byCompany.get(doc.company.id) ?? 0) + 1);
+        }
+      }
+      for (const [cId, count] of byCompany) {
+        logActivity({
+          companyId: cId,
+          action: "download_document",
+          metadata: { count, bulk: true },
+        });
+      }
     } finally {
       setDownloading(false);
     }
@@ -246,6 +271,12 @@ export default function DocumentsPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      logActivity({
+        companyId: companyFilter,
+        action: "download_document",
+        metadata: { count: filteredDocuments.length, bulk: true, all: true },
+      });
     } finally {
       setDownloading(false);
     }

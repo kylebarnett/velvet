@@ -14,10 +14,14 @@ import {
   DashboardLayout,
 } from "@/components/dashboard";
 import { DateRange } from "@/components/dashboard/date-range-selector";
-import { Download, Settings, Mail, BarChart3, Clock, FileUp } from "lucide-react";
+import { Download, Settings, Mail, BarChart3, Clock, FileUp, TrendingDown, TrendingUp, Fuel, ChevronDown, FileSpreadsheet, FileText, FileDown, X } from "lucide-react";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 import { EmailPasteModal } from "@/components/founder/email-paste-modal";
+import { AddMetricModal } from "@/components/founder/add-metric-modal";
+import { computeRunway, type RunwayMissing } from "@/lib/metrics/derived-metrics";
+import { downloadExcel } from "@/lib/utils/excel-export";
+import { exportToPdf } from "@/lib/utils/pdf-export";
 import { logger } from "@/lib/logger";
 
 type DashboardView = {
@@ -388,6 +392,357 @@ function EmptyMetricsState({
   );
 }
 
+function ExportDropdown({ isExporting, onExport }: { isExporting: boolean; onExport: (format: "csv" | "excel" | "pdf") => void }) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [open]);
+
+  const options = [
+    { format: "csv" as const, label: "CSV", icon: FileDown },
+    { format: "excel" as const, label: "Excel (.xlsx)", icon: FileSpreadsheet },
+    { format: "pdf" as const, label: "PDF Snapshot", icon: FileText },
+  ];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        disabled={isExporting}
+        className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default disabled:opacity-50"
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        <Download className="h-3.5 w-3.5" />
+        {isExporting ? "Exporting..." : "Export"}
+        <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute right-0 z-50 mt-1 w-44 overflow-hidden rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm" role="menu">
+          <div>
+            {options.map((opt) => {
+              const Icon = opt.icon;
+              return (
+                <button
+                  key={opt.format}
+                  type="button"
+                  role="menuitem"
+                  onClick={() => { onExport(opt.format); setOpen(false); }}
+                  className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary"
+                >
+                  <Icon className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" />
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function getCurrentMonthRange() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return {
+    start: start.toISOString().split("T")[0],
+    end: end.toISOString().split("T")[0],
+  };
+}
+
+function RunwayCard({
+  metrics,
+  companyId,
+  onSubmitted,
+}: {
+  metrics: MetricValue[];
+  companyId: string;
+  onSubmitted: () => void;
+}) {
+  const [hidden, setHidden] = React.useState(false);
+  const [cashInput, setCashInput] = React.useState("");
+  const [burnInput, setBurnInput] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (localStorage.getItem("velvet_runway_hidden") === "true") {
+      setHidden(true);
+    }
+  }, []);
+
+  function handleHide() {
+    localStorage.setItem("velvet_runway_hidden", "true");
+    setHidden(true);
+    fetch("/api/user/preferences", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "runway_hidden", value: true }),
+    }).catch(() => {});
+  }
+
+  function handleShow() {
+    localStorage.removeItem("velvet_runway_hidden");
+    setHidden(false);
+    fetch("/api/user/preferences", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "runway_hidden", value: false }),
+    }).catch(() => {});
+  }
+
+  if (hidden) {
+    return (
+      <button
+        type="button"
+        onClick={handleShow}
+        className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-text-muted hover:text-text-secondary hover:bg-bg-hover transition-colors"
+      >
+        <Fuel className="h-3.5 w-3.5" />
+        Show runway
+      </button>
+    );
+  }
+
+  const result = computeRunway(metrics);
+
+  if ("missing" in result) {
+    const { missing } = result as RunwayMissing;
+    const needsCash = missing.includes("Cash Balance");
+    const needsBurn = missing.includes("Burn Rate");
+
+    async function handleSubmit(e: React.FormEvent) {
+      e.preventDefault();
+      setError(null);
+
+      const submissions: {
+        metricName: string;
+        periodType: "monthly";
+        periodStart: string;
+        periodEnd: string;
+        value: string;
+        source: "manual";
+      }[] = [];
+
+      const { start, end } = getCurrentMonthRange();
+
+      if (needsCash) {
+        const val = cashInput.replace(/[,$\s]/g, "");
+        if (!val || isNaN(Number(val))) {
+          setError("Enter a valid number for Cash Balance.");
+          return;
+        }
+        submissions.push({
+          metricName: "Cash Balance",
+          periodType: "monthly",
+          periodStart: start,
+          periodEnd: end,
+          value: val,
+          source: "manual",
+        });
+      }
+
+      if (needsBurn) {
+        const val = burnInput.replace(/[,$\s]/g, "");
+        if (!val || isNaN(Number(val))) {
+          setError("Enter a valid number for Burn Rate.");
+          return;
+        }
+        submissions.push({
+          metricName: "Burn Rate",
+          periodType: "monthly",
+          periodStart: start,
+          periodEnd: end,
+          value: val,
+          source: "manual",
+        });
+      }
+
+      setSubmitting(true);
+      try {
+        const res = await fetch("/api/metrics/submit-batch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ companyId, submissions }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          setError(data?.error ?? "Submission failed. Please try again.");
+          return;
+        }
+
+        const data = await res.json();
+        if (data.submitted > 0) {
+          onSubmitted();
+        } else {
+          setError("No metrics were saved. Please try again.");
+        }
+      } catch {
+        setError("Network error. Please try again.");
+      } finally {
+        setSubmitting(false);
+      }
+    }
+
+    return (
+      <div className="rounded-xl border border-border-default card-surface p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-text-muted">
+            <Fuel className="h-4 w-4" aria-hidden="true" />
+            <span className="text-xs font-medium uppercase tracking-wider">Runway</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleHide}
+            className="rounded-md p-1 text-text-faint hover:text-text-secondary hover:bg-bg-hover transition-colors"
+            aria-label="Hide runway card"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <p className="mt-2 text-sm text-text-tertiary">
+          Submit {missing.map((name, i) => (
+            <React.Fragment key={name}>
+              {i > 0 && " and "}
+              <span className="font-medium text-text-secondary">{name}</span>
+            </React.Fragment>
+          ))} to see your runway estimate.
+        </p>
+        <form onSubmit={handleSubmit} className="mt-3 space-y-2">
+          {needsCash && (
+            <label className="flex items-center gap-2">
+              <span className="w-28 shrink-0 text-xs text-text-secondary">Cash Balance</span>
+              <div className="relative flex-1">
+                <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-text-muted">$</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={cashInput}
+                  onChange={(e) => setCashInput(e.target.value)}
+                  placeholder="500,000"
+                  className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-6 pr-3 text-sm text-text-primary placeholder:text-text-muted focus:border-border-active focus:outline-none"
+                />
+              </div>
+            </label>
+          )}
+          {needsBurn && (
+            <label className="flex items-center gap-2">
+              <span className="w-28 shrink-0 text-xs text-text-secondary">Burn Rate</span>
+              <div className="relative flex-1">
+                <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-text-muted">$</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={burnInput}
+                  onChange={(e) => setBurnInput(e.target.value)}
+                  placeholder="50,000"
+                  className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-6 pr-10 text-sm text-text-primary placeholder:text-text-muted focus:border-border-active focus:outline-none"
+                />
+                <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-text-muted">/mo</span>
+              </div>
+            </label>
+          )}
+          {error && (
+            <p className="text-xs text-[var(--error-accent)]" role="alert">{error}</p>
+          )}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="mt-1 inline-flex h-8 items-center rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+          >
+            {submitting ? "Submitting..." : "Submit"}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  const runway = result;
+
+  const colorMap = {
+    critical: {
+      bg: "bg-[var(--error-bg-subtle)] border-[var(--error-border)]",
+      text: "text-[var(--error-accent)]",
+      label: "Critical",
+      icon: TrendingDown,
+    },
+    warning: {
+      bg: "bg-[var(--warning-bg-subtle)] border-[var(--warning-border)]",
+      text: "text-[var(--warning-accent)]",
+      label: "Caution",
+      icon: TrendingDown,
+    },
+    healthy: {
+      bg: "bg-[var(--success-bg-subtle)] border-[var(--success-border)]",
+      text: "text-[var(--success-accent)]",
+      label: "Healthy",
+      icon: TrendingUp,
+    },
+  };
+
+  const style = colorMap[runway.urgency];
+  const StatusIcon = style.icon;
+
+  const formatCurrency = (n: number) => {
+    if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
+    return `$${n.toFixed(0)}`;
+  };
+
+  return (
+    <div className={`rounded-xl border p-4 ${style.bg}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-text-muted">
+          <Fuel className="h-4 w-4" aria-hidden="true" />
+          <span className="text-xs font-medium uppercase tracking-wider">Runway</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${style.text}`}>
+            <StatusIcon className="h-3 w-3" aria-hidden="true" />
+            {style.label}
+          </span>
+          <button
+            type="button"
+            onClick={handleHide}
+            className="rounded-md p-1 text-text-faint hover:text-text-secondary hover:bg-bg-hover transition-colors"
+            aria-label="Hide runway card"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+      <div className="mt-2 flex items-baseline gap-1">
+        <span className={`text-2xl font-bold ${style.text}`}>
+          {runway.months.toFixed(1)}
+        </span>
+        <span className="text-sm text-text-tertiary">months</span>
+      </div>
+      <div className="mt-2 flex items-center gap-3 text-xs text-text-muted">
+        <span>Cash: {formatCurrency(runway.cashBalance)}</span>
+        <span>Burn: {formatCurrency(runway.burnRate)}/mo</span>
+      </div>
+    </div>
+  );
+}
+
 export function FounderDashboardClient({
   companyId,
   companyName,
@@ -410,6 +765,7 @@ export function FounderDashboardClient({
     periodStart?: string;
   } | null>(null);
   const [showEmailModal, setShowEmailModal] = React.useState(false);
+  const [showAddMetricModal, setShowAddMetricModal] = React.useState(false);
 
   // Sync views state when props change (e.g., after navigation with fresh server data)
   React.useEffect(() => {
@@ -442,9 +798,52 @@ export function FounderDashboardClient({
     }
   }
 
-  async function handleExport() {
+  const dashboardRef = React.useRef<HTMLDivElement>(null);
+
+  async function handleExport(format: "csv" | "excel" | "pdf" = "csv") {
     setIsExporting(true);
     try {
+      if (format === "pdf") {
+        if (dashboardRef.current) {
+          await exportToPdf({
+            element: dashboardRef.current,
+            filename: `${companyName.replace(/[^a-z0-9]/gi, "_")}_dashboard`,
+            title: `${companyName} — Dashboard`,
+          });
+        }
+        return;
+      }
+
+      if (format === "excel") {
+        // Build Excel from metrics data
+        const metricNames = [...new Set(metrics.map((m) => m.metric_name))].sort();
+        const periods = [...new Set(metrics.map((m) => m.period_start))].sort();
+        const headers = ["Metric", ...periods];
+        const rows = metricNames.map((name) => {
+          const row: (string | number | null)[] = [name];
+          for (const period of periods) {
+            const val = metrics.find((m) => m.metric_name === name && m.period_start === period);
+            const raw = val?.value;
+            if (raw && typeof raw === "object" && "raw" in raw) {
+              row.push(String(raw.raw));
+            } else if (raw !== undefined && raw !== null) {
+              row.push(String(raw));
+            } else {
+              row.push(null);
+            }
+          }
+          return row;
+        });
+        downloadExcel({
+          filename: `${companyName.replace(/[^a-z0-9]/gi, "_")}_metrics`,
+          headers,
+          rows,
+          sheetName: "Metrics",
+        });
+        return;
+      }
+
+      // CSV export via server
       const params = new URLSearchParams();
       if (periodType) params.set("periodType", periodType);
 
@@ -510,7 +909,10 @@ export function FounderDashboardClient({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={dashboardRef}>
+      {/* Runway indicator */}
+      <RunwayCard metrics={metrics} companyId={companyId} onSubmitted={() => router.refresh()} />
+
       {/* Controls bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -536,15 +938,7 @@ export function FounderDashboardClient({
             <Mail className="h-3 w-3" />
             Import from Email
           </button>
-          <button
-            type="button"
-            onClick={handleExport}
-            disabled={isExporting}
-            className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default disabled:opacity-50"
-          >
-            <Download className="h-3.5 w-3.5" />
-            {isExporting ? "Exporting..." : "Export CSV"}
-          </button>
+          <ExportDropdown isExporting={isExporting} onExport={handleExport} />
           <Link
             href="/portal/dashboard/edit"
             className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
@@ -582,6 +976,7 @@ export function FounderDashboardClient({
                   setDetailSelection({ metricName: name, periodStart: period })
                 }
                 companyId={companyId}
+                onAddMetric={() => setShowAddMetricModal(true)}
               />
             </div>
           );
@@ -613,6 +1008,14 @@ export function FounderDashboardClient({
         companyId={companyId}
         onClose={() => setShowEmailModal(false)}
         onMetricsSaved={() => router.refresh()}
+      />
+
+      <AddMetricModal
+        open={showAddMetricModal}
+        companyId={companyId}
+        existingMetricNames={availableMetricNames}
+        onClose={() => setShowAddMetricModal(false)}
+        onSubmitted={() => router.refresh()}
       />
     </div>
   );

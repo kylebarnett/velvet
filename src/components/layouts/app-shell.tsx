@@ -18,6 +18,8 @@ import {
   Sparkles,
   Landmark,
   Upload,
+  TrendingUp,
+  Eye,
   ChevronDown,
   HelpCircle,
   LogOut,
@@ -74,6 +76,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   landmark: Landmark,
   sparkles: Sparkles,
   upload: Upload,
+  "trending-up": TrendingUp,
+  eye: Eye,
 };
 
 function NavIcon({ name, className }: { name?: string; className?: string }) {

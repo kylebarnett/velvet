@@ -108,7 +108,7 @@ function KpiMini({
       <p
         className={cn(
           "mt-0.5 text-lg font-semibold",
-          value === "-" ? "text-text-faint" : good ? "text-emerald-400" : "text-amber-400",
+          value === "-" ? "text-text-faint" : good ? "text-[var(--success-accent)]" : "text-[var(--warning-accent)]",
         )}
       >
         {value}

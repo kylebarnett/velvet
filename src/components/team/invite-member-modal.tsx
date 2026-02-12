@@ -121,7 +121,7 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
                     onClick={copyLink}
                   >
                     {copied ? (
-                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      <Check className="h-3.5 w-3.5 text-[var(--success-accent)]" />
                     ) : (
                       <Copy className="h-3.5 w-3.5" />
                     )}

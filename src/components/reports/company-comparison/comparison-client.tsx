@@ -13,6 +13,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import { useReportsContext } from "@/components/reports/reports-context";
 import { NormalizationToggle, type NormalizationMode } from "./normalization-toggle";
 import { ComparisonChart } from "./comparison-chart";
 import { ComparisonTable } from "./comparison-table";
@@ -113,7 +114,7 @@ function MultiSelectDropdown({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex min-h-[2.75rem] w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
+          "flex min-h-11 w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
           isOpen
             ? "border-border-default bg-bg-sidebar"
             : "border-border-default bg-bg-input hover:border-border-default"
@@ -353,6 +354,48 @@ export function ComparisonClient({
 
   // Abort controller ref for cancelling in-flight requests
   const abortRef = useRef<AbortController | null>(null);
+
+  // Save/load context integration
+  const { setCurrentConfig, loadedReport, clearLoadedReport } = useReportsContext();
+
+  // Register current config with context
+  useEffect(() => {
+    if (selectedCompanies.length > 0 || selectedMetrics.length > 0) {
+      setCurrentConfig({
+        reportType: "comparison",
+        filters: { metrics: selectedMetrics, periodType },
+        companyIds: selectedCompanies,
+        normalize: normalization,
+        config: { viewMode },
+      });
+    }
+  }, [selectedCompanies, selectedMetrics, periodType, normalization, viewMode, setCurrentConfig]);
+
+  // Restore state when a saved report is loaded
+  useEffect(() => {
+    if (!loadedReport || loadedReport.report_type !== "comparison") return;
+
+    const filters = loadedReport.filters as Record<string, unknown> | undefined;
+    const config = loadedReport.config as Record<string, unknown> | undefined;
+
+    if (loadedReport.company_ids && loadedReport.company_ids.length > 0) {
+      setSelectedCompanies(loadedReport.company_ids);
+    }
+    if (filters?.metrics && Array.isArray(filters.metrics)) {
+      setSelectedMetrics(filters.metrics as string[]);
+    }
+    if (filters?.periodType && typeof filters.periodType === "string") {
+      setPeriodType(filters.periodType as PeriodType);
+    }
+    if (loadedReport.normalize) {
+      setNormalization(loadedReport.normalize as NormalizationMode);
+    }
+    if (config?.viewMode && typeof config.viewMode === "string") {
+      setViewMode(config.viewMode as ViewMode);
+    }
+
+    clearLoadedReport();
+  }, [loadedReport, clearLoadedReport]);
 
   const companyOptions = useMemo(
     () => companies.map((c) => ({ value: c.id, label: c.name })),

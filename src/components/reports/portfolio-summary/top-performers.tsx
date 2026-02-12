@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { TrendingUp, ChevronRight } from "lucide-react";
 import { INDUSTRY_LABELS, STAGE_LABELS } from "@/lib/constants/industries";
 
 type TopPerformersProps = {
@@ -22,7 +23,7 @@ const STAGE_COLORS: Record<string, string> = {
   growth: "bg-[var(--tag-emerald-bg)] text-[var(--tag-emerald-text)] ring-[var(--tag-emerald-bg)]",
 };
 
-// Medal colors for top 3
+// Medal colors for top 3 — semantic decorative colors that work in both themes
 const MEDAL_STYLES = [
   "bg-gradient-to-br from-amber-400 to-amber-600 text-amber-950 shadow-lg shadow-amber-500/20",
   "bg-gradient-to-br from-slate-300 to-slate-400 text-slate-800 shadow-lg shadow-slate-400/20",
@@ -37,51 +38,42 @@ export function TopPerformers({ companies }: TopPerformersProps) {
 
   if (topCompanies.length === 0) {
     return (
-      <div className="relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent p-6">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-violet-500/[0.05] via-transparent to-transparent" />
-        <div className="relative">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-bg-elevated ring-1 ring-border-subtle">
-              <svg className="h-5 w-5 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="font-semibold text-text-primary">Top Performers</h3>
-              <p className="text-xs text-text-muted">by growth rate</p>
-            </div>
-          </div>
-          <p className="text-sm text-text-tertiary">
-            Not enough data to rank performers yet.
-          </p>
-          <p className="mt-1 text-xs text-text-faint">
-            Growth rankings require at least 2 periods of data.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-violet-500/[0.05] via-transparent to-transparent" />
-
-      <div className="relative p-5">
-        {/* Header */}
-        <div className="mb-5 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 ring-1 ring-violet-500/20">
-            <svg className="h-5 w-5 text-[var(--tag-violet-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-            </svg>
+      <div className="card-surface rounded-2xl border border-border-subtle p-6">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-bg-elevated ring-1 ring-border-subtle">
+            <TrendingUp className="h-5 w-5 text-text-muted" />
           </div>
           <div>
             <h3 className="font-semibold text-text-primary">Top Performers</h3>
             <p className="text-xs text-text-muted">by growth rate</p>
           </div>
         </div>
+        <p className="text-sm text-text-secondary">
+          Not enough data to rank performers yet.
+        </p>
+        <p className="mt-1 text-xs text-text-muted">
+          Growth rankings require at least 2 periods of data.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card-surface flex h-full flex-col rounded-2xl border border-border-subtle">
+      <div className="flex flex-1 flex-col p-5">
+        {/* Header */}
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)]">
+            <TrendingUp className="h-5 w-5" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold tracking-tight text-text-primary">Top Performers</h3>
+            <p className="text-xs text-text-muted">by growth rate</p>
+          </div>
+        </div>
 
         {/* Company list */}
-        <div className="space-y-2">
+        <div className="flex-1 space-y-2">
           {topCompanies.map((company, index) => (
             <Link
               key={company.companyId}
@@ -122,11 +114,11 @@ export function TopPerformers({ companies }: TopPerformersProps) {
                 )}
               </div>
 
-              {/* Growth indicator */}
+              {/* Growth indicator — semantic data colors */}
               <div className="flex flex-col items-end">
                 <span
                   className={`text-lg font-semibold tabular-nums ${
-                    (company.revenueGrowth ?? 0) >= 0 ? "text-emerald-400" : "text-red-400"
+                    (company.revenueGrowth ?? 0) >= 0 ? "text-[var(--success-accent)]" : "text-[var(--error-accent)]"
                   }`}
                 >
                   {(company.revenueGrowth ?? 0) >= 0 ? "+" : ""}
@@ -140,14 +132,9 @@ export function TopPerformers({ companies }: TopPerformersProps) {
               </div>
 
               {/* Arrow on hover */}
-              <svg
+              <ChevronRight
                 className="h-4 w-4 flex-shrink-0 text-text-faint transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-text-muted"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-              </svg>
+              />
             </Link>
           ))}
         </div>

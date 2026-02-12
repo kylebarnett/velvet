@@ -24,6 +24,8 @@ type DashboardWidgetProps = {
   onMetricClick?: (metricName: string, periodStart?: string) => void;
   /** Company ID for persisting metric order in tables */
   companyId?: string;
+  /** Callback to add a new metric (passed to table widgets) */
+  onAddMetric?: () => void;
 };
 
 export function DashboardWidget({
@@ -32,6 +34,7 @@ export function DashboardWidget({
   periodTypeOverride,
   onMetricClick,
   companyId,
+  onAddMetric,
 }: DashboardWidgetProps) {
   const { config } = widget;
 
@@ -104,6 +107,7 @@ export function DashboardWidget({
         onMetricClick={onMetricClick}
         storageKey={storageKey}
         showTotals={config.showTotals !== false}
+        onAddMetric={onAddMetric}
       />
     );
   }

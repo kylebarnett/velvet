@@ -84,12 +84,12 @@ export function YoYComparisonChart({
 
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent transition-all duration-300 hover:border-border-default">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-500/[0.05] via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[var(--info-bg-subtle)] via-transparent to-transparent" />
 
       <div className="relative p-5">
         {/* Header */}
         <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 ring-1 ring-blue-500/20 text-blue-400">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--status-info-bg)] to-[var(--info-bg-subtle)] ring-1 ring-[var(--info-border)] text-[var(--info-accent)]">
             <svg
               className="h-5 w-5"
               fill="none"

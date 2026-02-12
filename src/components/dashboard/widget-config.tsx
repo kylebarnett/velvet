@@ -248,7 +248,7 @@ export function WidgetConfig({
           <button
             type="button"
             onClick={onDelete}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)] hover:bg-red-500/20"
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)] hover:bg-[var(--error-bg-subtle)]"
           >
             <Trash2 className="h-4 w-4" />
             Delete Widget

@@ -173,7 +173,7 @@ export function ScheduleDetailActions({
           type="button"
           onClick={() => setDeleteModal(true)}
           disabled={loading !== null}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border-default bg-bg-elevated text-red-400 hover:bg-red-500/10 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border-default bg-bg-elevated text-[var(--error-accent)] hover:bg-[var(--error-bg-subtle)] disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[var(--error-ring)]"
           aria-label="Delete schedule"
         >
           <Trash2 className="h-4 w-4" />

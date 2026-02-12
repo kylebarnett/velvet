@@ -1,7 +1,6 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ComparisonClient } from "@/components/reports/company-comparison/comparison-client";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const dynamic = "force-dynamic";
 
@@ -71,20 +70,9 @@ export default async function ComparePage() {
 
   return (
     <div className="space-y-6">
-      <Breadcrumbs items={[
-        { label: "Reports", href: "/reports" },
-        { label: "Compare" },
-      ]} />
-      <div>
-        <h1 className="text-xl font-semibold text-text-primary">Company Comparison</h1>
-        <p className="mt-1 text-sm text-text-tertiary">
-          Compare metrics across portfolio companies side by side.
-        </p>
-      </div>
-
       {companies.length < 2 ? (
-        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-          <p className="text-text-tertiary">
+        <div className="card-surface rounded-xl border border-border-subtle p-12 text-center">
+          <p className="text-text-secondary">
             You need at least 2 approved portfolio companies to use comparison.
           </p>
           <a

@@ -352,9 +352,9 @@ export function ReviewTable({
 
   const confidenceColor = (conf: number | null) => {
     if (conf === null) return "text-text-tertiary";
-    if (conf >= 0.9) return "text-emerald-400";
-    if (conf >= 0.7) return "text-amber-300";
-    return "text-red-400";
+    if (conf >= 0.9) return "text-[var(--success-accent)]";
+    if (conf >= 0.7) return "text-[var(--warning-accent)]";
+    return "text-[var(--error-accent)]";
   };
 
   return (
@@ -371,7 +371,7 @@ export function ReviewTable({
               setSearch(e.target.value);
               setOffset(0);
             }}
-            className="h-11 w-full rounded-md border border-white/10 bg-black/30 pl-9 pr-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+            className="h-11 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm text-text-primary transition-colors hover:border-border-default focus:border-border-default focus:outline-none"
           />
         </div>
 
@@ -381,7 +381,7 @@ export function ReviewTable({
             setStatusFilter(e.target.value);
             setOffset(0);
           }}
-          className="h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
+          className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary transition-colors hover:border-border-default focus:border-border-default focus:outline-none"
         >
           <option value="">All statuses</option>
           <option value="pending">Pending</option>
@@ -399,14 +399,14 @@ export function ReviewTable({
             <button
               onClick={() => handleAction(Array.from(selected), "approve")}
               disabled={processing}
-              className="rounded-md bg-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/30 disabled:opacity-60"
+              className="rounded-md bg-[var(--success-bg-muted)] px-3 py-1.5 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-60"
             >
               Approve Selected
             </button>
             <button
               onClick={() => handleAction(Array.from(selected), "reject")}
               disabled={processing}
-              className="rounded-md bg-red-500/20 px-3 py-1.5 text-xs font-medium text-red-300 hover:bg-red-500/30 disabled:opacity-60"
+              className="rounded-md bg-[var(--status-error-bg)] px-3 py-1.5 text-xs font-medium text-[var(--status-error-text)] hover:bg-[var(--error-bg-subtle)] disabled:opacity-60"
             >
               Reject Selected
             </button>
@@ -422,7 +422,7 @@ export function ReviewTable({
             <button
               onClick={() => handleBulkAction("approve_all", 0.9)}
               disabled={processing || pendingCount === 0}
-              className="rounded-md bg-emerald-500/20 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/30 disabled:opacity-60"
+              className="rounded-md bg-[var(--success-bg-muted)] px-3 py-1.5 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-60"
             >
               Approve High Confidence (&gt;90%)
             </button>
@@ -449,16 +449,16 @@ export function ReviewTable({
       {/* Stats bar */}
       <div className="flex gap-4 text-xs text-text-secondary">
         <span>{total} total</span>
-        <span className="text-amber-300">{pendingCount} pending</span>
-        <span className="text-emerald-400">{approvedCount} approved</span>
-        <span className="text-red-400">{rejectedCount} rejected</span>
+        <span className="text-[var(--warning-accent)]">{pendingCount} pending</span>
+        <span className="text-[var(--success-accent)]">{approvedCount} approved</span>
+        <span className="text-[var(--error-accent)]">{rejectedCount} rejected</span>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-300" />
-          <p className="text-sm text-red-200">{error}</p>
+        <div className="flex items-start gap-2 rounded-lg border border-[var(--error-border)] bg-[var(--error-bg-subtle)] p-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--error-accent)]" />
+          <p className="text-sm text-[var(--status-error-text)]">{error}</p>
         </div>
       )}
 
@@ -524,10 +524,10 @@ export function ReviewTable({
                               key={v.id}
                               className={cn(
                                 "group flex items-center gap-3 px-4 py-2 pl-12",
-                                v.status === "approved" && "bg-emerald-500/5",
-                                v.status === "rejected" && "bg-red-500/5 opacity-60",
-                                v.status === "conflict" && "bg-amber-500/5",
-                                selected.has(v.id) && "bg-white/5",
+                                v.status === "approved" && "bg-[var(--success-bg-subtle)]",
+                                v.status === "rejected" && "bg-[var(--error-bg-subtle)] opacity-60",
+                                v.status === "conflict" && "bg-[var(--warning-bg-subtle)]",
+                                selected.has(v.id) && "bg-bg-raised",
                               )}
                             >
                               {/* Checkbox */}
@@ -538,7 +538,7 @@ export function ReviewTable({
                                   onChange={(e) =>
                                     handleSelect(v.id, (e.nativeEvent as MouseEvent).shiftKey)
                                   }
-                                  className="h-4 w-4 shrink-0 rounded border-white/20 bg-transparent"
+                                  className="h-4 w-4 shrink-0 rounded border-border-default bg-transparent"
                                   aria-label={`Select ${v.metric_name} ${formatPeriod(v)}`}
                                 />
                               )}
@@ -572,10 +572,10 @@ export function ReviewTable({
                               <span
                                 className={cn(
                                   "w-20 shrink-0 rounded-full px-2 py-0.5 text-center text-xs",
-                                  v.status === "pending" && "bg-amber-500/20 text-amber-200",
-                                  v.status === "conflict" && "bg-amber-500/20 text-amber-200",
-                                  v.status === "approved" && "bg-emerald-500/20 text-emerald-200",
-                                  v.status === "rejected" && "bg-red-500/20 text-red-200",
+                                  v.status === "pending" && "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]",
+                                  v.status === "conflict" && "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]",
+                                  v.status === "approved" && "bg-[var(--success-bg-muted)] text-[var(--status-success-text)]",
+                                  v.status === "rejected" && "bg-[var(--status-error-bg)] text-[var(--status-error-text)]",
                                 )}
                               >
                                 {v.status === "conflict" ? "Conflict" : v.status.charAt(0).toUpperCase() + v.status.slice(1)}
@@ -588,7 +588,7 @@ export function ReviewTable({
                                     onClick={() => handleAction([v.id], "approve")}
                                     disabled={processing}
                                     title="Approve"
-                                    className="rounded p-1 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-60"
+                                    className="rounded p-1 text-[var(--success-accent)] hover:bg-[var(--success-bg-muted)] disabled:opacity-60"
                                   >
                                     <Check className="h-4 w-4" />
                                   </button>
@@ -596,14 +596,14 @@ export function ReviewTable({
                                     onClick={() => handleAction([v.id], "reject")}
                                     disabled={processing}
                                     title="Reject"
-                                    className="rounded p-1 text-red-400 hover:bg-red-500/20 disabled:opacity-60"
+                                    className="rounded p-1 text-[var(--error-accent)] hover:bg-[var(--status-error-bg)] disabled:opacity-60"
                                   >
                                     <X className="h-4 w-4" />
                                   </button>
                                   <button
                                     onClick={() => setEditingValue(v)}
                                     title="Edit"
-                                    className="rounded p-1 text-text-tertiary hover:bg-white/10 hover:text-text-secondary"
+                                    className="rounded p-1 text-text-tertiary hover:bg-bg-elevated hover:text-text-secondary"
                                   >
                                     <Pencil className="h-3.5 w-3.5" />
                                   </button>
@@ -671,7 +671,7 @@ export function ReviewTable({
       <div className="flex justify-end border-t border-border-default pt-4">
         <button
           onClick={handleFinish}
-          className="rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90"
+          className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
         >
           {pendingCount > 0 ? `Finish (${pendingCount} skipped)` : "Finish"}
         </button>

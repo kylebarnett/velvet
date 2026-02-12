@@ -64,22 +64,22 @@ export default async function ImportPage() {
             <tbody className="text-text-tertiary">
               <tr className="border-b border-border-subtle">
                 <td className="py-2 pr-6">Company Name</td>
-                <td className="py-2 pr-6 text-emerald-400">Yes</td>
+                <td className="py-2 pr-6 text-[var(--success-accent)]">Yes</td>
                 <td className="py-2">Acme Corp</td>
               </tr>
               <tr className="border-b border-border-subtle">
                 <td className="py-2 pr-6">First Name</td>
-                <td className="py-2 pr-6 text-emerald-400">Yes</td>
+                <td className="py-2 pr-6 text-[var(--success-accent)]">Yes</td>
                 <td className="py-2">Jane</td>
               </tr>
               <tr className="border-b border-border-subtle">
                 <td className="py-2 pr-6">Last Name</td>
-                <td className="py-2 pr-6 text-emerald-400">Yes</td>
+                <td className="py-2 pr-6 text-[var(--success-accent)]">Yes</td>
                 <td className="py-2">Doe</td>
               </tr>
               <tr className="border-b border-border-subtle">
                 <td className="py-2 pr-6">Email</td>
-                <td className="py-2 pr-6 text-emerald-400">Yes</td>
+                <td className="py-2 pr-6 text-[var(--success-accent)]">Yes</td>
                 <td className="py-2">jane@acme.com</td>
               </tr>
               <tr>

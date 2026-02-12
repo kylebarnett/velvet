@@ -284,7 +284,7 @@ export default function EditTearSheetPage() {
                 onClick={handleToggleShare}
                 className={`rounded-md border px-3 py-1.5 text-xs font-medium ${
                   tearSheet.share_enabled
-                    ? "border-[var(--status-success-bg)] bg-[var(--status-success-bg)] text-[var(--status-success-text)] hover:bg-emerald-500/20"
+                    ? "border-[var(--status-success-bg)] bg-[var(--status-success-bg)] text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted)]"
                     : "border-border-default bg-bg-input text-text-primary hover:border-border-default"
                 }`}
               >
@@ -294,7 +294,7 @@ export default function EditTearSheetPage() {
                 type="button"
                 onClick={handleUnpublish}
                 disabled={saving}
-                className="rounded-md border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] px-3 py-1.5 text-xs font-medium text-[var(--status-warning-text)] hover:bg-amber-500/20 disabled:opacity-50"
+                className="rounded-md border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] px-3 py-1.5 text-xs font-medium text-[var(--status-warning-text)] hover:bg-[var(--warning-bg-subtle)] disabled:opacity-50"
               >
                 Unpublish
               </button>
@@ -326,7 +326,7 @@ export default function EditTearSheetPage() {
                 navigator.clipboard.writeText(shareUrl);
                 setSuccess("Link copied to clipboard.");
               }}
-              className="shrink-0 rounded-md border border-emerald-500/30 px-2.5 py-1 text-xs font-medium text-[var(--status-success-text)] hover:bg-emerald-500/20"
+              className="shrink-0 rounded-md border border-[var(--success-border)] px-2.5 py-1 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted)]"
             >
               Copy Link
             </button>

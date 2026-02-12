@@ -305,7 +305,7 @@ export function MetricDetailPanel({
     percentChange != null && percentChange > 0
       ? "bg-[var(--success-bg-subtle)] text-[var(--success-accent)] ring-1 ring-inset ring-[var(--success-ring)]"
       : percentChange != null && percentChange < 0
-        ? "bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/25"
+        ? "bg-[var(--error-bg-subtle)] text-[var(--error-accent)] ring-1 ring-inset ring-[var(--error-border)]"
         : "bg-bg-elevated text-text-muted ring-1 ring-inset ring-border-default";
 
   return (
@@ -458,7 +458,7 @@ export function MetricDetailPanel({
           )}
 
           {error && (
-            <div className="mx-8 mt-6 rounded-xl border border-red-500/15 bg-red-500/5 px-4 py-3 text-sm text-[var(--status-error-text)]">
+            <div className="mx-8 mt-6 rounded-xl border border-[var(--error-border)] bg-[var(--error-bg-subtle)] px-4 py-3 text-sm text-[var(--status-error-text)]">
               {error}
             </div>
           )}

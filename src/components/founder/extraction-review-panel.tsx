@@ -243,7 +243,7 @@ export function ExtractionReviewPanel({
               id="extraction-title"
               className="flex items-center gap-2 text-base font-semibold text-text-primary"
             >
-              <Sparkles className="h-5 w-5 text-violet-400" />
+              <Sparkles className="h-5 w-5 text-[var(--violet-accent)]" />
               AI Extraction Review
             </h2>
             <div className="mt-1 flex items-center gap-1.5 text-sm text-text-tertiary">
@@ -288,7 +288,7 @@ export function ExtractionReviewPanel({
                   type="button"
                   onClick={handleAcceptAll}
                   disabled={processing}
-                  className="h-7 rounded-md bg-emerald-500/20 px-2.5 text-xs font-medium text-[var(--status-success-text)] hover:bg-emerald-500/30 disabled:opacity-40"
+                  className="h-7 rounded-md bg-[var(--success-bg-muted)] px-2.5 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-40"
                 >
                   Accept all
                 </button>
@@ -307,7 +307,7 @@ export function ExtractionReviewPanel({
 
           {(status === "loading" || status === "processing") && (
             <div className="flex flex-col items-center justify-center gap-3 py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-violet-400" />
+              <Loader2 className="h-8 w-8 animate-spin text-[var(--violet-accent)]" />
               <p className="text-sm text-text-tertiary">
                 {status === "loading"
                   ? "Loading extraction results..."
@@ -321,8 +321,8 @@ export function ExtractionReviewPanel({
 
           {status === "failed" && !error && (
             <div className="flex flex-col items-center justify-center gap-3 py-16">
-              <div className="rounded-full bg-red-500/10 p-3">
-                <Sparkles className="h-6 w-6 text-red-400" />
+              <div className="rounded-full bg-[var(--error-bg-subtle)] p-3">
+                <Sparkles className="h-6 w-6 text-[var(--error-accent)]" />
               </div>
               <p className="text-sm text-text-tertiary">Extraction failed.</p>
               <p className="text-xs text-text-muted">
@@ -359,8 +359,8 @@ export function ExtractionReviewPanel({
           )}
 
           {status === "completed" && pendingCount === 0 && mappings.length > 0 && (
-            <div className="mt-6 flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-              <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-400" />
+            <div className="mt-6 flex items-center gap-2 rounded-lg border border-[var(--success-border)] bg-[var(--success-bg-subtle)] p-3">
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-[var(--success-accent)]" />
               <p className="text-sm text-[var(--status-success-text)]">
                 All metrics reviewed. {acceptedCount} accepted, {rejectedCount} rejected.
               </p>

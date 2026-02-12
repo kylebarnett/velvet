@@ -185,8 +185,8 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
       className={`rounded-lg border p-3 transition-colors ${
         isReviewed
           ? mapping.status === "accepted"
-            ? "border-emerald-500/20 bg-emerald-500/5"
-            : "border-red-500/20 bg-red-500/5 opacity-60"
+            ? "border-[var(--success-border)] bg-[var(--success-bg-subtle)]"
+            : "border-[var(--error-border)] bg-[var(--error-bg-subtle)] opacity-60"
           : "border-border-default bg-bg-elevated"
       }`}
     >
@@ -305,7 +305,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
               type="button"
               onClick={() => onReject(mapping.id)}
               disabled={disabled}
-              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-red-400/60 hover:bg-red-500/10 hover:text-[var(--status-error-text)] disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-[var(--error-accent)] hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)] disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--error-ring)]"
               title="Reject"
             >
               <X className="h-4 w-4" />
@@ -326,7 +326,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 )
               }
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-[var(--status-success-bg)] text-[var(--status-success-text)] text-xs font-medium hover:bg-emerald-500/30 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-[var(--status-success-bg)] text-[var(--status-success-text)] text-xs font-medium hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--success-ring)]"
               title="Accept"
             >
               <Check className="h-3.5 w-3.5" />

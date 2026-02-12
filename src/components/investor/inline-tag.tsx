@@ -166,7 +166,7 @@ export const InlineTag = React.memo(function InlineTag({
               }`}
             >
               <span>{option.label}</span>
-              {option.value === value && <Check className="h-3 w-3 text-emerald-400" />}
+              {option.value === value && <Check className="h-3 w-3 text-[var(--success-accent)]" />}
             </button>
           ))}
         </div>

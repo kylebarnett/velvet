@@ -13,21 +13,23 @@ export function formatPeriodRange(
   const startDate = parseISO(start);
 
   if (periodType === "quarterly") {
-    const quarter = Math.ceil((startDate.getMonth() + 1) / 3);
-    return `Q${quarter} ${startDate.getFullYear()}`;
+    // Use UTC to avoid timezone shifts on date-only strings
+    const quarter = Math.ceil((startDate.getUTCMonth() + 1) / 3);
+    return `Q${quarter} ${startDate.getUTCFullYear()}`;
   }
 
   if (periodType === "monthly") {
-    return format(startDate, "MMM yyyy");
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${monthNames[startDate.getUTCMonth()]} ${startDate.getUTCFullYear()}`;
   }
 
   if (periodType === "annual" || periodType === "yearly") {
-    return String(startDate.getFullYear());
+    return String(startDate.getUTCFullYear());
   }
 
   // Fallback: full range
   const endDate = parseISO(end);
-  if (startDate.getFullYear() === endDate.getFullYear()) {
+  if (startDate.getUTCFullYear() === endDate.getUTCFullYear()) {
     return `${format(startDate, "MMM d")} – ${format(endDate, "MMM d, yyyy")}`;
   }
   return `${format(startDate, "MMM d, yyyy")} – ${format(endDate, "MMM d, yyyy")}`;

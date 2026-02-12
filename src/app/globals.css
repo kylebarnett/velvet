@@ -2,6 +2,7 @@
 
 /* Light theme (default) — cool-tinted grays, indigo accent */
 :root {
+  color-scheme: light;
   --background: #f5f6fa;
   --foreground: #1a1b25;
 
@@ -61,7 +62,7 @@
   --tag-pink-text: #be185d;
 
   /* Status — bumped from 0.12 */
-  --status-success-bg: rgba(16, 185, 129, 0.16);
+  --status-success-bg: rgba(5, 150, 105, 0.10);
   --status-success-text: #047857;
   --status-warning-bg: rgba(245, 158, 11, 0.16);
   --status-warning-text: #b45309;
@@ -69,6 +70,61 @@
   --status-error-text: #dc2626;
   --status-info-bg: rgba(59, 130, 246, 0.16);
   --status-info-text: #2563eb;
+
+  /* Success accent scale — softer for light mode */
+  --success-accent: #059669;
+  --success-solid: #059669;
+  --success-bg-subtle: rgba(5, 150, 105, 0.05);
+  --success-bg-muted: rgba(5, 150, 105, 0.10);
+  --success-bg-muted-hover: rgba(5, 150, 105, 0.15);
+  --success-border: rgba(5, 150, 105, 0.15);
+  --success-ring: rgba(5, 150, 105, 0.30);
+
+  /* Warning accent scale */
+  --warning-accent: #d97706;
+  --warning-solid: #d97706;
+  --warning-bg-subtle: rgba(217, 119, 6, 0.06);
+  --warning-border: rgba(217, 119, 6, 0.15);
+
+  /* Error accent scale */
+  --error-accent: #dc2626;
+  --error-solid: #dc2626;
+  --error-bg-subtle: rgba(220, 38, 38, 0.06);
+  --error-border: rgba(220, 38, 38, 0.15);
+  --error-ring: rgba(220, 38, 38, 0.35);
+
+  /* Data indicators (growth up/down) */
+  --data-positive: #059669;
+  --data-negative: #dc2626;
+
+  /* Info accent scale */
+  --info-accent: #2563eb;
+  --info-solid: #2563eb;
+  --info-bg-subtle: rgba(37, 99, 235, 0.06);
+  --info-border: rgba(37, 99, 235, 0.15);
+
+  /* Violet accent scale */
+  --violet-accent: #7c3aed;
+  --violet-bg-subtle: rgba(124, 58, 237, 0.06);
+  --violet-bg-muted: rgba(124, 58, 237, 0.12);
+  --violet-border: rgba(124, 58, 237, 0.15);
+
+  /* Info glow (for timeline dots, etc.) */
+  --info-glow: rgba(37, 99, 235, 0.35);
+
+  /* KPI accent colors — monochromatic indigo */
+  --kpi-1-bg: rgba(99, 102, 241, 0.06);
+  --kpi-1-accent: #4f46e5;
+  --kpi-1-ring: rgba(99, 102, 241, 0.15);
+  --kpi-2-bg: rgba(99, 102, 241, 0.10);
+  --kpi-2-accent: #6366f1;
+  --kpi-2-ring: rgba(99, 102, 241, 0.22);
+  --kpi-3-bg: rgba(99, 102, 241, 0.04);
+  --kpi-3-accent: #818cf8;
+  --kpi-3-ring: rgba(99, 102, 241, 0.12);
+  --kpi-4-bg: rgba(99, 102, 241, 0.08);
+  --kpi-4-accent: #6366f1;
+  --kpi-4-ring: rgba(99, 102, 241, 0.18);
 
   /* Surface colors */
   --surface-primary: #f5f6fa;
@@ -91,6 +147,7 @@
 
 /* Dark theme — lifted base, cool-tinted, indigo accent */
 .dark {
+  color-scheme: dark;
   --background: #111114;
   --foreground: #ededf0;
 
@@ -158,6 +215,62 @@
   --status-error-text: #fecaca;
   --status-info-bg: rgba(59, 130, 246, 0.25);
   --status-info-text: #bfdbfe;
+
+  /* Success accent scale — bright for dark mode */
+  --success-accent: #34d399;
+  --success-solid: #10b981;
+  --success-bg-subtle: rgba(16, 185, 129, 0.08);
+  --success-bg-muted: rgba(16, 185, 129, 0.20);
+  --success-bg-muted-hover: rgba(16, 185, 129, 0.30);
+  --success-border: rgba(16, 185, 129, 0.20);
+  --success-ring: rgba(16, 185, 129, 0.40);
+
+  /* Warning accent scale */
+  --warning-accent: #fbbf24;
+  --warning-solid: #f59e0b;
+  --warning-bg-subtle: rgba(245, 158, 11, 0.08);
+  --warning-border: rgba(245, 158, 11, 0.20);
+
+  /* Error accent scale */
+  --error-accent: #f87171;
+  --error-solid: #ef4444;
+  --error-bg-subtle: rgba(239, 68, 68, 0.08);
+  --error-border: rgba(239, 68, 68, 0.20);
+  --error-ring: rgba(239, 68, 68, 0.40);
+
+  /* Data indicators (growth up/down) */
+  --data-positive: #34d399;
+  --data-negative: #f87171;
+
+  /* Info accent scale */
+  --info-accent: #93c5fd;
+  --info-solid: #3b82f6;
+  --info-bg-subtle: rgba(59, 130, 246, 0.08);
+  --info-border: rgba(59, 130, 246, 0.20);
+
+  /* Violet accent scale */
+  --violet-accent: #c4b5fd;
+  --violet-bg-subtle: rgba(139, 92, 246, 0.08);
+  --violet-bg-muted: rgba(139, 92, 246, 0.20);
+  --violet-border: rgba(139, 92, 246, 0.20);
+
+  /* Info glow (for timeline dots, etc.) */
+  --info-glow: rgba(59, 130, 246, 0.50);
+
+  /* KPI accent colors */
+  /* KPI accent colors — monochromatic indigo (dark) */
+  --kpi-1-bg: rgba(129, 140, 248, 0.10);
+  --kpi-1-accent: #a5b4fc;
+  --kpi-1-ring: rgba(129, 140, 248, 0.25);
+  --kpi-2-bg: rgba(129, 140, 248, 0.14);
+  --kpi-2-accent: #c7d2fe;
+  --kpi-2-ring: rgba(129, 140, 248, 0.30);
+  --kpi-3-bg: rgba(129, 140, 248, 0.07);
+  --kpi-3-accent: #a5b4fc;
+  --kpi-3-ring: rgba(129, 140, 248, 0.18);
+  --kpi-4-bg: rgba(129, 140, 248, 0.12);
+  --kpi-4-accent: #c7d2fe;
+  --kpi-4-ring: rgba(129, 140, 248, 0.22);
 
   /* Surface colors */
   --surface-primary: #111114;

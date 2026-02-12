@@ -84,6 +84,12 @@ export async function GET(req: Request) {
   const archive = archiver("zip", { zlib: { level: 5 } });
   const passthrough = new PassThrough();
 
+  // Drain passthrough into buffer to prevent backpressure deadlock —
+  // without this, archive.finalize() blocks waiting for the passthrough
+  // to be consumed, but nothing reads it until after finalize returns.
+  const chunks: Buffer[] = [];
+  passthrough.on("data", (chunk: Buffer) => chunks.push(chunk));
+
   archive.pipe(passthrough);
 
   // Track filenames to handle duplicates
@@ -134,6 +140,14 @@ export async function GET(req: Request) {
 
   await archive.finalize();
 
+  // Wait for passthrough to finish flushing all data
+  await new Promise<void>((resolve, reject) => {
+    passthrough.on("end", resolve);
+    passthrough.on("error", reject);
+  });
+
+  const zipBuffer = Buffer.concat(chunks);
+
   // Determine filename
   let zipFilename = "velvet-documents";
   if (companyId && documents.length > 0) {
@@ -146,20 +160,7 @@ export async function GET(req: Request) {
   const dateStr = new Date().toISOString().split("T")[0];
   zipFilename = `${zipFilename}-${dateStr}.zip`;
 
-  // Convert PassThrough stream to ReadableStream for Response
-  const reader = passthrough[Symbol.asyncIterator]();
-  const readableStream = new ReadableStream({
-    async pull(controller) {
-      const { value, done } = await reader.next();
-      if (done) {
-        controller.close();
-      } else {
-        controller.enqueue(value);
-      }
-    },
-  });
-
-  return new NextResponse(readableStream, {
+  return new NextResponse(zipBuffer, {
     headers: {
       "Content-Type": "application/zip",
       "Content-Disposition": `attachment; filename="${zipFilename}"`,

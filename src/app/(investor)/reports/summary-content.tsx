@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { BarChart3 } from "lucide-react";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
-import { EmptyState } from "@/components/ui/empty-state";
 import { ReportsClient } from "./reports-client";
 import {
   extractNumericValue,
@@ -121,19 +119,29 @@ export async function SummaryContent({
 
   if (companyIds.length === 0) {
     return (
-      <EmptyState
-        icon={BarChart3}
-        title="No companies in your portfolio yet"
-        description="Import contacts to start viewing portfolio reports."
-        action={
+      <div
+        role="status"
+        className="flex flex-col items-center justify-center rounded-xl border border-border-default card-surface p-6 text-center"
+      >
+        <div className="mb-3 rounded-full bg-bg-elevated p-3">
+          <svg className="h-6 w-6 text-text-muted" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7 17V9m4 8V5m4 12v-4m4 4V7" />
+          </svg>
+        </div>
+        <h3 className="text-sm font-medium text-text-primary">No companies in your portfolio yet</h3>
+        <p className="mt-1 max-w-sm text-sm text-text-tertiary">
+          Import contacts to start viewing portfolio reports.
+        </p>
+        <div className="mt-4">
           <Link
             href="/portfolio/import"
             className="inline-flex items-center gap-2 rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
           >
             Import contacts
           </Link>
-        }
-      />
+        </div>
+      </div>
     );
   }
 
@@ -153,8 +161,10 @@ export async function SummaryContent({
 
   const values = (metricValues ?? []) as MetricValue[];
 
-  // Group by metric name for aggregates
-  const metricGroups = new Map<string, number[]>();
+  // Deduplicate: keep only the latest value per company per metric.
+  // Without dedup, a company with 12 months of Revenue inflates the aggregate.
+  // Map<metricName, Map<companyId, { value: number; periodStart: string }>>
+  const latestByMetric = new Map<string, Map<string, { value: number; periodStart: string }>>();
   const companiesWithMetrics = new Set<string>();
 
   for (const mv of values) {
@@ -164,11 +174,59 @@ export async function SummaryContent({
     const metricName = mv.metric_name.toLowerCase().trim();
     companiesWithMetrics.add(mv.company_id);
 
-    // Aggregate by metric
-    if (!metricGroups.has(metricName)) {
-      metricGroups.set(metricName, []);
+    if (!latestByMetric.has(metricName)) {
+      latestByMetric.set(metricName, new Map());
     }
-    metricGroups.get(metricName)!.push(numValue);
+    const companyMap = latestByMetric.get(metricName)!;
+    const existing = companyMap.get(mv.company_id);
+
+    if (!existing || mv.period_start > existing.periodStart) {
+      companyMap.set(mv.company_id, { value: numValue, periodStart: mv.period_start });
+    }
+  }
+
+  // Compute data freshness (per-company latest period_start across all metrics)
+  const companyLatestDate = new Map<string, string>();
+  for (const companyMap of latestByMetric.values()) {
+    for (const [companyId, entry] of companyMap) {
+      const existing = companyLatestDate.get(companyId);
+      if (!existing || entry.periodStart > existing) {
+        companyLatestDate.set(companyId, entry.periodStart);
+      }
+    }
+  }
+
+  const now = new Date();
+  let freshnessRecent = 0;
+  let freshnessAging = 0;
+  let freshnessStale = 0;
+  let freshnessNoData = 0;
+
+  for (const company of companies) {
+    const latest = companyLatestDate.get(company.id);
+    if (!latest) {
+      freshnessNoData++;
+      continue;
+    }
+    const daysDiff = Math.floor(
+      (now.getTime() - new Date(latest).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (daysDiff < 90) freshnessRecent++;
+    else if (daysDiff < 180) freshnessAging++;
+    else freshnessStale++;
+  }
+
+  const freshness = {
+    recent: freshnessRecent,
+    aging: freshnessAging,
+    stale: freshnessStale,
+    noData: freshnessNoData,
+  };
+
+  // Build deduplicated metric groups for aggregation (one value per company per metric)
+  const metricGroups = new Map<string, number[]>();
+  for (const [metricName, companyMap] of latestByMetric) {
+    metricGroups.set(metricName, Array.from(companyMap.values()).map((e) => e.value));
   }
 
   // Calculate overall aggregates
@@ -374,6 +432,7 @@ export async function SummaryContent({
       byStage={byStage}
       byCompany={byCompany}
       drilldownData={drilldownData}
+      freshness={freshness}
     />
   );
 }

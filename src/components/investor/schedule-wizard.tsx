@@ -171,7 +171,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
               <div
                 className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
                   i < step
-                    ? "bg-emerald-500/20 text-[var(--status-success-text)]"
+                    ? "bg-[var(--success-bg-muted)] text-[var(--status-success-text)]"
                     : i === step
                       ? "bg-bg-hover text-text-primary"
                       : "bg-bg-elevated text-text-tertiary"
@@ -184,7 +184,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             {i < STEPS.length - 1 && (
               <div
                 className={`h-px w-8 sm:w-12 ${
-                  i < step ? "bg-emerald-500/30" : "bg-bg-hover"
+                  i < step ? "bg-[var(--success-bg-muted-hover)]" : "bg-bg-hover"
                 }`}
               />
             )}

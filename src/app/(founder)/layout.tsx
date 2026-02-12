@@ -29,7 +29,7 @@ export default async function FounderLayout({
   // Fetch the founder's company
   const { data: companyData } = await supabase
     .from("companies")
-    .select("id, name, website")
+    .select("id, name, website, logo_url")
     .eq("founder_id", user.id)
     .single();
 
@@ -38,7 +38,7 @@ export default async function FounderLayout({
     company = {
       name: companyData.name,
       website: companyData.website,
-      logoUrl: null,
+      logoUrl: companyData.logo_url ?? null,
     };
   }
 

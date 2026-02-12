@@ -334,7 +334,7 @@ export function TearSheetsTab() {
                           {ts.status === "published" ? "Published" : "Draft"}
                         </span>
                         {ts.share_enabled && (
-                          <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-[var(--status-info-text)]">
+                          <span className="rounded-full bg-[var(--status-info-bg)] px-2 py-0.5 text-xs font-medium text-[var(--status-info-text)]">
                             Shared
                           </span>
                         )}

@@ -25,20 +25,20 @@ const STATUS_CONFIG = {
   success: {
     icon: CheckCircle2,
     label: "Success",
-    className: "text-emerald-400",
-    bgClassName: "bg-emerald-500/10",
+    className: "text-[var(--success-accent)]",
+    bgClassName: "bg-[var(--success-bg-subtle)]",
   },
   partial: {
     icon: AlertCircle,
     label: "Partial",
-    className: "text-amber-400",
-    bgClassName: "bg-amber-500/10",
+    className: "text-[var(--warning-accent)]",
+    bgClassName: "bg-[var(--warning-bg-subtle)]",
   },
   failed: {
     icon: XCircle,
     label: "Failed",
-    className: "text-red-400",
-    bgClassName: "bg-red-500/10",
+    className: "text-[var(--error-accent)]",
+    bgClassName: "bg-[var(--error-bg-subtle)]",
   },
 };
 
@@ -83,7 +83,7 @@ function RunRow({ run }: { run: ScheduleRun }) {
         </div>
 
         {hasErrors && (
-          <span className="shrink-0 rounded-full bg-red-500/10 px-2 py-0.5 text-xs text-[var(--status-error-text)]">
+          <span className="shrink-0 rounded-full bg-[var(--error-bg-subtle)] px-2 py-0.5 text-xs text-[var(--status-error-text)]">
             {run.errors.length} error{run.errors.length !== 1 ? "s" : ""}
           </span>
         )}
@@ -120,7 +120,7 @@ function RunRow({ run }: { run: ScheduleRun }) {
             {run.errors.map((error, i) => (
               <div
                 key={i}
-                className="rounded bg-red-500/5 px-2 py-1.5 text-xs text-[var(--status-error-text)]"
+                className="rounded bg-[var(--error-bg-subtle)] px-2 py-1.5 text-xs text-[var(--status-error-text)]"
               >
                 {error.company && (
                   <span className="text-text-tertiary">{error.company}: </span>

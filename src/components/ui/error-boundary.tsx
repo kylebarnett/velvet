@@ -43,7 +43,7 @@ export class ErrorBoundary extends React.Component<
       return (
         <div className="flex items-center justify-center p-8">
           <div className="w-full max-w-md rounded-xl border border-border-default card-surface p-6 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--error-bg-subtle)]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -52,7 +52,7 @@ export class ErrorBoundary extends React.Component<
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="h-6 w-6 text-red-400"
+                className="h-6 w-6 text-[var(--error-accent)]"
                 aria-hidden="true"
               >
                 <circle cx={12} cy={12} r={10} />

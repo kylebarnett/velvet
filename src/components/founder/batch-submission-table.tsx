@@ -7,7 +7,13 @@ import { AlertTriangle, ArrowLeft, CheckCircle2, Info } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
-import { getMetricDefinition } from "@/lib/metric-definitions";
+import { getMetricDefinition, inferMetricValueType } from "@/lib/metric-definitions";
+import {
+  type Period,
+  generateMonthlyPeriods,
+  generateQuarterlyPeriods,
+  generateAnnualPeriods,
+} from "@/lib/utils/period-generator";
 
 type PeriodTypeValue = "quarterly" | "annual";
 
@@ -27,14 +33,6 @@ type GroupedRequest = {
   hasSubmission: boolean;
 };
 
-type Period = {
-  key: string;
-  start: string;
-  end: string;
-  label: string;
-  isRequested: boolean;
-};
-
 type BatchSubmissionTableProps = {
   initialCompanyId: string | null;
   prefilterPeriod: {
@@ -44,124 +42,6 @@ type BatchSubmissionTableProps = {
   } | null;
   onBack: () => void;
 };
-
-// Format a local Date as YYYY-MM-DD without timezone shift.
-// Using toISOString() converts to UTC first, which shifts the date
-// backwards in US timezones (e.g. 2026-01-01 local → 2025-12-31 UTC).
-function fmtDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function generateQuarterlyPeriods(
-  requestedStart: string | null,
-  count: number,
-): Period[] {
-  const periods: Period[] = [];
-  let date: Date;
-
-  if (requestedStart) {
-    // Parse YYYY-MM-DD as local date (not UTC) by splitting manually
-    const [y, mo, d] = requestedStart.split("-").map(Number);
-    date = new Date(y, mo - 1, d);
-  } else {
-    const now = new Date();
-    // Start from the current quarter so founders can submit for it
-    const currentQ = Math.floor(now.getMonth() / 3);
-    date = new Date(now.getFullYear(), currentQ * 3, 1);
-  }
-
-  for (let i = 0; i < count; i++) {
-    const qMonth = date.getMonth();
-    const qYear = date.getFullYear();
-    const q = Math.floor(qMonth / 3) + 1;
-    const start = new Date(qYear, (q - 1) * 3, 1);
-    const end = new Date(qYear, q * 3, 0);
-
-    const startStr = fmtDate(start);
-    const endStr = fmtDate(end);
-    periods.push({
-      key: startStr,
-      start: startStr,
-      end: endStr,
-      label: `Q${q} '${String(qYear).slice(-2)}`,
-      isRequested: requestedStart === startStr,
-    });
-
-    // Move to previous quarter
-    date = new Date(qYear, (q - 2) * 3, 1);
-  }
-
-  return periods;
-}
-
-function generateAnnualPeriods(
-  requestedStart: string | null,
-  count: number,
-): Period[] {
-  const periods: Period[] = [];
-  let year: number;
-
-  if (requestedStart) {
-    year = parseInt(requestedStart.split("-")[0], 10);
-  } else {
-    year = new Date().getFullYear();
-  }
-
-  for (let i = 0; i < count; i++) {
-    const start = `${year}-01-01`;
-    const end = `${year}-12-31`;
-    periods.push({
-      key: start,
-      start,
-      end,
-      label: String(year),
-      isRequested: requestedStart === start,
-    });
-    year--;
-  }
-
-  return periods;
-}
-
-function generateMonthlyPeriods(
-  requestedStart: string | null,
-  count: number,
-): Period[] {
-  const periods: Period[] = [];
-  let date: Date;
-
-  if (requestedStart) {
-    const [y, mo, d] = requestedStart.split("-").map(Number);
-    date = new Date(y, mo - 1, d);
-  } else {
-    const now = new Date();
-    date = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  }
-
-  for (let i = 0; i < count; i++) {
-    const start = new Date(date.getFullYear(), date.getMonth(), 1);
-    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-    const startStr = fmtDate(start);
-
-    periods.push({
-      key: startStr,
-      start: startStr,
-      end: fmtDate(end),
-      label: start.toLocaleDateString("en-US", {
-        month: "short",
-        year: "2-digit",
-      }),
-      isRequested: requestedStart === startStr,
-    });
-
-    date = new Date(date.getFullYear(), date.getMonth() - 1, 1);
-  }
-
-  return periods;
-}
 
 /** Return a placeholder hint appropriate for the metric type. */
 function getFormatHint(metricName: string): string {
@@ -183,6 +63,21 @@ function getFormatHint(metricName: string): string {
     return "e.g. 45.2";
   }
   return "e.g. 1000";
+}
+
+function formatPriorValue(metricName: string, rawValue: string): string {
+  const num = parseFloat(rawValue);
+  if (isNaN(num)) return rawValue;
+
+  const valueType = inferMetricValueType(metricName);
+  if (valueType === "currency") {
+    if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(1)}M`;
+    if (num >= 1_000) return `$${Math.round(num / 1_000)}K`;
+    return `$${num.toFixed(0)}`;
+  }
+  if (valueType === "percent") return `${num.toFixed(1)}%`;
+  if (valueType === "ratio") return num.toFixed(2);
+  return num.toLocaleString();
 }
 
 function MetricInfoTooltip({ metricName }: { metricName: string }) {
@@ -209,7 +104,7 @@ function MetricInfoTooltip({ metricName }: { metricName: string }) {
           {info.formula && (
             <div className="mt-2 rounded bg-bg-elevated px-2 py-1.5">
               <p className="text-[10px] font-medium uppercase tracking-wide text-text-muted">Formula</p>
-              <p className="mt-0.5 text-xs text-emerald-400">{info.formula}</p>
+              <p className="mt-0.5 text-xs text-[var(--success-accent)]">{info.formula}</p>
             </div>
           )}
         </div>
@@ -331,11 +226,16 @@ function BatchTableBody({
           </div>
         )}
       </td>
-      {periods.map((p) => {
+      {periods.map((p, periodIdx) => {
         const existing = existingValues[row.metricName]?.[p.key];
         const hasExisting = !!existing;
         const cellKey = `${row.metricName}:${p.key}`;
         const cellError = cellErrors.get(cellKey);
+        // Find prior period value for reference
+        const priorPeriod = periods[periodIdx - 1];
+        const priorValue = priorPeriod
+          ? existingValues[row.metricName]?.[priorPeriod.key]
+          : undefined;
         return (
           <td
             key={p.key}
@@ -351,15 +251,20 @@ function BatchTableBody({
                 placeholder={hasExisting ? existing : getFormatHint(row.metricName)}
                 className={`h-9 w-full rounded-md border bg-bg-input px-2 text-center text-sm font-mono focus:outline-none focus:ring-2 ${
                   cellError
-                    ? "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20"
+                    ? "border-[var(--error-border)] focus:border-[var(--error-accent)] focus:ring-[var(--error-ring)]"
                     : hasExisting && !row.values[p.key]
                       ? "border-border-subtle text-text-muted focus:border-border-default focus:ring-[var(--ring-focus)]"
                       : "border-border-default text-text-primary focus:border-border-default focus:ring-[var(--ring-focus)]"
                 }`}
               />
               {cellError && (
-                <div className="absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-red-900/90 px-2 py-0.5 text-[10px] text-[var(--status-error-text)]">
+                <div className="absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-[var(--bg-tooltip)] px-2 py-0.5 text-[10px] text-[var(--status-error-text)]">
                   {cellError}
+                </div>
+              )}
+              {!hasExisting && !row.values[p.key] && priorValue && (
+                <div className="mt-0.5 text-center text-[10px] text-text-faint">
+                  Prior: {formatPriorValue(row.metricName, priorValue)}
                 </div>
               )}
             </div>
@@ -873,13 +778,21 @@ export function BatchSubmissionTable({
                   </p>
                 )}
                 {isAllDone ? (
-                  <button
-                    type="button"
-                    onClick={onBack}
-                    className="mt-2 inline-flex h-8 items-center rounded-md bg-emerald-500/20 px-3 text-xs font-medium text-[var(--status-success-text)] hover:bg-emerald-500/30 transition-colors"
-                  >
-                    Back to requests
-                  </button>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={onBack}
+                      className="inline-flex h-8 items-center rounded-md bg-[var(--success-bg-muted)] px-3 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] transition-colors"
+                    >
+                      Back to requests
+                    </button>
+                    <Link
+                      href={`/portal/tear-sheets/new?period=${encodeURIComponent(periodType === "quarterly" ? (() => { const ps = pendingSubmissions[0]?.periodStart; if (!ps) return ""; const d = new Date(ps); const q = Math.floor(d.getUTCMonth() / 3) + 1; return `Q${q} ${d.getUTCFullYear()}`; })() : pendingSubmissions[0]?.periodStart?.slice(0, 4) ?? "")}`}
+                      className="inline-flex h-8 items-center rounded-md border border-[var(--success-border)] px-3 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-subtle)] transition-colors"
+                    >
+                      Create Tear Sheet &rarr;
+                    </Link>
+                  </div>
                 ) : remainingCount > 0 ? (
                   <p className="text-xs text-text-muted">
                     You still have {remainingCount} pending metric{remainingCount !== 1 ? "s" : ""} to submit.

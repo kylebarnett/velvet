@@ -120,6 +120,12 @@ Cron endpoints verify `CRON_SECRET` via Bearer token when set. Without it, endpo
 - **Cards**: `rounded-xl border border-white/10 bg-white/5 p-4`
 - **Modals**: Backdrop `bg-black/60 backdrop-blur-sm`, modal `rounded-xl border border-white/10 bg-zinc-900 p-6`
 - **Skeletons**: `animate-pulse` with `bg-white/5` or `bg-white/10`
+- **Dropdown menus** (custom popups, listboxes, context menus — NOT native `<select>`):
+  - Container: `absolute z-50 mt-1 overflow-hidden rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm`
+  - Add `overflow-y-auto max-h-[Xpx]` when list can be long
+  - Items: `flex w-full items-center gap-2 px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary`
+  - Active/highlighted item: `bg-bg-elevated text-text-primary`
+  - **Never** use `shadow-lg`, `bg-bg-raised`, or `bg-bg-hover` for the container — always `shadow-xl` and `bg-bg-secondary`
 - **Disabled state**: `disabled:opacity-60`
 - **Low contrast text**: minimum `text-white/60` (never `text-white/40`)
 - **Field errors**: `text-xs text-red-300`

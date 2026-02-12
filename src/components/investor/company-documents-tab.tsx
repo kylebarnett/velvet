@@ -15,6 +15,7 @@ import {
   DOCUMENT_TYPES,
   getDocumentTypeColor,
 } from "@/lib/utils/document-colors";
+import { logActivity } from "@/lib/activity/log-activity";
 import { DocumentPreviewModal } from "./document-preview-modal";
 
 type DateFilterValue = "all" | "7" | "30" | "90";
@@ -148,6 +149,12 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    logActivity({
+      companyId,
+      action: "download_document",
+      metadata: { document_name: doc.file_name, count: 1 },
+    });
   }
 
   async function downloadSelected() {
@@ -174,6 +181,12 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      logActivity({
+        companyId,
+        action: "download_document",
+        metadata: { count: selectedIds.size, bulk: true },
+      });
     } finally {
       setDownloading(false);
     }
@@ -203,6 +216,12 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      logActivity({
+        companyId,
+        action: "download_document",
+        metadata: { count: filteredDocuments.length, bulk: true, all: true },
+      });
     } finally {
       setDownloading(false);
     }

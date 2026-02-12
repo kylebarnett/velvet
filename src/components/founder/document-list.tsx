@@ -12,6 +12,10 @@ import {
   Calendar,
   Tag,
   ArrowLeft,
+  FolderOpen,
+  List,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -202,7 +206,7 @@ function PreviewPane({
             type="button"
             onClick={() => onDelete(doc)}
             disabled={deleting}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-red-400/60 hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--error-accent)] hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             title="Delete"
             aria-label="Delete document"
           >
@@ -293,6 +297,8 @@ export function FounderDocumentList() {
   const [success, setSuccess] = React.useState<string | null>(null);
   const [previewDoc, setPreviewDoc] = React.useState<Document | null>(null);
   const [reviewDoc, setReviewDoc] = React.useState<Document | null>(null);
+  const [viewMode, setViewMode] = React.useState<"flat" | "folder">("flat");
+  const [collapsedFolders, setCollapsedFolders] = React.useState<Set<string>>(new Set());
 
   // Auto-dismiss success message
   React.useEffect(() => {
@@ -333,6 +339,38 @@ export function FounderDocumentList() {
       doc.file_name.toLowerCase().includes(q),
     );
   }, [documents, searchQuery]);
+
+  // Group documents by year → quarter for folder view
+  const groupedDocuments = React.useMemo(() => {
+    if (viewMode !== "folder") return null;
+    const groups: Record<string, Record<string, Document[]>> = {};
+    for (const doc of filteredDocuments) {
+      const date = new Date(doc.uploaded_at);
+      const year = String(date.getFullYear());
+      const q = `Q${Math.floor(date.getMonth() / 3) + 1}`;
+
+      // Use period_label if available for better grouping
+      let quarterKey = q;
+      if (doc.period_label) {
+        const match = doc.period_label.match(/Q(\d)/i);
+        if (match) quarterKey = `Q${match[1]}`;
+      }
+
+      if (!groups[year]) groups[year] = {};
+      if (!groups[year][quarterKey]) groups[year][quarterKey] = [];
+      groups[year][quarterKey].push(doc);
+    }
+    return groups;
+  }, [filteredDocuments, viewMode]);
+
+  function toggleFolder(key: string) {
+    setCollapsedFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
 
   const openDeleteModal = React.useCallback((doc: Document) => {
     setDeleteModal({ open: true, document: doc });
@@ -412,21 +450,43 @@ export function FounderDocumentList() {
             className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default sm:w-64"
           />
         </div>
-        <div className="flex items-center gap-2 text-sm text-text-tertiary">
-          <Filter className="h-4 w-4" />
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger size="sm" className="w-auto min-w-[150px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All types</SelectItem>
-              {Object.entries(documentTypeLabels).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-3 text-sm text-text-tertiary">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger size="sm" className="w-auto min-w-[150px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All types</SelectItem>
+                {Object.entries(documentTypeLabels).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex rounded-md border border-border-default">
+            <button
+              type="button"
+              onClick={() => setViewMode("flat")}
+              className={`inline-flex h-8 w-8 items-center justify-center rounded-l-md transition-colors ${viewMode === "flat" ? "bg-bg-elevated text-text-primary" : "text-text-muted hover:text-text-tertiary"}`}
+              title="List view"
+              aria-label="List view"
+            >
+              <List className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("folder")}
+              className={`inline-flex h-8 w-8 items-center justify-center rounded-r-md border-l border-border-default transition-colors ${viewMode === "folder" ? "bg-bg-elevated text-text-primary" : "text-text-muted hover:text-text-tertiary"}`}
+              title="Folder view"
+              aria-label="Folder view"
+            >
+              <FolderOpen className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -453,6 +513,105 @@ export function FounderDocumentList() {
               : "Upload pitch decks, financial statements, cap tables, and other documents. Approved investors will be able to view them."
           }
         />
+      ) : viewMode === "folder" && groupedDocuments ? (
+        /* ============================================ */
+        /*  FOLDER VIEW                                 */
+        /* ============================================ */
+        <div className="space-y-2">
+          {Object.entries(groupedDocuments)
+            .sort(([a], [b]) => b.localeCompare(a))
+            .map(([year, quarters]) => {
+              const yearKey = `year-${year}`;
+              const isYearCollapsed = collapsedFolders.has(yearKey);
+              return (
+                <div key={year} className="rounded-xl border border-border-default card-surface overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => toggleFolder(yearKey)}
+                    className="flex w-full items-center gap-2 px-4 py-3 text-left hover:bg-bg-elevated transition-colors"
+                  >
+                    {isYearCollapsed ? (
+                      <ChevronRight className="h-4 w-4 text-text-muted" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-text-muted" />
+                    )}
+                    <FolderOpen className="h-4 w-4 text-text-tertiary" />
+                    <span className="text-sm font-medium text-text-primary">{year}</span>
+                    <span className="text-xs text-text-muted">
+                      {Object.values(quarters).reduce((sum, docs) => sum + docs.length, 0)} files
+                    </span>
+                  </button>
+                  {!isYearCollapsed && (
+                    <div className="border-t border-border-subtle">
+                      {Object.entries(quarters)
+                        .sort(([a], [b]) => b.localeCompare(a))
+                        .map(([quarter, docs]) => {
+                          const qKey = `${yearKey}-${quarter}`;
+                          const isQCollapsed = collapsedFolders.has(qKey);
+                          return (
+                            <div key={quarter}>
+                              <button
+                                type="button"
+                                onClick={() => toggleFolder(qKey)}
+                                className="flex w-full items-center gap-2 pl-8 pr-4 py-2.5 text-left hover:bg-bg-elevated transition-colors"
+                              >
+                                {isQCollapsed ? (
+                                  <ChevronRight className="h-3.5 w-3.5 text-text-faint" />
+                                ) : (
+                                  <ChevronDown className="h-3.5 w-3.5 text-text-faint" />
+                                )}
+                                <span className="text-sm text-text-secondary">{quarter}</span>
+                                <span className="text-xs text-text-muted">{docs.length}</span>
+                              </button>
+                              {!isQCollapsed && (
+                                <div className="border-t border-border-subtle">
+                                  {docs.map((doc) => (
+                                    <div
+                                      key={doc.id}
+                                      className="flex cursor-pointer items-center gap-3 px-4 py-2.5 pl-14 hover:bg-bg-elevated transition-colors"
+                                      onClick={() => setPreviewDoc(doc)}
+                                    >
+                                      <FileText className="h-4 w-4 shrink-0 text-text-muted" />
+                                      <div className="min-w-0 flex-1">
+                                        <span className="text-sm font-medium truncate block">{doc.file_name}</span>
+                                      </div>
+                                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${documentTypeColors[doc.document_type] ?? documentTypeColors.other}`}>
+                                        {documentTypeShortLabels[doc.document_type] ?? doc.document_type}
+                                      </span>
+                                      <span className="text-xs text-text-muted">{formatFileSize(doc.file_size)}</span>
+                                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                          type="button"
+                                          onClick={() => downloadDocument(doc)}
+                                          className="inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-bg-hover"
+                                          title="Download"
+                                          aria-label="Download"
+                                        >
+                                          <Download className="h-3.5 w-3.5 text-text-tertiary" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => openDeleteModal(doc)}
+                                          className="inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-bg-hover"
+                                          title="Delete"
+                                          aria-label="Delete"
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5 text-[var(--error-accent)]" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+        </div>
       ) : (
         <>
           {/* ============================================ */}
@@ -640,7 +799,7 @@ export function FounderDocumentList() {
                                 title="Delete"
                                 aria-label="Delete document"
                               >
-                                <Trash2 className="h-4 w-4 text-red-400/60" />
+                                <Trash2 className="h-4 w-4 text-[var(--error-accent)]" />
                               </button>
                             </div>
                           </td>

@@ -132,8 +132,8 @@ export function InvestmentTable({
                         moic == null
                           ? "text-text-faint"
                           : moic >= 1
-                            ? "text-emerald-400"
-                            : "text-red-400",
+                            ? "text-[var(--success-accent)]"
+                            : "text-[var(--error-accent)]",
                       )}
                     >
                       {moic != null ? `${moic.toFixed(2)}x` : "-"}
@@ -154,7 +154,7 @@ export function InvestmentTable({
                         <button
                           onClick={() => handleDelete(inv.id)}
                           disabled={deletingId === inv.id}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded text-text-muted hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded text-text-muted hover:bg-[var(--error-bg-subtle)] hover:text-[var(--error-accent)] disabled:opacity-50"
                           title="Delete"
                           type="button"
                         >

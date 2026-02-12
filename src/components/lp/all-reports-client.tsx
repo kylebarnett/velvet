@@ -198,8 +198,8 @@ export function AllReportsClient({ funds }: { funds: FundOption[] }) {
               <span
                 className={
                   report.status === "published"
-                    ? "rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-[var(--status-success-text)]"
-                    : "rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-[var(--status-warning-text)]"
+                    ? "rounded-full bg-[var(--success-bg-muted)] px-2 py-0.5 text-xs text-[var(--status-success-text)]"
+                    : "rounded-full bg-[var(--status-warning-bg)] px-2 py-0.5 text-xs text-[var(--status-warning-text)]"
                 }
               >
                 {report.status}

@@ -77,22 +77,27 @@ export function formatValue(value: number | null | undefined, metricName?: strin
   return formatWithCommas(value);
 }
 
-// Format period for display
+// Format period for display.
+// Uses UTC methods — date-only strings like "2023-10-01" parse as midnight UTC.
+// Local-time getMonth() shifts the result in timezones behind UTC
+// (e.g. Oct 1 UTC → Sep 30 PST → Q3 instead of Q4).
 export function formatPeriod(periodStart: string, periodType: string): string {
   const date = new Date(periodStart);
 
   if (periodType === "monthly") {
-    return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const year = date.getUTCFullYear().toString().slice(-2);
+    return `${monthNames[date.getUTCMonth()]} '${year}`;
   }
 
   if (periodType === "quarterly") {
-    const quarter = Math.floor(date.getMonth() / 3) + 1;
-    const year = date.getFullYear().toString().slice(-2);
+    const quarter = Math.floor(date.getUTCMonth() / 3) + 1;
+    const year = date.getUTCFullYear().toString().slice(-2);
     return `Q${quarter} '${year}`;
   }
 
   if (periodType === "yearly") {
-    return date.getFullYear().toString();
+    return date.getUTCFullYear().toString();
   }
 
   return periodStart;

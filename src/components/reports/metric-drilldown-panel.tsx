@@ -6,6 +6,9 @@ import { X, ArrowUpRight, ArrowDownRight, TrendingUp, Building2, ArrowUpDown } f
 import { formatValue } from "@/components/charts/types";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
 import { INDUSTRY_LABELS, STAGE_LABELS_SHORT } from "@/lib/constants/industries";
+import { ExportButton } from "@/components/ui/export-button";
+import { downloadCsv } from "@/lib/utils/csv-export";
+import { downloadExcel } from "@/lib/utils/excel-export";
 
 export type CompanyMetricBreakdown = {
   companyId: string;
@@ -135,13 +138,36 @@ export function MetricDrilldownPanel({
               Across {companies.length} {companies.length === 1 ? "company" : "companies"}
             </p>
           </div>
-          <button
-            onClick={handleClose}
-            className="rounded-lg p-2 text-text-tertiary transition-colors hover:bg-bg-hover hover:text-text-primary"
-            aria-label="Close panel"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <ExportButton
+              onExport={(format) => {
+                const headers = ["Company", "Industry", "Stage", "Value", "% of Total", "Growth (%)"];
+                const rows = sortedCompanies.map((c) => [
+                  c.companyName,
+                  c.industry ? (INDUSTRY_LABELS[c.industry] ?? c.industry) : "",
+                  c.stage ? (STAGE_LABELS_SHORT[c.stage] ?? c.stage) : "",
+                  formatValue(c.value, metricName),
+                  c.percentOfTotal.toFixed(1),
+                  c.growth !== null ? c.growth.toFixed(1) : "",
+                ]);
+                const dateStr = new Date().toISOString().split("T")[0];
+                const baseName = `${metricName}-breakdown-${dateStr}`;
+                if (format === "excel") {
+                  downloadExcel({ filename: baseName, headers, rows });
+                } else {
+                  downloadCsv(`${baseName}.csv`, headers, rows);
+                }
+              }}
+              formats={["csv", "excel"]}
+            />
+            <button
+              onClick={handleClose}
+              className="rounded-lg p-2 text-text-tertiary transition-colors hover:bg-bg-hover hover:text-text-primary"
+              aria-label="Close panel"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Sort Controls */}
@@ -288,7 +314,7 @@ function CompanyRow({
         {company.growth !== null && (
           <div
             className={`flex items-center gap-0.5 text-xs ${
-              company.growth >= 0 ? "text-emerald-400" : "text-red-400"
+              company.growth >= 0 ? "text-[var(--success-accent)]" : "text-[var(--error-accent)]"
             }`}
           >
             {company.growth >= 0 ? (

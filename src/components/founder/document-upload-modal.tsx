@@ -145,7 +145,7 @@ export function DocumentUploadModal({
         <form className="mt-4 space-y-4" onSubmit={onSubmit}>
           <div className="grid gap-2">
             <label className="text-sm font-medium">
-              Document type <span className="text-red-400">*</span>
+              Document type <span className="text-[var(--error-accent)]">*</span>
             </label>
             <input type="hidden" name="documentType" value={documentType} />
             <Select
@@ -173,7 +173,7 @@ export function DocumentUploadModal({
 
           <div className="grid gap-2">
             <label className="text-sm font-medium">
-              Time period <span className="text-red-400">*</span>
+              Time period <span className="text-[var(--error-accent)]">*</span>
             </label>
             <div className="flex gap-2">
               <Select value={periodQuarter} onValueChange={setPeriodQuarter}>
@@ -269,7 +269,7 @@ export function DocumentUploadModal({
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-bg-hover">
                 <div
-                  className="h-full rounded-full bg-white transition-all duration-300"
+                  className="h-full rounded-full bg-btn-primary-bg transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>

@@ -40,18 +40,17 @@ function buildPeriodLabel(
   periodStart: string,
   periodType: string,
 ): string {
+  // Use UTC methods — date-only strings parse as midnight UTC.
   const start = new Date(periodStart);
   if (periodType === "quarterly") {
-    const q = Math.floor(start.getMonth() / 3) + 1;
-    return `Q${q} ${start.getFullYear()}`;
+    const q = Math.floor(start.getUTCMonth() / 3) + 1;
+    return `Q${q} ${start.getUTCFullYear()}`;
   }
   if (periodType === "monthly") {
-    return start.toLocaleDateString("en-US", {
-      month: "short",
-      year: "numeric",
-    });
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${monthNames[start.getUTCMonth()]} ${start.getUTCFullYear()}`;
   }
-  return String(start.getFullYear());
+  return String(start.getUTCFullYear());
 }
 
 export async function GET(req: Request) {

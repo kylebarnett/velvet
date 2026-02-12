@@ -81,7 +81,7 @@ function MetricChip({ name }: { name: string }) {
               {metricInfo.formula && (
                 <div className="mt-2 rounded bg-bg-elevated px-2 py-1.5">
                   <p className="text-[10px] font-medium uppercase tracking-wide text-text-tertiary">Formula</p>
-                  <p className="mt-0.5 text-xs text-emerald-400">{metricInfo.formula}</p>
+                  <p className="mt-0.5 text-xs text-[var(--success-accent)]">{metricInfo.formula}</p>
                 </div>
               )}
             </>
@@ -478,8 +478,8 @@ export function UnifiedRequestWizard() {
     return (
       <div className="space-y-6">
         <div className="rounded-xl border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] p-6 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
-            <Check className="h-6 w-6 text-emerald-400" />
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--success-bg-muted)]">
+            <Check className="h-6 w-6 text-[var(--success-accent)]" />
           </div>
           {result.type === "one-time" ? (
             <>
@@ -804,8 +804,8 @@ export function UnifiedRequestWizard() {
                 onClick={() => setFrequency("one-time")}
                 className="flex flex-col items-start rounded-xl border border-border-default card-surface p-5 text-left transition-colors hover:border-border-default hover:bg-bg-hover"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
-                  <Send className="h-5 w-5 text-blue-300" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--status-info-bg)]">
+                  <Send className="h-5 w-5 text-[var(--info-accent)]" />
                 </div>
                 <h3 className="mt-3 font-medium">One-time request</h3>
                 <p className="mt-1 text-sm text-text-tertiary">

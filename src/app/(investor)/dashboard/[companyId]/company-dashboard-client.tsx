@@ -20,6 +20,7 @@ import { CompanyDocumentsTab } from "@/components/investor/company-documents-tab
 import { CompanyTearSheetsTab } from "@/components/investor/company-tear-sheets-tab";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
+import { logActivity } from "@/lib/activity/log-activity";
 import { logger } from "@/lib/logger";
 
 type DashboardView = {
@@ -45,6 +46,7 @@ type CompanyDashboardClientProps = {
   metrics: MetricValue[];
   views: DashboardView[];
   templates: DashboardTemplate[];
+  readOnly?: boolean;
 };
 
 type TabValue = "metrics" | "documents" | "tear-sheets";
@@ -240,6 +242,7 @@ function MetricsTabContent({
   metrics,
   views: initialViews,
   templates,
+  readOnly,
 }: CompanyDashboardClientProps) {
   const router = useRouter();
   const [views, setViews] = React.useState(initialViews);
@@ -333,27 +336,29 @@ function MetricsTabContent({
           <div className="hidden sm:block h-5 w-px bg-bg-elevated" />
           <DateRangeSelector value={dateRange} onChange={setDateRange} />
         </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href={`/campaigns/new?companyId=${companyId}`}
-            className="flex items-center justify-center gap-2 rounded-lg bg-btn-primary-bg px-3 py-2 sm:py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover transition-colors"
-          >
-            <Send className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Request Metrics</span>
-          </Link>
-          <Link
-            href={`/dashboard/${companyId}/edit`}
-            className="flex items-center justify-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-2 sm:py-1.5 text-xs font-medium text-text-tertiary hover:border-border-default hover:text-text-secondary transition-colors"
-          >
-            <Settings className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Edit Dashboard</span>
-          </Link>
-          <ExportButton
-            companyId={companyId}
-            companyName={companyName}
-            periodType={periodType}
-          />
-        </div>
+        {!readOnly && (
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/campaigns/new?companyId=${companyId}`}
+              className="flex items-center justify-center gap-2 rounded-lg bg-btn-primary-bg px-3 py-2 sm:py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover transition-colors"
+            >
+              <Send className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Request Metrics</span>
+            </Link>
+            <Link
+              href={`/dashboard/${companyId}/edit`}
+              className="flex items-center justify-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-2 sm:py-1.5 text-xs font-medium text-text-tertiary hover:border-border-default hover:text-text-secondary transition-colors"
+            >
+              <Settings className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Edit Dashboard</span>
+            </Link>
+            <ExportButton
+              companyId={companyId}
+              companyName={companyName}
+              periodType={periodType}
+            />
+          </div>
+        )}
       </div>
 
       {/* Dashboard grid - stacked on mobile, grid on desktop */}
@@ -412,6 +417,15 @@ function MetricsTabContent({
 export function CompanyDashboardClient(props: CompanyDashboardClientProps) {
   const searchParams = useSearchParams();
   const activeTab = (searchParams.get("tab") as TabValue) || "metrics";
+
+  // Log view_dashboard once per company visit
+  const loggedRef = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (loggedRef.current !== props.companyId) {
+      loggedRef.current = props.companyId;
+      logActivity({ companyId: props.companyId, action: "view_dashboard" });
+    }
+  }, [props.companyId]);
 
   return (
     <>

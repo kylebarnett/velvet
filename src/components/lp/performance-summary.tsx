@@ -37,18 +37,18 @@ function formatCurrency(value: number, currency: string): string {
 
 function getMultipleColor(value: number | null): string {
   if (value == null) return "text-text-faint";
-  if (value >= 2) return "text-emerald-400";
-  if (value >= 1) return "text-emerald-400/80";
-  if (value >= 0.5) return "text-amber-400";
-  return "text-red-400";
+  if (value >= 2) return "text-[var(--success-accent)]";
+  if (value >= 1) return "text-[var(--success-accent)]/80";
+  if (value >= 0.5) return "text-[var(--warning-accent)]";
+  return "text-[var(--error-accent)]";
 }
 
 function getIRRColor(value: number | null): string {
   if (value == null) return "text-text-faint";
-  if (value >= 0.25) return "text-emerald-400";
-  if (value >= 0.1) return "text-emerald-400/80";
-  if (value >= 0) return "text-amber-400";
-  return "text-red-400";
+  if (value >= 0.25) return "text-[var(--success-accent)]";
+  if (value >= 0.1) return "text-[var(--success-accent)]/80";
+  if (value >= 0) return "text-[var(--warning-accent)]";
+  return "text-[var(--error-accent)]";
 }
 
 function KpiTooltip({

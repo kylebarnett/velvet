@@ -115,15 +115,15 @@ const PAGE_SIZE = 20;
 // ---------- Helpers ----------
 
 function getProgressColor(percent: number): string {
-  if (percent >= 80) return "bg-emerald-500";
-  if (percent >= 40) return "bg-amber-500";
-  return "bg-red-500";
+  if (percent >= 80) return "bg-[var(--success-solid)]";
+  if (percent >= 40) return "bg-[var(--warning-solid)]";
+  return "bg-[var(--error-solid)]";
 }
 
 function getProgressTextColor(percent: number): string {
-  if (percent >= 80) return "text-emerald-400";
-  if (percent >= 40) return "text-amber-400";
-  return "text-red-400";
+  if (percent >= 80) return "text-[var(--success-accent)]";
+  if (percent >= 40) return "text-[var(--warning-accent)]";
+  return "text-[var(--error-accent)]";
 }
 
 function getPeriodBadgeClasses(periodType: string): string {
@@ -236,7 +236,7 @@ function ResponseRateTile({
               {hasContent ? `${pct}%` : "—"}
             </span>
             {summary.overdueCampaigns > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-medium text-[var(--status-error-text)]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--error-bg-subtle)] px-2 py-0.5 text-[11px] font-medium text-[var(--status-error-text)]">
                 <AlertTriangle className="h-3 w-3" />
                 {summary.overdueCampaigns} overdue
               </span>
@@ -357,7 +357,7 @@ function NeedsAttentionTile({ summary }: { summary: CampaignSummary }) {
               {needsAttentionTotal}
             </span>
             {summary.overdueCompanyCount > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-medium text-[var(--status-error-text)]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--error-bg-subtle)] px-2 py-0.5 text-[11px] font-medium text-[var(--status-error-text)]">
                 <AlertTriangle className="h-3 w-3" />
                 {summary.overdueCompanyCount} overdue
               </span>
@@ -369,7 +369,7 @@ function NeedsAttentionTile({ summary }: { summary: CampaignSummary }) {
               <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-bg-hover">
                 {summary.notRespondedCount > 0 && (
                   <div
-                    className="h-full bg-red-500"
+                    className="h-full bg-[var(--error-solid)]"
                     style={{
                       width: `${(summary.notRespondedCount / needsAttentionTotal) * 100}%`,
                     }}
@@ -377,7 +377,7 @@ function NeedsAttentionTile({ summary }: { summary: CampaignSummary }) {
                 )}
                 {summary.partialCount > 0 && (
                   <div
-                    className="h-full bg-amber-500"
+                    className="h-full bg-[var(--warning-solid)]"
                     style={{
                       width: `${(summary.partialCount / needsAttentionTotal) * 100}%`,
                     }}

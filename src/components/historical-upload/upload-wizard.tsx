@@ -211,7 +211,7 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
               <div
                 className={cn(
                   "h-px flex-1",
-                  i <= currentStepIndex ? "bg-white/30" : "bg-border-default",
+                  i <= currentStepIndex ? "bg-border-emphasis" : "bg-border-default",
                 )}
               />
             )}
@@ -220,9 +220,9 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
                 className={cn(
                   "flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium",
                   i < currentStepIndex
-                    ? "bg-emerald-500/20 text-emerald-400"
+                    ? "bg-[var(--success-bg-muted)] text-[var(--success-accent)]"
                     : i === currentStepIndex
-                      ? "bg-white/10 text-text-primary"
+                      ? "bg-bg-elevated text-text-primary"
                       : "bg-bg-tertiary text-text-tertiary",
                 )}
               >
@@ -267,8 +267,8 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
             className={cn(
               "flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-12 transition-colors",
               dragOver
-                ? "border-white/30 bg-white/5"
-                : "border-border-default hover:border-white/20 hover:bg-bg-secondary",
+                ? "border-border-emphasis bg-bg-raised"
+                : "border-border-default hover:border-border-emphasis hover:bg-bg-secondary",
               uploading && "pointer-events-none opacity-60",
             )}
           >
@@ -282,7 +282,7 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
 
             {file ? (
               <>
-                <FileSpreadsheet className="mb-3 h-10 w-10 text-emerald-400" />
+                <FileSpreadsheet className="mb-3 h-10 w-10 text-[var(--success-accent)]" />
                 <p className="text-sm font-medium text-text-primary">{file.name}</p>
                 <p className="mt-1 text-xs text-text-secondary">
                   {(file.size / 1024).toFixed(0)} KB
@@ -314,7 +314,7 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-bg-tertiary">
                 <div
-                  className="h-full rounded-full bg-white/30 transition-all duration-300"
+                  className="h-full rounded-full bg-btn-primary-bg/30 transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -323,9 +323,9 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-300" />
-              <p className="text-sm text-red-200">{error}</p>
+            <div className="flex items-start gap-2 rounded-lg border border-[var(--error-border)] bg-[var(--error-bg-subtle)] p-3">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--error-accent)]" />
+              <p className="text-sm text-[var(--status-error-text)]">{error}</p>
             </div>
           )}
 
@@ -334,7 +334,7 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
             <button
               onClick={handleUpload}
               disabled={!file || uploading}
-              className="rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90 disabled:opacity-60"
+              className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
             >
               {uploading ? "Processing..." : "Upload & Analyze"}
             </button>
@@ -376,7 +376,7 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
 
       {step === "complete" && completionStats && (
         <div className="flex flex-col items-center py-12 text-center">
-          <CheckCircle2 className="mb-4 h-12 w-12 text-emerald-400" />
+          <CheckCircle2 className="mb-4 h-12 w-12 text-[var(--success-accent)]" />
           <h2 className="text-lg font-semibold text-text-primary">Upload Complete</h2>
           <p className="mt-2 text-sm text-text-secondary">
             Your historical metrics have been processed.
@@ -384,11 +384,11 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
 
           <div className="mt-6 grid grid-cols-3 gap-4 text-center">
             <div className="rounded-lg border border-border-default bg-bg-secondary p-4">
-              <p className="text-2xl font-bold text-emerald-400">{completionStats.approved}</p>
+              <p className="text-2xl font-bold text-[var(--success-accent)]">{completionStats.approved}</p>
               <p className="text-xs text-text-secondary">Approved</p>
             </div>
             <div className="rounded-lg border border-border-default bg-bg-secondary p-4">
-              <p className="text-2xl font-bold text-red-400">{completionStats.rejected}</p>
+              <p className="text-2xl font-bold text-[var(--error-accent)]">{completionStats.rejected}</p>
               <p className="text-xs text-text-secondary">Rejected</p>
             </div>
             <div className="rounded-lg border border-border-default bg-bg-secondary p-4">
@@ -401,14 +401,14 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
             {role === "investor" ? (
               <button
                 onClick={() => router.push("/reports")}
-                className="rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90"
+                className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
               >
                 View Reports
               </button>
             ) : (
               <button
                 onClick={() => router.push("/portal")}
-                className="rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90"
+                className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
               >
                 Go to Dashboard
               </button>

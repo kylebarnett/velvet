@@ -212,7 +212,7 @@ export function CompanyLogo({
           <div className="mx-2 border-t border-border-default" />
           <button
             onClick={handleRemove}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10 hover:text-[var(--status-error-text)]"
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-[var(--error-accent)] transition-colors hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)]"
           >
             <X className="h-4 w-4" />
             Remove

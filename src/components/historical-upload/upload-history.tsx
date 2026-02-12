@@ -38,13 +38,13 @@ export function UploadHistory({ role }: { role: "investor" | "founder" }) {
   const statusIcon = (status: string) => {
     switch (status) {
       case "completed":
-        return <CheckCircle2 className="h-4 w-4 text-emerald-400" />;
+        return <CheckCircle2 className="h-4 w-4 text-[var(--success-accent)]" />;
       case "failed":
-        return <XCircle className="h-4 w-4 text-red-400" />;
+        return <XCircle className="h-4 w-4 text-[var(--error-accent)]" />;
       case "processing":
         return <Loader2 className="h-4 w-4 animate-spin text-text-tertiary" />;
       default:
-        return <Clock className="h-4 w-4 text-amber-300" />;
+        return <Clock className="h-4 w-4 text-[var(--warning-accent)]" />;
     }
   };
 
@@ -85,11 +85,11 @@ export function UploadHistory({ role }: { role: "investor" | "founder" }) {
               <span
                 className={cn(
                   "rounded-full px-2 py-0.5 text-xs",
-                  upload.status === "completed" && "bg-emerald-500/20 text-emerald-200",
-                  upload.status === "failed" && "bg-red-500/20 text-red-200",
-                  upload.status === "processing" && "bg-blue-500/20 text-blue-200",
+                  upload.status === "completed" && "bg-[var(--success-bg-muted)] text-[var(--status-success-text)]",
+                  upload.status === "failed" && "bg-[var(--status-error-bg)] text-[var(--status-error-text)]",
+                  upload.status === "processing" && "bg-[var(--status-info-bg)] text-[var(--status-info-text)]",
                   (upload.status === "parsed" || upload.status === "reviewing") &&
-                    "bg-amber-500/20 text-amber-200",
+                    "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]",
                 )}
               >
                 {upload.status.charAt(0).toUpperCase() + upload.status.slice(1)}

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Download } from "lucide-react";
+import { logActivity } from "@/lib/activity/log-activity";
 import { logger } from "@/lib/logger";
 
 type ExportButtonProps = {
@@ -43,6 +44,12 @@ export function ExportButton({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      logActivity({
+        companyId,
+        action: "export_metrics",
+        metadata: { format: "csv", periodType: periodType ?? "all" },
+      });
     } catch (err: unknown) {
       logger.error("Export error:", err);
     } finally {

@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpDown, ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
 
 import { cn } from "@/lib/utils/cn";
 import { getPercentileBgColor } from "@/lib/benchmarks/calculate";
 import { formatValue } from "@/components/charts/types";
+import { ExportButton } from "@/components/ui/export-button";
+import { downloadCsv } from "@/lib/utils/csv-export";
+import { downloadExcel } from "@/lib/utils/excel-export";
 
 type CompanyBenchmark = {
   id: string;
@@ -34,8 +38,8 @@ function formatDelta(value: number, median: number, metricName: string): string 
 
 function getDeltaColor(value: number, median: number): string {
   const diff = value - median;
-  if (diff > 0) return "text-emerald-400";
-  if (diff < 0) return "text-red-400";
+  if (diff > 0) return "text-[var(--success-accent)]";
+  if (diff < 0) return "text-[var(--error-accent)]";
   return "text-text-tertiary";
 }
 
@@ -90,12 +94,37 @@ export function BenchmarkTable({
     );
   }
 
+  function getExportData() {
+    const headers = ["Company", "Industry", "Stage", "Value", "Percentile", "vs Median"];
+    const rows = sortedCompanies.map((c) => [
+      c.name,
+      c.industry ?? "",
+      c.stage ?? "",
+      c.formattedValue,
+      c.percentile !== null ? `P${c.percentile}` : "",
+      medianValue !== null ? formatDelta(c.value, medianValue, metricName) : "",
+    ]);
+    return { headers, rows };
+  }
+
+  function handleExport(format: "csv" | "excel" | "pdf") {
+    const { headers, rows } = getExportData();
+    const dateStr = new Date().toISOString().split("T")[0];
+    const baseName = `benchmarks-${metricName}-${dateStr}`;
+    if (format === "excel") {
+      downloadExcel({ filename: baseName, headers, rows });
+    } else {
+      downloadCsv(`${baseName}.csv`, headers, rows);
+    }
+  }
+
   return (
     <div className="rounded-xl border border-border-default card-surface">
-      <div className="p-4 pb-2">
+      <div className="flex items-center justify-between p-4 pb-2">
         <h3 className="text-sm font-medium text-text-primary">
           Company Rankings
         </h3>
+        <ExportButton onExport={handleExport} formats={["csv", "excel"]} />
       </div>
 
       <div className="overflow-x-auto">
@@ -144,6 +173,7 @@ export function BenchmarkTable({
                   </button>
                 </th>
               )}
+              <th className="w-10 px-4 py-2.5" />
             </tr>
           </thead>
           <tbody>
@@ -160,12 +190,12 @@ export function BenchmarkTable({
                     {(company.industry || company.stage) && (
                       <div className="flex items-center gap-1">
                         {company.industry && (
-                          <span className="rounded-md bg-blue-500/20 px-1.5 py-0.5 text-[10px] text-[var(--status-info-text)]">
+                          <span className="rounded-md bg-[var(--status-info-bg)] px-1.5 py-0.5 text-[10px] text-[var(--status-info-text)]">
                             {company.industry}
                           </span>
                         )}
                         {company.stage && (
-                          <span className="rounded-md bg-violet-500/20 px-1.5 py-0.5 text-[10px] text-violet-200">
+                          <span className="rounded-md bg-[var(--tag-violet-bg)] px-1.5 py-0.5 text-[10px] text-[var(--tag-violet-text)]">
                             {company.stage}
                           </span>
                         )}
@@ -200,6 +230,15 @@ export function BenchmarkTable({
                     {formatDelta(company.value, medianValue, metricName)}
                   </td>
                 )}
+                <td className="px-4 py-3 text-right">
+                  <Link
+                    href={`/dashboard/${company.id}`}
+                    className="text-text-faint transition-colors hover:text-text-muted"
+                    aria-label={`View ${company.name} dashboard`}
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </td>
               </tr>
             ))}
           </tbody>

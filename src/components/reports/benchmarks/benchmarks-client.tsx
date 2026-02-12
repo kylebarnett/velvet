@@ -12,8 +12,10 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import { useReportsContext } from "@/components/reports/reports-context";
 import { BenchmarkChart } from "./benchmark-chart";
 import { BenchmarkTable } from "./benchmark-table";
+import { BenchmarkPortfolioSummary } from "./benchmark-portfolio-summary";
 
 const NONE = "__none__";
 
@@ -73,6 +75,37 @@ export function BenchmarksClient() {
   const [companies, setCompanies] = useState<CompanyBenchmark[]>([]);
 
   const abortRef = useRef<AbortController | null>(null);
+
+  // Save/load context integration
+  const { setCurrentConfig, loadedReport, clearLoadedReport } = useReportsContext();
+
+  // Register current config with context
+  useEffect(() => {
+    if (selectedMetric) {
+      setCurrentConfig({
+        reportType: "benchmarks",
+        filters: { metric: selectedMetric, industry, stage },
+      });
+    }
+  }, [selectedMetric, industry, stage, setCurrentConfig]);
+
+  // Restore state when a saved report is loaded
+  useEffect(() => {
+    if (!loadedReport || loadedReport.report_type !== "benchmarks") return;
+
+    const filters = loadedReport.filters as Record<string, unknown> | undefined;
+    if (filters?.metric && typeof filters.metric === "string") {
+      setSelectedMetric(filters.metric);
+    }
+    if (filters?.industry && typeof filters.industry === "string") {
+      setIndustry(filters.industry);
+    }
+    if (filters?.stage && typeof filters.stage === "string") {
+      setStage(filters.stage);
+    }
+
+    clearLoadedReport();
+  }, [loadedReport, clearLoadedReport]);
 
   // Fetch available metric names
   useEffect(() => {
@@ -163,19 +196,8 @@ export function BenchmarksClient() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-lg font-semibold text-text-primary">
-          Portfolio Benchmarks
-        </h2>
-        <p className="mt-1 text-sm text-text-tertiary">
-          See how your portfolio companies rank against anonymized industry
-          benchmarks.
-        </p>
-      </div>
-
       {/* Controls */}
-      <div className="rounded-xl border border-border-default card-surface p-4">
+      <div className="card-surface rounded-xl border border-border-subtle p-4">
         <div className="grid gap-4 md:grid-cols-3">
           {/* Metric selector */}
           <div>
@@ -295,6 +317,14 @@ export function BenchmarksClient() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Portfolio Summary */}
+      {!isLoadingData && hasBenchmark && hasCompanies && (
+        <BenchmarkPortfolioSummary
+          companies={companies}
+          benchmark={benchmarkData!}
+        />
       )}
 
       {/* Chart */}

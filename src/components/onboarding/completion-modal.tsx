@@ -85,8 +85,8 @@ export function CompletionModal({ onClose, onRestart, role = "investor" }: Compl
 
         {/* Content */}
         <div className="flex flex-col items-center text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20">
-            <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--success-bg-muted)]">
+            <CheckCircle2 className="h-8 w-8 text-[var(--success-accent)]" />
           </div>
 
           <h2 className="mt-4 text-xl font-semibold text-text-primary">

@@ -11,11 +11,18 @@ type Investor = {
   approval_status: string;
   is_inviting_investor: boolean;
   created_at: string;
+  org_name?: string | null;
   users: {
     id: string;
     email: string;
     full_name: string | null;
   } | null;
+};
+
+type DataCounts = {
+  metrics: number;
+  documents: number;
+  tearSheets: number;
 };
 
 function LoadingSkeleton() {
@@ -45,6 +52,7 @@ function LoadingSkeleton() {
 
 export default function FounderInvestorsPage() {
   const [investors, setInvestors] = React.useState<Investor[]>([]);
+  const [dataCounts, setDataCounts] = React.useState<DataCounts>({ metrics: 0, documents: 0, tearSheets: 0 });
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -57,6 +65,7 @@ export default function FounderInvestorsPage() {
         const json = await res.json().catch(() => null);
         if (!res.ok) throw new Error(json?.error ?? "Failed to load.");
         setInvestors(json.investors ?? []);
+        if (json.dataCounts) setDataCounts(json.dataCounts);
       } catch (e: unknown) {
         const message =
           e instanceof Error ? e.message : "Something went wrong.";
@@ -74,7 +83,8 @@ export default function FounderInvestorsPage() {
     return investors.filter((inv) => {
       const name = inv.users?.full_name?.toLowerCase() ?? "";
       const email = inv.users?.email?.toLowerCase() ?? "";
-      return name.includes(q) || email.includes(q);
+      const org = inv.org_name?.toLowerCase() ?? "";
+      return name.includes(q) || email.includes(q) || org.includes(q);
     });
   }, [investors, searchQuery]);
 
@@ -201,7 +211,7 @@ export default function FounderInvestorsPage() {
 
           <div className="space-y-3">
             {filteredInvestors.map((inv) => (
-              <InvestorApprovalCard key={inv.id} investor={inv} />
+              <InvestorApprovalCard key={inv.id} investor={inv} dataCounts={dataCounts} />
             ))}
             {filteredInvestors.length === 0 && searchQuery && (
               <div className="rounded-xl border border-border-default card-surface p-4 text-sm text-text-tertiary">

@@ -181,7 +181,7 @@ export function TemplateForm({
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-30"
                 title="Remove metric"
               >
-                <Trash2 className="h-4 w-4 text-red-400/60" />
+                <Trash2 className="h-4 w-4 text-[var(--error-accent)]" />
               </button>
             </div>
           ))}

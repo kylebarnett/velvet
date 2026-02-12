@@ -34,7 +34,7 @@ export function RichTextEditor({
       }),
       Link.configure({
         openOnClick: false,
-        HTMLAttributes: { class: "underline text-blue-300" },
+        HTMLAttributes: { class: "underline text-[var(--accent-text)]" },
       }),
       Placeholder.configure({ placeholder: placeholder ?? "Start typing..." }),
     ],
@@ -45,7 +45,7 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "min-h-[80px] w-full rounded-b-md border border-t-0 border-border-default bg-bg-input px-3 py-2 text-sm outline-none focus:border-border-default prose prose-invert prose-sm max-w-none [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:underline [&_a]:text-blue-300",
+          "min-h-[80px] w-full rounded-b-md border border-t-0 border-border-default bg-bg-input px-3 py-2 text-sm outline-none focus:border-border-default prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:underline [&_a]:text-[var(--accent-text)]",
       },
     },
   });

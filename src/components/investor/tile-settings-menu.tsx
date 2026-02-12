@@ -151,7 +151,7 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
                     {loading && selectedCompany?.id === company.id ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin text-text-muted" />
                     ) : hasCustomSettings ? (
-                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      <Check className="h-3.5 w-3.5 text-[var(--success-accent)]" />
                     ) : null}
                   </button>
                 );

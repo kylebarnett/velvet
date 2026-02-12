@@ -169,7 +169,7 @@ function ContactsDesktopTable({
             <button
               onClick={saveEdit}
               disabled={loading}
-              className="text-sm text-emerald-400 hover:text-[var(--status-success-text)]"
+              className="text-sm text-[var(--success-accent)] hover:text-[var(--status-success-text)]"
             >
               Save
             </button>
@@ -208,7 +208,7 @@ function ContactsDesktopTable({
               title="Delete contact"
               aria-label="Delete contact"
             >
-              <Trash2 className="h-4 w-4 text-red-400/60" />
+              <Trash2 className="h-4 w-4 text-[var(--error-accent)]" />
             </button>
           </div>
         )}
@@ -674,21 +674,21 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
         <div className="rounded-xl card-surface kpi-gradient-blue p-3 sm:p-4">
           <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
-            <Users className="h-4 w-4 text-blue-400" aria-hidden="true" />
+            <Users className="h-4 w-4 text-[var(--info-accent)]" aria-hidden="true" />
             Total Contacts
           </div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{pagination.total}</div>
         </div>
         <div className="rounded-xl card-surface kpi-gradient-emerald p-3 sm:p-4">
           <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
-            <CheckCircle2 className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+            <CheckCircle2 className="h-4 w-4 text-[var(--success-accent)]" aria-hidden="true" />
             Accepted
           </div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{stats.accepted}</div>
         </div>
         <div className="rounded-xl card-surface kpi-gradient-amber p-3 sm:p-4">
           <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
-            <Clock className="h-4 w-4 text-amber-400" aria-hidden="true" />
+            <Clock className="h-4 w-4 text-[var(--warning-accent)]" aria-hidden="true" />
             Awaiting Response
           </div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{stats.awaiting}</div>
@@ -813,7 +813,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
               <button
                 onClick={bulkDelete}
                 disabled={loading}
-                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-red-500/20 px-3 text-sm text-[var(--status-error-text)] hover:bg-red-500/30 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-[var(--status-error-bg)] px-3 text-sm text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--error-border)]"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Delete</span>
@@ -945,7 +945,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                           title="Delete"
                           aria-label="Delete contact"
                         >
-                          <Trash2 className="h-4 w-4 text-red-400/60" />
+                          <Trash2 className="h-4 w-4 text-[var(--error-accent)]" />
                         </button>
                       </div>
                     </>

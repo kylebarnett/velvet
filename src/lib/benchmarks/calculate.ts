@@ -92,18 +92,18 @@ export function getCompanyPercentile(
  * Return a Tailwind text colour class corresponding to a percentile rank.
  */
 export function getPercentileColor(percentile: number): string {
-  if (percentile < 25) return "text-red-400";
-  if (percentile < 50) return "text-amber-400";
-  if (percentile < 75) return "text-blue-400";
-  return "text-emerald-400";
+  if (percentile < 25) return "text-[var(--error-accent)]";
+  if (percentile < 50) return "text-[var(--warning-accent)]";
+  if (percentile < 75) return "text-[var(--info-accent)]";
+  return "text-[var(--data-positive)]";
 }
 
 /**
  * Return Tailwind background-badge classes corresponding to a percentile rank.
  */
 export function getPercentileBgColor(percentile: number): string {
-  if (percentile < 25) return "bg-red-500/20 text-red-200";
-  if (percentile < 50) return "bg-amber-500/20 text-amber-200";
-  if (percentile < 75) return "bg-blue-500/20 text-blue-200";
-  return "bg-emerald-500/20 text-emerald-200";
+  if (percentile < 25) return "bg-[var(--status-error-bg)] text-[var(--status-error-text)]";
+  if (percentile < 50) return "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]";
+  if (percentile < 75) return "bg-[var(--status-info-bg)] text-[var(--status-info-text)]";
+  return "bg-[var(--status-success-bg)] text-[var(--status-success-text)]";
 }

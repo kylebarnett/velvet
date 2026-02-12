@@ -1,5 +1,6 @@
 "use client";
 
+import { Building2, BarChart3, PieChart as PieChartIcon } from "lucide-react";
 import { PieChart } from "@/components/charts/pie-chart";
 
 type DistributionData = {
@@ -18,29 +19,15 @@ const CHART_CONFIGS = [
     key: "industry",
     title: "By Industry",
     subtitle: "Portfolio breakdown",
-    icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-    ),
-    gradient: "from-blue-500/[0.08] via-transparent to-transparent",
-    iconBg: "from-blue-500/20 to-blue-500/5",
-    iconRing: "ring-blue-500/20",
-    iconColor: "text-blue-400",
+    icon: Building2,
+    iconClasses: "bg-[var(--tag-blue-bg)] text-[var(--tag-blue-text)]",
   },
   {
     key: "stage",
     title: "By Stage",
     subtitle: "Investment phases",
-    icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-    ),
-    gradient: "from-emerald-500/[0.08] via-transparent to-transparent",
-    iconBg: "from-emerald-500/20 to-emerald-500/5",
-    iconRing: "ring-emerald-500/20",
-    iconColor: "text-emerald-400",
+    icon: BarChart3,
+    iconClasses: "bg-[var(--tag-emerald-bg)] text-[var(--tag-emerald-text)]",
   },
 ];
 
@@ -57,16 +44,11 @@ export function DistributionCharts({
 
   if (!hasData) {
     return (
-      <div className="relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent p-8 text-center">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-bg-raised via-transparent to-transparent" />
-        <div className="relative">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated ring-1 ring-border-subtle">
-            <svg className="h-6 w-6 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-            </svg>
-          </div>
-          <p className="text-text-tertiary">No distribution data available</p>
+      <div className="card-surface rounded-2xl border border-border-subtle p-8 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated ring-1 ring-border-subtle">
+          <PieChartIcon className="h-6 w-6 text-text-muted" />
         </div>
+        <p className="text-text-secondary">No distribution data available</p>
       </div>
     );
   }
@@ -75,27 +57,25 @@ export function DistributionCharts({
   const chartsToShow = CHART_CONFIGS.filter((config) => dataMap[config.key].length > 0);
 
   return (
-    <div className={`grid gap-4 ${chartsToShow.length === 2 ? "md:grid-cols-2" : ""}`}>
+    <div className="flex h-full flex-col gap-4">
       {chartsToShow.map((config) => {
         const data = dataMap[config.key];
         const total = data.reduce((sum, d) => sum + d.value, 0);
+        const Icon = config.icon;
 
         return (
           <div
             key={config.key}
-            className="group relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent transition-all duration-300 hover:border-border-default"
+            className="card-surface group rounded-2xl border border-border-subtle transition-all duration-300 hover:border-border-default"
           >
-            {/* Gradient overlay */}
-            <div className={`absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] ${config.gradient}`} />
-
-            <div className="relative p-5">
+            <div className="p-5">
               {/* Header */}
               <div className="mb-4 flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${config.iconBg} ring-1 ${config.iconRing} ${config.iconColor}`}>
-                  {config.icon}
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${config.iconClasses}`}>
+                  <Icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-text-primary">{config.title}</h3>
+                  <h3 className="text-base font-semibold tracking-tight text-text-primary">{config.title}</h3>
                   <p className="text-xs text-text-muted">{config.subtitle}</p>
                 </div>
               </div>

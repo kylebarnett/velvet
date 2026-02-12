@@ -64,7 +64,7 @@ function TrendIndicator({ percentChange }: { percentChange: number | null }) {
 
   if (percentChange > 0) {
     return (
-      <div className="flex items-center gap-1 text-emerald-400">
+      <div className="flex items-center gap-1 text-[var(--success-accent)]">
         <TrendingUp className="h-4 w-4" />
         <span className="text-xs font-medium">+{percentChange.toFixed(1)}%</span>
       </div>
@@ -73,7 +73,7 @@ function TrendIndicator({ percentChange }: { percentChange: number | null }) {
 
   if (percentChange < 0) {
     return (
-      <div className="flex items-center gap-1 text-red-400">
+      <div className="flex items-center gap-1 text-[var(--data-negative)]">
         <TrendingDown className="h-4 w-4" />
         <span className="text-xs font-medium">{percentChange.toFixed(1)}%</span>
       </div>

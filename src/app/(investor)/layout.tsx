@@ -54,9 +54,10 @@ export default async function InvestorLayout({
             icon: "bar-chart-3",
             divider: true,
             children: [
-              { href: "/reports", label: "Summary", icon: "bar-chart-3" },
+              { href: "/reports", label: "Overview", icon: "bar-chart-3" },
               { href: "/reports/compare", label: "Compare", icon: "bar-chart-3" },
               { href: "/reports/benchmarks", label: "Benchmarks", icon: "bar-chart-3" },
+              { href: "/reports/trends", label: "Trends", icon: "trending-up" },
             ],
           },
           { href: "/documents", label: "Documents", icon: "file-text" },

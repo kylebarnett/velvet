@@ -443,8 +443,8 @@ export function ChatbotWidget() {
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
             <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-500/20">
-                <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--violet-bg-muted)]">
+                <Sparkles className="h-3.5 w-3.5 text-[var(--violet-accent)]" />
               </div>
               <span className="text-sm font-medium">Ask AI</span>
             </div>
@@ -483,8 +483,8 @@ export function ChatbotWidget() {
             {showEmpty && (
               <div className="space-y-4">
                 <div className="flex flex-col items-center py-6 text-center">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10">
-                    <Sparkles className="h-5 w-5 text-violet-400/70" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--tag-violet-bg)]">
+                    <Sparkles className="h-5 w-5 text-[var(--violet-accent)]/70" />
                   </div>
                   <p className="mt-3 text-sm text-text-muted">
                     Ask about your portfolio
@@ -547,8 +547,8 @@ export function ChatbotWidget() {
 
                     {/* AI response */}
                     <div className="flex gap-2">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-violet-500/20">
-                        <Sparkles className="h-3 w-3 text-violet-400" />
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--violet-bg-muted)]">
+                        <Sparkles className="h-3 w-3 text-[var(--violet-accent)]" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="rounded-xl bg-bg-elevated px-3 py-2 text-xs leading-relaxed text-text-primary">
@@ -593,8 +593,8 @@ export function ChatbotWidget() {
             {/* Loading indicator */}
             {state === "loading" && (
               <div className="mt-3 flex gap-2">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-violet-500/20">
-                  <Sparkles className="h-3 w-3 text-violet-400" />
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--violet-bg-muted)]">
+                  <Sparkles className="h-3 w-3 text-[var(--violet-accent)]" />
                 </div>
                 <div className="rounded-xl bg-bg-elevated px-3 py-2">
                   <LoadingDots />

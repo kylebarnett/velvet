@@ -670,13 +670,13 @@ export function AddMetricModal({
                                 isCurrency ? "pl-7" : "pl-3"
                               } ${
                                 fieldErrors[row.id]
-                                  ? "border-red-500/50 focus:border-red-500/50"
+                                  ? "border-[var(--error-border)] focus:border-[var(--error-accent)]"
                                   : "border-border-default focus:border-border-default"
                               }`}
                             />
                           </div>
                           {fieldErrors[row.id] && (
-                            <p className="mt-1 text-xs text-red-300">
+                            <p className="mt-1 text-xs text-[var(--error-accent)]">
                               {fieldErrors[row.id]}
                             </p>
                           )}

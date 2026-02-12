@@ -20,7 +20,7 @@ export function FormField({ label, htmlFor, error, children, className }: FormFi
       </label>
       {children}
       {error && (
-        <p className="text-xs text-red-300" role="alert">
+        <p className="text-xs text-[var(--error-accent)]" role="alert">
           {error}
         </p>
       )}

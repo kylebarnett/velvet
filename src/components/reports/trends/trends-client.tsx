@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { TrendingUp } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -8,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useReportsContext } from "@/components/reports/reports-context";
 import { GrowthDistributionChart } from "./growth-distribution-chart";
 import { YoYComparisonChart } from "./yoy-comparison-chart";
 import { OutlierTable } from "./outlier-table";
@@ -48,15 +50,82 @@ type TrendsClientProps = {
   availableMetrics: string[];
 };
 
+const NONE = "__none__";
+
+const INDUSTRIES = [
+  { value: "", label: "All Industries" },
+  { value: "saas", label: "SaaS" },
+  { value: "fintech", label: "Fintech" },
+  { value: "healthcare", label: "Healthcare" },
+  { value: "ecommerce", label: "E-commerce" },
+  { value: "edtech", label: "EdTech" },
+  { value: "ai_ml", label: "AI/ML" },
+  { value: "other", label: "Other" },
+];
+
+const STAGES = [
+  { value: "", label: "All Stages" },
+  { value: "seed", label: "Seed" },
+  { value: "series_a", label: "Series A" },
+  { value: "series_b", label: "Series B" },
+  { value: "series_c", label: "Series C" },
+  { value: "growth", label: "Growth" },
+];
+
 export function TrendsClient({ availableMetrics }: TrendsClientProps) {
   const [selectedMetric, setSelectedMetric] = useState(
     availableMetrics.length > 0 ? availableMetrics[0] : ""
   );
   const [periodType, setPeriodType] = useState("quarterly");
   const [periods, setPeriods] = useState("8");
+  const [industry, setIndustry] = useState("");
+  const [stage, setStage] = useState("");
   const [data, setData] = useState<TrendsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Save/load context integration
+  const { setCurrentConfig, loadedReport, clearLoadedReport } = useReportsContext();
+
+  // Register current config with context
+  useEffect(() => {
+    if (selectedMetric) {
+      setCurrentConfig({
+        reportType: "trends",
+        filters: {
+          metric: selectedMetric,
+          periodType,
+          periods,
+          ...(industry ? { industry } : {}),
+          ...(stage ? { stage } : {}),
+        },
+      });
+    }
+  }, [selectedMetric, periodType, periods, industry, stage, setCurrentConfig]);
+
+  // Restore state when a saved report is loaded
+  useEffect(() => {
+    if (!loadedReport || loadedReport.report_type !== "trends") return;
+
+    const filters = loadedReport.filters as Record<string, unknown> | undefined;
+    if (filters?.metric && typeof filters.metric === "string") {
+      setSelectedMetric(filters.metric);
+    }
+    if (filters?.periodType && typeof filters.periodType === "string") {
+      setPeriodType(filters.periodType);
+    }
+    if (filters?.periods && typeof filters.periods === "string") {
+      setPeriods(filters.periods);
+    }
+    if (filters?.industry && typeof filters.industry === "string") {
+      setIndustry(filters.industry);
+    }
+    if (filters?.stage && typeof filters.stage === "string") {
+      setStage(filters.stage);
+    }
+
+    clearLoadedReport();
+  }, [loadedReport, clearLoadedReport]);
 
   const fetchTrends = useCallback(async () => {
     if (!selectedMetric) return;
@@ -70,6 +139,8 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
         periodType,
         periods,
       });
+      if (industry) params.set("industry", industry);
+      if (stage) params.set("stage", stage);
 
       const res = await fetch(`/api/investors/portfolio/trends?${params}`);
       if (!res.ok) {
@@ -85,7 +156,7 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
     } finally {
       setLoading(false);
     }
-  }, [selectedMetric, periodType, periods]);
+  }, [selectedMetric, periodType, periods, industry, stage]);
 
   useEffect(() => {
     fetchTrends();
@@ -93,29 +164,12 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
 
   if (availableMetrics.length === 0) {
     return (
-      <div className="relative overflow-hidden rounded-2xl border border-border-subtle bg-gradient-to-br from-bg-elevated to-transparent p-8 text-center">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-bg-raised via-transparent to-transparent" />
-        <div className="relative">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated ring-1 ring-border-subtle">
-            <svg
-              className="h-6 w-6 text-text-muted"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-              />
-            </svg>
-          </div>
-          <p className="text-text-tertiary">No metric data available yet</p>
-          <p className="mt-1 text-sm text-text-muted">
-            Trends will appear here once founders submit metric data
-          </p>
-        </div>
+      <div className="card-surface rounded-xl border border-border-subtle p-12 text-center">
+        <TrendingUp className="mx-auto mb-3 h-10 w-10 text-text-muted" />
+        <p className="text-text-secondary">No metric data available yet</p>
+        <p className="mt-1 text-sm text-text-muted">
+          Trends will appear here once founders submit metric data
+        </p>
       </div>
     );
   }
@@ -123,55 +177,99 @@ export function TrendsClient({ availableMetrics }: TrendsClientProps) {
   return (
     <div className="space-y-6">
       {/* Selectors */}
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="w-full sm:w-56">
-          <label className="mb-1.5 block text-xs font-medium text-text-tertiary">
-            Metric
-          </label>
-          <Select value={selectedMetric} onValueChange={setSelectedMetric}>
-            <SelectTrigger size="sm">
-              <SelectValue placeholder="Select metric" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableMetrics.map((m) => (
-                <SelectItem key={m} value={m}>
-                  {m}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="card-surface rounded-xl border border-border-subtle p-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="w-full sm:w-56">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+              Metric
+            </label>
+            <Select value={selectedMetric} onValueChange={setSelectedMetric}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select metric" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableMetrics.map((m) => (
+                  <SelectItem key={m} value={m}>
+                    {m}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="w-40">
-          <label className="mb-1.5 block text-xs font-medium text-text-tertiary">
-            Period Type
-          </label>
-          <Select value={periodType} onValueChange={setPeriodType}>
-            <SelectTrigger size="sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="monthly">Monthly</SelectItem>
-              <SelectItem value="quarterly">Quarterly</SelectItem>
-              <SelectItem value="yearly">Yearly</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="w-40">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+              Period Type
+            </label>
+            <Select value={periodType} onValueChange={setPeriodType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="monthly">Monthly</SelectItem>
+                <SelectItem value="quarterly">Quarterly</SelectItem>
+                <SelectItem value="yearly">Yearly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="w-32">
-          <label className="mb-1.5 block text-xs font-medium text-text-tertiary">
-            Periods
-          </label>
-          <Select value={periods} onValueChange={setPeriods}>
-            <SelectTrigger size="sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="4">4</SelectItem>
-              <SelectItem value="8">8</SelectItem>
-              <SelectItem value="12">12</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="w-32">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+              Periods
+            </label>
+            <Select value={periods} onValueChange={setPeriods}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="4">4</SelectItem>
+                <SelectItem value="8">8</SelectItem>
+                <SelectItem value="12">12</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="w-40">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+              Industry
+            </label>
+            <Select
+              value={industry || NONE}
+              onValueChange={(v) => setIndustry(v === NONE ? "" : v)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {INDUSTRIES.map((opt) => (
+                  <SelectItem key={opt.value || NONE} value={opt.value || NONE}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="w-40">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+              Stage
+            </label>
+            <Select
+              value={stage || NONE}
+              onValueChange={(v) => setStage(v === NONE ? "" : v)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STAGES.map((opt) => (
+                  <SelectItem key={opt.value || NONE} value={opt.value || NONE}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
