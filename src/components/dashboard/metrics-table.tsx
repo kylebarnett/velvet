@@ -277,6 +277,13 @@ function SortableMetricRow({
     }
   }, [metric.metricName, metric.periodType, onMetricInfoHover]);
 
+  const handleNameMouseEnter = useCallback(() => {
+    if (infoBtnRef.current) {
+      const rect = infoBtnRef.current.getBoundingClientRect();
+      onMetricInfoHover(metric.metricName, metric.periodType, rect);
+    }
+  }, [metric.metricName, metric.periodType, onMetricInfoHover]);
+
   return (
     <tr
       ref={setNodeRef}
@@ -299,19 +306,23 @@ function SortableMetricRow({
         className={`sticky ${isReorderMode ? "left-8" : "left-0"} z-10 overflow-hidden bg-[var(--table-bg)] py-3 pl-3 pr-4`}
         style={{ boxShadow: "4px 0 6px -4px var(--table-sticky-shadow)" }}
       >
-        <span className="inline-flex max-w-full items-center gap-1.5" title={metric.metricName}>
+        <span
+          className="inline-flex max-w-full items-center gap-1.5 cursor-default"
+          title={metric.metricName}
+          onMouseEnter={handleNameMouseEnter}
+          onMouseLeave={onMetricInfoLeave}
+        >
           {isAiExtracted && (
             <Sparkles className="h-3 w-3 shrink-0 text-[var(--tag-violet-text)]" />
           )}
           <span className="truncate font-medium text-text-primary">{metric.metricName}</span>
-          <button
+          <span
             ref={infoBtnRef}
-            type="button"
-            onClick={handleInfoClick}
-            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 text-text-faint hover:text-text-muted"
+            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 text-text-faint"
+            aria-hidden="true"
           >
             <Info className="h-3 w-3" />
-          </button>
+          </span>
         </span>
       </td>
       {displayPeriods.map((period) => {
