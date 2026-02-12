@@ -55,8 +55,6 @@ interface FounderPortalTabsProps {
   metrics: MetricValue[];
   views: DashboardView[];
   templates: DashboardTemplate[];
-  documentCount?: number;
-  tearSheetCount?: number;
 }
 
 export function FounderPortalTabs({
@@ -70,8 +68,6 @@ export function FounderPortalTabs({
   metrics,
   views,
   templates,
-  documentCount,
-  tearSheetCount,
 }: FounderPortalTabsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -80,17 +76,10 @@ export function FounderPortalTabs({
     tabParam === "documents" || tabParam === "tear-sheets" ? tabParam : "metrics"
   ) as Tab;
 
-  // Compute unique metrics count
-  const uniqueMetricNames = React.useMemo(() => {
-    const names = new Set<string>();
-    metrics.forEach((m) => names.add(m.metric_name));
-    return names.size;
-  }, [metrics]);
-
   const tabs: TabItem<Tab>[] = [
-    { value: "metrics", label: "Metrics", icon: BarChart3, badge: uniqueMetricNames || undefined, dataOnboarding: "metrics-tab" },
-    { value: "documents", label: "Documents", icon: FileText, badge: documentCount, dataOnboarding: "documents-tab" },
-    { value: "tear-sheets", label: "Tear Sheets", icon: FileSpreadsheet, badge: tearSheetCount, dataOnboarding: "tear-sheets-tab" },
+    { value: "metrics", label: "Metrics", icon: BarChart3, dataOnboarding: "metrics-tab" },
+    { value: "documents", label: "Documents", icon: FileText, dataOnboarding: "documents-tab" },
+    { value: "tear-sheets", label: "Tear Sheets", icon: FileSpreadsheet, dataOnboarding: "tear-sheets-tab" },
   ];
 
   function handleTabChange(tab: Tab) {
@@ -248,7 +237,7 @@ function CompanyHeader({
   ];
 
   return (
-    <div className="rounded-xl border border-border-subtle bg-bg-raised px-5 py-4" data-onboarding="company-profile">
+    <div data-onboarding="company-profile">
       <div className="flex items-start gap-4">
         {/* Logo */}
         <FounderCompanyLogo
@@ -256,15 +245,15 @@ function CompanyHeader({
           companyName={name}
           logoUrl={logoUrl}
           editable
-          size="lg"
+          size="xl"
           onLogoChange={setLogoUrl}
         />
 
         {/* Name + website + tags */}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold tracking-tight truncate">{name}</h1>
-            {/* Toast */}
+        <div className="min-w-0 flex-1 space-y-1.5">
+          {/* Row 1: Company name + toast */}
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-semibold tracking-tight text-text-primary truncate">{name}</h1>
             {toast && (
               <span className={`text-xs font-medium ${toast.type === "success" ? "text-[var(--success-accent)]" : "text-[var(--error-accent)]"}`}>
                 {toast.msg}
@@ -272,8 +261,9 @@ function CompanyHeader({
             )}
           </div>
 
-          {/* Website — click to edit */}
-          <div className="mt-0.5">
+          {/* Row 2: Website + tags (inline) */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            {/* Website — click to edit */}
             {editingWebsite ? (
               <div className="flex items-center gap-2">
                 <input
@@ -317,9 +307,9 @@ function CompanyHeader({
                   setWebsiteInput(website ?? "");
                   setEditingWebsite(true);
                 }}
-                className="group flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
+                className="group flex items-center gap-1 text-sm text-text-muted hover:text-text-secondary transition-colors"
               >
-                <Globe className="h-3 w-3" aria-hidden="true" />
+                <Globe className="h-3.5 w-3.5" aria-hidden="true" />
                 <span className="truncate max-w-[200px]">{website.replace(/^https?:\/\//, "")}</span>
                 <ExternalLink className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
               </button>
@@ -327,15 +317,18 @@ function CompanyHeader({
               <button
                 type="button"
                 onClick={() => setEditingWebsite(true)}
-                className="text-xs text-text-faint hover:text-text-tertiary transition-colors italic"
+                className="text-sm text-text-faint hover:text-text-tertiary transition-colors italic"
               >
                 + Add website
               </button>
             )}
-          </div>
 
-          {/* Tags — inline editable badges */}
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {/* Dot separator between website and tags */}
+            {(website || editingWebsite) && (
+              <span className="h-1 w-1 rounded-full bg-border-default" aria-hidden="true" />
+            )}
+
+            {/* Tags — inline editable badges */}
             {tags.map((tag) => (
               <InlineTagBadge
                 key={tag.type}
