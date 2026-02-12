@@ -29,6 +29,7 @@ import { getNumericValue } from "@/components/dashboard/types";
 import { useChartTheme } from "@/hooks/use-chart-theme";
 import { SourceBadge } from "./source-badge";
 import { MetricHistoryTimeline } from "./metric-history-timeline";
+import { MetricCommentThread } from "./metric-comment-thread";
 
 type MetricValue = {
   id: string;
@@ -127,10 +128,16 @@ export function MetricDetailPanel({
     return () => clearTimeout(timer);
   }, []);
 
-  // Scroll page to top so the fixed panel is fully visible
+  const panelRef = React.useRef<HTMLDivElement>(null);
+
+  // Scroll to the top of the side panel when it opens or metric/period changes.
+  // Uses the panel's parent element (the dashboard content area) as the scroll target
+  // so the page scrolls to the dashboard — not the very top of the page.
   React.useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [metricName]);
+    panelRef.current?.parentElement?.scrollIntoView({ behavior: "smooth", block: "start" });
+    contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    panelRef.current?.focus({ preventScroll: true });
+  }, [metricName, initialPeriod]);
 
   // Escape to close
   React.useEffect(() => {
@@ -296,7 +303,7 @@ export function MetricDetailPanel({
 
   const changeBadgeColor =
     percentChange != null && percentChange > 0
-      ? "bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/25"
+      ? "bg-[var(--success-bg-subtle)] text-[var(--success-accent)] ring-1 ring-inset ring-[var(--success-ring)]"
       : percentChange != null && percentChange < 0
         ? "bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/25"
         : "bg-bg-elevated text-text-muted ring-1 ring-inset ring-border-default";
@@ -314,6 +321,8 @@ export function MetricDetailPanel({
 
       {/* Panel */}
       <div
+        ref={panelRef}
+        tabIndex={-1}
         className={`fixed right-0 top-0 z-50 flex h-full w-full flex-col bg-bg-primary shadow-2xl transition-transform duration-300 ease-out sm:w-[520px] ${
           isVisible ? "translate-x-0" : "translate-x-full"
         }`}
@@ -646,7 +655,7 @@ export function MetricDetailPanel({
                             }
                           }}
                           disabled={confirming || submitting}
-                          className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-emerald-600 px-4 text-xs font-medium text-white shadow-sm shadow-emerald-900/30 transition-all duration-200 hover:bg-emerald-500 hover:shadow-emerald-900/40 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:ring-offset-1 focus:ring-offset-bg-primary"
+                          className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[var(--success-solid)] px-4 text-xs font-medium text-white shadow-sm shadow-emerald-900/30 transition-all duration-200 hover:bg-[var(--success-solid)] hover:shadow-emerald-900/40 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[var(--success-ring)] focus:ring-offset-1 focus:ring-offset-bg-primary"
                         >
                           <Check className="h-3.5 w-3.5" />
                           {confirming ? "Confirming..." : "Confirm value"}
@@ -757,6 +766,11 @@ export function MetricDetailPanel({
                     <MetricHistoryTimeline history={history} />
                   </div>
                 )}
+              </section>
+
+              {/* Comment Thread */}
+              <section className="rounded-lg border border-border-subtle overflow-hidden">
+                <MetricCommentThread companyId={companyId} metricName={metricName} />
               </section>
             </div>
           )}
