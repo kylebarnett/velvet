@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { unwrapJoin } from "@/lib/api/utils";
 import { sendEmailBatchWithRetry } from "@/lib/email/retry";
 import { escapeHtml } from "@/lib/utils/html";
@@ -15,6 +16,12 @@ export async function POST(req: Request) {
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
+
+  // Rate limit: 5 reminder batches per minute per user
+  const rl = checkRateLimit(`remind:${user.id}`, 5, 60_000);
+  if (!rl.allowed) {
+    return jsonError("Too many requests. Please try again later.", 429);
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
@@ -99,7 +106,7 @@ export async function POST(req: Request) {
           <ul style="color: rgba(255,255,255,0.7); font-size: 14px; padding-left: 20px; margin: 0 0 24px;">
             ${info.metrics.map((m) => `<li style="margin-bottom: 4px;">${escapeHtml(m)}</li>`).join("")}
           </ul>
-          <a href="${appUrl}/portal" style="display: inline-block; background: #fff; color: #000; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 500;">
+          <a href="${appUrl}/portal/requests" style="display: inline-block; background: #fff; color: #000; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 500;">
             Submit Metrics
           </a>
         </div>

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { checkRateLimit } from "@/lib/api/rate-limit";
+import { sendEmailBatchWithRetry } from "@/lib/email/retry";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { escapeHtml } from "@/lib/utils/html";
 import { logger } from "@/lib/logger";
@@ -184,30 +185,20 @@ export async function POST(
 </html>`.trim();
 
   const apiKey = process.env.RESEND_API_KEY;
+  const fromDomain = process.env.RESEND_FROM_DOMAIN;
+  const fromAddr = fromDomain
+    ? `Velvet <notifications@${fromDomain}>`
+    : "Velvet <onboarding@resend.dev>";
 
   if (apiKey) {
-    try {
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: "Velvet <onboarding@resend.dev>",
-          to: [email],
-          subject: `You've been invited to join ${orgName} on Velvet`,
-          html,
-        }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        logger.error("Failed to send org invitation email:", text);
-      }
-    } catch (err: unknown) {
-      logger.error("Failed to send org invitation email:", err);
-    }
+    await sendEmailBatchWithRetry(apiKey, [
+      {
+        from: fromAddr,
+        to: [email],
+        subject: `You've been invited to join ${orgName} on Velvet`,
+        html,
+      },
+    ]);
   } else {
     logger.info(`[DEV] Would send org invite to ${email}: ${inviteUrl}`);
   }

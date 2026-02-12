@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
+import { sendEmailBatchWithRetry } from "@/lib/email/retry";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { escapeHtml } from "@/lib/utils/html";
 import { logger } from "@/lib/logger";
@@ -19,6 +21,12 @@ export async function POST(req: Request) {
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
+
+  // Rate limit: 10 invite batches per minute per user
+  const rl = checkRateLimit(`invite:${user.id}`, 10, 60_000);
+  if (!rl.allowed) {
+    return jsonError("Too many requests. Please try again later.", 429);
+  }
 
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
@@ -152,6 +160,10 @@ export async function POST(req: Request) {
 
   // Send emails in batches
   const successfulIds: string[] = [];
+  const fromDomain = process.env.RESEND_FROM_DOMAIN;
+  const fromAddr = fromDomain
+    ? `Velvet <notifications@${fromDomain}>`
+    : "Velvet <onboarding@resend.dev>";
 
   if (!apiKey) {
     // No API key, just log and mark all as sent
@@ -160,83 +172,36 @@ export async function POST(req: Request) {
       successfulIds.push(email.id);
     }
   } else {
-    // Process in batches of BATCH_SIZE
+    // Process in batches of BATCH_SIZE using retry utility
     for (let i = 0; i < emailsToSend.length; i += BATCH_SIZE) {
       const batch = emailsToSend.slice(i, i + BATCH_SIZE);
 
-      // Prepare batch request
       const batchPayload = batch.map((email) => ({
-        from: "Velvet <onboarding@resend.dev>",
+        from: fromAddr,
         to: [email.email],
         subject: `You've been invited to Velvet by ${investorName}`,
         html: email.html,
       }));
 
-      try {
-        const res = await fetch("https://api.resend.com/emails/batch", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(batchPayload),
-        });
+      const result = await sendEmailBatchWithRetry(apiKey, batchPayload);
 
-        if (!res.ok) {
-          const text = await res.text().catch(() => "");
-          if (isDev) {
-            // In dev, don't fail - just log and continue
-            logger.info(`[DEV] Batch email send failed: ${text || res.statusText}`);
-            // Mark all as successful anyway in dev
-            for (const email of batch) {
-              successfulIds.push(email.id);
-            }
-          } else {
-            // In production, mark these as errors
-            for (const email of batch) {
-              results.errors.push({
-                email: email.email,
-                message: `Batch send failed: ${text || res.statusText}`,
-              });
-            }
-          }
-        } else {
-          // Batch succeeded
-          const json = await res.json().catch(() => null);
-          // Resend returns { data: [{ id: "..." }, ...] } for successful batch
-          if (json?.data && Array.isArray(json.data)) {
-            for (let j = 0; j < batch.length; j++) {
-              if (json.data[j]?.id) {
-                successfulIds.push(batch[j].id);
-              } else {
-                // Individual email in batch failed
-                results.errors.push({
-                  email: batch[j].email,
-                  message: "Email not sent (no ID returned)",
-                });
-              }
-            }
-          } else {
-            // Assume all succeeded if we got a 200 but unexpected response format
-            for (const email of batch) {
-              successfulIds.push(email.id);
-            }
-          }
+      if (result.sent > 0) {
+        // Mark sent emails as successful
+        for (let j = 0; j < Math.min(result.sent, batch.length); j++) {
+          successfulIds.push(batch[j].id);
         }
-      } catch (err: unknown) {
-        if (isDev) {
-          logger.info(`[DEV] Batch email send error: ${err instanceof Error ? err.message : "Unknown"}`);
-          // Mark all as successful anyway in dev
-          for (const email of batch) {
-            successfulIds.push(email.id);
-          }
-        } else {
-          for (const email of batch) {
-            results.errors.push({
-              email: email.email,
-              message: err instanceof Error ? err.message : "Failed to send email",
-            });
-          }
+      }
+      if (result.failed > 0 && !isDev) {
+        for (let j = result.sent; j < batch.length; j++) {
+          results.errors.push({
+            email: batch[j].email,
+            message: "Failed to send email",
+          });
+        }
+      } else if (result.failed > 0 && isDev) {
+        // In dev, mark all as successful anyway
+        for (let j = result.sent; j < batch.length; j++) {
+          successfulIds.push(batch[j].id);
         }
       }
     }

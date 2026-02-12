@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { addDays } from "date-fns";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { unwrapJoin } from "@/lib/api/utils";
+import { sendEmailBatchWithRetry } from "@/lib/email/retry";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   calculateReportingPeriod,
@@ -30,6 +32,12 @@ export async function POST(
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
+
+  // Rate limit: 5 manual runs per minute per user
+  const rl = checkRateLimit(`schedule-run:${user.id}`, 5, 60_000);
+  if (!rl.allowed) {
+    return jsonError("Too many requests. Please try again later.", 429);
+  }
 
   // Get schedule with template
   const { data: schedule, error: fetchError } = await supabase
@@ -295,6 +303,10 @@ export async function POST(
   const apiKey = process.env.RESEND_API_KEY;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const isDev = process.env.NODE_ENV === "development";
+  const fromDomain = process.env.RESEND_FROM_DOMAIN;
+  const fromAddr = fromDomain
+    ? `Velvet <notifications@${fromDomain}>`
+    : "Velvet <onboarding@resend.dev>";
 
   if (apiKey && founderCompanies.size > 0 && requestsCreated > 0) {
     const emailsToSend = Array.from(founderCompanies.values()).map((founder) => {
@@ -344,44 +356,18 @@ export async function POST(
       `.trim();
 
       return {
-        from: "Velvet <onboarding@resend.dev>",
+        from: fromAddr,
         to: [founder.email],
         subject: `${investorName} requested your metrics`,
         html,
       };
     });
 
-    // Send in batches
+    // Send in batches using retry utility
     for (let i = 0; i < emailsToSend.length; i += BATCH_SIZE) {
       const batch = emailsToSend.slice(i, i + BATCH_SIZE);
-
-      try {
-        const res = await fetch("https://api.resend.com/emails/batch", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(batch),
-        });
-
-        if (res.ok) {
-          const json = await res.json().catch(() => null);
-          if (json?.data && Array.isArray(json.data)) {
-            emailsSent += json.data.filter((d: { id?: string }) => d?.id).length;
-          } else {
-            emailsSent += batch.length;
-          }
-        } else if (isDev) {
-          logger.info(`[DEV] Email batch send failed: ${res.statusText}`);
-          emailsSent += batch.length; // Count as sent in dev
-        }
-      } catch (err: unknown) {
-        if (isDev) {
-          logger.info(`[DEV] Email error: ${err instanceof Error ? err.message : "Unknown"}`);
-          emailsSent += batch.length;
-        }
-      }
+      const result = await sendEmailBatchWithRetry(apiKey, batch);
+      emailsSent += result.sent;
     }
   } else if (!apiKey && isDev) {
     emailsSent = founderCompanies.size;
