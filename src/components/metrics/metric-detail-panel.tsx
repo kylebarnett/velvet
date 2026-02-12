@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   TrendingUp,
@@ -43,6 +44,7 @@ type MetricValue = {
   source_document_id: string | null;
   ai_confidence: number | null;
   submitted_at: string;
+  submitted_by_name: string | null;
 };
 
 type HistoryEntry = {
@@ -308,7 +310,7 @@ export function MetricDetailPanel({
         ? "bg-[var(--error-bg-subtle)] text-[var(--error-accent)] ring-1 ring-inset ring-[var(--error-border)]"
         : "bg-bg-elevated text-text-muted ring-1 ring-inset ring-border-default";
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -573,11 +575,42 @@ export function MetricDetailPanel({
                           </span>
                         </div>
                       )}
-                      {current.notes && (
-                        <p className="mt-3 border-t border-border-subtle pt-3 text-xs leading-relaxed text-text-muted italic">
-                          {current.notes}
-                        </p>
-                      )}
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* Notes */}
+              {current?.notes && (
+                <section>
+                  <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-text-faint">
+                    Notes
+                  </h3>
+                  <div className="overflow-hidden rounded-xl border border-border-subtle bg-bg-raised">
+                    <div className="p-4">
+                      <p className="text-sm leading-relaxed text-text-secondary">
+                        {current.notes}
+                      </p>
+                      <div className="mt-3 flex items-center gap-1.5 text-[11px] text-text-muted">
+                        {current.submitted_by_name && (
+                          <>
+                            <span className="font-medium text-text-tertiary">{current.submitted_by_name}</span>
+                            <span>&middot;</span>
+                          </>
+                        )}
+                        <span className="tabular-nums">
+                          {new Date(current.submitted_at).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}{" "}
+                          at{" "}
+                          {new Date(current.submitted_at).toLocaleTimeString("en-US", {
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </section>
@@ -770,12 +803,18 @@ export function MetricDetailPanel({
 
               {/* Comment Thread */}
               <section className="rounded-lg border border-border-subtle overflow-hidden">
-                <MetricCommentThread companyId={companyId} metricName={metricName} />
+                <MetricCommentThread
+                  companyId={companyId}
+                  metricName={metricName}
+                  periodStart={current?.period_start}
+                  periodEnd={current?.period_end}
+                />
               </section>
             </div>
           )}
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   );
 }

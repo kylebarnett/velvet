@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -95,7 +96,7 @@ export function ConfirmModal({
         ? "text-[var(--warning-accent)]"
         : "text-text-tertiary";
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
@@ -139,6 +140,7 @@ export function ConfirmModal({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

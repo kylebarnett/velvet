@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   FileText,
@@ -619,7 +620,7 @@ export function FounderDocumentList() {
           {/* ============================================ */}
           <div className="sm:hidden">
             {/* Full-screen mobile preview */}
-            {previewDoc && (
+            {previewDoc && createPortal(
               <div className="fixed inset-0 z-50 bg-bg-primary">
                 <PreviewPane
                   doc={previewDoc}
@@ -629,7 +630,8 @@ export function FounderDocumentList() {
                   onDelete={openDeleteModal}
                   deleting={deleting}
                 />
-              </div>
+              </div>,
+              document.body,
             )}
 
             {/* Card list */}

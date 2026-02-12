@@ -484,7 +484,7 @@ export function AddMetricModal({
     : null;
   const hasAvailablePeriods = allPeriods.some((p) => !selectedKeys.has(p.key));
 
-  return (
+  return ReactDOM.createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm">
       {/* Backdrop click to close */}
       <div
@@ -744,6 +744,7 @@ export function AddMetricModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
