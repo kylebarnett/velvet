@@ -232,6 +232,60 @@ export const METRIC_DEFINITIONS: Record<string, MetricInfo> = {
     description: "The amount of data processed by the platform."
   },
 
+  // Common Financial Metrics
+  "Cash Balance": {
+    description: "Total cash and cash equivalents available to the company.",
+  },
+  "EBITDA": {
+    description: "Earnings Before Interest, Taxes, Depreciation, and Amortization — a measure of core operating profitability.",
+    formula: "Net Income + Interest + Taxes + D&A"
+  },
+  "Gross Profit": {
+    description: "Revenue minus cost of goods sold, representing profit before operating expenses.",
+    formula: "Revenue - COGS"
+  },
+  "Net Income": {
+    description: "Total revenue minus all expenses, taxes, and costs — the bottom-line profit.",
+    formula: "Revenue - COGS - OpEx - Interest - Taxes"
+  },
+  "Total Debt": {
+    description: "Sum of all short-term and long-term debt obligations.",
+  },
+  "Working Capital": {
+    description: "Difference between current assets and current liabilities, indicating short-term financial health.",
+    formula: "Current Assets - Current Liabilities"
+  },
+  "Churn Rate": {
+    description: "Percentage of customers who cancel or do not renew in a given period.",
+    formula: "Customers Lost / Customers at Start × 100"
+  },
+  "Gross Burn": {
+    description: "Total monthly operating expenses before any revenue offset.",
+    formula: "Total Monthly OpEx"
+  },
+  "Net Burn": {
+    description: "Monthly cash outflow after accounting for revenue.",
+    formula: "Monthly Expenses - Monthly Revenue"
+  },
+  "DAU": {
+    description: "Daily Active Users — the number of unique users engaging with the product in a day.",
+  },
+  "WAU": {
+    description: "Weekly Active Users — the number of unique users engaging with the product in a week.",
+  },
+  "Payback Period": {
+    description: "The number of months required to recover the cost of acquiring a customer.",
+    formula: "CAC / (ARPU × Gross Margin %)"
+  },
+  "Revenue Growth Rate": {
+    description: "Percentage increase in revenue compared to the prior period.",
+    formula: "(Current - Previous) / Previous × 100"
+  },
+  "Quick Ratio (SaaS)": {
+    description: "Growth efficiency metric measuring revenue additions relative to losses.",
+    formula: "(New MRR + Expansion) / (Churned + Contraction)"
+  },
+
   // General Metrics
   "Operating Expenses": {
     description: "The ongoing costs of running the business, excluding cost of goods sold.",
@@ -291,7 +345,12 @@ export function inferMetricValueType(metricName: string): MetricValueType {
     lower.includes("cogs") ||
     lower.includes("opex") ||
     lower.includes("salary") ||
-    lower.includes("payroll")
+    lower.includes("payroll") ||
+    lower.includes("balance") ||
+    lower.includes("debt") ||
+    lower.includes("capital") ||
+    lower.includes("profit") ||
+    lower.includes("ebitda")
   ) {
     return "currency";
   }
@@ -318,7 +377,8 @@ export function inferMetricValueType(metricName: string): MetricValueType {
   if (
     lower.includes("runway") ||
     lower.includes("latency") ||
-    lower.includes("processing time")
+    lower.includes("processing time") ||
+    lower.includes("payback")
   ) {
     return "time";
   }

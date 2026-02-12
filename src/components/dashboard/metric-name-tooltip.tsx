@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Pencil, X } from "lucide-react";
+import { Pencil, X, Sparkles } from "lucide-react";
 import {
   resolveMetricDefinition,
   inferMetricValueType,
@@ -42,6 +42,7 @@ export function MetricNameTooltip({
   const [description, setDescription] = useState("");
   const [formula, setFormula] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
 
@@ -118,6 +119,27 @@ export function MetricNameTooltip({
       setIsSaving(false);
     }
   }, [metricName, deleteDefinition]);
+
+  const handleGenerateAI = useCallback(async () => {
+    setIsGenerating(true);
+    try {
+      const res = await fetch("/api/metrics/suggest-definition", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ metricName }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
+      // Pre-fill edit form with AI result so user can review and save
+      setDescription(data.description ?? "");
+      setFormula(data.formula ?? "");
+      setIsEditing(true);
+    } catch {
+      // Silently fail — user can still add manually
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [metricName]);
 
   const hasSystemDef = !!getMetricDefinition(metricName);
   const canReset = isCustom && hasSystemDef;
@@ -245,12 +267,27 @@ export function MetricNameTooltip({
               {info.description}
             </p>
           ) : (
-            <p
-              className="cursor-pointer text-[11px] italic text-text-faint hover:text-text-muted"
-              onClick={startEditing}
-            >
-              No description yet — click to add one
-            </p>
+            <div className="space-y-1.5">
+              <button
+                type="button"
+                onClick={handleGenerateAI}
+                disabled={isGenerating}
+                className="flex w-full items-center gap-1.5 rounded-md bg-bg-elevated px-2 py-1.5 text-[11px] font-medium text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary disabled:opacity-60"
+              >
+                {isGenerating ? (
+                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-text-faint border-t-text-secondary" />
+                ) : (
+                  <Sparkles className="h-3 w-3" />
+                )}
+                {isGenerating ? "Generating..." : "Generate with AI"}
+              </button>
+              <p
+                className="cursor-pointer text-center text-[10px] text-text-faint underline underline-offset-2 hover:text-text-muted"
+                onClick={startEditing}
+              >
+                Add manually
+              </p>
+            </div>
           )}
 
           {/* Formula */}
