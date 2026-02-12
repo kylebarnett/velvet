@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { createPortal } from "react-dom";
 import { formatValue, formatPeriod } from "@/components/charts/types";
-import { Sparkles, Info, GripVertical, ArrowUpDown } from "lucide-react";
+import { Sparkles, Info, GripVertical, ArrowUpDown, Plus } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -62,6 +62,8 @@ type MetricsTableProps = {
   allowReorder?: boolean;
   /** Storage key for persisting metric order (e.g., "metrics-order-{companyId}") */
   storageKey?: string;
+  /** Callback to add a new metric (renders + Add Metric button below table) */
+  onAddMetric?: () => void;
 };
 
 type HoveredCell = {
@@ -698,6 +700,7 @@ export function MetricsTable({
   onReorder,
   allowReorder = true,
   storageKey,
+  onAddMetric,
 }: MetricsTableProps) {
   const [hoveredCell, setHoveredCell] = useState<HoveredCell>(null);
   const [metricInfoTooltip, setMetricInfoTooltip] = useState<MetricInfoTooltipState>(null);
@@ -729,6 +732,9 @@ export function MetricsTable({
   const METRIC_COL_WIDTH = metricColWidth;
   const TOTAL_COL_WIDTH = showTotals ? 110 : 0;
   const GRIP_COL_WIDTH = isReorderMode ? 32 : 0;
+
+  // Track when loading completes so effects that need scrollRef re-run
+  const isTableLoading = (savedOrder === null || !metricColLoaded) && !!storageKey;
 
   // Load saved metric column width from preferences
   useEffect(() => {
@@ -818,7 +824,7 @@ export function MetricsTable({
     const observer = new ResizeObserver(() => measure());
     observer.observe(scrollEl);
     return () => observer.disconnect();
-  }, [showTotals, TOTAL_COL_WIDTH, GRIP_COL_WIDTH, METRIC_COL_WIDTH]);
+  }, [showTotals, TOTAL_COL_WIDTH, GRIP_COL_WIDTH, METRIC_COL_WIDTH, isTableLoading]);
 
   // Track which period columns are visible using IntersectionObserver
   // This is more reliable than scroll-event + getBoundingClientRect
@@ -866,7 +872,7 @@ export function MetricsTable({
     });
 
     return () => observerRef.current?.disconnect();
-  }, [METRIC_COL_WIDTH, GRIP_COL_WIDTH, TOTAL_COL_WIDTH, periodColWidth, data]);
+  }, [METRIC_COL_WIDTH, GRIP_COL_WIDTH, TOTAL_COL_WIDTH, periodColWidth, isTableLoading]);
 
   // Load saved order from API on mount
   useEffect(() => {
@@ -1205,6 +1211,17 @@ export function MetricsTable({
           />
         </SortableContext>
       </DndContext>
+
+      {onAddMetric && (
+        <button
+          type="button"
+          onClick={onAddMetric}
+          className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-secondary"
+        >
+          <Plus className="h-4 w-4" />
+          Add Metric
+        </button>
+      )}
 
       {/* Render cell tooltip via portal */}
       {mounted && hoveredCell && hoveredPeriodData && (
