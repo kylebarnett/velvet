@@ -3,7 +3,6 @@ import { Building2, CheckCircle2 } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { PortfolioCompletionCard } from "@/components/investor/portfolio-completion-card";
 import { GettingStartedChecklist } from "@/components/ui/getting-started-checklist";
 import { DashboardContent } from "./dashboard-content";
 
@@ -13,9 +12,27 @@ type MetricValue = {
   metric_name: string;
   value: unknown;
   period_start: string;
+  period_type: string;
   company_id: string;
   submitted_at?: string;
 };
+
+function formatPeriodLabel(periodStart: string, periodType: string): string {
+  const d = new Date(periodStart);
+  const month = d.getUTCMonth(); // 0-indexed
+  const year = d.getUTCFullYear();
+
+  if (periodType === "quarterly") {
+    const quarter = Math.floor(month / 3) + 1;
+    return `Q${quarter} ${year}`;
+  }
+  if (periodType === "annual") {
+    return `${year}`;
+  }
+  // monthly
+  const monthName = d.toLocaleString("en-US", { month: "short", timeZone: "UTC" });
+  return `${monthName} ${year}`;
+}
 
 // Priority metrics to show as snapshot (first match wins)
 const PRIORITY_METRICS = [
@@ -112,20 +129,20 @@ export default async function InvestorDashboardPage() {
   // Fetch latest metrics for approved companies
   const latestMetrics: Record<
     string,
-    { name: string; value: number | null; previousValue: number | null; percentChange: number | null }
+    { name: string; value: number | null; previousValue: number | null; percentChange: number | null; periodLabel: string | null }
   > = {};
   const secondaryMetrics: Record<
     string,
-    { name: string; value: number | null; previousValue: number | null; percentChange: number | null }
+    { name: string; value: number | null; previousValue: number | null; percentChange: number | null; periodLabel: string | null }
   > = {};
   // Track most recent submission date per company for freshness indicator
   const lastSubmittedAt: Record<string, string> = {};
 
   if (approvedCompanyIds.length > 0) {
-    // Get recent metric values
+    // Get recent metric values (include period_type to prefer quarterly data)
     const { data: metricValues } = await supabase
       .from("company_metric_values")
-      .select("company_id, metric_name, value, period_start, submitted_at")
+      .select("company_id, metric_name, value, period_start, period_type, submitted_at")
       .in("company_id", approvedCompanyIds)
       .order("period_start", { ascending: false });
 
@@ -146,17 +163,23 @@ export default async function InvestorDashboardPage() {
         }
       }
 
-      // Helper to find metric by name and calculate values
+      // Helper: build a snapshot from a metric name within a set of values.
+      // Prefers quarterly data, falls back to any period type.
       function findMetricByName(values: MetricValue[], metricName: string): {
         name: string;
         value: number | null;
         previousValue: number | null;
         percentChange: number | null;
+        periodLabel: string | null;
       } | null {
-        const matches = values.filter(
+        const allMatches = values.filter(
           (v) => v.metric_name.toLowerCase() === metricName.toLowerCase()
         );
-        if (matches.length === 0) return null;
+        if (allMatches.length === 0) return null;
+
+        // Prefer quarterly values; fall back to all if none exist
+        const quarterlyMatches = allMatches.filter((v) => v.period_type === "quarterly");
+        const matches = quarterlyMatches.length > 0 ? quarterlyMatches : allMatches;
 
         const currentValue = getNumericValue(matches[0].value);
         const prevValue = matches.length > 1 ? getNumericValue(matches[1].value) : null;
@@ -170,11 +193,48 @@ export default async function InvestorDashboardPage() {
           value: currentValue,
           previousValue: prevValue,
           percentChange,
+          periodLabel: matches[0].period_start
+            ? formatPeriodLabel(matches[0].period_start, matches[0].period_type)
+            : null,
         };
       }
 
+      // Helper: find the best metric from a list of values using priority order.
+      // Prefers quarterly data, falls back to any period type.
+      function findBestMetric(values: MetricValue[]): {
+        current: MetricValue;
+        previous: MetricValue | null;
+      } | null {
+        // Try quarterly values first, fall back to all
+        const quarterlyValues = values.filter((v) => v.period_type === "quarterly");
+        const pool = quarterlyValues.length > 0 ? quarterlyValues : values;
+
+        // Try priority metrics first
+        for (const priorityName of PRIORITY_METRICS) {
+          const matches = pool.filter(
+            (v) => v.metric_name.toLowerCase() === priorityName
+          );
+          if (matches.length > 0) {
+            return { current: matches[0], previous: matches[1] ?? null };
+          }
+        }
+
+        // Fall back to most recent metric in the pool
+        if (pool.length > 0) {
+          const sameMetricValues = pool.filter(
+            (v) => v.metric_name === pool[0].metric_name
+          );
+          return {
+            current: sameMetricValues[0],
+            previous: sameMetricValues[1] ?? null,
+          };
+        }
+
+        return null;
+      }
+
       for (const [companyId, values] of byCompany) {
-        // Sort by period_start desc
+        // Sort by period_start desc (already sorted from query, but ensure)
         values.sort(
           (a, b) =>
             new Date(b.period_start).getTime() - new Date(a.period_start).getTime()
@@ -188,49 +248,22 @@ export default async function InvestorDashboardPage() {
           if (configuredPrimary) {
             latestMetrics[companyId] = configuredPrimary;
           }
-          // If secondary is configured, find it too
           if (config.secondary) {
             const configuredSecondary = findMetricByName(values, config.secondary);
             if (configuredSecondary) {
               secondaryMetrics[companyId] = configuredSecondary;
             }
           }
-          // Skip fallback if configured (even if no data found - will show "No metrics")
           if (configuredPrimary) continue;
         }
 
-        // Fallback: Find priority metric (existing behavior)
-        let selectedMetric: MetricValue | null = null;
-        let previousMetric: MetricValue | null = null;
+        // Fallback: find best metric (prefers quarterly)
+        const best = findBestMetric(values);
 
-        for (const priorityName of PRIORITY_METRICS) {
-          const matches = values.filter(
-            (v) => v.metric_name.toLowerCase() === priorityName
-          );
-          if (matches.length > 0) {
-            selectedMetric = matches[0];
-            if (matches.length > 1) {
-              previousMetric = matches[1];
-            }
-            break;
-          }
-        }
-
-        // Fallback to most recent metric if no priority match
-        if (!selectedMetric && values.length > 0) {
-          selectedMetric = values[0];
-          const sameMetricValues = values.filter(
-            (v) => v.metric_name === values[0].metric_name
-          );
-          if (sameMetricValues.length > 1) {
-            previousMetric = sameMetricValues[1];
-          }
-        }
-
-        if (selectedMetric) {
-          const currentValue = getNumericValue(selectedMetric.value);
-          const prevValue = previousMetric
-            ? getNumericValue(previousMetric.value)
+        if (best) {
+          const currentValue = getNumericValue(best.current.value);
+          const prevValue = best.previous
+            ? getNumericValue(best.previous.value)
             : null;
           const percentChange =
             currentValue != null && prevValue != null && prevValue !== 0
@@ -238,10 +271,13 @@ export default async function InvestorDashboardPage() {
               : null;
 
           latestMetrics[companyId] = {
-            name: selectedMetric.metric_name,
+            name: best.current.metric_name,
             value: currentValue,
             previousValue: prevValue,
             percentChange,
+            periodLabel: best.current.period_start
+              ? formatPeriodLabel(best.current.period_start, best.current.period_type)
+              : null,
           };
         }
       }
@@ -272,105 +308,6 @@ export default async function InvestorDashboardPage() {
   const submittedThisWeekCount = submittedCompanyRows
     ? new Set(submittedCompanyRows.map((r) => r.company_id)).size
     : 0;
-
-  // Portfolio completion: current quarter requests grouped by company
-  const currentQuarterStart = new Date();
-  const currentQuarter = Math.floor(currentQuarterStart.getMonth() / 3) + 1;
-  const currentYear = currentQuarterStart.getFullYear();
-  currentQuarterStart.setMonth(Math.floor(currentQuarterStart.getMonth() / 3) * 3, 1);
-  currentQuarterStart.setHours(0, 0, 0, 0);
-
-  const { data: quarterRequests } = await supabase
-    .from("metric_requests")
-    .select(
-      "id, status, company_id, due_date, period_start, period_end, companies!inner(id, name), metric_definitions!inner(name)"
-    )
-    .eq("investor_id", user.id)
-    .gte("period_start", currentQuarterStart.toISOString());
-
-  type MetricDetail = {
-    id: string;
-    metricName: string;
-    status: string;
-    dueDate: string | null;
-    periodStart: string;
-    periodEnd: string;
-  };
-
-  type CompanyCompletion = {
-    id: string;
-    name: string;
-    total: number;
-    submitted: number;
-    metrics: MetricDetail[];
-  };
-
-  const companyMap = new Map<string, CompanyCompletion>();
-  let completionTotal = 0;
-  let completionSubmitted = 0;
-
-  if (quarterRequests) {
-    for (const req of quarterRequests) {
-      const companyRaw = req.companies;
-      const company = Array.isArray(companyRaw)
-        ? (companyRaw[0] as { id: string; name: string } | undefined)
-        : (companyRaw as { id: string; name: string } | null);
-      if (!company) continue;
-
-      const defRaw = req.metric_definitions;
-      const def = Array.isArray(defRaw)
-        ? (defRaw[0] as { name: string } | undefined)
-        : (defRaw as { name: string } | null);
-
-      const detail: MetricDetail = {
-        id: req.id,
-        metricName: def?.name ?? "Unknown metric",
-        status: req.status,
-        dueDate: req.due_date,
-        periodStart: req.period_start,
-        periodEnd: req.period_end,
-      };
-
-      completionTotal++;
-      if (req.status === "submitted") completionSubmitted++;
-
-      const existing = companyMap.get(company.id);
-      if (existing) {
-        existing.total++;
-        if (req.status === "submitted") existing.submitted++;
-        existing.metrics.push(detail);
-      } else {
-        companyMap.set(company.id, {
-          id: company.id,
-          name: company.name,
-          total: 1,
-          submitted: req.status === "submitted" ? 1 : 0,
-          metrics: [detail],
-        });
-      }
-    }
-  }
-
-  // Sort metrics within each company: pending first (by due date asc), then submitted
-  for (const company of companyMap.values()) {
-    company.metrics.sort((a, b) => {
-      if (a.status !== b.status) {
-        return a.status === "submitted" ? 1 : -1;
-      }
-      if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
-      if (a.dueDate) return -1;
-      return 1;
-    });
-  }
-
-  // Sort worst completion first (ascending by %)
-  const completionCompanies = Array.from(companyMap.values()).sort((a, b) => {
-    const pctA = a.total > 0 ? a.submitted / a.total : 0;
-    const pctB = b.total > 0 ? b.submitted / b.total : 0;
-    return pctA - pctB;
-  });
-
-  const quarterLabel = `Q${currentQuarter} ${currentYear}`;
 
   return (
     <div className="space-y-6">
@@ -425,7 +362,7 @@ export default async function InvestorDashboardPage() {
             label: "Send your first metric request",
             description: "Ask portfolio companies to submit their metrics",
             href: "/campaigns/new",
-            completed: awaitingCompanyCount > 0 || submittedThisWeekCount > 0 || completionTotal > 0,
+            completed: awaitingCompanyCount > 0 || submittedThisWeekCount > 0,
           },
           {
             id: "historical_upload",
@@ -443,16 +380,6 @@ export default async function InvestorDashboardPage() {
           },
         ]}
       />
-
-      {/* Portfolio Completion */}
-      {completionTotal > 0 && (
-        <PortfolioCompletionCard
-          companies={completionCompanies}
-          totalRequests={completionTotal}
-          submittedRequests={completionSubmitted}
-          quarterLabel={quarterLabel}
-        />
-      )}
 
       {companies.length === 0 ? (
         <div className="rounded-xl border border-border-default card-surface p-8 text-center">

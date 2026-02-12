@@ -27,6 +27,7 @@ type MetricSnapshot = {
   value: number | null;
   previousValue: number | null;
   percentChange: number | null;
+  periodLabel: string | null;
 };
 
 type DashboardContentProps = {
@@ -115,7 +116,7 @@ function TrendBadge({ percentChange }: { percentChange: number | null }) {
 
   if (percentChange > 0) {
     return (
-      <span className="inline-flex items-center gap-1 text-emerald-400">
+      <span className="inline-flex items-center gap-1 text-[var(--success-accent)]">
         <TrendingUp className="h-3.5 w-3.5" />
         <span className="text-xs font-medium">+{percentChange.toFixed(0)}%</span>
       </span>
@@ -124,7 +125,7 @@ function TrendBadge({ percentChange }: { percentChange: number | null }) {
 
   if (percentChange < 0) {
     return (
-      <span className="inline-flex items-center gap-1 text-red-400">
+      <span className="inline-flex items-center gap-1 text-[var(--data-negative)]">
         <TrendingDown className="h-3.5 w-3.5" />
         <span className="text-xs font-medium">{percentChange.toFixed(0)}%</span>
       </span>
@@ -162,17 +163,17 @@ function CompanyListRow({
         <div className="flex items-center gap-2">
           <h3 className="font-medium text-text-primary truncate">{company.name}</h3>
           {!isApproved && (
-            <span className="shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-[var(--status-warning-text)]">
+            <span className="shrink-0 rounded-full bg-[var(--status-warning-bg)] px-2 py-0.5 text-xs text-[var(--status-warning-text)]">
               Pending
             </span>
           )}
         </div>
         <div className="mt-0.5 flex items-center gap-1.5">
           {company.industry && (
-            <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[11px] capitalize text-blue-300/70">{company.industry.replace(/_/g, " ")}</span>
+            <span className="rounded-full bg-[var(--tag-blue-bg)] px-2 py-0.5 text-[11px] capitalize text-[var(--tag-blue-text)]">{company.industry.replace(/_/g, " ")}</span>
           )}
           {company.stage && (
-            <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[11px] capitalize text-violet-300/70">{company.stage.replace(/_/g, " ")}</span>
+            <span className="rounded-full bg-[var(--tag-violet-bg)] px-2 py-0.5 text-[11px] capitalize text-[var(--tag-violet-text)]">{company.stage.replace(/_/g, " ")}</span>
           )}
         </div>
       </div>
@@ -181,7 +182,12 @@ function CompanyListRow({
         {latestMetric && latestMetric.value != null ? (
           <>
             <div className="text-right">
-              <div className="text-xs text-text-tertiary">{latestMetric.name}</div>
+              <div className="text-xs text-text-tertiary">
+                {latestMetric.name}
+                {latestMetric.periodLabel && (
+                  <span className="ml-1 text-text-faint">· {latestMetric.periodLabel}</span>
+                )}
+              </div>
               <div className="font-semibold">
                 {formatValue(latestMetric.value, latestMetric.name)}
               </div>
@@ -192,7 +198,12 @@ function CompanyListRow({
             {secondaryMetric && secondaryMetric.value != null && (
               <>
                 <div className="text-right border-l border-border-subtle pl-6">
-                  <div className="text-xs text-text-tertiary">{secondaryMetric.name}</div>
+                  <div className="text-xs text-text-tertiary">
+                    {secondaryMetric.name}
+                    {secondaryMetric.periodLabel && (
+                      <span className="ml-1 text-text-faint">· {secondaryMetric.periodLabel}</span>
+                    )}
+                  </div>
                   <div className="text-sm font-medium text-text-primary">
                     {formatValue(secondaryMetric.value, secondaryMetric.name)}
                   </div>

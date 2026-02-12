@@ -10,6 +10,7 @@ type MetricSnapshot = {
   value: number | null;
   previousValue: number | null;
   percentChange: number | null;
+  periodLabel: string | null;
 };
 
 type CompanyCardProps = {
@@ -117,7 +118,7 @@ function TrendIndicator({ percentChange }: { percentChange: number | null }) {
 
   if (percentChange > 0) {
     return (
-      <div className="flex items-center gap-1 text-emerald-400" role="status">
+      <div className="flex items-center gap-1 text-[var(--success-accent)]" role="status">
         <TrendingUp className="h-4 w-4" aria-hidden="true" />
         <span className="text-xs font-medium">+{percentChange.toFixed(0)}%</span>
         <span className="sr-only">Trending up {percentChange.toFixed(0)} percent</span>
@@ -127,7 +128,7 @@ function TrendIndicator({ percentChange }: { percentChange: number | null }) {
 
   if (percentChange < 0) {
     return (
-      <div className="flex items-center gap-1 text-red-400" role="status">
+      <div className="flex items-center gap-1 text-[var(--error-accent)]" role="status">
         <TrendingDown className="h-4 w-4" aria-hidden="true" />
         <span className="text-xs font-medium">{percentChange.toFixed(0)}%</span>
         <span className="sr-only">Trending down {Math.abs(percentChange).toFixed(0)} percent</span>
@@ -192,7 +193,12 @@ export function CompanyCard({
           {/* Primary metric */}
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-text-tertiary">{latestMetric.name}</div>
+              <div className="text-xs text-text-tertiary">
+                {latestMetric.name}
+                {latestMetric.periodLabel && (
+                  <span className="ml-1 text-text-faint">· {latestMetric.periodLabel}</span>
+                )}
+              </div>
               <div className="mt-0.5 text-lg font-semibold">
                 {formatValue(latestMetric.value, latestMetric.name)}
               </div>
@@ -204,7 +210,12 @@ export function CompanyCard({
           {secondaryMetric && secondaryMetric.value != null && (
             <div className="flex items-center justify-between border-t border-border-subtle pt-2">
               <div>
-                <div className="text-xs text-text-muted">{secondaryMetric.name}</div>
+                <div className="text-xs text-text-muted">
+                  {secondaryMetric.name}
+                  {secondaryMetric.periodLabel && (
+                    <span className="ml-1 text-text-faint">· {secondaryMetric.periodLabel}</span>
+                  )}
+                </div>
                 <div className="mt-0.5 text-sm font-medium text-text-primary">
                   {formatValue(secondaryMetric.value, secondaryMetric.name)}
                 </div>
