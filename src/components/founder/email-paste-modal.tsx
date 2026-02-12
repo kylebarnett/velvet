@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { Loader2, Mail, CheckCircle2, X, Sparkles, Pencil, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { formatValue } from "@/components/charts/types";
@@ -224,7 +225,7 @@ export function EmailPasteModal({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm"
       onClick={(e) => {
@@ -556,6 +557,7 @@ export function EmailPasteModal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
