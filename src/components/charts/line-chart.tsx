@@ -54,7 +54,7 @@ export function LineChart({
             tick={{ fill: chartTheme.tick, fontSize: 11 }}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => formatValue(value)}
+            tickFormatter={(value) => formatValue(value, metrics[0])}
             dx={-5}
             width={80}
           />
