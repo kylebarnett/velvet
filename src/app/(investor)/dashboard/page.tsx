@@ -3,6 +3,7 @@ import { Building2, CheckCircle2 } from "lucide-react";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { computeRollups } from "@/lib/metrics/rollup";
 import { GettingStartedChecklist } from "@/components/ui/getting-started-checklist";
 import { DashboardContent } from "./dashboard-content";
 
@@ -140,11 +141,13 @@ export default async function InvestorDashboardPage() {
 
   if (approvedCompanyIds.length > 0) {
     // Get recent metric values (include period_type to prefer quarterly data)
+    // Safety cap: ~100 companies × 20 metrics × 2 values = 4000 max needed
     const { data: metricValues } = await supabase
       .from("company_metric_values")
       .select("company_id, metric_name, value, period_start, period_type, submitted_at")
       .in("company_id", approvedCompanyIds)
-      .order("period_start", { ascending: false });
+      .order("period_start", { ascending: false })
+      .limit(5000);
 
     if (metricValues) {
       // Group by company, find best metric per company
@@ -233,6 +236,27 @@ export default async function InvestorDashboardPage() {
         return null;
       }
 
+      // Compute quarterly rollups from monthly data for each company
+      for (const [companyId, values] of byCompany) {
+        const rollups = computeRollups(values.map((v) => ({
+          metric_name: v.metric_name,
+          period_type: v.period_type,
+          period_start: v.period_start,
+          period_end: "", // not needed for quarterly rollup computation
+          value: v.value,
+        })), "quarterly");
+
+        for (const r of rollups) {
+          values.push({
+            metric_name: r.metric_name,
+            value: r.value,
+            period_start: r.period_start,
+            period_type: "quarterly",
+            company_id: companyId,
+          });
+        }
+      }
+
       for (const [companyId, values] of byCompany) {
         // Sort by period_start desc (already sorted from query, but ensure)
         values.sort(
@@ -310,31 +334,26 @@ export default async function InvestorDashboardPage() {
     : 0;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight" data-onboarding="dashboard-title">Dashboard</h1>
-        <p className="text-sm text-text-tertiary">
-          Portfolio overview and recent metric activity.
-        </p>
-      </div>
+    <div className="space-y-8">
+      <h1 className="text-xl sm:text-2xl font-semibold tracking-tight" data-onboarding="dashboard-title">Dashboard</h1>
 
       <div className="grid gap-5 md:grid-cols-3">
         {[
-          { label: "Portfolio companies", subtitle: "Total companies you're tracking", value: String(companies.length), href: "/portfolio", icon: Building2, gradient: "kpi-gradient-blue" },
-          { label: "Awaiting submission", subtitle: "Companies with pending metric requests", value: String(awaitingCompanyCount), href: "/campaigns", icon: Building2, gradient: "kpi-gradient-amber" },
-          { label: "Submitted this week", subtitle: "Companies that submitted metrics in the last 7 days", value: String(submittedThisWeekCount), href: "/campaigns", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
+          { label: "Portfolio companies", subtitle: "Total companies in your portfolio", value: String(companies.length), href: "/portfolio", icon: Building2, gradient: "kpi-gradient-blue" },
+          { label: "Awaiting submission", subtitle: "Companies with pending metric requests", value: String(awaitingCompanyCount), href: "/metric-requests", icon: Building2, gradient: "kpi-gradient-amber" },
+          { label: "Submitted this week", subtitle: "Companies that sent data in the last 7 days", value: String(submittedThisWeekCount), href: "/metric-requests", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
         ].map((card) => (
           <Link
             key={card.label}
             href={card.href}
-            className={`card-hover-lift group rounded-xl border border-border-subtle ${card.gradient} p-5 hover:border-border-default`}
+            className={`card-hover-lift group rounded-xl ${card.gradient} p-5`}
           >
             <div className="flex items-start justify-between">
               <div className="text-xs font-medium uppercase tracking-wider text-text-muted group-hover:text-text-muted">{card.label}</div>
               <card.icon className="h-4 w-4 text-text-faint" />
             </div>
             <div className="mt-3 text-3xl font-semibold tracking-tight">{card.value}</div>
-            <div className="mt-1 text-[11px] text-text-faint">{card.subtitle}</div>
+            <div className="mt-1 text-xs text-text-tertiary">{card.subtitle}</div>
           </Link>
         ))}
       </div>
@@ -361,7 +380,7 @@ export default async function InvestorDashboardPage() {
             id: "request",
             label: "Send your first metric request",
             description: "Ask portfolio companies to submit their metrics",
-            href: "/campaigns/new",
+            href: "/metric-requests/new",
             completed: awaitingCompanyCount > 0 || submittedThisWeekCount > 0,
           },
           {
@@ -382,15 +401,12 @@ export default async function InvestorDashboardPage() {
       />
 
       {companies.length === 0 ? (
-        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated">
-            <Building2 className="h-6 w-6 text-text-muted" />
-          </div>
-          <h3 className="text-sm font-medium text-text-primary">No companies in your portfolio yet</h3>
-          <p className="mx-auto mt-2 max-w-md text-sm text-text-tertiary">
+        <div className="py-8">
+          <h3 className="text-base font-medium text-text-primary">No companies in your portfolio yet</h3>
+          <p className="mt-1 max-w-lg text-sm text-text-secondary">
             Import your portfolio companies to start collecting metrics. Once imported, invite founders to connect and begin submitting data.
           </p>
-          <div className="mt-5 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+          <div className="mt-4 flex items-center gap-3">
             <Link
               href="/portfolio/import"
               className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
@@ -403,15 +419,6 @@ export default async function InvestorDashboardPage() {
             >
               Or import historical metrics
             </Link>
-          </div>
-          <div className="mx-auto mt-6 max-w-sm rounded-lg bg-bg-elevated/50 p-4">
-            <p className="text-xs font-medium text-text-secondary mb-2">How it works</p>
-            <ol className="space-y-1.5 text-left text-xs text-text-tertiary">
-              <li className="flex gap-2"><span className="shrink-0 font-medium text-text-secondary">1.</span> Import your portfolio companies via CSV or add them manually</li>
-              <li className="flex gap-2"><span className="shrink-0 font-medium text-text-secondary">2.</span> Founders receive an invitation to join and connect their company</li>
-              <li className="flex gap-2"><span className="shrink-0 font-medium text-text-secondary">3.</span> Send metric requests to collect data on the cadence you choose</li>
-              <li className="flex gap-2"><span className="shrink-0 font-medium text-text-secondary">4.</span> View reports and track performance across your portfolio</li>
-            </ol>
           </div>
         </div>
       ) : (
