@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 import {
   Briefcase,
   Building2,
@@ -144,6 +145,7 @@ export function AppShell({
   company,
   user,
   role,
+  initialTheme,
   children,
   showTakeTour,
   onTakeTour,
@@ -153,6 +155,7 @@ export function AppShell({
   company?: CompanyInfo;
   user?: UserInfo;
   role?: "investor" | "founder";
+  initialTheme?: string;
   children: React.ReactNode;
   showTakeTour?: boolean;
   onTakeTour?: () => void;
@@ -163,6 +166,14 @@ export function AppShell({
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [settingsPanelOpen, setSettingsPanelOpen] = React.useState(false);
   const pathname = usePathname();
+  const { setTheme } = useTheme();
+
+  // Sync theme from DB on mount — ensures per-user theme overrides stale localStorage
+  React.useEffect(() => {
+    if (initialTheme) {
+      setTheme(initialTheme);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close mobile menu and settings panel on route change
   React.useEffect(() => {
@@ -355,6 +366,25 @@ export function AppShell({
                 <span>Team</span>
               </Link>
 
+              {/* Take tour */}
+              {showTakeTour && onTakeTour && (
+                <button
+                  onClick={() => {
+                    setSettingsPanelOpen(false);
+                    if (mobile) setMobileMenuOpen(false);
+                    onTakeTour();
+                  }}
+                  className={cn(
+                    "flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm text-text-tertiary transition-colors hover:bg-bg-raised hover:text-text-secondary",
+                    mobile ? "h-11" : "h-9",
+                  )}
+                  type="button"
+                >
+                  <HelpCircle className="h-[18px] w-[18px] shrink-0" />
+                  <span>Take tour</span>
+                </button>
+              )}
+
               {/* Logout button */}
               <button
                 onClick={onLogout}
@@ -535,26 +565,6 @@ export function AppShell({
             </React.Fragment>
           );
         })}
-        {showTakeTour && onTakeTour && (() => {
-          const tourBtn = (
-            <button
-              onClick={() => {
-                if (mobile) setMobileMenuOpen(false);
-                onTakeTour();
-              }}
-              className={cn(
-                "mt-4 flex w-full items-center rounded-md text-sm text-text-muted hover:bg-bg-raised hover:text-text-tertiary",
-                collapsed ? "h-9 justify-center" : "h-9 gap-2.5 px-3",
-                mobile && "h-12",
-              )}
-              type="button"
-            >
-              <HelpCircle className="h-[18px] w-[18px] shrink-0" />
-              {!collapsed && "Take tour"}
-            </button>
-          );
-          return collapsed ? <SidebarTooltip label="Take tour">{tourBtn}</SidebarTooltip> : tourBtn;
-        })()}
       </>
     );
   };
