@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { createPortal } from "react-dom";
 import { formatValue, formatPeriod } from "@/components/charts/types";
-import { Sparkles, RotateCcw, Info, GripVertical, ArrowUpDown, Plus, Pencil } from "lucide-react";
+import { Sparkles, RotateCcw, Info, GripVertical, ArrowUpDown, Plus, Pencil, Layers } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -38,6 +38,7 @@ type PeriodData = {
   aiConfidence?: number | null;
   submittedAt?: string;
   updatedAt?: string;
+  rollupDetail?: string;
 };
 
 type MetricRow = {
@@ -87,6 +88,8 @@ function formatSourceLabel(source?: string): string {
       return "Override";
     case "manual":
       return "Manual";
+    case "rollup":
+      return "Rolled Up";
     default:
       return source.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }
@@ -182,7 +185,9 @@ function CellTooltip({
                 ? "bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)]"
                 : periodData.source === "override"
                   ? "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]"
-                  : "bg-bg-hover text-text-secondary"
+                  : periodData.source === "rollup"
+                    ? "bg-[var(--tag-blue-bg)] text-[var(--tag-blue-text)]"
+                    : "bg-bg-hover text-text-secondary"
             }`}
           >
             {formatSourceLabel(periodData.source)}
@@ -195,6 +200,13 @@ function CellTooltip({
             <span className="text-text-secondary">
               {Math.round(periodData.aiConfidence * 100)}%
             </span>
+          </div>
+        )}
+
+        {periodData.rollupDetail && (
+          <div className="flex items-center justify-between">
+            <span className="text-text-tertiary">Calculation</span>
+            <span className="text-text-secondary">{periodData.rollupDetail}</span>
           </div>
         )}
 
@@ -421,6 +433,9 @@ function SortableMetricRow({
                 )}
                 {periodData?.source === "override" && (
                   <RotateCcw className="h-3 w-3 shrink-0 text-[var(--tag-amber-text)]" />
+                )}
+                {periodData?.source === "rollup" && (
+                  <Layers className="h-3 w-3 shrink-0 text-[var(--tag-blue-text)]" />
                 )}
                 {hasData ? (
                   <>

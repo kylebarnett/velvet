@@ -16,6 +16,7 @@ import {
   PeriodType,
 } from "./types";
 import { formatPeriod, MetricDataPoint } from "@/components/charts/types";
+import { computeRollups, buildRollupDetail, type RolledUpValue } from "@/lib/metrics/rollup";
 
 type DashboardWidgetProps = {
   widget: Widget;
@@ -155,6 +156,16 @@ function prepareChartData(
       m.period_type === dbPt
   );
 
+  // Compute rollups and merge as synthetic entries
+  const rollups = computeRollups(metrics, periodType);
+  const existingKeys = new Set(filtered.map((m) => `${m.metric_name}:${m.period_start}`));
+  const syntheticFiltered = rollups
+    .filter(
+      (r) =>
+        metricNames.some((n) => n.toLowerCase() === r.metric_name.toLowerCase()) &&
+        !existingKeys.has(`${r.metric_name}:${r.period_start}`),
+    );
+
   // Group by period
   const byPeriod = new Map<string, Record<string, number | null>>();
 
@@ -165,6 +176,17 @@ function prepareChartData(
     }
     const record = byPeriod.get(periodKey)!;
     record[metric.metric_name] = getNumericValue(metric.value);
+  }
+
+  // Add rollup values (only fill gaps)
+  for (const r of syntheticFiltered) {
+    if (!byPeriod.has(r.period_start)) {
+      byPeriod.set(r.period_start, {});
+    }
+    const record = byPeriod.get(r.period_start)!;
+    if (record[r.metric_name] == null) {
+      record[r.metric_name] = r.value;
+    }
   }
 
   // Convert to array and sort by date
@@ -242,12 +264,50 @@ function prepareTableData(
     );
   });
 
+  // Compute rollups and create synthetic MetricValue-like entries
+  const rollups = computeRollups(metrics, periodType);
+  const existingKeys = new Set(filtered.map((m) => `${m.metric_name}:${m.period_start}`));
+  const syntheticMetrics = rollups
+    .filter((r) => {
+      if (existingKeys.has(`${r.metric_name}:${r.period_start}`)) return false;
+      if (shouldShowAll) return true;
+      return metricNames.some((n) => n.toLowerCase() === r.metric_name.toLowerCase());
+    });
+
+  // Build rollup detail lookup for tooltip display
+  const rollupDetailMap = new Map<string, string>();
+  for (const r of syntheticMetrics) {
+    rollupDetailMap.set(`${r.metric_name}:${r.period_start}`, buildRollupDetail(r, metrics));
+  }
+
+  // Merge filtered + synthetic
+  const mergedFiltered: MetricValue[] = [
+    ...filtered,
+    ...syntheticMetrics.map((r) => ({
+      id: `rollup-${r.metric_name}-${r.period_start}`,
+      metric_name: r.metric_name,
+      period_type: dbPt as PeriodType,
+      period_start: r.period_start,
+      period_end: r.period_end,
+      value: r.value,
+      notes: null,
+      submitted_at: "",
+      updated_at: "",
+      source: "rollup" as const,
+    })),
+  ];
+
+  // Also ensure rollup metrics show in the names list
+  for (const r of syntheticMetrics) {
+    allMetricNames.add(r.metric_name);
+  }
+
   // Group by metric name
   const byMetric = new Map<string, MetricValue[]>();
   for (const name of allMetricNames) {
     byMetric.set(name, []);
   }
-  for (const metric of filtered) {
+  for (const metric of mergedFiltered) {
     byMetric.get(metric.metric_name)!.push(metric);
   }
 
@@ -271,6 +331,7 @@ function prepareTableData(
         aiConfidence: v.ai_confidence,
         submittedAt: v.submitted_at,
         updatedAt: v.updated_at,
+        rollupDetail: rollupDetailMap.get(`${v.metric_name}:${v.period_start}`),
       })),
     };
   });
@@ -288,6 +349,29 @@ function getLatestMetricValues(
   if (periodType) {
     const dbPt = dbPeriodType(periodType);
     filtered = filtered.filter((m) => m.period_type === dbPt);
+
+    // Merge rollup values for metric cards
+    const rollups = computeRollups(metrics, periodType);
+    const existingKeys = new Set(filtered.map((m) => `${m.metric_name}:${m.period_start}`));
+    const synthetic = rollups
+      .filter(
+        (r) =>
+          r.metric_name.toLowerCase() === metricName.toLowerCase() &&
+          !existingKeys.has(`${r.metric_name}:${r.period_start}`),
+      )
+      .map((r) => ({
+        id: `rollup-${r.metric_name}-${r.period_start}`,
+        metric_name: r.metric_name,
+        period_type: dbPt as PeriodType,
+        period_start: r.period_start,
+        period_end: r.period_end,
+        value: r.value,
+        notes: null,
+        submitted_at: "",
+        updated_at: "",
+        source: "rollup" as const,
+      }));
+    filtered = [...filtered, ...synthetic];
   }
 
   filtered.sort(

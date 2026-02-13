@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import Link from "next/link";
-import { AlertTriangle, ArrowLeft, CheckCircle2, Info, Star, TrendingDown } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle2, Info, Layers, Star, TrendingDown } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
@@ -24,6 +24,7 @@ import {
   generateQuarterlyPeriods,
   generateAnnualPeriods,
 } from "@/lib/utils/period-generator";
+import { computeRollups } from "@/lib/metrics/rollup";
 
 type PeriodTypeValue = "quarterly" | "annual";
 
@@ -195,6 +196,8 @@ type BatchTableBodyProps = {
   setDetailMetric: React.Dispatch<React.SetStateAction<string | null>>;
   rawMetrics: RawMetric[];
   periodType: string;
+  /** Pre-computed rollup values: metricName → periodStart → formatted value */
+  rollupLookup: Map<string, number>;
 };
 
 function BatchTableBody({
@@ -208,6 +211,7 @@ function BatchTableBody({
   setDetailMetric,
   rawMetrics,
   periodType,
+  rollupLookup,
 }: BatchTableBodyProps) {
   const parentRef = React.useRef<HTMLDivElement>(null);
   const allRows = React.useMemo(
@@ -332,6 +336,18 @@ function BatchTableBody({
                   Prior: {formatPriorValue(row.metricName, String(prevValue))}
                 </div>
               )}
+              {/* Rollup hint — show when no existing value, no user value, no prior, and a rollup is available */}
+              {!hasExisting && !userEnteredValue && prevValue === null && (() => {
+                const rollupKey = `${row.metricName}:${p.start}`;
+                const rollupValue = rollupLookup.get(rollupKey);
+                if (rollupValue === undefined) return null;
+                return (
+                  <div className="mt-0.5 flex items-center justify-center gap-1 text-[10px] text-[var(--tag-blue-text)]">
+                    <Layers className="h-2.5 w-2.5" />
+                    Calculated: {formatPriorValue(row.metricName, String(rollupValue))}
+                  </div>
+                );
+              })()}
             </div>
           </td>
         );
@@ -978,6 +994,25 @@ export function BatchSubmissionTable({
     }
   }
 
+  // Compute rollup values from raw metrics for hint display
+  const rollupLookup = React.useMemo(() => {
+    const lookup = new Map<string, number>();
+    if (periodType === "quarterly" || periodType === "annual") {
+      const uiPeriodType = periodType === "annual" ? "yearly" : periodType;
+      const rollups = computeRollups(rawMetrics as Array<{
+        metric_name: string;
+        period_type: string;
+        period_start: string;
+        period_end: string;
+        value: unknown;
+      }>, uiPeriodType as "quarterly" | "yearly");
+      for (const r of rollups) {
+        lookup.set(`${r.metric_name}:${r.period_start}`, r.value);
+      }
+    }
+    return lookup;
+  }, [rawMetrics, periodType]);
+
   if (loading) {
     return <LoadingSkeleton />;
   }
@@ -1045,6 +1080,7 @@ export function BatchSubmissionTable({
           setDetailMetric={setDetailMetric}
           rawMetrics={rawMetrics}
           periodType={periodType}
+          rollupLookup={rollupLookup}
         />
         </>
       )}
