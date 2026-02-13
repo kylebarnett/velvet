@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { NotificationList } from "@/components/founder/notification-list";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 
@@ -31,6 +32,7 @@ function buildTabs(counts: RequestCounts | null): TabItem<TabValue>[] {
 }
 
 export default function FounderRequestsPage() {
+  const router = useRouter();
   const [companyId, setCompanyId] = React.useState<string | null>(null);
   const [tab, setTab] = React.useState<TabValue>("pending");
   const [refreshKey, setRefreshKey] = React.useState(0);
@@ -53,6 +55,7 @@ export default function FounderRequestsPage() {
   function handleBackFromSubmit() {
     setSubmitPeriod(null);
     setRefreshKey((k) => k + 1);
+    router.refresh();
   }
 
   // When a pending group's "Submit" is clicked, show the batch table inline

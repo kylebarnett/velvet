@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { createPortal } from "react-dom";
 import { formatValue, formatPeriod } from "@/components/charts/types";
-import { Sparkles, Info, GripVertical, ArrowUpDown, Plus } from "lucide-react";
+import { Sparkles, RotateCcw, Info, GripVertical, ArrowUpDown, Plus, Pencil } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -64,6 +64,12 @@ type MetricsTableProps = {
   storageKey?: string;
   /** Callback to add a new metric (renders + Add Metric button below table) */
   onAddMetric?: () => void;
+  /** Enable click-to-edit on cells (founder dashboard) */
+  editable?: boolean;
+  /** Submit a single value edit — returns true on success */
+  onValueSubmit?: (metricName: string, periodStart: string, periodEnd: string, periodType: string, value: string) => Promise<boolean>;
+  /** Actions rendered in the table toolbar (e.g. export button) */
+  headerActions?: React.ReactNode;
 };
 
 type HoveredCell = {
@@ -221,6 +227,11 @@ type MetricInfoTooltipState = {
   rect: DOMRect;
 } | null;
 
+type EditingCell = {
+  metricName: string;
+  periodStart: string;
+} | null;
+
 type SortableMetricRowProps = {
   metric: MetricRow;
   displayPeriods: string[];
@@ -233,6 +244,14 @@ type SortableMetricRowProps = {
   onMetricInfoHover: (metricName: string, periodType: string, rect: DOMRect) => void;
   onMetricInfoLeave: () => void;
   rowIndex?: number;
+  editable?: boolean;
+  editingCell?: EditingCell;
+  editInputValue?: string;
+  editSaving?: boolean;
+  onEditStart?: (metricName: string, periodStart: string, currentValue: string) => void;
+  onEditChange?: (value: string) => void;
+  onEditSave?: () => void;
+  onEditCancel?: () => void;
 };
 
 function SortableMetricRow({
@@ -247,6 +266,14 @@ function SortableMetricRow({
   onMetricInfoHover,
   onMetricInfoLeave,
   rowIndex,
+  editable,
+  editingCell,
+  editInputValue,
+  editSaving,
+  onEditStart,
+  onEditChange,
+  onEditSave,
+  onEditCancel,
 }: SortableMetricRowProps) {
   const {
     attributes,
@@ -263,8 +290,6 @@ function SortableMetricRow({
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
-
-  const isAiExtracted = metric.source === "ai_extracted";
 
   // Determine aggregation type for total
   const aggregationType = metric.aggregationType ?? getDefaultAggregationType(metric.metricName);
@@ -312,9 +337,6 @@ function SortableMetricRow({
           onMouseEnter={handleNameMouseEnter}
           onMouseLeave={onMetricInfoLeave}
         >
-          {isAiExtracted && (
-            <Sparkles className="h-3 w-3 shrink-0 text-[var(--tag-violet-text)]" />
-          )}
           <span className="truncate font-medium text-text-primary">{metric.metricName}</span>
           <span
             ref={infoBtnRef}
@@ -333,25 +355,25 @@ function SortableMetricRow({
         const isHovered =
           hoveredCell?.metricName === metric.metricName &&
           hoveredCell?.periodStart === period;
-
-        // Color-coded cell background based on source
-        const cellBgColor =
-          periodData?.source === "ai_extracted"
-            ? "bg-[var(--tag-violet-bg)]"
-            : periodData?.source === "override"
-              ? "bg-[var(--tag-amber-bg)]"
-              : "";
+        const isEditing =
+          editingCell?.metricName === metric.metricName &&
+          editingCell?.periodStart === period;
+        const canEdit = editable && !isReorderMode;
 
         return (
           <td
             key={period}
-            className={`overflow-hidden px-3 py-3 text-right font-mono text-[13px] ${cellBgColor} ${
-              hasData
-                ? "cursor-default text-text-primary transition-colors duration-100 hover:bg-bg-elevated"
-                : ""
-            } ${isHovered ? "bg-bg-elevated" : ""}`}
+            className={`overflow-hidden px-3 py-3 text-right font-mono text-[13px] ${
+              isEditing
+                ? "p-1"
+                : hasData
+                  ? `${canEdit ? "cursor-pointer" : "cursor-default"} text-text-primary transition-colors duration-100 hover:bg-bg-elevated`
+                  : canEdit
+                    ? "cursor-pointer transition-colors duration-100 hover:bg-bg-elevated"
+                    : ""
+            } ${isHovered && !isEditing ? "bg-bg-elevated" : ""}`}
             onMouseEnter={
-              hasData && !isReorderMode
+              hasData && !isReorderMode && !isEditing
                 ? (e) =>
                     onCellMouseEnter(
                       metric.metricName,
@@ -360,13 +382,60 @@ function SortableMetricRow({
                     )
                 : undefined
             }
-            onMouseLeave={hasData && !isReorderMode ? onCellMouseLeave : undefined}
+            onMouseLeave={hasData && !isReorderMode && !isEditing ? onCellMouseLeave : undefined}
+            onClick={
+              canEdit && !isEditing
+                ? () => {
+                    const rawValue = hasData ? String(periodData.value) : "";
+                    onEditStart?.(metric.metricName, period, rawValue);
+                  }
+                : undefined
+            }
           >
-            <span className="block truncate whitespace-nowrap">
-              {periodData
-                ? formatValue(periodData.value, metric.metricName)
-                : <span className="text-text-faint">—</span>}
-            </span>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editInputValue ?? ""}
+                onChange={(e) => onEditChange?.(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    onEditSave?.();
+                  } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    onEditCancel?.();
+                  }
+                }}
+                onBlur={() => {
+                  // Cancel on blur unless actively saving
+                  if (!editSaving) onEditCancel?.();
+                }}
+                autoFocus
+                disabled={editSaving}
+                className="h-8 w-full rounded-md border border-border-active bg-bg-input px-2 text-center text-sm font-mono text-text-primary focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)] disabled:opacity-60"
+              />
+            ) : (
+              <span className="group/cell relative flex items-center justify-end gap-1 truncate whitespace-nowrap">
+                {periodData?.source === "ai_extracted" && (
+                  <Sparkles className="h-3 w-3 shrink-0 text-[var(--tag-violet-text)]" />
+                )}
+                {periodData?.source === "override" && (
+                  <RotateCcw className="h-3 w-3 shrink-0 text-[var(--tag-amber-text)]" />
+                )}
+                {hasData ? (
+                  <>
+                    {formatValue(periodData.value, metric.metricName)}
+                    {canEdit && (
+                      <Pencil className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 text-text-faint opacity-0 group-hover/cell:opacity-100 transition-opacity" />
+                    )}
+                  </>
+                ) : canEdit ? (
+                  <span className="text-text-faint opacity-0 group-hover/cell:opacity-100 transition-opacity">+</span>
+                ) : (
+                  <span className="text-text-faint">—</span>
+                )}
+              </span>
+            )}
           </td>
         );
       })}
@@ -496,6 +565,14 @@ type MetricsTableBodyProps = {
   GRIP_COL_WIDTH: number;
   METRIC_COL_WIDTH: number;
   TOTAL_COL_WIDTH: number;
+  editable?: boolean;
+  editingCell?: EditingCell;
+  editInputValue?: string;
+  editSaving?: boolean;
+  onEditStart?: (metricName: string, periodStart: string, currentValue: string) => void;
+  onEditChange?: (value: string) => void;
+  onEditSave?: () => void;
+  onEditCancel?: () => void;
 };
 
 function MetricsTableBody({
@@ -517,6 +594,14 @@ function MetricsTableBody({
   GRIP_COL_WIDTH,
   METRIC_COL_WIDTH,
   TOTAL_COL_WIDTH,
+  editable,
+  editingCell,
+  editInputValue,
+  editSaving,
+  onEditStart,
+  onEditChange,
+  onEditSave,
+  onEditCancel,
 }: MetricsTableBodyProps) {
   const shouldVirtualize = displayData.length > VIRTUALIZE_THRESHOLD && !isReorderMode;
 
@@ -627,6 +712,14 @@ function MetricsTableBody({
                 onMetricInfoHover={handleMetricInfoHover}
                 onMetricInfoLeave={handleMetricInfoLeave}
                 rowIndex={index}
+                editable={editable}
+                editingCell={editingCell}
+                editInputValue={editInputValue}
+                editSaving={editSaving}
+                onEditStart={onEditStart}
+                onEditChange={onEditChange}
+                onEditSave={onEditSave}
+                onEditCancel={onEditCancel}
               />
             ))}
           </tbody>
@@ -681,6 +774,14 @@ function MetricsTableBody({
                 onMetricInfoHover={handleMetricInfoHover}
                 onMetricInfoLeave={handleMetricInfoLeave}
                 rowIndex={virtualRow.index}
+                editable={editable}
+                editingCell={editingCell}
+                editInputValue={editInputValue}
+                editSaving={editSaving}
+                onEditStart={onEditStart}
+                onEditChange={onEditChange}
+                onEditSave={onEditSave}
+                onEditCancel={onEditCancel}
               />
             );
           })}
@@ -712,9 +813,17 @@ export function MetricsTable({
   allowReorder = true,
   storageKey,
   onAddMetric,
+  editable,
+  onValueSubmit,
+  headerActions,
 }: MetricsTableProps) {
   const [hoveredCell, setHoveredCell] = useState<HoveredCell>(null);
   const [metricInfoTooltip, setMetricInfoTooltip] = useState<MetricInfoTooltipState>(null);
+
+  // Inline editing state
+  const [editingCell, setEditingCell] = useState<EditingCell>(null);
+  const [editInputValue, setEditInputValue] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
   const [mounted, setMounted] = useState(false);
   const metricInfoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isOverMetricInfoRef = useRef(false);
@@ -1089,6 +1198,63 @@ export function MetricsTable({
     };
   }, []);
 
+  // Inline edit handlers
+  const handleEditStart = useCallback(
+    (metricName: string, periodStart: string, currentValue: string) => {
+      setEditingCell({ metricName, periodStart });
+      setEditInputValue(currentValue);
+      // Clear hover tooltip when editing starts
+      setHoveredCell(null);
+      // Open the side panel for context
+      onMetricClick?.(metricName, periodStart);
+    },
+    [onMetricClick],
+  );
+
+  const handleEditChange = useCallback((value: string) => {
+    setEditInputValue(value);
+  }, []);
+
+  const handleEditSave = useCallback(async () => {
+    if (!editingCell || !onValueSubmit) return;
+
+    const trimmed = editInputValue.trim();
+    if (!trimmed) {
+      setEditingCell(null);
+      return;
+    }
+    if (isNaN(Number(trimmed))) {
+      // Invalid — just cancel
+      setEditingCell(null);
+      return;
+    }
+
+    // Find the period end from the metric data
+    const metric = data.find((m) => m.metricName === editingCell.metricName);
+    const periodData = metric?.periods.find((p) => p.periodStart === editingCell.periodStart);
+    const periodEnd = periodData?.periodEnd ?? editingCell.periodStart;
+    const periodType = metric?.periodType ?? "quarterly";
+
+    setEditSaving(true);
+    const success = await onValueSubmit(
+      editingCell.metricName,
+      editingCell.periodStart,
+      periodEnd,
+      periodType,
+      trimmed,
+    );
+    setEditSaving(false);
+
+    if (success) {
+      setEditingCell(null);
+    }
+  }, [editingCell, editInputValue, onValueSubmit, data]);
+
+  const handleEditCancel = useCallback(() => {
+    if (editSaving) return;
+    setEditingCell(null);
+  }, [editSaving]);
+
   // Get all unique periods across metrics, sorted chronologically
   const sortedPeriods = useMemo(() => {
     const allPeriods = new Set<string>();
@@ -1107,13 +1273,17 @@ export function MetricsTable({
     const pType = displayData[0]?.periodType ?? "quarterly";
     const minPeriods = pType === "monthly" ? 12 : pType === "yearly" ? 5 : 0;
 
-    if (minPeriods > 0 && sortedPeriods.length < minPeriods && sortedPeriods.length > 0) {
-      const latest = new Date(sortedPeriods[sortedPeriods.length - 1]);
+    if (minPeriods > 0 && sortedPeriods.length < minPeriods) {
+      // Use latest data period or current date as anchor
+      const anchor = sortedPeriods.length > 0
+        ? new Date(sortedPeriods[sortedPeriods.length - 1])
+        : new Date();
       const periodsSet = new Set(sortedPeriods);
-      for (let i = 1; periodsSet.size < minPeriods; i++) {
+      // Fill backwards from anchor until we reach minPeriods
+      for (let i = 0; periodsSet.size < minPeriods; i++) {
         const d = pType === "monthly"
-          ? new Date(latest.getFullYear(), latest.getMonth() - i, 1)
-          : new Date(latest.getFullYear() - i, 0, 1);
+          ? new Date(anchor.getFullYear(), anchor.getMonth() - i, 1)
+          : new Date(anchor.getFullYear() - i, 0, 1);
         const iso = d.toISOString().slice(0, 10);
         periodsSet.add(iso);
       }
@@ -1170,12 +1340,14 @@ export function MetricsTable({
       )}
 
       {/* Toolbar */}
-      <div className="mb-2 flex items-center justify-between">
+      <div data-no-print className="mb-2 flex items-center justify-between">
         <div className="text-xs tabular-nums text-text-muted">
           {sortedPeriods.length} period{sortedPeriods.length !== 1 ? "s" : ""}
         </div>
-        {allowReorder && (
-          <button
+        <div className="flex items-center gap-2">
+          {headerActions}
+          {allowReorder && (
+            <button
             type="button"
             onClick={() => setIsReorderMode(!isReorderMode)}
             className={`flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs transition-colors ${
@@ -1188,7 +1360,8 @@ export function MetricsTable({
             <ArrowUpDown className="h-3 w-3" />
             {isReorderMode ? "Done" : "Reorder"}
           </button>
-        )}
+          )}
+        </div>
       </div>
 
       <DndContext
@@ -1219,6 +1392,14 @@ export function MetricsTable({
             GRIP_COL_WIDTH={GRIP_COL_WIDTH}
             METRIC_COL_WIDTH={METRIC_COL_WIDTH}
             TOTAL_COL_WIDTH={TOTAL_COL_WIDTH}
+            editable={editable}
+            editingCell={editingCell}
+            editInputValue={editInputValue}
+            editSaving={editSaving}
+            onEditStart={handleEditStart}
+            onEditChange={handleEditChange}
+            onEditSave={handleEditSave}
+            onEditCancel={handleEditCancel}
           />
         </SortableContext>
       </DndContext>
@@ -1226,6 +1407,7 @@ export function MetricsTable({
       {onAddMetric && (
         <button
           type="button"
+          data-no-print
           onClick={onAddMetric}
           className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-secondary"
         >

@@ -91,17 +91,17 @@ export async function GET() {
   // Also fetch the value itself so completed requests can show what was submitted.
   const { data: existingValues } = await admin
     .from("company_metric_values")
-    .select("metric_name, period_start, period_end, value")
+    .select("metric_name, period_start, period_end, value, notes")
     .eq("company_id", company.id);
 
   // Build a lookup of submitted values. We use a two-tier approach:
   // 1. Exact match by name + dates (fast path)
   // 2. Fuzzy match with ±2 day tolerance (handles timezone-shifted dates
   //    from an earlier bug where toISOString() shifted dates to UTC)
-  const submittedExactMap = new Map<string, unknown>();
+  const submittedExactMap = new Map<string, { value: unknown; notes: string | null }>();
   for (const v of existingValues ?? []) {
     const key = `${v.metric_name.toLowerCase()}|${v.period_start}|${v.period_end}`;
-    submittedExactMap.set(key, v.value);
+    submittedExactMap.set(key, { value: v.value, notes: v.notes ?? null });
   }
 
   const submittedEntries = (existingValues ?? []).map((v) => ({
@@ -109,6 +109,7 @@ export async function GET() {
     start: v.period_start,
     end: v.period_end,
     value: v.value,
+    notes: v.notes as string | null,
   }));
 
   function datesClose(a: string, b: string, toleranceDays: number): boolean {
@@ -121,10 +122,11 @@ export async function GET() {
     metricName: string,
     periodStart: string,
     periodEnd: string,
-  ): { hasSubmission: boolean; submittedValue?: unknown } {
+  ): { hasSubmission: boolean; submittedValue?: unknown; submittedNotes?: string | null } {
     const exactKey = `${metricName.toLowerCase()}|${periodStart}|${periodEnd}`;
-    if (submittedExactMap.has(exactKey)) {
-      return { hasSubmission: true, submittedValue: submittedExactMap.get(exactKey) };
+    const exact = submittedExactMap.get(exactKey);
+    if (exact) {
+      return { hasSubmission: true, submittedValue: exact.value, submittedNotes: exact.notes };
     }
     // Fuzzy match for timezone-shifted dates
     const nameLower = metricName.toLowerCase();
@@ -135,7 +137,7 @@ export async function GET() {
         datesClose(e.end, periodEnd, 2),
     );
     if (match) {
-      return { hasSubmission: true, submittedValue: match.value };
+      return { hasSubmission: true, submittedValue: match.value, submittedNotes: match.notes };
     }
     return { hasSubmission: false };
   }
@@ -167,6 +169,7 @@ export async function GET() {
     requestIds: string[];
     hasSubmission: boolean;
     submittedValue?: unknown;
+    submittedNotes?: string | null;
   };
 
   const groups = new Map<string, GroupedRequest>();
@@ -209,8 +212,11 @@ export async function GET() {
         investorCount: 1,
         investorNames: [investorName],
         requestIds: [req.id],
-        hasSubmission: submission.hasSubmission,
+        // A request counts as submitted if a matching value exists OR
+        // the request was already marked as submitted (partial submission)
+        hasSubmission: submission.hasSubmission || req.status === "submitted",
         submittedValue: submission.submittedValue,
+        submittedNotes: submission.submittedNotes,
       });
     }
   }

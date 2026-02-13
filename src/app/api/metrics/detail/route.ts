@@ -83,37 +83,43 @@ export async function GET(req: Request) {
     history = historyData ?? [];
   }
 
-  // Resolve changed_by UUIDs to user names
-  const changedByIds = [
-    ...new Set(
-      history
-        .map((h) => h.changed_by)
-        .filter((id): id is string => id != null),
-    ),
-  ];
+  // Resolve changed_by and submitted_by UUIDs to user names.
+  // Use admin client to read users table (bypasses RLS).
+  // Ownership verified above via role-based company access check.
+  const changedByIds = history
+    .map((h) => h.changed_by)
+    .filter((id): id is string => id != null);
+  const submittedByIds = (values ?? [])
+    .map((v) => v.submitted_by)
+    .filter((id): id is string => id != null);
+  const allUserIds = [...new Set([...changedByIds, ...submittedByIds])];
 
-  let enrichedHistory = history;
-  if (changedByIds.length > 0) {
-    // Use admin client to read users table (bypasses RLS)
-    // Ownership verified above via role-based company access check
+  let userMap = new Map<string, string>();
+  if (allUserIds.length > 0) {
     const admin = createSupabaseAdminClient();
     const { data: users } = await admin
       .from("users")
       .select("id, full_name, email")
-      .in("id", changedByIds);
+      .in("id", allUserIds);
 
-    const userMap = new Map(
+    userMap = new Map(
       (users ?? []).map((u) => [
         u.id,
         u.full_name || u.email || "Unknown user",
       ]),
     );
-
-    enrichedHistory = history.map((h) => ({
-      ...h,
-      changed_by_name: h.changed_by ? userMap.get(h.changed_by) ?? null : null,
-    }));
   }
+
+  const enrichedHistory = history.map((h) => ({
+    ...h,
+    changed_by_name: h.changed_by ? userMap.get(h.changed_by) ?? null : null,
+  }));
+
+  // Attach submitter name to each value
+  const enrichedValues = (values ?? []).map((v) => ({
+    ...v,
+    submitted_by_name: v.submitted_by ? userMap.get(v.submitted_by) ?? null : null,
+  }));
 
   // Fetch linked documents if any
   const docIds = (values ?? [])
@@ -132,7 +138,7 @@ export async function GET(req: Request) {
   return NextResponse.json({
     metricName,
     companyId,
-    values: values ?? [],
+    values: enrichedValues,
     history: enrichedHistory,
     documents,
   });

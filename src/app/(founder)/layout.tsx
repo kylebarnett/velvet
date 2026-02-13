@@ -42,15 +42,22 @@ export default async function FounderLayout({
     };
   }
 
-  // Count pending metric requests for badge
+  // Count pending metric requests for badge — group by investor+period so
+  // a single request with 3 metrics shows as "1", not "3"
   let pendingCount = 0;
   if (companyData) {
-    const { count } = await supabase
+    const { data: pendingRequests } = await supabase
       .from("metric_requests")
-      .select("id", { count: "exact", head: true })
+      .select("investor_id, period_start, period_end")
       .eq("company_id", companyData.id)
       .eq("status", "pending");
-    pendingCount = count ?? 0;
+
+    const uniqueKeys = new Set(
+      (pendingRequests ?? []).map(
+        (r) => `${r.investor_id}|${r.period_start}|${r.period_end}`,
+      ),
+    );
+    pendingCount = uniqueKeys.size;
   }
 
   const userInfo = {

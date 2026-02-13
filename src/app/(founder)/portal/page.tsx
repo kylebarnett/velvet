@@ -81,12 +81,6 @@ export default async function FounderDashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("company_id", company.id);
 
-  // Fetch tear sheet count
-  const { count: tearSheetCount } = await supabase
-    .from("tear_sheets")
-    .select("*", { count: "exact", head: true })
-    .eq("company_id", company.id);
-
   // Fetch investor count for checklist
   const { count: investorCount } = await supabase
     .from("investor_company_relationships")
@@ -212,8 +206,6 @@ export default async function FounderDashboardPage() {
       metrics={metricValues ?? []}
       views={views ?? []}
       templates={templates ?? []}
-      documentCount={documentCount ?? 0}
-      tearSheetCount={tearSheetCount ?? 0}
     />
     </div>
   );

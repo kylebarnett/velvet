@@ -26,6 +26,12 @@ type DashboardWidgetProps = {
   companyId?: string;
   /** Callback to add a new metric (passed to table widgets) */
   onAddMetric?: () => void;
+  /** Enable click-to-edit on table cells */
+  editable?: boolean;
+  /** Submit a single value edit — returns true on success */
+  onValueSubmit?: (metricName: string, periodStart: string, periodEnd: string, periodType: string, value: string) => Promise<boolean>;
+  /** Actions rendered in the table toolbar (e.g. export button) — only used for table widgets */
+  headerActions?: React.ReactNode;
 };
 
 export function DashboardWidget({
@@ -35,6 +41,9 @@ export function DashboardWidget({
   onMetricClick,
   companyId,
   onAddMetric,
+  editable,
+  onValueSubmit,
+  headerActions,
 }: DashboardWidgetProps) {
   const { config } = widget;
 
@@ -108,6 +117,9 @@ export function DashboardWidget({
         storageKey={storageKey}
         showTotals={config.showTotals !== false}
         onAddMetric={onAddMetric}
+        editable={editable}
+        onValueSubmit={onValueSubmit}
+        headerActions={headerActions}
       />
     );
   }
@@ -117,6 +129,11 @@ export function DashboardWidget({
       Unknown widget type
     </div>
   );
+}
+
+/** The UI uses "yearly" but the DB stores "annual". Normalize for comparisons. */
+function dbPeriodType(pt: PeriodType): string {
+  return pt === "yearly" ? "annual" : pt;
 }
 
 function getChartHeight(gridHeight: number): number {
@@ -131,10 +148,11 @@ function prepareChartData(
   periodType: PeriodType
 ): MetricDataPoint[] {
   // Filter to requested metrics and period type
+  const dbPt = dbPeriodType(periodType);
   const filtered = metrics.filter(
     (m) =>
       metricNames.some((name) => name.toLowerCase() === m.metric_name.toLowerCase()) &&
-      m.period_type === periodType
+      m.period_type === dbPt
   );
 
   // Group by period
@@ -171,10 +189,11 @@ function preparePieData(
   periodType: PeriodType
 ): Array<{ name: string; value: number }> {
   // Get the most recent period
+  const dbPt = dbPeriodType(periodType);
   const filtered = metrics.filter(
     (m) =>
       metricNames.some((name) => name.toLowerCase() === m.metric_name.toLowerCase()) &&
-      m.period_type === periodType
+      m.period_type === dbPt
   );
 
   // Find the most recent period
@@ -214,8 +233,9 @@ function prepareTableData(
   }
 
   // Filter data to the selected period type only
+  const dbPt = dbPeriodType(periodType);
   const filtered = metrics.filter((m) => {
-    if (m.period_type !== periodType) return false;
+    if (m.period_type !== dbPt) return false;
     if (shouldShowAll) return true;
     return metricNames.some(
       (name) => name.toLowerCase() === m.metric_name.toLowerCase()
@@ -266,7 +286,8 @@ function getLatestMetricValues(
   );
 
   if (periodType) {
-    filtered = filtered.filter((m) => m.period_type === periodType);
+    const dbPt = dbPeriodType(periodType);
+    filtered = filtered.filter((m) => m.period_type === dbPt);
   }
 
   filtered.sort(

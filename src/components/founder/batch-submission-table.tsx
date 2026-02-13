@@ -3,11 +3,21 @@
 import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import Link from "next/link";
-import { AlertTriangle, ArrowLeft, CheckCircle2, Info } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle2, Info, Star, TrendingDown } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import { getMetricDefinition, inferMetricValueType } from "@/lib/metric-definitions";
+import {
+  type RawMetric,
+  type ReportCard,
+  getSparklineValues,
+  getPreviousValue,
+  computeDelta,
+  detectAnomaly,
+  buildReportCard,
+  formatReportValue,
+} from "@/lib/metrics/batch-analytics";
 import {
   type Period,
   generateMonthlyPeriods,
@@ -175,29 +185,39 @@ type BatchRow = {
 };
 
 type BatchTableBodyProps = {
-  rows: BatchRow[];
+  requestedRows: BatchRow[];
+  otherRows: BatchRow[];
   periods: Period[];
   existingValues: Record<string, Record<string, string>>;
   cellErrors: Map<string, string>;
   updateCellValue: (metricName: string, periodKey: string, value: string) => void;
   updateNotes: (metricName: string, notes: string) => void;
   setDetailMetric: React.Dispatch<React.SetStateAction<string | null>>;
+  rawMetrics: RawMetric[];
+  periodType: string;
 };
 
 function BatchTableBody({
-  rows,
+  requestedRows,
+  otherRows,
   periods,
   existingValues,
   cellErrors,
   updateCellValue,
   updateNotes,
   setDetailMetric,
+  rawMetrics,
+  periodType,
 }: BatchTableBodyProps) {
   const parentRef = React.useRef<HTMLDivElement>(null);
-  const shouldVirtualize = rows.length > BATCH_VIRTUALIZE_THRESHOLD;
+  const allRows = React.useMemo(
+    () => [...requestedRows, ...otherRows],
+    [requestedRows, otherRows],
+  );
+  const shouldVirtualize = allRows.length > BATCH_VIRTUALIZE_THRESHOLD;
 
   const virtualizer = useVirtualizer({
-    count: rows.length,
+    count: allRows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => BATCH_ESTIMATED_ROW_HEIGHT,
     overscan: 10,
@@ -207,35 +227,47 @@ function BatchTableBody({
   // Column count: metric + periods + notes
   const colCount = 1 + periods.length + 1;
 
-  const renderRow = (row: BatchRow) => (
+  // Current period start for delta/anomaly lookups
+  const currentPeriodStart = periods[0]?.start ?? "";
+
+  const renderRow = (row: BatchRow, muted: boolean) => (
     <>
       <td className="sticky left-0 z-10 bg-bg-primary px-4 py-2">
-        <div className="flex items-start gap-1.5">
-          <button
-            type="button"
-            onClick={() => setDetailMetric(row.metricName)}
-            className="font-medium text-text-primary hover:text-text-primary hover:underline underline-offset-2 text-left"
-          >
-            {row.metricName}
-          </button>
-          <MetricInfoTooltip metricName={row.metricName} />
-        </div>
-        {row.investorNames.length > 0 && (
-          <div className="text-[10px] text-text-muted">
-            {row.investorNames.join(", ")}
+        <div className="flex items-start gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start gap-1.5">
+              <button
+                type="button"
+                onClick={() => setDetailMetric(row.metricName)}
+                className={`font-medium hover:underline underline-offset-2 text-left ${
+                  muted ? "text-text-secondary" : "text-text-primary"
+                }`}
+              >
+                {row.metricName}
+              </button>
+              <MetricInfoTooltip metricName={row.metricName} />
+            </div>
+            {row.investorNames.length > 0 && (
+              <div className="text-[10px] text-text-muted">
+                {row.investorNames.join(", ")}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </td>
-      {periods.map((p, periodIdx) => {
+      {periods.map((p) => {
         const existing = existingValues[row.metricName]?.[p.key];
         const hasExisting = !!existing;
         const cellKey = `${row.metricName}:${p.key}`;
         const cellError = cellErrors.get(cellKey);
-        // Find prior period value for reference
-        const priorPeriod = periods[periodIdx - 1];
-        const priorValue = priorPeriod
-          ? existingValues[row.metricName]?.[priorPeriod.key]
-          : undefined;
+        const userEnteredValue = row.values[p.key]?.trim() || "";
+        // Previous value from raw metrics history
+        const prevValue = getPreviousValue(
+          rawMetrics,
+          row.metricName,
+          periodType,
+          p.start,
+        );
         return (
           <td
             key={p.key}
@@ -262,9 +294,42 @@ function BatchTableBody({
                   {cellError}
                 </div>
               )}
-              {!hasExisting && !row.values[p.key] && priorValue && (
+              {/* Live delta indicator */}
+              {userEnteredValue && prevValue !== null && (() => {
+                const num = parseFloat(userEnteredValue);
+                if (isNaN(num)) return null;
+                if (prevValue === 0) return null;
+                const delta = computeDelta(num, prevValue);
+                if (delta.percent === null) return null;
+                return (
+                  <div className={`mt-0.5 text-center text-[10px] font-medium ${
+                    delta.direction === "up" ? "text-[var(--data-positive)]"
+                    : delta.direction === "down" ? "text-[var(--data-negative)]"
+                    : "text-text-muted"
+                  }`}>
+                    {delta.direction === "up" ? "\u2191" : delta.direction === "down" ? "\u2193" : "\u2192"}{" "}
+                    {Math.abs(delta.percent).toFixed(1)}% from prior
+                  </div>
+                );
+              })()}
+              {/* Anomaly warning */}
+              {userEnteredValue && (() => {
+                const num = parseFloat(userEnteredValue);
+                if (isNaN(num)) return null;
+                const historical = getSparklineValues(rawMetrics, row.metricName, periodType);
+                const anomaly = detectAnomaly(num, historical);
+                if (!anomaly.isAnomaly) return null;
+                return (
+                  <div className="mt-0.5 flex items-center justify-center gap-1 text-[10px] text-[var(--warning-accent)]">
+                    <AlertTriangle className="h-2.5 w-2.5" />
+                    {anomaly.message}
+                  </div>
+                );
+              })()}
+              {/* Prior value hint (only when no existing and no user value) */}
+              {!hasExisting && !userEnteredValue && prevValue !== null && (
                 <div className="mt-0.5 text-center text-[10px] text-text-faint">
-                  Prior: {formatPriorValue(row.metricName, priorValue)}
+                  Prior: {formatPriorValue(row.metricName, String(prevValue))}
                 </div>
               )}
             </div>
@@ -304,24 +369,49 @@ function BatchTableBody({
     </tr>
   );
 
+  // Section header row
+  const sectionHeader = (label: string, subtitle?: string) => (
+    <tr className="border-b border-border-subtle">
+      <td colSpan={colCount} className="px-4 py-2 bg-bg-primary">
+        <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
+          {label}
+        </span>
+        {subtitle && (
+          <span className="ml-2 text-xs text-text-faint">{subtitle}</span>
+        )}
+      </td>
+    </tr>
+  );
+
   if (!shouldVirtualize) {
     return (
       <div className="overflow-x-auto rounded-xl border border-border-default">
         <table className="w-full text-sm">
           <thead>{theadContent}</thead>
           <tbody>
-            {rows.map((row) => (
+            {requestedRows.length > 0 && otherRows.length > 0 && sectionHeader("Requested by investors")}
+            {requestedRows.map((row) => (
               <tr key={row.metricName} className="border-b border-border-subtle">
-                {renderRow(row)}
+                {renderRow(row, false)}
               </tr>
             ))}
+            {otherRows.length > 0 && (
+              <>
+                {sectionHeader("Other metrics", "Not requested, but you can submit them now")}
+                {otherRows.map((row) => (
+                  <tr key={row.metricName} className="border-b border-border-subtle">
+                    {renderRow(row, true)}
+                  </tr>
+                ))}
+              </>
+            )}
           </tbody>
         </table>
       </div>
     );
   }
 
-  // Virtualized rendering
+  // Virtualized rendering — flat list with section awareness
   const virtualItems = virtualizer.getVirtualItems();
 
   return (
@@ -344,7 +434,8 @@ function BatchTableBody({
             </tr>
           )}
           {virtualItems.map((virtualRow) => {
-            const row = rows[virtualRow.index];
+            const row = allRows[virtualRow.index];
+            const isOther = virtualRow.index >= requestedRows.length;
             return (
               <tr
                 key={virtualRow.key}
@@ -352,7 +443,7 @@ function BatchTableBody({
                 ref={virtualizer.measureElement}
                 className="border-b border-border-subtle"
               >
-                {renderRow(row)}
+                {renderRow(row, isOther)}
               </tr>
             );
           })}
@@ -375,6 +466,136 @@ function BatchTableBody({
   );
 }
 
+function ReportCardView({
+  card,
+  periodType,
+  periodStart,
+  onBack,
+}: {
+  card: ReportCard;
+  periodType: string;
+  periodStart: string;
+  onBack: () => void;
+}) {
+  // Build period label
+  let periodLabel = "";
+  if (periodStart) {
+    const d = new Date(periodStart);
+    if (periodType === "quarterly") {
+      const q = Math.floor(d.getUTCMonth() / 3) + 1;
+      periodLabel = `Q${q} '${String(d.getUTCFullYear()).slice(-2)}`;
+    } else if (periodType === "annual") {
+      periodLabel = String(d.getUTCFullYear());
+    } else {
+      periodLabel = d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+    }
+  }
+
+  const tearSheetPeriod = periodStart
+    ? periodType === "quarterly"
+      ? (() => {
+          const d = new Date(periodStart);
+          const q = Math.floor(d.getUTCMonth() / 3) + 1;
+          return `Q${q} ${d.getUTCFullYear()}`;
+        })()
+      : periodStart.slice(0, 4)
+    : "";
+
+  return (
+    <div className="rounded-xl border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] p-5">
+      <div className="flex items-start gap-3">
+        <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--status-success-text)]" />
+        <div className="flex-1 space-y-3">
+          <div>
+            <p className="text-sm font-medium text-[var(--status-success-text)]">
+              {card.totalSubmitted} metric{card.totalSubmitted !== 1 ? "s" : ""} submitted{periodLabel ? ` for ${periodLabel}` : ""}
+            </p>
+            <p className="mt-0.5 text-xs text-[var(--status-success-text)]/70">
+              Your investors will see these now.
+            </p>
+          </div>
+
+          {/* Metric rows */}
+          {card.items.length > 0 && (
+            <div className="space-y-1">
+              {card.items.map((item) => (
+                <div
+                  key={item.metricName}
+                  className="flex items-center justify-between gap-3 text-sm"
+                >
+                  <span className="text-[var(--status-success-text)]/80 truncate">
+                    {item.metricName}
+                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="font-mono text-[var(--status-success-text)]">
+                      {formatReportValue(item.metricName, item.newValue)}
+                    </span>
+                    {item.deltaPercent !== null && (
+                      <span
+                        className={`text-xs font-medium ${
+                          item.direction === "up"
+                            ? "text-[var(--data-positive)]"
+                            : item.direction === "down"
+                              ? "text-[var(--data-negative)]"
+                              : "text-text-muted"
+                        }`}
+                      >
+                        {item.direction === "up" ? "\u2191" : item.direction === "down" ? "\u2193" : "\u2192"}{" "}
+                        {Math.abs(item.deltaPercent).toFixed(1)}%
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Highlights */}
+          {(card.biggestGain || card.biggestDecline) && (
+            <div className="space-y-1 border-t border-[var(--success-border)] pt-2">
+              {card.biggestGain && (
+                <div className="flex items-center gap-1.5 text-xs text-[var(--data-positive)]">
+                  <Star className="h-3 w-3" />
+                  <span>
+                    Biggest gain: {card.biggestGain.metricName} (+{Math.abs(card.biggestGain.deltaPercent ?? 0).toFixed(1)}%)
+                  </span>
+                </div>
+              )}
+              {card.biggestDecline && (
+                <div className="flex items-center gap-1.5 text-xs text-[var(--data-negative)]">
+                  <TrendingDown className="h-3 w-3" />
+                  <span>
+                    Biggest decline: {card.biggestDecline.metricName} ({card.biggestDecline.deltaPercent?.toFixed(1)}%)
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onBack}
+              className="inline-flex h-8 items-center rounded-md bg-[var(--success-bg-muted)] px-3 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] transition-colors"
+            >
+              Back to requests
+            </button>
+            {tearSheetPeriod && (
+              <Link
+                href={`/portal/tear-sheets/new?period=${encodeURIComponent(tearSheetPeriod)}`}
+                className="inline-flex h-8 items-center rounded-md border border-[var(--success-border)] px-3 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-subtle)] transition-colors"
+              >
+                Create Tear Sheet &rarr;
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function BatchSubmissionTable({
   initialCompanyId,
   prefilterPeriod,
@@ -392,6 +613,7 @@ export function BatchSubmissionTable({
   const [existingValues, setExistingValues] = React.useState<
     Record<string, Record<string, string>>
   >({});
+  const [rawMetrics, setRawMetrics] = React.useState<RawMetric[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   // User-entered data — persists across period type changes
@@ -406,7 +628,7 @@ export function BatchSubmissionTable({
   );
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [success, setSuccess] = React.useState<string | null>(null);
+  const [reportCard, setReportCard] = React.useState<ReportCard | null>(null);
   const [confirmModal, setConfirmModal] = React.useState(false);
   const [detailMetric, setDetailMetric] = React.useState<string | null>(null);
   const [pendingSubmissions, setPendingSubmissions] = React.useState<
@@ -420,9 +642,37 @@ export function BatchSubmissionTable({
     }>
   >([]);
 
-  // Generate periods based on type — reversed to chronological (oldest left)
+  // When a prefilterPeriod is set (founder clicked "Submit" on a specific
+  // request group), only show the single requested period — no extras.
   const periods = React.useMemo(() => {
-    const requestedStart = prefilterPeriod?.periodStart ?? null;
+    if (prefilterPeriod) {
+      const { periodStart, periodEnd } = prefilterPeriod;
+      const date = new Date(periodStart);
+      let label: string;
+      if (periodType === "quarterly") {
+        const q = Math.floor(date.getUTCMonth() / 3) + 1;
+        label = `Q${q} '${String(date.getUTCFullYear()).slice(-2)}`;
+      } else if (periodType === "annual") {
+        label = String(date.getUTCFullYear());
+      } else {
+        label = date.toLocaleDateString("en-US", {
+          month: "short",
+          year: "2-digit",
+        });
+      }
+      return [
+        {
+          key: periodStart,
+          start: periodStart,
+          end: periodEnd,
+          label,
+          isRequested: true,
+        },
+      ] as Period[];
+    }
+
+    // Fallback: no prefilter (shouldn't happen in normal flow, but safe)
+    const requestedStart = null;
     let generated: Period[];
     if (periodType === "quarterly") {
       generated = generateQuarterlyPeriods(requestedStart, 4);
@@ -456,9 +706,13 @@ export function BatchSubmissionTable({
         const requests: GroupedRequest[] = reqJson.requests ?? [];
         const existingMetrics: Array<{
           metric_name: string;
+          period_type: string;
           period_start: string;
           value: { raw?: string } | string | number;
         }> = metricJson.metrics ?? [];
+
+        // Store raw metrics for sparklines/anomalies
+        setRawMetrics(existingMetrics as RawMetric[]);
 
         // Build existing values map: metricName -> periodKey -> value
         const existing: Record<string, Record<string, string>> = {};
@@ -487,7 +741,18 @@ export function BatchSubmissionTable({
   }, []);
 
   // Derive display rows from raw data + current periods + user edits
-  const rows = React.useMemo(() => {
+  const { requestedRows, otherRows } = React.useMemo(() => {
+    // When a specific period is prefiltered, only show metrics requested for
+    // that exact period — not metrics from other periods.
+    const filteredRequests = prefilterPeriod
+      ? rawRequests.filter(
+          (r) =>
+            r.periodType === prefilterPeriod.periodType &&
+            r.periodStart === prefilterPeriod.periodStart &&
+            r.periodEnd === prefilterPeriod.periodEnd,
+        )
+      : rawRequests;
+
     const rowMap = new Map<
       string,
       {
@@ -498,7 +763,7 @@ export function BatchSubmissionTable({
       }
     >();
 
-    for (const req of rawRequests) {
+    for (const req of filteredRequests) {
       if (!rowMap.has(req.metricName)) {
         rowMap.set(req.metricName, {
           metricName: req.metricName,
@@ -523,10 +788,14 @@ export function BatchSubmissionTable({
       }
     }
 
-    return Array.from(rowMap.values()).map((row) => {
+    const toBatchRow = (row: {
+      metricName: string;
+      investorNames: string[];
+      investorCount: number;
+      requestIds: string[];
+    }): BatchRow => {
       const values: Record<string, string> = {};
       for (const p of periods) {
-        // User-entered value takes priority, then existing DB value, then empty
         values[p.key] =
           userValues[row.metricName]?.[p.key] ??
           existingValues[row.metricName]?.[p.key] ??
@@ -537,16 +806,45 @@ export function BatchSubmissionTable({
         values,
         notes: userNotes[`${periodType}:${row.metricName}`] ?? "",
       };
-    });
-  }, [rawRequests, periods, periodType, userValues, userNotes, existingValues]);
+    };
 
-  // Auto-dismiss success
-  React.useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 4000);
-      return () => clearTimeout(timer);
+    const requested = Array.from(rowMap.values()).map(toBatchRow);
+
+    // Collect "other" metrics: all metric names the company has submitted
+    // that aren't in the requested set
+    const requestedNames = new Set(
+      Array.from(rowMap.keys()).map((n) => n.toLowerCase()),
+    );
+
+    const otherMetricNames = new Set<string>();
+    for (const m of rawMetrics) {
+      if (
+        m.period_type === periodType &&
+        !requestedNames.has(m.metric_name.toLowerCase())
+      ) {
+        otherMetricNames.add(m.metric_name);
+      }
     }
-  }, [success]);
+
+    const others: BatchRow[] = Array.from(otherMetricNames)
+      .sort((a, b) => a.localeCompare(b))
+      .map((name) =>
+        toBatchRow({
+          metricName: name,
+          investorNames: [],
+          investorCount: 0,
+          requestIds: [],
+        }),
+      );
+
+    return { requestedRows: requested, otherRows: others };
+  }, [rawRequests, prefilterPeriod, periods, periodType, userValues, userNotes, existingValues, rawMetrics]);
+
+  // Combined rows for submission logic
+  const allRows = React.useMemo(
+    () => [...requestedRows, ...otherRows],
+    [requestedRows, otherRows],
+  );
 
   const validateCell = React.useCallback((cellKey: string, value: string) => {
     setCellErrors((prev) => {
@@ -594,7 +892,7 @@ export function BatchSubmissionTable({
       notes?: string;
     }> = [];
 
-    for (const row of rows) {
+    for (const row of allRows) {
       for (const period of periods) {
         const val = row.values[period.key]?.trim();
         if (!val) continue;
@@ -613,11 +911,7 @@ export function BatchSubmissionTable({
       }
     }
 
-    if (submissions.length === 0) {
-      setError("No new or changed values to submit.");
-      return;
-    }
-
+    // Allow empty submissions — founder is marking the period as complete
     setPendingSubmissions(submissions);
     setConfirmModal(true);
   }
@@ -627,16 +921,12 @@ export function BatchSubmissionTable({
     setConfirmModal(false);
     setSubmitting(true);
     setError(null);
-    setSuccess(null);
+    setReportCard(null);
 
     const submissions = pendingSubmissions;
 
-    // Collect all request IDs for submitted metrics so the API can
-    // directly mark them as fulfilled (no fragile date matching needed)
-    const submittedNames = new Set(submissions.map((s) => s.metricName));
-    const fulfillRequestIds = rows
-      .filter((r) => submittedNames.has(r.metricName))
-      .flatMap((r) => r.requestIds);
+    // Only fulfill request IDs from requested rows (other rows have none)
+    const fulfillRequestIds = requestedRows.flatMap((r) => r.requestIds);
 
     try {
       const res = await fetch("/api/metrics/submit-batch", {
@@ -647,9 +937,20 @@ export function BatchSubmissionTable({
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Submission failed.");
 
-      // Remove submitted metric rows from the table
+      // Build report card before clearing state
+      const currentPeriodStart = periods[0]?.start ?? "";
+      const card = buildReportCard(
+        submissions.map((s) => ({ metricName: s.metricName, value: s.value })),
+        rawMetrics,
+        periodType,
+        currentPeriodStart,
+      );
+      setReportCard(card);
+
+      // Remove requested rows for this period — the period is complete
+      const requestedNames = new Set(requestedRows.map((r) => r.metricName));
       const remaining = rawRequests.filter(
-        (r) => !submittedNames.has(r.metricName),
+        (r) => !requestedNames.has(r.metricName),
       );
       setRawRequests(remaining);
 
@@ -661,25 +962,13 @@ export function BatchSubmissionTable({
       }
       setExistingValues(updated);
 
-      // Clear user-entered data for submitted metrics
+      // Clear user-entered data for all submitted metrics
+      const allNames = new Set(allRows.map((r) => r.metricName));
       setUserValues((prev) => {
         const next = { ...prev };
-        for (const name of submittedNames) delete next[name];
+        for (const name of allNames) delete next[name];
         return next;
       });
-
-      const submittedCount = json.submitted ?? submissions.length;
-      const failedCount = json.failed ?? 0;
-
-      if (remaining.length === 0) {
-        setSuccess(
-          `all_done:${submittedCount}:${periodType}`,
-        );
-      } else {
-        setSuccess(
-          `partial:${submittedCount}:${failedCount}:${remaining.length}`,
-        );
-      }
     } catch (e: unknown) {
       const message =
         e instanceof Error ? e.message : "Something went wrong.";
@@ -705,17 +994,19 @@ export function BatchSubmissionTable({
           Back to requests
         </button>
 
-        {/* Period type toggle */}
-        <SlidingTabs
-          tabs={PERIOD_TYPE_TABS}
-          value={periodType}
-          onChange={setPeriodType}
-          size="sm"
-          showIcons={false}
-        />
+        {/* Only show period type toggle when there's no prefilter (no specific request) */}
+        {!prefilterPeriod && (
+          <SlidingTabs
+            tabs={PERIOD_TYPE_TABS}
+            value={periodType}
+            onChange={setPeriodType}
+            size="sm"
+            showIcons={false}
+          />
+        )}
       </div>
 
-      {rows.length === 0 ? (
+      {allRows.length === 0 && !reportCard ? (
         <div className="rounded-xl border border-border-default card-surface p-6 text-center">
           <p className="text-text-tertiary">No metrics requested yet.</p>
           <p className="mt-1 text-sm text-text-muted">
@@ -728,6 +1019,13 @@ export function BatchSubmissionTable({
             Import historical metrics instead
           </Link>
         </div>
+      ) : reportCard ? (
+        <ReportCardView
+          card={reportCard}
+          periodType={periodType}
+          periodStart={pendingSubmissions[0]?.periodStart ?? ""}
+          onBack={onBack}
+        />
       ) : (
         <>
         {cellErrors.size > 0 && (
@@ -737,13 +1035,16 @@ export function BatchSubmissionTable({
           </div>
         )}
         <BatchTableBody
-          rows={rows}
+          requestedRows={requestedRows}
+          otherRows={otherRows}
           periods={periods}
           existingValues={existingValues}
           cellErrors={cellErrors}
           updateCellValue={updateCellValue}
           updateNotes={updateNotes}
           setDetailMetric={setDetailMetric}
+          rawMetrics={rawMetrics}
+          periodType={periodType}
         />
         </>
       )}
@@ -754,57 +1055,7 @@ export function BatchSubmissionTable({
         </div>
       )}
 
-      {success && (() => {
-        const parts = success.split(":");
-        const isAllDone = parts[0] === "all_done";
-        const count = parseInt(parts[1], 10) || 0;
-        const failedCount = isAllDone ? 0 : parseInt(parts[2], 10) || 0;
-        const remainingCount = isAllDone ? 0 : parseInt(parts[3], 10) || 0;
-
-        return (
-          <div className="rounded-xl border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] p-4">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--status-success-text)]" />
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium text-[var(--status-success-text)]">
-                  {count} metric{count !== 1 ? "s" : ""} submitted for {periodType === "quarterly" ? "this quarter" : "this period"}
-                </p>
-                <p className="text-xs text-[var(--status-success-text)]/70">
-                  Your investors will see these immediately.
-                </p>
-                {failedCount > 0 && (
-                  <p className="text-xs text-[var(--status-warning-text)]">
-                    {failedCount} value{failedCount !== 1 ? "s" : ""} failed to submit.
-                  </p>
-                )}
-                {isAllDone ? (
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={onBack}
-                      className="inline-flex h-8 items-center rounded-md bg-[var(--success-bg-muted)] px-3 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] transition-colors"
-                    >
-                      Back to requests
-                    </button>
-                    <Link
-                      href={`/portal/tear-sheets/new?period=${encodeURIComponent(periodType === "quarterly" ? (() => { const ps = pendingSubmissions[0]?.periodStart; if (!ps) return ""; const d = new Date(ps); const q = Math.floor(d.getUTCMonth() / 3) + 1; return `Q${q} ${d.getUTCFullYear()}`; })() : pendingSubmissions[0]?.periodStart?.slice(0, 4) ?? "")}`}
-                      className="inline-flex h-8 items-center rounded-md border border-[var(--success-border)] px-3 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-subtle)] transition-colors"
-                    >
-                      Create Tear Sheet &rarr;
-                    </Link>
-                  </div>
-                ) : remainingCount > 0 ? (
-                  <p className="text-xs text-text-muted">
-                    You still have {remainingCount} pending metric{remainingCount !== 1 ? "s" : ""} to submit.
-                  </p>
-                ) : null}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {rows.length > 0 && (
+      {allRows.length > 0 && !reportCard && (
         <div className="flex justify-end">
           <button
             type="button"
@@ -835,7 +1086,11 @@ export function BatchSubmissionTable({
       <ConfirmModal
         open={confirmModal}
         title="Confirm Submission"
-        message={`Submit ${pendingSubmissions.length} metric value${pendingSubmissions.length !== 1 ? "s" : ""}? These will be visible to approved investors.`}
+        message={
+          pendingSubmissions.length > 0
+            ? `Submit ${pendingSubmissions.length} metric value${pendingSubmissions.length !== 1 ? "s" : ""} and mark all requests as complete? Values will be visible to approved investors.`
+            : "Mark all requests as complete with no values submitted? You can submit values later."
+        }
         confirmLabel="Submit"
         cancelLabel="Cancel"
         variant="default"

@@ -352,11 +352,6 @@ function MetricsTabContent({
               <Settings className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Edit Dashboard</span>
             </Link>
-            <ExportButton
-              companyId={companyId}
-              companyName={companyName}
-              periodType={periodType}
-            />
           </div>
         )}
       </div>
@@ -386,6 +381,11 @@ function MetricsTabContent({
                 companyId={companyId}
                 onMetricClick={(name, period) =>
                   setDetailSelection({ metricName: name, periodStart: period })
+                }
+                headerActions={
+                  widget.type === "table" && !readOnly ? (
+                    <ExportButton companyId={companyId} companyName={companyName} periodType={periodType} />
+                  ) : undefined
                 }
               />
             </div>

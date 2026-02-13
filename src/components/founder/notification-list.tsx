@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Inbox, CheckCircle2, Info } from "lucide-react";
+import { Inbox, CheckCircle2, Info, ChevronRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatPeriod } from "@/components/charts/types";
 import { getMetricDefinition, inferMetricValueType } from "@/lib/metric-definitions";
@@ -19,6 +19,7 @@ type GroupedRequest = {
   requestIds: string[];
   hasSubmission: boolean;
   submittedValue?: unknown;
+  submittedNotes?: string | null;
 };
 
 type PeriodGroup = {
@@ -166,6 +167,146 @@ function LoadingSkeleton() {
   );
 }
 
+function CompletedSubmissions({ requests }: { requests: GroupedRequest[] }) {
+  const [expanded, setExpanded] = React.useState<Set<string>>(new Set());
+
+  function toggle(key: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  const groups = React.useMemo(() => {
+    const map = new Map<string, PeriodGroup>();
+    for (const req of requests) {
+      const key = `${req.periodType}-${req.periodStart}-${req.periodEnd}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          label: formatPeriodLabel(req.periodType, req.periodStart),
+          periodType: req.periodType,
+          periodStart: req.periodStart,
+          periodEnd: req.periodEnd,
+          dueDate: req.dueDate,
+          metrics: [],
+          investorNames: [],
+        });
+      }
+      const group = map.get(key)!;
+      group.metrics.push(req);
+      for (const name of req.investorNames ?? []) {
+        if (!group.investorNames.includes(name)) {
+          group.investorNames.push(name);
+        }
+      }
+    }
+    return Array.from(map.values()).sort(
+      (a, b) =>
+        new Date(b.periodStart).getTime() - new Date(a.periodStart).getTime(),
+    );
+  }, [requests]);
+
+  return (
+    <div className="space-y-3">
+      {groups.map((group) => {
+        const key = `${group.periodType}-${group.periodStart}`;
+        const isExpanded = expanded.has(key);
+
+        return (
+          <div
+            key={key}
+            className="rounded-xl border border-border-default card-surface"
+          >
+            <button
+              type="button"
+              onClick={() => toggle(key)}
+              className="flex w-full items-start justify-between gap-4 p-4 text-left transition-colors hover:bg-bg-elevated/50"
+              aria-expanded={isExpanded}
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-medium text-text-secondary">
+                    {group.label}
+                  </span>
+                  <span className="rounded-full bg-[var(--success-bg-muted)] px-2 py-0.5 text-xs font-medium text-[var(--status-success-text)]">
+                    Submitted
+                  </span>
+                </div>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {group.metrics.map((m) => {
+                    const formatted = formatSubmittedValue(m.metricName, m.submittedValue);
+                    return (
+                      <span
+                        key={m.metricName}
+                        className="inline-flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-tertiary"
+                      >
+                        {m.metricName}
+                        {formatted && (
+                          <span className="font-mono text-text-secondary">{formatted}</span>
+                        )}
+                      </span>
+                    );
+                  })}
+                </div>
+                <div className="mt-2 text-xs text-text-muted">
+                  {group.metrics.length} metric
+                  {group.metrics.length !== 1 ? "s" : ""} &middot;{" "}
+                  Requested by{" "}
+                  {group.investorNames.length > 0
+                    ? group.investorNames.join(", ")
+                    : "investor"}
+                </div>
+              </div>
+              <ChevronRight
+                className={`mt-0.5 h-4 w-4 shrink-0 text-text-tertiary transition-transform duration-200 ${
+                  isExpanded ? "rotate-90" : ""
+                }`}
+              />
+            </button>
+
+            {isExpanded && (
+              <div className="border-t border-border-default px-4 pb-4 pt-3">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="text-xs text-text-muted">
+                      <th className="pb-2 font-medium">Metric</th>
+                      <th className="pb-2 font-medium">Value</th>
+                      <th className="pb-2 font-medium">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-default">
+                    {group.metrics.map((m) => {
+                      const formatted = formatSubmittedValue(m.metricName, m.submittedValue);
+                      return (
+                        <tr key={m.metricName}>
+                          <td className="py-2 pr-4">
+                            <span className="inline-flex items-center gap-1 text-text-secondary">
+                              {m.metricName}
+                              <MetricInfoBadge metricName={m.metricName} />
+                            </span>
+                          </td>
+                          <td className="py-2 pr-4 font-mono text-text-primary">
+                            {formatted ?? "—"}
+                          </td>
+                          <td className="py-2 text-text-tertiary">
+                            {m.submittedNotes || "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function NotificationList({
   mode = "pending",
   onCompanyId,
@@ -190,9 +331,19 @@ export function NotificationList({
         const reqs: GroupedRequest[] = json.requests ?? [];
         setRequests(reqs);
         if (onCountsRef.current) {
-          const pending = reqs.filter((r) => !r.hasSubmission).length;
-          const completed = reqs.filter((r) => r.hasSubmission).length;
-          onCountsRef.current({ pending, completed });
+          // Count unique period groups (not individual metrics) — each period
+          // group is one "request" the founder needs to action.
+          const pendingKeys = new Set<string>();
+          const completedKeys = new Set<string>();
+          for (const r of reqs) {
+            const key = `${r.periodType}-${r.periodStart}-${r.periodEnd}`;
+            if (r.hasSubmission) {
+              completedKeys.add(key);
+            } else {
+              pendingKeys.add(key);
+            }
+          }
+          onCountsRef.current({ pending: pendingKeys.size, completed: completedKeys.size });
         }
       } catch (e: unknown) {
         const message =
@@ -298,83 +449,7 @@ export function NotificationList({
   }
 
   if (mode === "completed") {
-    // Group completed requests by period (same grouping logic as pending)
-    const completedGroups = new Map<string, PeriodGroup>();
-    for (const req of submittedRequests) {
-      const key = `${req.periodType}-${req.periodStart}-${req.periodEnd}`;
-      if (!completedGroups.has(key)) {
-        completedGroups.set(key, {
-          label: formatPeriodLabel(req.periodType, req.periodStart),
-          periodType: req.periodType,
-          periodStart: req.periodStart,
-          periodEnd: req.periodEnd,
-          dueDate: req.dueDate,
-          metrics: [],
-          investorNames: [],
-        });
-      }
-      const group = completedGroups.get(key)!;
-      group.metrics.push(req);
-      for (const name of req.investorNames ?? []) {
-        if (!group.investorNames.includes(name)) {
-          group.investorNames.push(name);
-        }
-      }
-    }
-
-    const sortedCompleted = Array.from(completedGroups.values()).sort(
-      (a, b) =>
-        new Date(b.periodStart).getTime() - new Date(a.periodStart).getTime(),
-    );
-
-    return (
-      <div className="space-y-3">
-        {sortedCompleted.map((group) => (
-          <div
-            key={`${group.periodType}-${group.periodStart}`}
-            className="rounded-xl border border-border-default card-surface p-4"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-medium text-text-secondary">
-                    {group.label}
-                  </span>
-                  <span className="rounded-full bg-[var(--success-bg-muted)] px-2 py-0.5 text-xs font-medium text-[var(--status-success-text)]">
-                    Submitted
-                  </span>
-                </div>
-                <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {group.metrics.map((m) => {
-                    const formatted = formatSubmittedValue(m.metricName, m.submittedValue);
-                    return (
-                      <span
-                        key={m.metricName}
-                        className="inline-flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-tertiary"
-                      >
-                        {m.metricName}
-                        {formatted && (
-                          <span className="font-mono text-text-secondary">{formatted}</span>
-                        )}
-                        <MetricInfoBadge metricName={m.metricName} />
-                      </span>
-                    );
-                  })}
-                </div>
-                <div className="mt-2 text-xs text-text-muted">
-                  {group.metrics.length} metric
-                  {group.metrics.length !== 1 ? "s" : ""} &middot;{" "}
-                  Requested by{" "}
-                  {group.investorNames.length > 0
-                    ? group.investorNames.join(", ")
-                    : "investor"}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <CompletedSubmissions requests={submittedRequests} />;
   }
 
   return (

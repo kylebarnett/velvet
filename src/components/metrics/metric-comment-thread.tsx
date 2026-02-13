@@ -15,6 +15,8 @@ type Comment = {
 type MetricCommentThreadProps = {
   companyId: string;
   metricName: string;
+  periodStart?: string;
+  periodEnd?: string;
 };
 
 function formatRelativeTime(dateString: string): string {
@@ -31,7 +33,7 @@ function formatRelativeTime(dateString: string): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-export function MetricCommentThread({ companyId, metricName }: MetricCommentThreadProps) {
+export function MetricCommentThread({ companyId, metricName, periodStart, periodEnd }: MetricCommentThreadProps) {
   const [comments, setComments] = React.useState<Comment[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [newComment, setNewComment] = React.useState("");
@@ -42,9 +44,11 @@ export function MetricCommentThread({ companyId, metricName }: MetricCommentThre
   React.useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(
-          `/api/metrics/comments?company_id=${companyId}&metric_name=${encodeURIComponent(metricName)}`
-        );
+        let commentsUrl = `/api/metrics/comments?company_id=${companyId}&metric_name=${encodeURIComponent(metricName)}`;
+        if (periodStart && periodEnd) {
+          commentsUrl += `&period_start=${encodeURIComponent(periodStart)}&period_end=${encodeURIComponent(periodEnd)}`;
+        }
+        const res = await fetch(commentsUrl);
         if (!res.ok) throw new Error("Failed to load comments.");
         const json = await res.json();
         setComments(json.comments ?? []);
@@ -55,7 +59,7 @@ export function MetricCommentThread({ companyId, metricName }: MetricCommentThre
       }
     }
     load();
-  }, [companyId, metricName]);
+  }, [companyId, metricName, periodStart, periodEnd]);
 
   React.useEffect(() => {
     if (scrollRef.current) {
@@ -77,14 +81,18 @@ export function MetricCommentThread({ companyId, metricName }: MetricCommentThre
           company_id: companyId,
           metric_name: metricName,
           content: newComment.trim(),
+          period_start: periodStart ?? null,
+          period_end: periodEnd ?? null,
         }),
       });
       if (!res.ok) throw new Error("Failed to post comment.");
 
       // Reload comments
-      const loadRes = await fetch(
-        `/api/metrics/comments?company_id=${companyId}&metric_name=${encodeURIComponent(metricName)}`
-      );
+      let reloadUrl = `/api/metrics/comments?company_id=${companyId}&metric_name=${encodeURIComponent(metricName)}`;
+      if (periodStart && periodEnd) {
+        reloadUrl += `&period_start=${encodeURIComponent(periodStart)}&period_end=${encodeURIComponent(periodEnd)}`;
+      }
+      const loadRes = await fetch(reloadUrl);
       if (loadRes.ok) {
         const json = await loadRes.json();
         setComments(json.comments ?? []);

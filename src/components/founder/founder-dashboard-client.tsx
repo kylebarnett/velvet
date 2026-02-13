@@ -14,14 +14,13 @@ import {
   DashboardLayout,
 } from "@/components/dashboard";
 import { DateRange } from "@/components/dashboard/date-range-selector";
-import { Download, Settings, Mail, BarChart3, Clock, FileUp, TrendingDown, TrendingUp, Fuel, ChevronDown, FileSpreadsheet, FileText, FileDown, X } from "lucide-react";
+import { Download, Settings, Mail, BarChart3, Clock, FileUp, TrendingDown, TrendingUp, Fuel, ChevronDown, FileSpreadsheet, FileDown, X } from "lucide-react";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 import { EmailPasteModal } from "@/components/founder/email-paste-modal";
 import { AddMetricModal } from "@/components/founder/add-metric-modal";
 import { computeRunway, type RunwayMissing } from "@/lib/metrics/derived-metrics";
 import { downloadExcel } from "@/lib/utils/excel-export";
-import { exportToPdf } from "@/lib/utils/pdf-export";
 import { logger } from "@/lib/logger";
 
 type DashboardView = {
@@ -392,7 +391,7 @@ function EmptyMetricsState({
   );
 }
 
-function ExportDropdown({ isExporting, onExport }: { isExporting: boolean; onExport: (format: "csv" | "excel" | "pdf") => void }) {
+function ExportDropdown({ isExporting, onExport }: { isExporting: boolean; onExport: (format: "csv" | "excel") => void }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
 
@@ -415,7 +414,6 @@ function ExportDropdown({ isExporting, onExport }: { isExporting: boolean; onExp
   const options = [
     { format: "csv" as const, label: "CSV", icon: FileDown },
     { format: "excel" as const, label: "Excel (.xlsx)", icon: FileSpreadsheet },
-    { format: "pdf" as const, label: "PDF Snapshot", icon: FileText },
   ];
 
   return (
@@ -798,22 +796,9 @@ export function FounderDashboardClient({
     }
   }
 
-  const dashboardRef = React.useRef<HTMLDivElement>(null);
-
-  async function handleExport(format: "csv" | "excel" | "pdf" = "csv") {
+  async function handleExport(format: "csv" | "excel" = "csv") {
     setIsExporting(true);
     try {
-      if (format === "pdf") {
-        if (dashboardRef.current) {
-          await exportToPdf({
-            element: dashboardRef.current,
-            filename: `${companyName.replace(/[^a-z0-9]/gi, "_")}_dashboard`,
-            title: `${companyName} — Dashboard`,
-          });
-        }
-        return;
-      }
-
       if (format === "excel") {
         // Build Excel from metrics data
         const metricNames = [...new Set(metrics.map((m) => m.metric_name))].sort();
@@ -888,6 +873,33 @@ export function FounderDashboardClient({
     widgets = getDefaultLayout(companyIndustry, templates, availableMetricNames);
   }
 
+  // Inline cell edit handler — posts to the single-metric submit API
+  const handleValueSubmit = React.useCallback(
+    async (metricName: string, periodStart: string, periodEnd: string, periodType: string, value: string): Promise<boolean> => {
+      try {
+        const res = await fetch("/api/metrics/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            companyId,
+            metricName,
+            periodType,
+            periodStart,
+            periodEnd,
+            value,
+            source: "override",
+          }),
+        });
+        if (!res.ok) return false;
+        router.refresh();
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [companyId, router],
+  );
+
   const filteredMetrics = filterMetricsByDateRange(metrics, dateRange);
   const hasMetrics = metrics.length > 0;
 
@@ -909,12 +921,14 @@ export function FounderDashboardClient({
   }
 
   return (
-    <div className="space-y-4" ref={dashboardRef}>
+    <div className="space-y-4">
       {/* Runway indicator */}
-      <RunwayCard metrics={metrics} companyId={companyId} onSubmitted={() => router.refresh()} />
+      <div data-no-print>
+        <RunwayCard metrics={metrics} companyId={companyId} onSubmitted={() => router.refresh()} />
+      </div>
 
       {/* Controls bar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
+      <div data-no-print className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <ViewSelector
             views={views.map((v) => ({
@@ -938,7 +952,6 @@ export function FounderDashboardClient({
             <Mail className="h-3 w-3" />
             Import from Email
           </button>
-          <ExportDropdown isExporting={isExporting} onExport={handleExport} />
           <Link
             href="/portal/dashboard/edit"
             className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
@@ -977,6 +990,13 @@ export function FounderDashboardClient({
                 }
                 companyId={companyId}
                 onAddMetric={() => setShowAddMetricModal(true)}
+                editable
+                onValueSubmit={handleValueSubmit}
+                headerActions={
+                  widget.type === "table" ? (
+                    <ExportDropdown isExporting={isExporting} onExport={handleExport} />
+                  ) : undefined
+                }
               />
             </div>
           );

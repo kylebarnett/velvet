@@ -13,6 +13,8 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const companyId = url.searchParams.get("company_id");
   const metricName = url.searchParams.get("metric_name");
+  const periodStart = url.searchParams.get("period_start");
+  const periodEnd = url.searchParams.get("period_end");
 
   if (!companyId || !metricName) {
     return jsonError("company_id and metric_name are required.", 400);
@@ -20,11 +22,18 @@ export async function GET(req: NextRequest) {
 
   const { limit, offset } = parsePagination(url);
 
-  const { data: comments, error } = await supabase
+  let query = supabase
     .from("metric_comments")
     .select("id, company_id, metric_name, period_start, period_end, user_id, user_role, content, created_at")
     .eq("company_id", companyId)
-    .eq("metric_name", metricName)
+    .eq("metric_name", metricName);
+
+  // Filter to period-specific comments when period is provided
+  if (periodStart && periodEnd) {
+    query = query.eq("period_start", periodStart).eq("period_end", periodEnd);
+  }
+
+  const { data: comments, error } = await query
     .order("created_at", { ascending: true })
     .range(offset, offset + limit - 1);
 
