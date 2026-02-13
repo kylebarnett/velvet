@@ -5,7 +5,7 @@ const PROTECTED_PATHS = [
   "/dashboard",
   "/portfolio",
   "/reports",
-  "/campaigns",
+  "/metric-requests",
   "/documents",
   "/team",
   "/portal",
@@ -47,6 +47,11 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
+
+  // Redirect /reports/new to /reports (template picker is now inline)
+  if (pathname === "/reports/new") {
+    return NextResponse.redirect(new URL("/reports", request.url));
+  }
 
   // Redirect unauthenticated users away from protected routes
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));

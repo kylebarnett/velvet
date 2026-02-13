@@ -1,7 +1,7 @@
 export { MetricDrilldownPanel, type CompanyMetricBreakdown } from "./metric-drilldown-panel";
 export { ReportGallery } from "./report-gallery";
 export { ReportCard } from "./report-card";
-export { TemplatePicker } from "./template-picker";
+export { ReportsPageClient } from "./reports-page-client";
 export { ReportEditor } from "./report-editor";
 export { ReportToolbar } from "./report-toolbar";
 export { ReportFilterBar } from "./report-filter-bar";

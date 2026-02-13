@@ -20,7 +20,7 @@ export function InvestorLayoutClient({
   isOnboardingComplete,
 }: InvestorLayoutClientProps) {
   const pathname = usePathname();
-  const hideChatbot = pathname.startsWith("/funds");
+  const hideChatbot = pathname.startsWith("/funds") || pathname.startsWith("/reports");
 
   return (
     <MetricDefinitionsProvider>

@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ReportGallery } from "@/components/reports/report-gallery";
+import { ReportsPageClient } from "@/components/reports/reports-page-client";
 import type { SavedReport } from "@/components/reports/reports-context";
 
 export const dynamic = "force-dynamic";
@@ -29,5 +29,5 @@ export default async function ReportsPage() {
     updated_at: r.updated_at,
   }));
 
-  return <ReportGallery initialReports={reports} />;
+  return <ReportsPageClient initialReports={reports} />;
 }
