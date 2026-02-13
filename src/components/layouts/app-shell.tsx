@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   Inbox,
   Shield,
+  ShieldCheck,
   Sparkles,
   Landmark,
   Upload,
@@ -73,6 +74,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   "layout-dashboard": LayoutDashboard,
   inbox: Inbox,
   shield: Shield,
+  "shield-check": ShieldCheck,
   landmark: Landmark,
   sparkles: Sparkles,
   upload: Upload,
@@ -159,11 +161,13 @@ export function AppShell({
   const [expandedSections, setExpandedSections] = React.useState<Set<string>>(new Set());
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+  const [settingsPanelOpen, setSettingsPanelOpen] = React.useState(false);
   const pathname = usePathname();
 
-  // Close mobile menu on route change
+  // Close mobile menu and settings panel on route change
   React.useEffect(() => {
     setMobileMenuOpen(false);
+    setSettingsPanelOpen(false);
   }, [pathname]);
 
   // Prevent body scroll when mobile menu is open
@@ -258,7 +262,7 @@ export function AppShell({
             <span className="text-[15px] font-semibold tracking-tight">Velvet</span>
           </Link>
           <button
-            onClick={() => setSidebarCollapsed(true)}
+            onClick={() => { setSidebarCollapsed(true); setSettingsPanelOpen(false); }}
             className="hidden md:inline-flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-secondary transition-colors"
             type="button"
             aria-label="Collapse sidebar"
@@ -289,37 +293,101 @@ export function AppShell({
   );
 
   /* ---------------------------------------------------------------- */
-  /*  User profile footer                                              */
+  /*  User settings panel                                              */
   /* ---------------------------------------------------------------- */
 
-  const profileFooter = user ? (
-    <div className="border-t border-border-subtle p-3">
-      {sidebarCollapsed ? (
-        <div className="flex flex-col items-center gap-2">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-hover text-xs font-medium" title={user.fullName || user.email}>
-            {getInitials(user.fullName, user.email)}
-          </span>
-          <button
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
-            onClick={onLogout}
-            type="button"
-            aria-label="Log out"
-            title="Log out"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
+  const teamHref = role === "founder" ? "/portal/team" : "/team";
+  const teamActive = pathname === teamHref || pathname?.startsWith(teamHref + "/");
+
+  const settingsPanel = (mobile = false) => {
+    if (sidebarCollapsed && !mobile) {
+      // Collapsed desktop: avatar only — click to expand + open panel
+      return (
+        <div className="border-t border-border-subtle p-3">
+          <div className="flex flex-col items-center">
+            <SidebarTooltip label={user?.fullName || user?.email || "Settings"}>
+              <button
+                type="button"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-hover text-xs font-medium hover:ring-2 hover:ring-border-default transition-shadow"
+                onClick={() => { setSidebarCollapsed(false); setSettingsPanelOpen(true); }}
+                aria-label="Open settings"
+              >
+                {user ? getInitials(user.fullName, user.email) : (
+                  <LogOut className="h-4 w-4 text-text-muted" />
+                )}
+              </button>
+            </SidebarTooltip>
+          </div>
         </div>
-      ) : (
-        <div className="flex items-center gap-2.5">
+      );
+    }
+
+    return (
+      <div className="border-t border-border-subtle">
+        {/* Expandable content */}
+        <div
+          className="grid transition-[grid-template-rows] duration-200 ease-in-out"
+          style={{ gridTemplateRows: settingsPanelOpen ? "1fr" : "0fr" }}
+        >
+          <div className="overflow-hidden">
+            <div className="px-3 pt-2 pb-1 space-y-0.5">
+              {/* Theme toggle row */}
+              <div className={cn(
+                "flex items-center justify-between rounded-md px-2.5",
+                mobile ? "h-11" : "h-9",
+              )}>
+                <span className="text-sm text-text-tertiary">Theme</span>
+                <ThemeToggle />
+              </div>
+
+              {/* Team link */}
+              <Link
+                href={teamHref}
+                className={cn(
+                  "flex items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors",
+                  mobile ? "h-11" : "h-9",
+                  "text-text-tertiary hover:bg-bg-raised hover:text-text-secondary",
+                  teamActive && "bg-bg-elevated text-text-primary",
+                )}
+                onClick={mobile ? () => setMobileMenuOpen(false) : undefined}
+              >
+                <UserPlus className="h-[18px] w-[18px] shrink-0" />
+                <span>Team</span>
+              </Link>
+
+              {/* Logout button */}
+              <button
+                onClick={onLogout}
+                className={cn(
+                  "flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm text-text-tertiary transition-colors hover:bg-bg-raised hover:text-text-secondary",
+                  mobile ? "h-11" : "h-9",
+                )}
+                type="button"
+              >
+                <LogOut className="h-[18px] w-[18px] shrink-0" />
+                <span>Log out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Trigger button — always visible */}
+        <button
+          type="button"
+          className="flex w-full items-center gap-2.5 p-3 text-left transition-colors hover:bg-bg-elevated"
+          onClick={() => setSettingsPanelOpen((prev) => !prev)}
+          aria-expanded={settingsPanelOpen}
+          aria-label="Toggle settings"
+        >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-hover text-xs font-medium">
-            {getInitials(user.fullName, user.email)}
+            {user ? getInitials(user.fullName, user.email) : "?"}
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-text-primary">
-              {user.fullName || user.email.split("@")[0]}
+              {user?.fullName || user?.email?.split("@")[0] || "User"}
             </p>
             <div className="flex items-center gap-1.5">
-              <p className="truncate text-xs text-text-muted">{user.email}</p>
+              <p className="truncate text-xs text-text-muted">{user?.email}</p>
             </div>
             {role && (
               <span className="mt-0.5 inline-flex rounded-full bg-bg-hover px-2 py-0.5 text-[10px] font-medium capitalize text-text-tertiary">
@@ -327,19 +395,16 @@ export function AppShell({
               </span>
             )}
           </div>
-          <button
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
-            onClick={onLogout}
-            type="button"
-            aria-label="Log out"
-            title="Log out"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-    </div>
-  ) : null;
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 shrink-0 text-text-faint transition-transform duration-200",
+              settingsPanelOpen && "rotate-180",
+            )}
+          />
+        </button>
+      </div>
+    );
+  };
 
   /* ---------------------------------------------------------------- */
   /*  Nav rendering                                                    */
@@ -573,47 +638,7 @@ export function AppShell({
           {renderNavItems(true)}
         </nav>
 
-        {/* Mobile theme toggle */}
-        <div className="border-t border-border-subtle px-3 py-2 flex items-center justify-between">
-          <span className="text-xs text-text-muted">Theme</span>
-          <ThemeToggle />
-        </div>
-
-        {/* Mobile profile footer */}
-        {user ? (
-          <div className="border-t border-border-subtle p-3">
-            <div className="flex items-center gap-2.5 mb-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-hover text-xs font-medium">
-                {getInitials(user.fullName, user.email)}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-text-primary">
-                  {user.fullName || user.email.split("@")[0]}
-                </p>
-                <p className="truncate text-xs text-text-muted">{user.email}</p>
-              </div>
-            </div>
-            <button
-              onClick={onLogout}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-bg-elevated text-sm text-text-secondary hover:bg-bg-hover"
-              type="button"
-            >
-              <LogOut className="h-4 w-4" />
-              Log out
-            </button>
-          </div>
-        ) : (
-          <div className="border-t border-border-default p-4">
-            <button
-              onClick={onLogout}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-bg-elevated text-sm text-text-secondary hover:bg-bg-hover"
-              type="button"
-            >
-              <LogOut className="h-4 w-4" />
-              Log out
-            </button>
-          </div>
-        )}
+        {settingsPanel(true)}
       </aside>
 
       {/* Desktop Layout */}
@@ -627,29 +652,7 @@ export function AppShell({
           <nav className={cn("flex-1 overflow-y-auto", sidebarCollapsed ? "px-1.5" : "px-2")}>
             {renderNavItems(false)}
           </nav>
-          {!sidebarCollapsed && (
-            <div className="border-t border-border-subtle px-3 py-2 flex items-center justify-between">
-              <span className="text-xs text-text-muted">Theme</span>
-              <ThemeToggle />
-            </div>
-          )}
-          {profileFooter}
-          {/* Fallback logout if no user prop */}
-          {!user && (
-            <div className="border-t border-border-subtle p-3">
-              <button
-                className={cn(
-                  "flex h-9 w-full items-center justify-center gap-2 rounded-md text-sm text-text-muted hover:bg-bg-elevated hover:text-text-secondary",
-                )}
-                onClick={onLogout}
-                type="button"
-                title="Log out"
-              >
-                <LogOut className="h-4 w-4" />
-                {!sidebarCollapsed && "Log out"}
-              </button>
-            </div>
-          )}
+          {settingsPanel(false)}
         </aside>
 
         {/* Desktop Main Content */}
