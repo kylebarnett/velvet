@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { Users, Clock, CheckCircle2 } from "lucide-react";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -149,8 +151,33 @@ export default async function FounderDashboardPage() {
     missingMetrics,
   } : undefined;
 
+  const pendingRequestCount = (pendingRequests ?? []).length;
+
   return (
     <div className="space-y-6">
+      <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Dashboard</h1>
+
+      <div className="grid gap-5 md:grid-cols-3">
+        {[
+          { label: "Linked investors", subtitle: "Investors connected to your company", value: String(investorCount ?? 0), href: "/portal/investors", icon: Users, gradient: "kpi-gradient-blue" },
+          { label: "Pending requests", subtitle: "Metric requests awaiting your submission", value: String(pendingRequestCount), href: "/portal/requests", icon: Clock, gradient: "kpi-gradient-amber" },
+          { label: "Submitted this quarter", subtitle: `Metrics submitted in ${currentQuarterLabel}`, value: String(submittedCount), href: "/portal/requests", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
+        ].map((card) => (
+          <Link
+            key={card.label}
+            href={card.href}
+            className={`card-hover-lift group rounded-xl ${card.gradient} p-5`}
+          >
+            <div className="flex items-start justify-between">
+              <div className="text-xs font-medium uppercase tracking-wider text-text-muted group-hover:text-text-muted">{card.label}</div>
+              <card.icon className="h-4 w-4 text-text-faint" />
+            </div>
+            <div className="mt-3 text-3xl font-semibold tracking-tight">{card.value}</div>
+            <div className="mt-1 text-xs text-text-tertiary">{card.subtitle}</div>
+          </Link>
+        ))}
+      </div>
+
       <GettingStartedChecklist
         role="founder"
         items={[
