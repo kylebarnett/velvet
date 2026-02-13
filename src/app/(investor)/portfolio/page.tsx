@@ -5,7 +5,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ContactsTable } from "@/components/portfolio/contacts-table";
-import { DownloadCsvButton } from "@/components/portfolio/download-csv-button";
+import { AddContactButton } from "@/components/portfolio/add-contact-button";
 
 export const dynamic = "force-dynamic";
 
@@ -87,14 +87,7 @@ export default async function PortfolioPage() {
           <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight" data-onboarding="portfolio-title">Portfolio</h1>
         </div>
         <div className="flex items-center gap-2">
-          <DownloadCsvButton />
-          <Link
-            href="/portfolio/add"
-            className="inline-flex items-center gap-2 rounded-md border border-border-default bg-bg-elevated px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
-            data-onboarding="add-contact"
-          >
-            Add Contact
-          </Link>
+          <AddContactButton />
           <Link
             href="/portfolio/import"
             className="inline-flex items-center gap-2 rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"

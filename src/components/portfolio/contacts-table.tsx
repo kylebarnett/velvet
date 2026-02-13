@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDebounce } from "@/hooks/use-debounce";
+import { DownloadCsvButton } from "./download-csv-button";
 
 type Company = {
   id: string;
@@ -782,6 +783,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                 <SelectItem value="accepted">Accepted</SelectItem>
               </SelectContent>
             </Select>
+            <DownloadCsvButton />
             {pendingCount > 0 && (
               <button
                 onClick={sendAllPending}
