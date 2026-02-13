@@ -178,18 +178,29 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
                   </button>
                 </div>
               ) : data.website ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setWebsiteInput(data.website ?? "");
-                    setEditingWebsite(true);
-                  }}
-                  className="group flex items-center gap-1 text-sm text-text-muted hover:text-text-secondary transition-colors"
-                >
-                  <Globe className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span className="truncate max-w-[240px]">{data.website.replace(/^https?:\/\//, "")}</span>
-                  <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <a
+                    href={data.website.startsWith("http") ? data.website : `https://${data.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-1 text-sm text-text-muted hover:text-text-secondary transition-colors"
+                  >
+                    <Globe className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span className="truncate max-w-[240px]">{data.website.replace(/^https?:\/\//, "")}</span>
+                    <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWebsiteInput(data.website ?? "");
+                      setEditingWebsite(true);
+                    }}
+                    className="rounded-md p-1 text-text-muted hover:text-text-secondary hover:bg-bg-elevated transition-colors"
+                    title="Edit website"
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                </div>
               ) : (
                 <button
                   type="button"
