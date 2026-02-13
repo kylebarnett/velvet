@@ -213,7 +213,7 @@ export default async function FounderDashboardPage() {
             id: "documents",
             label: "Upload documents",
             description: "Share pitch decks, financials, and other materials with investors",
-            href: "/portal",
+            href: "/portal/documents",
             completed: (documentCount ?? 0) > 0,
           },
         ]}

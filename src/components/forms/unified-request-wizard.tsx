@@ -934,6 +934,18 @@ export function UnifiedRequestWizard() {
                       <span className="text-text-tertiary">Companies:</span>{" "}
                       {selectedCompanyIds.size} selected
                     </p>
+                    <div className="flex flex-wrap gap-1">
+                      {companies
+                        .filter((c) => selectedCompanyIds.has(c.id))
+                        .map((c) => (
+                          <span
+                            key={c.id}
+                            className="inline-flex rounded-full bg-bg-elevated px-2 py-0.5 text-xs text-text-tertiary"
+                          >
+                            {c.name}
+                          </span>
+                        ))}
+                    </div>
                     <p>
                       <span className="text-text-tertiary">Period:</span>{" "}
                       {getPeriodLabel(
@@ -943,10 +955,22 @@ export function UnifiedRequestWizard() {
                       )}
                     </p>
                     {!useCustomMetric && selectedTemplate && (
-                      <p>
-                        <span className="text-text-tertiary">Metrics:</span>{" "}
-                        {selectedTemplate.metric_template_items.length} per company
-                      </p>
+                      <>
+                        <p>
+                          <span className="text-text-tertiary">Metrics:</span>{" "}
+                          {selectedTemplate.metric_template_items.length} per company
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {selectedTemplate.metric_template_items.map((item, i) => (
+                            <span
+                              key={i}
+                              className="inline-flex rounded-full bg-bg-elevated px-2 py-0.5 text-xs text-text-tertiary"
+                            >
+                              {item.metric_name}
+                            </span>
+                          ))}
+                        </div>
+                      </>
                     )}
                     <p>
                       <span className="text-text-tertiary">Total requests:</span>{" "}

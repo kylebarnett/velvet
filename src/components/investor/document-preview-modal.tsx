@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Download, FileText, X, Tag } from "lucide-react";
+import { Download, ExternalLink, FileText, X, Tag } from "lucide-react";
 import {
   DOCUMENT_TYPE_LABELS,
   getDocumentTypeColor,
@@ -164,6 +164,18 @@ export function DocumentPreviewModal({
               <Download className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Download</span>
             </button>
+            {previewUrl && (
+              <a
+                href={previewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs text-text-secondary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                aria-label="Open in new tab"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Open</span>
+              </a>
+            )}
             <button
               type="button"
               onClick={onClose}

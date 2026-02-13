@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Search, CheckCircle2, Loader2 } from "lucide-react";
+import { Search, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { InvestorApprovalCard } from "@/components/founder/investor-approval-card";
 
 type Investor = {
@@ -58,6 +59,8 @@ export default function FounderInvestorsPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [bulkApproving, setBulkApproving] = React.useState(false);
+  const [bulkDenying, setBulkDenying] = React.useState(false);
+  const [showBulkDenyConfirm, setShowBulkDenyConfirm] = React.useState(false);
 
   React.useEffect(() => {
     async function load() {
@@ -127,6 +130,28 @@ export default function FounderInvestorsPage() {
     }
   }
 
+  async function handleBulkDeny() {
+    if (pendingInvestors.length === 0) return;
+    setBulkDenying(true);
+    setShowBulkDenyConfirm(false);
+    try {
+      await Promise.all(
+        pendingInvestors.map((inv) =>
+          fetch(`/api/founder/investors/${inv.id}/approval`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "denied" }),
+          })
+        )
+      );
+      window.location.reload();
+    } catch {
+      setError("Failed to deny all investors. Please try again.");
+    } finally {
+      setBulkDenying(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-1" data-onboarding="investors-title">
@@ -165,20 +190,45 @@ export default function FounderInvestorsPage() {
       </div>
 
       {pendingInvestors.length >= 2 && (
-        <button
-          type="button"
-          onClick={handleBulkApprove}
-          disabled={bulkApproving}
-          className="inline-flex items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
-        >
-          {bulkApproving ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <CheckCircle2 className="h-4 w-4" />
-          )}
-          Approve all pending ({pendingInvestors.length})
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleBulkApprove}
+            disabled={bulkApproving || bulkDenying}
+            className="inline-flex items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+          >
+            {bulkApproving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4" />
+            )}
+            Approve all ({pendingInvestors.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowBulkDenyConfirm(true)}
+            disabled={bulkApproving || bulkDenying}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border-default px-3 py-2 text-sm font-medium text-text-secondary hover:bg-bg-hover disabled:opacity-60"
+          >
+            {bulkDenying ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <XCircle className="h-4 w-4" />
+            )}
+            Deny all ({pendingInvestors.length})
+          </button>
+        </div>
       )}
+
+      <ConfirmModal
+        open={showBulkDenyConfirm}
+        title="Deny all pending investors?"
+        message={`This will deny access for ${pendingInvestors.length} investor${pendingInvestors.length !== 1 ? "s" : ""}. They will not be able to see your metrics or documents. You can approve them later.`}
+        confirmLabel="Deny all"
+        variant="danger"
+        onConfirm={handleBulkDeny}
+        onCancel={() => setShowBulkDenyConfirm(false)}
+      />
 
       {loading && <LoadingSkeleton />}
 

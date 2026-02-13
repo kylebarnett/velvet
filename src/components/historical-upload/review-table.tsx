@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ArrowLeft,
   Check,
   X,
   Pencil,
@@ -64,11 +65,13 @@ export function ReviewTable({
   role,
   totalValues,
   onComplete,
+  onBack,
 }: {
   uploadId: string;
   role: "investor" | "founder";
   totalValues: number;
   onComplete: (stats: CompletionStats) => void;
+  onBack?: () => void;
 }) {
   const [values, setValues] = useState<UploadValue[]>([]);
   const [groups, setGroups] = useState<CompanyGroup[]>([]);
@@ -360,6 +363,16 @@ export function ReviewTable({
 
   return (
     <div className="space-y-4">
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </button>
+      )}
       {/* Header with search/filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1">

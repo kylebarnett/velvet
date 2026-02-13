@@ -215,7 +215,28 @@ function CompanyListRow({
             )}
           </>
         ) : !hasFounder ? (
-          <span className="text-xs text-[var(--status-warning-text)]/60">Awaiting founder signup</span>
+          <span className="flex items-center gap-2 text-xs text-[var(--status-warning-text)]/60">
+            Awaiting founder signup
+            <span
+              role="button"
+              tabIndex={0}
+              className="text-text-tertiary underline underline-offset-2 hover:text-text-secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                window.location.href = "/portfolio";
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  window.location.href = "/portfolio";
+                }
+              }}
+            >
+              Manage contacts
+            </span>
+          </span>
         ) : isApproved ? (
           <span className="text-xs text-text-tertiary">No metrics yet</span>
         ) : null}
@@ -226,8 +247,23 @@ function CompanyListRow({
 
 export function DashboardContent({ companies, latestMetrics, secondaryMetrics = {}, lastSubmittedAt = {} }: DashboardContentProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [viewMode, setViewMode] = React.useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = React.useState<ViewMode>(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("velvet_dashboard_view") as ViewMode) || "grid";
+    }
+    return "grid";
+  });
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
+
+  function handleViewModeChange(mode: ViewMode) {
+    setViewMode(mode);
+    localStorage.setItem("velvet_dashboard_view", mode);
+    fetch("/api/user/preferences", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "dashboard_view_mode", value: mode }),
+    }).catch(() => {});
+  }
 
   const statusGroups = React.useMemo(() => {
     const groups = new Set<string>();
@@ -300,7 +336,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
           <div className="flex items-center rounded-lg border border-border-subtle bg-bg-input p-1">
             <button
               type="button"
-              onClick={() => setViewMode("grid")}
+              onClick={() => handleViewModeChange("grid")}
               className={`rounded p-1.5 transition-colors ${
                 viewMode === "grid"
                   ? "bg-bg-hover text-text-primary"
@@ -312,7 +348,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
             </button>
             <button
               type="button"
-              onClick={() => setViewMode("list")}
+              onClick={() => handleViewModeChange("list")}
               className={`rounded p-1.5 transition-colors ${
                 viewMode === "list"
                   ? "bg-bg-hover text-text-primary"

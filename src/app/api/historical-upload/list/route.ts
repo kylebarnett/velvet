@@ -22,6 +22,12 @@ export async function GET(req: Request) {
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
+  // Optional status filter
+  const statusParam = url.searchParams.get("status");
+  if (statusParam) {
+    query = query.eq("status", statusParam);
+  }
+
   // Optional company filter: find uploads that have values for a specific company
   const companyId = url.searchParams.get("companyId");
   if (companyId) {

@@ -24,7 +24,7 @@ export default async function CompanyDashboardPage({
   // Verify relationship
   const { data: relationship } = await supabase
     .from("investor_company_relationships")
-    .select("id, approval_status, logo_url")
+    .select("id, approval_status, logo_url, created_at")
     .eq("investor_id", user.id)
     .eq("company_id", companyId)
     .single();
@@ -187,7 +187,9 @@ export default async function CompanyDashboardPage({
         <div className="rounded-md border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] px-3 py-2 text-sm text-[var(--status-warning-text)]">
           {relationship.approval_status === "denied"
             ? "The founder has denied access to their data. Metric data is not available."
-            : "Pending founder approval. The founder needs to approve your access before you can view their metrics and documents."}
+            : !company.founder_id
+              ? <>This company&apos;s founder hasn&apos;t joined Velvet yet. You can manage their invitation from your <Link href="/portfolio" className="underline underline-offset-2 hover:text-[var(--status-warning-text)]">contacts page</Link>.</>
+              : `Pending founder approval${relationship.created_at ? ` since ${new Date(relationship.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : ""}. The founder needs to approve your access before you can view their metrics and documents.`}
         </div>
       )}
 

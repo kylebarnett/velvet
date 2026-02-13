@@ -431,7 +431,7 @@ export function NotificationList({
           description={
             mode === "completed"
               ? "Completed submissions will appear here after you submit metrics. You can also submit metrics proactively from your dashboard."
-              : "You're all caught up! When investors request metrics from your company, they'll appear here grouped by period. You can also submit metrics proactively from your dashboard."
+              : "No pending metric requests right now. When investors request metrics from your company, they'll appear here grouped by period. You can also submit metrics proactively from your dashboard."
           }
         />
         {mode === "pending" && (

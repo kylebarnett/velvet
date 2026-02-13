@@ -491,6 +491,10 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
     failed: number;
     devMode?: boolean;
   } | null>(null);
+  const [lastRemindAction, setLastRemindAction] = React.useState<{
+    requestIds: string[];
+    sourceId: string;
+  } | null>(null);
 
   // Auto-dismiss remind result
   React.useEffect(() => {
@@ -523,6 +527,7 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
   async function handleRemind(requestIds: string[], sourceId: string) {
     if (requestIds.length === 0) return;
     setReminding(sourceId);
+    setLastRemindAction({ requestIds, sourceId });
     try {
       const res = await fetch("/api/investors/requests/remind", {
         method: "POST",
@@ -549,6 +554,28 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
   function handleRemindAll() {
     if (!companies) return;
     const allPendingIds = companies.flatMap((c) => c.pendingRequestIds);
+    handleRemind(allPendingIds, "all");
+  }
+
+  async function handleRemindFromCollapsed(e: React.MouseEvent) {
+    e.stopPropagation();
+    // If companies already loaded, use them; otherwise fetch first
+    let companyList = companies;
+    if (!companyList) {
+      try {
+        const periodKey = `${campaign.periodStart}_${campaign.periodEnd}`;
+        const res = await fetch(`/api/investors/metric-requests/${periodKey}`);
+        if (res.ok) {
+          const json = await res.json();
+          companyList = json.companies ?? [];
+          setCompanies(companyList);
+        }
+      } catch {
+        return;
+      }
+    }
+    if (!companyList) return;
+    const allPendingIds = companyList.flatMap((c) => c.pendingRequestIds);
     handleRemind(allPendingIds, "all");
   }
 
@@ -639,11 +666,27 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
           </div>
         </div>
 
-        {/* Expand icon */}
-        <div className="mt-1 shrink-0 text-text-faint">
-          <ChevronDown
-            className={`h-4 w-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
-          />
+        {/* Collapsed remind + expand icon */}
+        <div className="mt-1 flex shrink-0 items-center gap-2">
+          {!expanded && pendingCompanyCount > 0 && (
+            <button
+              type="button"
+              onClick={handleRemindFromCollapsed}
+              disabled={reminding !== null}
+              className="shrink-0 rounded-md border border-border-default px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:bg-bg-hover disabled:opacity-60"
+            >
+              {reminding === "all" ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                "Remind"
+              )}
+            </button>
+          )}
+          <div className="text-text-faint">
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            />
+          </div>
         </div>
       </button>
 
@@ -671,20 +714,43 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
                       ? `Sent ${remindResult.sent} reminder${remindResult.sent > 1 ? "s" : ""}`
                       : "Failed to send reminders"}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setRemindResult(null)}
-                  className="ml-2 rounded p-0.5 hover:bg-bg-hover"
-                  aria-label="Dismiss"
-                >
-                  <X className="h-3 w-3" aria-hidden="true" />
-                </button>
+                <div className="flex items-center gap-1">
+                  {remindResult.failed > 0 && remindResult.sent === 0 && lastRemindAction && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRemindResult(null);
+                        handleRemind(lastRemindAction.requestIds, lastRemindAction.sourceId);
+                      }}
+                      className="rounded px-2 py-0.5 text-xs font-medium hover:bg-bg-hover"
+                    >
+                      Retry
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setRemindResult(null)}
+                    className="rounded p-0.5 hover:bg-bg-hover"
+                    aria-label="Dismiss"
+                  >
+                    <X className="h-3 w-3" aria-hidden="true" />
+                  </button>
+                </div>
               </div>
             )}
 
             {detailLoading ? (
-              <div className="flex items-center justify-center py-6">
-                <Loader2 className="h-5 w-5 animate-spin text-text-muted" />
+              <div className="space-y-2 py-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-3 px-3 py-2">
+                    <div className="h-8 w-8 animate-pulse rounded-full bg-bg-elevated" />
+                    <div className="flex-1 space-y-1.5">
+                      <div className="h-3.5 w-32 animate-pulse rounded bg-bg-elevated" />
+                      <div className="h-3 w-20 animate-pulse rounded bg-bg-elevated" />
+                    </div>
+                    <div className="h-6 w-16 animate-pulse rounded bg-bg-elevated" />
+                  </div>
+                ))}
               </div>
             ) : companies && companies.length > 0 ? (
               <>

@@ -191,6 +191,7 @@ type BatchTableBodyProps = {
   periods: Period[];
   existingValues: Record<string, Record<string, string>>;
   cellErrors: Map<string, string>;
+  cellWarnings: Map<string, string>;
   updateCellValue: (metricName: string, periodKey: string, value: string) => void;
   updateNotes: (metricName: string, notes: string) => void;
   setDetailMetric: React.Dispatch<React.SetStateAction<string | null>>;
@@ -206,6 +207,7 @@ function BatchTableBody({
   periods,
   existingValues,
   cellErrors,
+  cellWarnings,
   updateCellValue,
   updateNotes,
   setDetailMetric,
@@ -264,6 +266,7 @@ function BatchTableBody({
         const hasExisting = !!existing;
         const cellKey = `${row.metricName}:${p.key}`;
         const cellError = cellErrors.get(cellKey);
+        const cellWarning = cellWarnings.get(cellKey);
         const userEnteredValue = row.values[p.key]?.trim() || "";
         // Previous value from raw metrics history
         const prevValue = getPreviousValue(
@@ -288,14 +291,21 @@ function BatchTableBody({
                 className={`h-9 w-full rounded-md border bg-bg-input px-2 text-center text-sm font-mono focus:outline-none focus:ring-2 ${
                   cellError
                     ? "border-[var(--error-border)] focus:border-[var(--error-accent)] focus:ring-[var(--error-ring)]"
-                    : hasExisting && !row.values[p.key]
-                      ? "border-border-subtle text-text-muted focus:border-border-default focus:ring-[var(--ring-focus)]"
-                      : "border-border-default text-text-primary focus:border-border-default focus:ring-[var(--ring-focus)]"
+                    : cellWarning
+                      ? "border-[var(--warning-border)] focus:border-[var(--warning-accent)] focus:ring-[var(--warning-ring)]"
+                      : hasExisting && !row.values[p.key]
+                        ? "border-border-subtle text-text-muted focus:border-border-default focus:ring-[var(--ring-focus)]"
+                        : "border-border-default text-text-primary focus:border-border-default focus:ring-[var(--ring-focus)]"
                 }`}
               />
               {cellError && (
                 <div className="absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-[var(--bg-tooltip)] px-2 py-0.5 text-[10px] text-[var(--status-error-text)]">
                   {cellError}
+                </div>
+              )}
+              {!cellError && cellWarning && (
+                <div className="absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-[var(--bg-tooltip)] px-2 py-0.5 text-[10px] text-[var(--warning-accent)]">
+                  {cellWarning}
                 </div>
               )}
               {/* Live delta indicator */}
@@ -642,6 +652,9 @@ export function BatchSubmissionTable({
   const [cellErrors, setCellErrors] = React.useState<Map<string, string>>(
     new Map(),
   );
+  const [cellWarnings, setCellWarnings] = React.useState<Map<string, string>>(
+    new Map(),
+  );
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [reportCard, setReportCard] = React.useState<ReportCard | null>(null);
@@ -872,6 +885,22 @@ export function BatchSubmissionTable({
       }
       return next;
     });
+    setCellWarnings((prev) => {
+      const next = new Map(prev);
+      if (value && !isNaN(Number(value))) {
+        const num = Number(value);
+        const metricName = cellKey.split(":")[0].toLowerCase();
+        const nonNegativeMetrics = ["revenue", "mrr", "arr", "cash", "cash balance", "headcount", "customers", "users"];
+        if (num < 0 && nonNegativeMetrics.some((m) => metricName.includes(m))) {
+          next.set(cellKey, "Negative value — is this correct?");
+        } else {
+          next.delete(cellKey);
+        }
+      } else {
+        next.delete(cellKey);
+      }
+      return next;
+    });
   }, []);
 
   const updateCellValue = React.useCallback(
@@ -1075,6 +1104,7 @@ export function BatchSubmissionTable({
           periods={periods}
           existingValues={existingValues}
           cellErrors={cellErrors}
+          cellWarnings={cellWarnings}
           updateCellValue={updateCellValue}
           updateNotes={updateNotes}
           setDetailMetric={setDetailMetric}

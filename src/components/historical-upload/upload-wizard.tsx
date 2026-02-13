@@ -32,6 +32,13 @@ type CompletionStats = {
   skipped: number;
 };
 
+type ResumableUpload = {
+  id: string;
+  file_name: string;
+  total_values_detected: number;
+  companies_detected: DetectedCompany[] | null;
+};
+
 export function UploadWizard({ role }: { role: "investor" | "founder" }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,6 +50,7 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
   const [error, setError] = useState<string | null>(null);
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
   const [completionStats, setCompletionStats] = useState<CompletionStats | null>(null);
+  const [resumableUpload, setResumableUpload] = useState<ResumableUpload | null>(null);
 
   // Prevent accidental navigation during upload
   useEffect(() => {
@@ -53,6 +61,37 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, [uploading]);
+
+  // Check for resumable in-progress uploads
+  useEffect(() => {
+    async function checkResumable() {
+      try {
+        const res = await fetch("/api/historical-upload/list?status=reviewing&limit=1");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.uploads?.length > 0) {
+            setResumableUpload(data.uploads[0]);
+          }
+        }
+      } catch {
+        // Non-critical, ignore
+      }
+    }
+    checkResumable();
+  }, []);
+
+  function handleResume(upload: ResumableUpload) {
+    setUploadResult({
+      uploadId: upload.id,
+      totalValues: upload.total_values_detected,
+      companiesDetected: upload.companies_detected ?? [],
+      conflicts: 0,
+      aiProvider: "",
+      parsingTimeMs: 0,
+    });
+    setStep("review");
+    setResumableUpload(null);
+  }
 
   const handleFiles = useCallback((files: FileList | null) => {
     setError(null);
@@ -250,6 +289,34 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
       {/* Step content */}
       {step === "upload" && (
         <div className="space-y-4">
+          {/* Resume banner */}
+          {resumableUpload && (
+            <div className="flex items-center justify-between rounded-lg border border-[var(--status-info-bg)] bg-[var(--status-info-bg)] px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-[var(--status-info-text)]">Resume previous upload</p>
+                <p className="text-xs text-[var(--status-info-text)]/70">
+                  {resumableUpload.file_name} — {resumableUpload.total_values_detected} values detected
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setResumableUpload(null)}
+                  className="rounded-md px-2 py-1 text-xs text-[var(--status-info-text)]/70 hover:bg-bg-hover"
+                >
+                  Dismiss
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleResume(resumableUpload)}
+                  className="rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+                >
+                  Resume
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Drop zone */}
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -361,7 +428,7 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
           uploadId={uploadResult.uploadId}
           companiesDetected={uploadResult.companiesDetected}
           onComplete={handleMappingComplete}
-          onBack={() => handleReset()}
+          onBack={() => setStep("upload")}
         />
       )}
 
@@ -371,6 +438,7 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
           role={role}
           totalValues={uploadResult.totalValues}
           onComplete={handleReviewComplete}
+          onBack={() => setStep(role === "investor" ? "map-companies" : "upload")}
         />
       )}
 

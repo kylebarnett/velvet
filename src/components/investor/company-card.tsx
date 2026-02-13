@@ -272,8 +272,27 @@ export function CompanyCard({
       )}
 
       {!hasFounder && (
-        <div className="mt-auto flex items-center border-t border-border-subtle pt-4">
+        <div className="mt-auto flex items-center justify-between border-t border-border-subtle pt-4">
           <span className="text-xs text-[var(--status-warning-text)]/60">Awaiting founder signup</span>
+          <span
+            role="button"
+            tabIndex={0}
+            className="text-xs text-text-tertiary underline underline-offset-2 hover:text-text-secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              window.location.href = "/portfolio";
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.stopPropagation();
+                e.preventDefault();
+                window.location.href = "/portfolio";
+              }
+            }}
+          >
+            Manage contacts
+          </span>
         </div>
       )}
     </Link>
