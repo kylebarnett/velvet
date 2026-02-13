@@ -32,6 +32,7 @@ export default async function PortfolioPage() {
       email,
       first_name,
       last_name,
+      position,
       status,
       invite_token,
       sent_at,
@@ -83,7 +84,7 @@ export default async function PortfolioPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Portfolio" }]} />
+          <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Portfolio", href: "/portfolio" }, { label: "Contacts" }]} />
           <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight" data-onboarding="portfolio-title">Portfolio</h1>
         </div>
         <div className="flex items-center gap-2">

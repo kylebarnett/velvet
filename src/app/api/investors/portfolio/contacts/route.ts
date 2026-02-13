@@ -11,6 +11,7 @@ type ContactRow = {
   email: string;
   first_name: string;
   last_name: string;
+  position: string | null;
   status: string;
   invite_token: string;
   sent_at: string | null;
@@ -54,6 +55,7 @@ export async function GET(req: Request) {
       email,
       first_name,
       last_name,
+      position,
       status,
       invite_token,
       sent_at,
@@ -106,7 +108,7 @@ export async function GET(req: Request) {
 
   // Sorting by company name requires in-memory sort because Supabase
   // referencedTable ordering only sorts the embedded rows, not parent rows.
-  const isCompanySort = sortField === "company" || !["contact", "email", "status"].includes(sortField);
+  const isCompanySort = sortField === "company" || !["contact", "position", "email", "status"].includes(sortField);
   const ascending = sortDir !== "desc";
 
   if (!isCompanySort) {
@@ -114,6 +116,9 @@ export async function GET(req: Request) {
     switch (sortField) {
       case "contact":
         dataQuery = dataQuery.order("last_name", { ascending }).order("first_name", { ascending });
+        break;
+      case "position":
+        dataQuery = dataQuery.order("position", { ascending, nullsFirst: false });
         break;
       case "email":
         dataQuery = dataQuery.order("email", { ascending });
@@ -165,6 +170,7 @@ const updateSchema = z.object({
   first_name: z.string().min(1).optional(),
   last_name: z.string().min(1).optional(),
   email: z.string().email().optional(),
+  position: z.string().optional(),
 });
 
 export async function PUT(req: Request) {

@@ -82,6 +82,11 @@ export default async function ImportPage() {
                 <td className="py-2 pr-6 text-[var(--success-accent)]">Yes</td>
                 <td className="py-2">jane@acme.com</td>
               </tr>
+              <tr className="border-b border-border-subtle">
+                <td className="py-2 pr-6">Position</td>
+                <td className="py-2 pr-6 text-text-muted">No</td>
+                <td className="py-2">CEO</td>
+              </tr>
               <tr>
                 <td className="py-2 pr-6">Company Website</td>
                 <td className="py-2 pr-6 text-text-muted">No</td>

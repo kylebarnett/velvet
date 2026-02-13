@@ -13,6 +13,7 @@ type ParsedRow = {
   first_name: string;
   last_name: string;
   email: string;
+  position?: string;
 };
 
 type ValidationError = {
@@ -57,6 +58,11 @@ const columnAliases: Record<string, string> = {
   emailaddress: "email",
   dba: "dba",
   doing_business_as: "dba",
+  position: "position",
+  title: "position",
+  job_title: "position",
+  jobtitle: "position",
+  role: "position",
 };
 
 function mapColumnName(name: string): string {
@@ -154,6 +160,7 @@ function parseCSV(text: string): { rows: ParsedRow[]; errors: ValidationError[];
       first_name: row.first_name,
       last_name: row.last_name,
       email: row.email,
+      position: row.position || undefined,
     });
   }
 
@@ -279,7 +286,7 @@ export function CsvImportForm() {
           <span className="font-medium text-text-tertiary">Required:</span> Company Name, First Name, Last Name, Email
         </p>
         <p className="mt-0.5 text-xs text-text-tertiary">
-          <span className="font-medium text-text-tertiary">Optional:</span> Company Website
+          <span className="font-medium text-text-tertiary">Optional:</span> Company Website, Position
         </p>
       </div>
 

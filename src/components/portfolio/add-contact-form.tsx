@@ -16,6 +16,7 @@ const schema = z.object({
   first_name: z.string().min(1, "First name is required."),
   last_name: z.string().min(1, "Last name is required."),
   email: z.string().email("Valid email is required."),
+  position: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -38,6 +39,7 @@ export function AddContactModal({ open, onClose }: Props) {
       first_name: "",
       last_name: "",
       email: "",
+      position: "",
     },
   });
 
@@ -227,6 +229,18 @@ export function AddContactModal({ open, onClose }: Props) {
                 {...form.register("email")}
               />
               <FieldError name="email" />
+            </div>
+
+            <div className="grid gap-2">
+              <label className="text-sm text-text-secondary" htmlFor="position">
+                Position <span className="text-text-muted">(optional)</span>
+              </label>
+              <input
+                id="position"
+                className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
+                placeholder="CEO"
+                {...form.register("position")}
+              />
             </div>
           </div>
 

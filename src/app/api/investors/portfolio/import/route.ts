@@ -12,6 +12,7 @@ const rowSchema = z.object({
   first_name: z.string().min(1),
   last_name: z.string().min(1),
   email: z.string().email(),
+  position: z.string().optional(),
 });
 
 const schema = z.object({
@@ -195,6 +196,7 @@ export async function POST(req: Request) {
     email: string;
     first_name: string;
     last_name: string;
+    position: string | null;
     status: string;
   }[] = [];
   const successfulRowIndices: number[] = [];
@@ -213,6 +215,7 @@ export async function POST(req: Request) {
       email: row.email,
       first_name: row.first_name,
       last_name: row.last_name,
+      position: row.position ?? null,
       status: "pending",
     });
     successfulRowIndices.push(rowIndex);
@@ -236,6 +239,7 @@ export async function POST(req: Request) {
       email: row.email,
       first_name: row.first_name,
       last_name: row.last_name,
+      position: row.position ?? null,
       status: "pending",
     });
     successfulRowIndices.push(c.rowIndex);

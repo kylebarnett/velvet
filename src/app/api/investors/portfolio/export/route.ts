@@ -17,6 +17,7 @@ export async function GET() {
       email,
       first_name,
       last_name,
+      position,
       companies (
         name,
         website
@@ -31,7 +32,7 @@ export async function GET() {
   }
 
   // Build CSV content
-  const headers = ["Company Name", "First Name", "Last Name", "Email", "Company Website"];
+  const headers = ["Company Name", "First Name", "Last Name", "Email", "Position", "Company Website"];
   const rows = (contacts ?? []).map((contact) => {
     const company = Array.isArray(contact.companies)
       ? contact.companies[0]
@@ -41,6 +42,7 @@ export async function GET() {
       escapeCsvField(contact.first_name ?? ""),
       escapeCsvField(contact.last_name ?? ""),
       escapeCsvField(contact.email ?? ""),
+      escapeCsvField(contact.position ?? ""),
       escapeCsvField(company?.website ?? ""),
     ].join(",");
   });

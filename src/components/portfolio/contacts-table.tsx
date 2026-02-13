@@ -28,6 +28,7 @@ type Contact = {
   email: string;
   first_name: string;
   last_name: string;
+  position: string | null;
   status: "pending" | "sent" | "accepted";
   invite_token: string;
   sent_at: string | null;
@@ -44,7 +45,7 @@ type Pagination = {
   totalPages: number;
 };
 
-type SortField = "company" | "contact" | "email" | "status";
+type SortField = "company" | "contact" | "position" | "email" | "status";
 type SortDir = "asc" | "desc";
 
 type Stats = {
@@ -62,8 +63,8 @@ type Props = {
 const CONTACTS_VIRTUALIZE_THRESHOLD = 30;
 /** Estimated row height in pixels for the virtualizer */
 const CONTACTS_ESTIMATED_ROW_HEIGHT = 52;
-/** Number of columns in the contacts table (checkbox + company + contact + email + status + actions) */
-const CONTACTS_COL_COUNT = 6;
+/** Number of columns in the contacts table (checkbox + company + contact + position + email + status + actions) */
+const CONTACTS_COL_COUNT = 7;
 
 type ContactsDesktopTableProps = {
   sortedContacts: Contact[];
@@ -74,8 +75,8 @@ type ContactsDesktopTableProps = {
   toggleSort: (field: SortField) => void;
   sortIcon: (field: SortField) => React.ReactNode;
   editingId: string | null;
-  editForm: { first_name: string; last_name: string; email: string };
-  setEditForm: React.Dispatch<React.SetStateAction<{ first_name: string; last_name: string; email: string }>>;
+  editForm: { first_name: string; last_name: string; email: string; position: string };
+  setEditForm: React.Dispatch<React.SetStateAction<{ first_name: string; last_name: string; email: string; position: string }>>;
   saveEdit: () => void;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
   startEdit: (contact: Contact) => void;
@@ -148,6 +149,18 @@ function ContactsDesktopTable({
           </div>
         ) : (
           `${contact.first_name} ${contact.last_name}`
+        )}
+      </td>
+      <td className="p-3 text-text-tertiary">
+        {editingId === contact.id ? (
+          <input
+            value={editForm.position}
+            onChange={(e) => setEditForm({ ...editForm, position: e.target.value })}
+            className="h-8 w-32 rounded border border-border-default bg-bg-input px-2 text-sm"
+            placeholder="Position"
+          />
+        ) : (
+          contact.position ?? ""
         )}
       </td>
       <td className="p-3 text-text-tertiary">
@@ -231,6 +244,7 @@ function ContactsDesktopTable({
       {([
         ["company", "Company"],
         ["contact", "Contact"],
+        ["position", "Position"],
         ["email", "Email"],
         ["status", "Status"],
       ] as const).map(([field, label]) => (
@@ -330,7 +344,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
   const [sortDir, setSortDir] = React.useState<SortDir>("asc");
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [editingId, setEditingId] = React.useState<string | null>(null);
-  const [editForm, setEditForm] = React.useState({ first_name: "", last_name: "", email: "" });
+  const [editForm, setEditForm] = React.useState({ first_name: "", last_name: "", email: "", position: "" });
   const [loading, setLoading] = React.useState(false);
   const [fetching, setFetching] = React.useState(false);
   const { error, success, setError, setSuccess } = useToast();
@@ -526,6 +540,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
       first_name: contact.first_name,
       last_name: contact.last_name,
       email: contact.email,
+      position: contact.position ?? "",
     });
   }, []);
 
@@ -679,6 +694,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
             Total Contacts
           </div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{pagination.total}</div>
+          <p className="mt-1 text-xs text-text-muted">All founders in your portfolio</p>
         </div>
         <div className="rounded-xl card-surface kpi-gradient-emerald p-3 sm:p-4">
           <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
@@ -686,6 +702,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
             Accepted
           </div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{stats.accepted}</div>
+          <p className="mt-1 text-xs text-text-muted">Founders who joined and can submit metrics</p>
         </div>
         <div className="rounded-xl card-surface kpi-gradient-amber p-3 sm:p-4">
           <div className="flex items-center gap-2 text-xs sm:text-sm text-text-tertiary">
@@ -693,6 +710,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
             Awaiting Response
           </div>
           <div className="mt-1 text-lg sm:text-2xl font-semibold">{stats.awaiting}</div>
+          <p className="mt-1 text-xs text-text-muted">Pending or sent invitations not yet accepted</p>
         </div>
       </div>
 
@@ -909,6 +927,12 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                         className="h-10 w-full rounded border border-border-default bg-bg-input px-3 text-sm"
                         placeholder="Email"
                       />
+                      <input
+                        value={editForm.position}
+                        onChange={(e) => setEditForm({ ...editForm, position: e.target.value })}
+                        className="h-10 w-full rounded border border-border-default bg-bg-input px-3 text-sm"
+                        placeholder="Position (optional)"
+                      />
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setEditingId(null)}
@@ -943,6 +967,9 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                               <div className="font-medium truncate">
                                 {contact.first_name} {contact.last_name}
                               </div>
+                              {contact.position && (
+                                <div className="text-xs text-text-tertiary truncate">{contact.position}</div>
+                              )}
                               <div className="text-sm text-text-tertiary truncate">{contact.email}</div>
                             </div>
                             {statusBadge(contact.status)}
