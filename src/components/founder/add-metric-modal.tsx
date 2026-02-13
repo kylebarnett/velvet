@@ -3,6 +3,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { X, Plus, Trash2, Info, ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { SlidingTabs, type TabItem } from "@/components/ui/sliding-tabs";
 import {
@@ -468,10 +469,11 @@ export function AddMetricModal({
       }
       onSubmitted();
       onClose();
+      toast.success("Metric submitted successfully.");
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Something went wrong.";
-      setError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -485,7 +487,7 @@ export function AddMetricModal({
   const hasAvailablePeriods = allPeriods.some((p) => !selectedKeys.has(p.key));
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter">
       {/* Backdrop click to close */}
       <div
         className="absolute inset-0"
@@ -499,7 +501,7 @@ export function AddMetricModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative mx-4 flex max-h-[min(90vh,680px)] w-full max-w-lg flex-col rounded-xl border border-border-default bg-bg-secondary shadow-2xl"
+        className="relative mx-4 flex max-h-[min(90vh,680px)] w-full max-w-lg flex-col rounded-xl border border-border-default bg-bg-secondary shadow-2xl modal-dialog-enter"
       >
         {/* Header — pinned */}
         <div className="flex items-center justify-between border-b border-border-subtle px-6 py-4">
@@ -722,15 +724,6 @@ export function AddMetricModal({
               </div>
             )}
 
-            {/* Error message */}
-            {error && (
-              <div
-                className="rounded-lg border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3.5 py-2.5 text-sm text-[var(--status-error-text)]"
-                role="alert"
-              >
-                {error}
-              </div>
-            )}
           </div>
 
           {/* Footer — pinned */}
@@ -738,8 +731,8 @@ export function AddMetricModal({
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Submitting..." : "Submit"}
+            <Button type="submit" loading={submitting}>
+              Submit
             </Button>
           </div>
         </form>

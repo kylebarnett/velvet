@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 const QUARTERS = ["Q1", "Q2", "Q3", "Q4"] as const;
 
@@ -59,14 +58,8 @@ export default function NewTearSheetPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <Link
-          href="/portal/tear-sheets"
-          className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to tear sheets
-        </Link>
-        <h1 className="text-xl font-semibold tracking-tight">
+        <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Tear Sheets", href: "/portal/tear-sheets" }, { label: "New Tear Sheet" }]} />
+        <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight">
           New Tear Sheet
         </h1>
         <p className="text-sm text-text-tertiary">

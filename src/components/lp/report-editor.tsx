@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Download, Trash2, Check, Send, BarChart3, Loader2, ChevronDown, GripVertical, Eye, X } from "lucide-react";
+import { toast } from "sonner";
+import { ArrowLeft, Save, Download, Trash2, Send, BarChart3, Loader2, ChevronDown, GripVertical, Eye, X } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -252,8 +253,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [showUnpublishConfirm, setShowUnpublishConfirm] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState<EditorTab>("edit");
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
@@ -317,14 +316,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [showPreviewModal]);
-
-  // Auto-dismiss success
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
 
   // Selected investments
   const selectedInvestments = useMemo(
@@ -505,7 +496,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   // Save (preserves current status)
   async function handleSave() {
     setSaving(true);
-    setError(null);
 
     try {
       const res = await fetch(
@@ -528,7 +518,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
       resetInitialRef();
       router.push("/funds/lp-reports");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred.");
+      toast.error(err instanceof Error ? err.message : "An error occurred.");
       setSaving(false);
     }
   }
@@ -536,7 +526,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   // Publish
   async function handlePublish() {
     setPublishing(true);
-    setError(null);
     setShowPublishConfirm(false);
 
     try {
@@ -560,9 +549,9 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
 
       setStatus("published");
       resetInitialRef();
-      setSuccess("Report published successfully.");
+      toast.success("Report published successfully.");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred.");
+      toast.error(err instanceof Error ? err.message : "An error occurred.");
     } finally {
       setPublishing(false);
     }
@@ -571,7 +560,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   // Unpublish
   async function handleUnpublish() {
     setPublishing(true);
-    setError(null);
     setShowUnpublishConfirm(false);
 
     try {
@@ -591,9 +579,9 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
 
       setStatus("draft");
       resetInitialRef();
-      setSuccess("Report reverted to draft.");
+      toast.success("Report reverted to draft.");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred.");
+      toast.error(err instanceof Error ? err.message : "An error occurred.");
     } finally {
       setPublishing(false);
     }
@@ -602,7 +590,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   // Delete
   async function handleDelete() {
     setDeleting(true);
-    setError(null);
 
     try {
       const res = await fetch(
@@ -617,7 +604,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
 
       router.push(`/funds/${fund.id}?tab=reports`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred.");
+      toast.error(err instanceof Error ? err.message : "An error occurred.");
       setDeleting(false);
     }
   }
@@ -630,7 +617,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
       const safeName = `${title.replace(/[^a-zA-Z0-9._-]/g, "_")}.pdf`;
       await exportElementAsPdf(previewRef.current, safeName);
     } catch {
-      setError("Failed to export PDF.");
+      toast.error("Failed to export PDF.");
     }
   }
 
@@ -764,19 +751,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           </button>
         </div>
       </div>
-
-      {/* Messages */}
-      {error && (
-        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]" role="alert">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="flex items-center gap-2 rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2 text-sm text-[var(--status-success-text)]" role="alert">
-          <Check className="h-4 w-4" />
-          {success}
-        </div>
-      )}
 
       {/* Mobile tab toggle */}
       <div className="lg:hidden" data-no-print>

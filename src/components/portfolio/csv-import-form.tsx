@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Upload, AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type ParsedRow = {
   company_name: string;
@@ -170,13 +172,11 @@ export function CsvImportForm() {
   const [showAll, setShowAll] = React.useState(false);
   const [importing, setImporting] = React.useState(false);
   const [importResult, setImportResult] = React.useState<{ imported: number; errors: { row: number; message: string }[] } | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   async function handleFile(file: File) {
     setFile(file);
-    setError(null);
     setImportResult(null);
     setShowAll(false);
 
@@ -192,7 +192,7 @@ export function CsvImportForm() {
     if (droppedFile && droppedFile.name.endsWith(".csv")) {
       handleFile(droppedFile);
     } else {
-      setError("Please drop a CSV file.");
+      toast.error("Please drop a CSV file.");
     }
   }
 
@@ -207,7 +207,6 @@ export function CsvImportForm() {
     if (!parsedData || parsedData.rows.length === 0) return;
 
     setImporting(true);
-    setError(null);
 
     try {
       const res = await fetch("/api/investors/portfolio/import", {
@@ -223,6 +222,7 @@ export function CsvImportForm() {
       }
 
       setImportResult(json);
+      toast.success(`Successfully imported ${json.imported} ${json.imported === 1 ? "company" : "companies"}`);
 
       if (json.imported > 0) {
         setTimeout(() => {
@@ -231,7 +231,7 @@ export function CsvImportForm() {
         }, 2000);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      toast.error(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setImporting(false);
     }
@@ -389,13 +389,6 @@ export function CsvImportForm() {
         </div>
       )}
 
-      {/* Error message */}
-      {error && (
-        <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-3 text-sm text-[var(--status-error-text)]">
-          {error}
-        </div>
-      )}
-
       {/* Import result */}
       {importResult && (
         <div className="rounded-xl border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] p-4">
@@ -421,15 +414,15 @@ export function CsvImportForm() {
       {/* Import button */}
       {parsedData && parsedData.rows.length > 0 && !importResult && (
         <div className="flex justify-end">
-          <button
+          <Button
             onClick={handleImport}
             disabled={!canImport}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+            loading={importing}
           >
             {importing
               ? "Importing..."
               : `Import ${parsedData.rows.length} ${parsedData.rows.length === 1 ? "Company" : "Companies"}`}
-          </button>
+          </Button>
         </div>
       )}
     </div>

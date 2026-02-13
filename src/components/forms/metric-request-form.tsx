@@ -4,6 +4,7 @@ import * as React from "react";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -11,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 const schema = z.object({
   companyId: z.string().min(1, "Select a company."),
@@ -29,8 +31,6 @@ type Company = {
 };
 
 export function MetricRequestForm() {
-  const [error, setError] = React.useState<string | null>(null);
-  const [success, setSuccess] = React.useState<string | null>(null);
   const [companies, setCompanies] = React.useState<Company[]>([]);
 
   React.useEffect(() => {
@@ -48,13 +48,6 @@ export function MetricRequestForm() {
     loadCompanies();
   }, []);
 
-  React.useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
-
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -68,8 +61,6 @@ export function MetricRequestForm() {
   });
 
   async function onSubmit(values: FormValues) {
-    setError(null);
-    setSuccess(null);
     try {
       const res = await fetch("/api/metrics/request", {
         method: "POST",
@@ -80,10 +71,10 @@ export function MetricRequestForm() {
       if (!res.ok) {
         throw new Error(json?.error ?? "Failed to create request.");
       }
-      setSuccess("Request created.");
+      toast.success("Request created.");
       form.reset();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      toast.error(e instanceof Error ? e.message : "Something went wrong.");
     }
   }
 
@@ -199,25 +190,13 @@ export function MetricRequestForm() {
         </div>
       </div>
 
-      {error && (
-        <div className="mt-4 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="mt-4 rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2 text-sm text-[var(--status-success-text)]">
-          {success}
-        </div>
-      )}
-
       <div className="mt-4 flex items-center justify-end">
-        <button
-          className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
-          disabled={form.formState.isSubmitting}
+        <Button
           type="submit"
+          loading={form.formState.isSubmitting}
         >
           {form.formState.isSubmitting ? "Creating..." : "Create request"}
-        </button>
+        </Button>
       </div>
     </form>
   );

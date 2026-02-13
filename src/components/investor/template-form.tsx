@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Trash2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -41,7 +43,6 @@ export function TemplateForm({
   const [name, setName] = React.useState(initialName);
   const [description, setDescription] = React.useState(initialDescription);
   const [items, setItems] = React.useState<TemplateItem[]>(initialItems);
-  const [error, setError] = React.useState<string | null>(null);
   const [saving, setSaving] = React.useState(false);
 
   function addItem() {
@@ -68,7 +69,6 @@ export function TemplateForm({
     if (items.some((i) => !i.metric_name.trim())) return;
 
     setSaving(true);
-    setError(null);
 
     try {
       const url =
@@ -100,7 +100,7 @@ export function TemplateForm({
         router.push("/metric-requests/templates");
       }
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      toast.error(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setSaving(false);
     }
@@ -114,7 +114,7 @@ export function TemplateForm({
       <div className="rounded-xl border border-border-default card-surface p-5 space-y-4">
         <div className="grid gap-2">
           <label className="text-sm text-text-secondary" htmlFor="templateName">
-            Template name
+            Template name<span className="text-[var(--error-accent)]"> *</span>
           </label>
           <input
             id="templateName"
@@ -188,31 +188,17 @@ export function TemplateForm({
         </div>
       </div>
 
-      {error && (
-        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
-          {error}
-        </div>
-      )}
-
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={saving}
-          className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
-        >
-          {saving
-            ? "Saving..."
-            : mode === "edit"
-              ? "Update template"
-              : "Create template"}
-        </button>
-        <button
+        <Button type="submit" loading={saving}>
+          {mode === "edit" ? "Update template" : "Create template"}
+        </Button>
+        <Button
           type="button"
+          variant="secondary"
           onClick={() => onCancel ? onCancel() : router.push("/metric-requests/templates")}
-          className="inline-flex h-10 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-4 text-sm text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );

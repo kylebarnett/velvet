@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { ArrowUpDown, LayoutGrid, List } from "lucide-react";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { TearSheetCard } from "@/components/founder/tear-sheet-card";
 import { SlidingTabs, SlidingIconTabs, TabItem } from "@/components/ui/sliding-tabs";
 import {
@@ -169,7 +170,8 @@ export default function TearSheetsPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight">Tear Sheets</h1>
+          <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Tear Sheets" }]} />
+          <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight">Tear Sheets</h1>
           <p className="text-sm text-text-tertiary">
             Create quarterly summaries to share with investors.
           </p>

@@ -129,8 +129,8 @@ export function DocumentUploadModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-xl border border-border-default bg-bg-secondary p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter">
+      <div className="w-full max-w-lg rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">Upload document</h3>
           <button

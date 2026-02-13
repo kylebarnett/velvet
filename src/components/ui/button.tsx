@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
@@ -7,6 +8,7 @@ type ButtonSize = "sm" | "md" | "lg";
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  loading?: boolean;
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -26,12 +28,18 @@ const sizeStyles: Record<ButtonSize, string> = {
   lg: "h-11 px-5 text-sm gap-2",
 };
 
+const spinnerSizeClasses: Record<ButtonSize, string> = {
+  sm: "h-3.5 w-3.5",
+  md: "h-4 w-4",
+  lg: "h-4 w-4",
+};
+
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = "primary", size = "md", className, disabled, ...props }, ref) => {
+  ({ variant = "primary", size = "md", loading, className, disabled, children, ...props }, ref) => {
     return (
       <button
         ref={ref}
-        disabled={disabled}
+        disabled={disabled || loading}
         className={cn(
           "inline-flex items-center justify-center rounded-md font-medium transition-all duration-150",
           "focus:outline-none focus-visible:ring-2",
@@ -42,7 +50,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           className,
         )}
         {...props}
-      />
+      >
+        {loading && <Loader2 className={cn("animate-spin", spinnerSizeClasses[size])} />}
+        {children}
+      </button>
     );
   },
 );

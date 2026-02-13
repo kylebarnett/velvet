@@ -2,8 +2,10 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { CadenceSelector } from "./cadence-selector";
 import {
   Select,
@@ -49,7 +51,6 @@ const STEPS = [
 export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
   const router = useRouter();
   const [step, setStep] = React.useState(0);
-  const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
   // Form state
@@ -97,14 +98,12 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
   const handleNext = () => {
     if (step < STEPS.length - 1) {
       setStep(step + 1);
-      setError(null);
     }
   };
 
   const handleBack = () => {
     if (step > 0) {
       setStep(step - 1);
-      setError(null);
     }
   };
 
@@ -112,7 +111,6 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
     if (!selectedTemplate || !scheduleName.trim()) return;
 
     setSubmitting(true);
-    setError(null);
 
     try {
       const res = await fetch("/api/investors/schedules", {
@@ -137,7 +135,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
       router.push("/metric-requests");
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create schedule");
+      toast.error(err instanceof Error ? err.message : "Failed to create schedule");
     } finally {
       setSubmitting(false);
     }
@@ -191,13 +189,6 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
           </React.Fragment>
         ))}
       </div>
-
-      {/* Error message */}
-      {error && (
-        <div className="rounded-lg border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-3 text-sm text-[var(--status-error-text)]">
-          {error}
-        </div>
-      )}
 
       {/* Step content */}
       <div className="rounded-xl border border-border-default card-surface p-4 sm:p-6">
@@ -451,7 +442,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
             {/* Schedule name */}
             <div>
               <label className="text-sm font-medium text-text-secondary">
-                Schedule Name
+                Schedule Name<span className="text-[var(--error-accent)]"> *</span>
               </label>
               <input
                 type="text"
@@ -564,45 +555,32 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
 
       {/* Navigation buttons */}
       <div className="flex items-center justify-between">
-        <button
-          type="button"
+        <Button
+          variant="secondary"
           onClick={handleBack}
           disabled={step === 0}
-          className="flex h-10 items-center gap-2 rounded-md border border-border-default px-4 text-sm text-text-secondary hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
-        </button>
+        </Button>
 
         {step < STEPS.length - 1 ? (
-          <button
-            type="button"
+          <Button
             onClick={handleNext}
             disabled={!canProceed()}
-            className="flex h-10 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             Continue
             <ArrowRight className="h-4 w-4" />
-          </button>
+          </Button>
         ) : (
-          <button
-            type="button"
+          <Button
             onClick={handleSubmit}
-            disabled={!canProceed() || submitting}
-            className="flex h-10 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+            disabled={!canProceed()}
+            loading={submitting}
           >
-            {submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              <>
-                <Check className="h-4 w-4" />
-                Create Schedule
-              </>
-            )}
-          </button>
+            {!submitting && <Check className="h-4 w-4" />}
+            {submitting ? "Creating..." : "Create Schedule"}
+          </Button>
         )}
       </div>
     </div>

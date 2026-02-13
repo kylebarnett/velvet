@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 const UnifiedRequestWizard = dynamic(
   () =>
@@ -37,5 +38,10 @@ const UnifiedRequestWizard = dynamic(
 );
 
 export default function NewRequestPage() {
-  return <UnifiedRequestWizard />;
+  return (
+    <div className="space-y-4">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Metric Requests", href: "/metric-requests" }, { label: "New Request" }]} />
+      <UnifiedRequestWizard />
+    </div>
+  );
 }

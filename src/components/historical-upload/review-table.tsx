@@ -14,6 +14,7 @@ import {
   Filter,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ValueEditModal } from "./value-edit-modal";
 import { ConflictCard } from "./conflict-card";
 
@@ -371,8 +372,21 @@ export function ReviewTable({
               setSearch(e.target.value);
               setOffset(0);
             }}
-            className="h-11 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm text-text-primary transition-colors hover:border-border-default focus:border-border-default focus:outline-none"
+            className="h-11 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-8 text-sm text-text-primary transition-colors hover:border-border-default focus:border-border-default focus:outline-none"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setOffset(0);
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-text-muted hover:text-text-secondary"
+              aria-label="Clear search"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
         <select
@@ -446,6 +460,28 @@ export function ReviewTable({
         {processing && <Loader2 className="ml-2 h-4 w-4 animate-spin text-text-tertiary" />}
       </div>
 
+      {/* Result count when filtering */}
+      {(search || statusFilter) && (
+        <div className="flex items-center gap-3">
+          {values.length > 0 && values.length < totalValues && (
+            <p className="text-xs text-text-muted">
+              Showing {total} of {totalValues} results
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setSearch("");
+              setStatusFilter("");
+              setOffset(0);
+            }}
+            className="text-xs text-text-tertiary hover:text-text-secondary"
+          >
+            Reset filters
+          </button>
+        </div>
+      )}
+
       {/* Stats bar */}
       <div className="flex gap-4 text-xs text-text-secondary">
         <span>{total} total</span>
@@ -468,9 +504,11 @@ export function ReviewTable({
           <Loader2 className="h-6 w-6 animate-spin text-text-tertiary" />
         </div>
       ) : groups.length === 0 ? (
-        <div className="py-12 text-center text-sm text-text-tertiary">
-          No values found matching your filters.
-        </div>
+        <EmptyState
+          variant="no-results"
+          title="No results found"
+          description={search ? `No matches for "${search}"` : "No values match the selected filter"}
+        />
       ) : (
         <div className="divide-y divide-border-default rounded-xl border border-border-default">
           {groups.map((company) => (

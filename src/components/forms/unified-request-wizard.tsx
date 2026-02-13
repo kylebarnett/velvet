@@ -10,11 +10,12 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
-  Loader2,
   CalendarClock,
   Send,
 } from "lucide-react";
 
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { getMetricDefinition } from "@/lib/metric-definitions";
 import {
   getAvailableQuarters,
@@ -151,7 +152,6 @@ export function UnifiedRequestWizard() {
   // UI state
   const [loading, setLoading] = React.useState(true);
   const [submitting, setSubmitting] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
   const [result, setResult] = React.useState<{
     type: "one-time" | "recurring";
     requestsCreated?: number;
@@ -231,7 +231,7 @@ export function UnifiedRequestWizard() {
         }
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "Failed to load data.";
-        setError(msg);
+        toast.error(msg);
       } finally {
         setLoading(false);
       }
@@ -280,7 +280,7 @@ export function UnifiedRequestWizard() {
     if (selectedCompanyIds.size === 0) return;
 
     setSubmitting(true);
-    setError(null);
+    
 
     const effectivePeriodType = useCustomMetric ? customPeriodType : periodType;
     const effectiveYear =
@@ -334,7 +334,7 @@ export function UnifiedRequestWizard() {
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Something went wrong.";
-      setError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -344,7 +344,7 @@ export function UnifiedRequestWizard() {
     if (!selectedTemplateId || !scheduleName.trim()) return;
 
     setSubmitting(true);
-    setError(null);
+    
 
     try {
       const companyIds = allCompanies ? null : Array.from(selectedCompanyIds);
@@ -369,7 +369,7 @@ export function UnifiedRequestWizard() {
 
       setResult({ type: "recurring", scheduleId: json.id });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create schedule");
+      toast.error(err instanceof Error ? err.message : "Failed to create schedule");
     } finally {
       setSubmitting(false);
     }
@@ -555,12 +555,6 @@ export function UnifiedRequestWizard() {
         </span>
       </div>
 
-      {error && (
-        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
-          {error}
-        </div>
-      )}
-
       {/* Step 1: Select Template */}
       {step === 1 && (
         <div className="space-y-6">
@@ -572,7 +566,7 @@ export function UnifiedRequestWizard() {
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div className="space-y-1">
-              <h1 className="text-xl font-semibold tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
                 Select a template
               </h1>
               <p className="text-sm text-text-tertiary">
@@ -650,7 +644,7 @@ export function UnifiedRequestWizard() {
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div className="space-y-1">
-              <h1 className="text-xl font-semibold tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
                 Select companies
               </h1>
               <p className="text-sm text-text-tertiary">
@@ -667,7 +661,7 @@ export function UnifiedRequestWizard() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
                   <label className="text-sm text-text-secondary" htmlFor="customMetricName">
-                    Metric name
+                    Metric name<span className="text-[var(--error-accent)]"> *</span>
                   </label>
                   <input
                     id="customMetricName"
@@ -782,7 +776,7 @@ export function UnifiedRequestWizard() {
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div className="space-y-1">
-              <h1 className="text-xl font-semibold tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
                 {frequency === null
                   ? "Choose frequency"
                   : frequency === "one-time"
@@ -972,14 +966,13 @@ export function UnifiedRequestWizard() {
                 >
                   Back
                 </button>
-                <button
+                <Button
                   onClick={handleSubmitOneTime}
-                  disabled={submitting}
-                  className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                  loading={submitting}
                   type="button"
                 >
-                  {submitting ? "Creating..." : "Create Requests"}
-                </button>
+                  Create Requests
+                </Button>
               </div>
             </>
           )}
@@ -991,7 +984,7 @@ export function UnifiedRequestWizard() {
                 {/* Schedule name */}
                 <div>
                   <label className="text-sm font-medium text-text-secondary">
-                    Schedule Name
+                    Schedule Name<span className="text-[var(--error-accent)]"> *</span>
                   </label>
                   <input
                     type="text"
@@ -1182,24 +1175,15 @@ export function UnifiedRequestWizard() {
                 >
                   Back
                 </button>
-                <button
+                <Button
                   onClick={handleSubmitRecurring}
-                  disabled={submitting || !scheduleName.trim()}
-                  className="flex h-10 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                  disabled={!scheduleName.trim()}
+                  loading={submitting}
                   type="button"
                 >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="h-4 w-4" />
-                      Create Schedule
-                    </>
-                  )}
-                </button>
+                  <Check className="h-4 w-4" />
+                  Create Schedule
+                </Button>
               </div>
             </>
           )}

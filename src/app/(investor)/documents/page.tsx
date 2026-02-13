@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Download, Eye, FileText, Search, X } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Select,
   SelectContent,
@@ -9,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import {
   DOCUMENT_TYPE_SHORT_LABELS,
@@ -287,27 +289,31 @@ export default function DocumentsPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-xl sm:text-2xl font-semibold">Documents</h1>
+      <div>
+        <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Documents" }]} />
+        <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight">Documents</h1>
+      </div>
 
       {/* Filters */}
       <div className="space-y-4">
         {/* Search - full width on mobile */}
-        <div className="relative">
+        <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder="Search by filename..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-10 w-full sm:w-64 rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm placeholder:text-text-muted focus:border-border-default focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+            className="h-10 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-8 text-sm placeholder:text-text-muted focus:border-border-default focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-bg-hover rounded"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-text-muted hover:text-text-secondary"
               type="button"
+              aria-label="Clear search"
             >
-              <X className="h-3 w-3 text-text-muted" />
+              <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
@@ -417,16 +423,44 @@ export default function DocumentsPage() {
         </div>
       )}
 
+      {/* Result count when filtering */}
+      {!loading && (search || companyFilter || typeFilter || dateFilter !== "all") && (
+        <div className="flex items-center gap-3">
+          {filteredDocuments.length > 0 && filteredDocuments.length < documents.length && (
+            <p className="text-xs text-text-muted">
+              Showing {filteredDocuments.length} of {documents.length} results
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setSearch("");
+              setCompanyFilter("");
+              setTypeFilter("");
+              setDateFilter("all");
+            }}
+            className="text-xs text-text-tertiary hover:text-text-secondary"
+          >
+            Reset filters
+          </button>
+        </div>
+      )}
+
       {/* Documents table */}
       {!loading && filteredDocuments.length === 0 && (
-        <div className="py-12 text-center">
-          <p className="text-sm text-text-secondary">No documents found.</p>
-          <p className="mt-1 text-xs text-text-muted">
-            {search || companyFilter || typeFilter || dateFilter !== "all"
-              ? "Try adjusting your filters."
-              : "Documents uploaded by founders will appear here."}
-          </p>
-        </div>
+        search || companyFilter || typeFilter || dateFilter !== "all" ? (
+          <EmptyState
+            variant="no-results"
+            title="No results found"
+            description={search ? `No matches for "${search}"` : "Try adjusting your filters"}
+          />
+        ) : (
+          <EmptyState
+            variant="first-use"
+            title="No documents yet"
+            description="Documents uploaded by founders will appear here."
+          />
+        )
       )}
 
       {/* Document Preview Modal */}

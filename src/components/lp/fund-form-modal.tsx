@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -26,7 +27,6 @@ type FundFormModalProps = {
 };
 
 export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: FundFormModalProps) {
-  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const backdropRef = useRef<HTMLDivElement>(null);
 
@@ -46,7 +46,6 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
       setVintageYear(String(initialValues?.vintage_year ?? new Date().getFullYear()));
       setFundSize(initialValues?.fund_size != null ? String(initialValues.fund_size) : "");
       setCurrency(initialValues?.currency ?? "USD");
-      setError(null);
     }
   }, [open, initialValues]);
 
@@ -66,17 +65,16 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
   async function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setError(null);
 
     // Validate
     if (!name.trim()) {
-      setError("Fund name is required.");
+      toast.error("Fund name is required.");
       setSaving(false);
       return;
     }
     const year = parseInt(vintageYear, 10);
     if (isNaN(year) || year < 1990 || year > 2100) {
-      setError("Vintage year must be between 1990 and 2100.");
+      toast.error("Vintage year must be between 1990 and 2100.");
       setSaving(false);
       return;
     }
@@ -90,7 +88,7 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
       if (fundSize.trim() !== "") {
         const size = parseFloat(fundSize);
         if (isNaN(size) || size <= 0) {
-          setError("Fund size must be a positive number.");
+          toast.error("Fund size must be a positive number.");
           setSaving(false);
           return;
         }
@@ -113,7 +111,7 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
 
       onSaved();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred.");
+      toast.error(err instanceof Error ? err.message : "An error occurred.");
     } finally {
       setSaving(false);
     }
@@ -122,12 +120,12 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter"
       onClick={(e) => {
         if (e.target === backdropRef.current) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">
             {mode === "create" ? "Create Fund" : "Edit Fund"}
@@ -142,16 +140,10 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
           </button>
         </div>
 
-        {error && (
-          <div className="mt-3 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]" role="alert">
-            {error}
-          </div>
-        )}
-
         <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">
           {/* Name */}
           <div>
-            <label className="mb-1 block text-sm text-text-secondary">Fund Name</label>
+            <label className="mb-1 block text-sm text-text-secondary">Fund Name<span className="text-[var(--error-accent)]"> *</span></label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -210,9 +202,9 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
             </Button>
             <Button
               type="submit"
-              disabled={saving}
+              loading={saving}
             >
-              {saving ? "Saving..." : mode === "create" ? "Create Fund" : "Save Changes"}
+              {mode === "create" ? "Create Fund" : "Save Changes"}
             </Button>
           </div>
         </form>

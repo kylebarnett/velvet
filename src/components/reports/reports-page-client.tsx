@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { BarChart3, GitCompareArrows, Trophy, Search } from "lucide-react";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { REPORT_TEMPLATES, type ReportType } from "@/lib/reports/templates";
 import { ReportGallery } from "./report-gallery";
 import { ReportPreviewPanel } from "./report-preview-panel";
@@ -73,8 +74,9 @@ export function ReportsPageClient({ initialReports }: ReportsPageClientProps) {
     <div className="space-y-8">
       {/* Page header */}
       <div>
+        <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Reports" }]} />
         <h1
-          className="text-2xl font-bold tracking-tight text-text-primary"
+          className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight text-text-primary"
           data-onboarding="reports-title"
         >
           Reports

@@ -63,6 +63,28 @@ interface SkeletonTableProps {
   className?: string;
 }
 
+interface KPICardSkeletonProps {
+  count?: number;
+  className?: string;
+}
+
+export function KPICardSkeleton({ count = 4, className }: KPICardSkeletonProps) {
+  return (
+    <div className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-4", className)}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div
+          key={i}
+          className="rounded-xl border border-border-default card-surface p-4"
+        >
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="mt-3 h-7 w-24" />
+          <Skeleton className="mt-2 h-3 w-16" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function SkeletonTable({
   rows = 5,
   columns = 4,

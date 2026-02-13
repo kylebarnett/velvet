@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { requireRole } from "@/lib/auth/require-role";
 import { TeamSettings } from "@/components/team/team-settings";
 
@@ -8,7 +9,10 @@ export default async function InvestorTeamPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-xl font-semibold tracking-tight" data-onboarding="team-title">Team</h1>
+      <div>
+        <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Team" }]} />
+        <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight" data-onboarding="team-title">Team</h1>
+      </div>
       <TeamSettings currentUserId={user.id} />
     </div>
   );

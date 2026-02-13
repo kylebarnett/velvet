@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { requireRole } from "@/lib/auth/require-role";
 import { TeamSettings } from "@/components/team/team-settings";
 
@@ -9,7 +10,8 @@ export default async function FounderTeamPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1" data-onboarding="team-title">
-        <h1 className="text-xl font-semibold tracking-tight">Team</h1>
+        <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Team" }]} />
+        <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight">Team</h1>
         <p className="text-sm text-text-tertiary">
           Manage your team members and their access to company data.
         </p>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Plus, FileText } from "lucide-react";
 
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { CampaignsTabContent } from "@/components/investor/requests-tab-content";
 import { CollapsibleSchedules } from "@/components/investor/collapsible-schedules";
 
@@ -11,9 +12,12 @@ export function RequestsTabs() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <h1 className="text-xl font-semibold tracking-tight" data-onboarding="requests-title">
-          Metric Requests
-        </h1>
+        <div>
+          <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Metric Requests" }]} />
+          <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight" data-onboarding="requests-title">
+            Metric Requests
+          </h1>
+        </div>
         <div className="flex items-center gap-2">
           <Link
             href="/metric-requests/templates"

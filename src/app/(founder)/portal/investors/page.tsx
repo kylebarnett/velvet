@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Search, CheckCircle2, Loader2 } from "lucide-react";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InvestorApprovalCard } from "@/components/founder/investor-approval-card";
 
@@ -129,8 +130,9 @@ export default function FounderInvestorsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1" data-onboarding="investors-title">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-xl font-semibold tracking-tight">Investors</h1>
+        <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Investors" }]} />
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Investors</h1>
           {!loading && investors.length > 0 && (
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center rounded-full bg-bg-elevated px-2.5 py-0.5 text-xs font-medium text-text-secondary">

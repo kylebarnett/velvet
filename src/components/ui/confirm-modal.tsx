@@ -100,7 +100,7 @@ export function ConfirmModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-bg-backdrop backdrop-blur-sm"
+        className="absolute inset-0 bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter"
         onClick={onCancel}
         aria-hidden="true"
       />
@@ -111,7 +111,7 @@ export function ConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative mx-4 w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 shadow-2xl"
+        className="relative mx-4 w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 shadow-2xl modal-dialog-enter"
       >
         <div className="flex items-start gap-4">
           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${iconBgColor}`}>

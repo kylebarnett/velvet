@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { toast } from "sonner";
 import { X, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MemberRoleSelector } from "./member-role-selector";
@@ -16,7 +17,6 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
   const [email, setEmail] = React.useState("");
   const [role, setRole] = React.useState("member");
   const [submitting, setSubmitting] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
   const [inviteUrl, setInviteUrl] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState(false);
 
@@ -24,7 +24,6 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
     if (open) {
       setEmail("");
       setRole("member");
-      setError(null);
       setInviteUrl(null);
       setCopied(false);
     }
@@ -42,7 +41,6 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
   async function handleInvite() {
     if (!email.trim()) return;
     setSubmitting(true);
-    setError(null);
 
     try {
       const res = await fetch(`/api/organizations/${orgId}/invitations`, {
@@ -55,8 +53,9 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
 
       setInviteUrl(json.inviteUrl);
       onInvited();
+      toast.success("Invitation sent successfully.");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      toast.error(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setSubmitting(false);
     }
@@ -74,13 +73,13 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
   return (
     <>
       <div
-        className="fixed inset-0 z-50 bg-bg-backdrop backdrop-blur-sm"
+        className="fixed inset-0 z-50 bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter"
         onClick={onClose}
         aria-hidden="true"
       />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6"
+          className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between mb-4">
@@ -92,12 +91,6 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
               <X className="h-4 w-4" />
             </button>
           </div>
-
-          {error && (
-            <div className="mb-4 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
-              {error}
-            </div>
-          )}
 
           {inviteUrl ? (
             <div className="space-y-4">
@@ -140,7 +133,7 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-text-tertiary">Email</label>
+                <label className="text-xs text-text-tertiary">Email<span className="text-[var(--error-accent)]"> *</span></label>
                 <input
                   type="email"
                   value={email}
@@ -164,9 +157,10 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
                 </Button>
                 <Button
                   onClick={handleInvite}
-                  disabled={submitting || !email.trim()}
+                  loading={submitting}
+                  disabled={!email.trim()}
                 >
-                  {submitting ? "Sending..." : "Send Invitation"}
+                  Send Invitation
                 </Button>
               </div>
             </div>

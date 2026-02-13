@@ -4,6 +4,8 @@ import * as React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const schema = z.object({
   requestId: z.string().min(1),
@@ -14,9 +16,6 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function MetricSubmissionForm() {
-  const [error, setError] = React.useState<string | null>(null);
-  const [success, setSuccess] = React.useState<string | null>(null);
-
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -27,8 +26,6 @@ export function MetricSubmissionForm() {
   });
 
   async function onSubmit(values: FormValues) {
-    setError(null);
-    setSuccess(null);
     try {
       const res = await fetch("/api/metrics/submit", {
         method: "POST",
@@ -37,10 +34,10 @@ export function MetricSubmissionForm() {
       });
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Failed to submit metric.");
-      setSuccess("Submitted.");
+      toast.success("Submitted.");
       form.reset({ ...values, value: "", notes: "" });
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      toast.error(e instanceof Error ? e.message : "Something went wrong.");
     }
   }
 
@@ -75,25 +72,13 @@ export function MetricSubmissionForm() {
         />
       </div>
 
-      {error && (
-        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2 text-sm text-[var(--status-success-text)]">
-          {success}
-        </div>
-      )}
-
       <div className="flex justify-end">
-        <button
-          className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
-          disabled={form.formState.isSubmitting}
+        <Button
           type="submit"
+          loading={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? "Submitting…" : "Submit"}
-        </button>
+          {form.formState.isSubmitting ? "Submitting..." : "Submit"}
+        </Button>
       </div>
     </form>
   );

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 const schema = z.object({
@@ -19,9 +20,6 @@ type FormValues = z.infer<typeof schema>;
 
 export function AddContactForm() {
   const router = useRouter();
-  const [error, setError] = React.useState<string | null>(null);
-  const [success, setSuccess] = React.useState<string | null>(null);
-
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -34,9 +32,6 @@ export function AddContactForm() {
   });
 
   async function onSubmit(values: FormValues) {
-    setError(null);
-    setSuccess(null);
-
     try {
       const res = await fetch("/api/investors/portfolio/import", {
         method: "POST",
@@ -54,7 +49,7 @@ export function AddContactForm() {
         throw new Error(json.errors[0].message);
       }
 
-      setSuccess("Contact added successfully.");
+      toast.success("Contact added successfully.");
       form.reset();
 
       setTimeout(() => {
@@ -62,7 +57,7 @@ export function AddContactForm() {
         router.refresh();
       }, 1500);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      toast.error(err instanceof Error ? err.message : "Something went wrong.");
     }
   }
 
@@ -146,23 +141,12 @@ export function AddContactForm() {
         </div>
       </div>
 
-      {error && (
-        <div className="mt-4 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="mt-4 rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2 text-sm text-emerald-100">
-          {success}
-        </div>
-      )}
-
       <div className="mt-4 flex items-center justify-end">
         <Button
-          disabled={form.formState.isSubmitting}
+          loading={form.formState.isSubmitting}
           type="submit"
         >
-          {form.formState.isSubmitting ? "Adding..." : "Add Contact"}
+          Add Contact
         </Button>
       </div>
     </form>

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { NotificationList } from "@/components/founder/notification-list";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 
@@ -63,7 +64,8 @@ export default function FounderRequestsPage() {
     return (
       <div className="space-y-6">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight">Metric Requests</h1>
+          <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Metric Requests" }]} />
+          <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight">Metric Requests</h1>
           <p className="text-sm text-text-tertiary">
             Submit metrics for the selected period.
           </p>
@@ -103,7 +105,8 @@ export default function FounderRequestsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1" data-onboarding="requests-title">
-        <h1 className="text-xl font-semibold tracking-tight">Metric Requests</h1>
+        <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Metric Requests" }]} />
+        <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight">Metric Requests</h1>
         <p className="text-sm text-text-tertiary">
           Metrics your investors have requested. Submit values here or from your dashboard.
         </p>

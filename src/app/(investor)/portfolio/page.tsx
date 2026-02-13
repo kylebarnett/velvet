@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { requireRole } from "@/lib/auth/require-role";
 import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -81,7 +82,10 @@ export default async function PortfolioPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl sm:text-2xl font-semibold" data-onboarding="portfolio-title">Portfolio</h1>
+        <div>
+          <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Portfolio" }]} />
+          <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight" data-onboarding="portfolio-title">Portfolio</h1>
+        </div>
         <div className="flex items-center gap-2">
           <DownloadCsvButton />
           <Link

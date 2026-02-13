@@ -6,6 +6,8 @@ import { LucideIcon } from "lucide-react";
 export type TabItem<T extends string = string> = {
   value: T;
   label: string;
+  /** Shorter label for small screens (if provided, label is hidden on mobile) */
+  shortLabel?: string;
   icon?: LucideIcon;
   /** Optional badge count to display */
   badge?: number;
@@ -158,7 +160,14 @@ export function SlidingTabs<T extends string = string>({
                 )}
 
                 {/* Label */}
-                <span className="relative tracking-wide">{tab.label}</span>
+                {tab.shortLabel ? (
+                  <>
+                    <span className="relative hidden tracking-wide sm:inline">{tab.label}</span>
+                    <span className="relative tracking-wide sm:hidden">{tab.shortLabel}</span>
+                  </>
+                ) : (
+                  <span className="relative tracking-wide">{tab.label}</span>
+                )}
 
                 {/* Badge */}
                 {tab.badge !== undefined && tab.badge > 0 && (

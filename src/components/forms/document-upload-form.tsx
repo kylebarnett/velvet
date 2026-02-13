@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -19,26 +21,11 @@ type Props = {
 
 export function DocumentUploadForm({ company }: Props) {
   const router = useRouter();
-  const [error, setError] = React.useState<string | null>(null);
-  const [success, setSuccess] = React.useState<string | null>(null);
   const [isUploading, setIsUploading] = React.useState(false);
   const [documentType, setDocumentType] = React.useState("");
 
-  // Auto-dismiss success message after 4 seconds
-  React.useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => {
-        setSuccess(null);
-        router.push("/portal/documents");
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [success, router]);
-
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
     setIsUploading(true);
     try {
       const formData = new FormData(e.currentTarget);
@@ -48,11 +35,12 @@ export function DocumentUploadForm({ company }: Props) {
       });
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Upload failed.");
-      setSuccess("Document uploaded successfully.");
+      toast.success("Document uploaded successfully.");
       setDocumentType("");
       e.currentTarget.reset();
+      setTimeout(() => router.push("/portal/documents"), 1500);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      toast.error(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setIsUploading(false);
     }
@@ -76,7 +64,7 @@ export function DocumentUploadForm({ company }: Props) {
 
         <div className="grid gap-2">
           <label className="text-sm font-medium">
-            Document type
+            Document type<span className="text-[var(--error-accent)]"> *</span>
           </label>
           <input type="hidden" name="documentType" value={documentType} />
           <Select value={documentType || "__none__"} onValueChange={(v) => setDocumentType(v === "__none__" ? "" : v)}>
@@ -127,7 +115,7 @@ export function DocumentUploadForm({ company }: Props) {
 
         <div className="grid gap-2">
           <label className="text-sm font-medium" htmlFor="file">
-            File
+            File<span className="text-[var(--error-accent)]"> *</span>
           </label>
           <div className="rounded-xl border border-dashed border-border-default bg-bg-input p-6">
             <input
@@ -145,25 +133,10 @@ export function DocumentUploadForm({ company }: Props) {
         </div>
       </div>
 
-      {error && (
-        <div className="mt-4 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="mt-4 rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2 text-sm text-[var(--status-success-text)]">
-          {success}
-        </div>
-      )}
-
       <div className="mt-4 flex justify-end">
-        <button
-          className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
-          disabled={isUploading || !documentType}
-          type="submit"
-        >
-          {isUploading ? "Uploading..." : "Upload"}
-        </button>
+        <Button loading={isUploading} disabled={!documentType} type="submit">
+          Upload
+        </Button>
       </div>
     </form>
   );

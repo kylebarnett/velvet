@@ -9,8 +9,8 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import { FounderCompanyLogo } from "@/components/founder/company-logo";
-import { useToast } from "@/hooks/use-toast";
 import { TAG_OPTIONS, TAG_COLORS, getTagLabel, type TagType } from "@/lib/company/constants";
 
 type CompanyData = {
@@ -37,11 +37,9 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
   const [editingWebsite, setEditingWebsite] = React.useState(false);
   const [websiteInput, setWebsiteInput] = React.useState(data.website ?? "");
   const [saving, setSaving] = React.useState(false);
-  const { success, error, setSuccess, setError } = useToast();
 
   async function saveField(field: string, value: string | number | null) {
     setSaving(true);
-    setError(null);
     try {
       const res = await fetch("/api/founder/company", {
         method: "PUT",
@@ -49,13 +47,13 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
         body: JSON.stringify({ [field]: value }),
       });
       if (!res.ok) {
-        setError("Failed to save changes.");
+        toast.error("Failed to save changes.");
         return false;
       }
-      setSuccess("Changes saved");
+      toast.success("Changes saved");
       return true;
     } catch {
-      setError("Failed to save changes.");
+      toast.error("Failed to save changes.");
       return false;
     } finally {
       setSaving(false);
@@ -94,28 +92,11 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">Company Profile</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Company Profile</h1>
         <p className="text-sm text-text-tertiary">
           View and update your company information.
         </p>
       </div>
-
-      {/* Status messages */}
-      {success && (
-        <div className="flex items-center gap-2 rounded-lg border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-4 py-2.5 text-sm text-[var(--status-success-text)]" role="alert">
-          <Check className="h-4 w-4 shrink-0" />
-          {success}
-        </div>
-      )}
-      {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-2.5 text-sm text-[var(--status-error-text)]" role="alert">
-          <X className="h-4 w-4 shrink-0" />
-          {error}
-          <button type="button" onClick={() => setError(null)} className="ml-auto rounded p-0.5 hover:bg-bg-hover">
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      )}
 
       {/* Hero section — Logo + Name + Website + Tags */}
       <div className="rounded-xl border border-border-default card-surface px-6 py-5">

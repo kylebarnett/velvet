@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CompanyProfile } from "@/components/founder/company-profile";
@@ -22,5 +23,10 @@ export default async function FounderCompanyPage() {
     );
   }
 
-  return <CompanyProfile company={company} />;
+  return (
+    <div className="space-y-4">
+      <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Company Profile" }]} />
+      <CompanyProfile company={company} />
+    </div>
+  );
 }

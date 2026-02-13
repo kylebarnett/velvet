@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
+import { toast } from "sonner";
 import { Loader2, Mail, CheckCircle2, X, Sparkles, Pencil, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { formatValue } from "@/components/charts/types";
@@ -61,7 +62,6 @@ export function EmailPasteModal({
   const [emailContent, setEmailContent] = React.useState("");
   const [metrics, setMetrics] = React.useState<ExtractedMetric[]>([]);
   const [selected, setSelected] = React.useState<Set<number>>(new Set());
-  const [error, setError] = React.useState<string | null>(null);
   const [savedCount, setSavedCount] = React.useState(0);
   const [providerInfo, setProviderInfo] = React.useState<string | null>(null);
   const [showExample, setShowExample] = React.useState(false);
@@ -96,7 +96,6 @@ export function EmailPasteModal({
     setEmailContent("");
     setMetrics([]);
     setSelected(new Set());
-    setError(null);
     setSavedCount(0);
     setProviderInfo(null);
     setShowExample(false);
@@ -108,12 +107,11 @@ export function EmailPasteModal({
 
   async function handleExtract() {
     if (!emailContent.trim() || emailContent.trim().length < 10) {
-      setError("Please paste email content (at least 10 characters).");
+      toast.error("Please paste email content (at least 10 characters).");
       return;
     }
 
     setState("extracting");
-    setError(null);
 
     try {
       const res = await fetch("/api/founder/email-ingest", {
@@ -134,7 +132,7 @@ export function EmailPasteModal({
       const extractedMetrics: ExtractedMetric[] = data.metrics || [];
 
       if (extractedMetrics.length === 0) {
-        setError("No financial metrics found in the email content. Try pasting a different email.");
+        toast.error("No financial metrics found in the email content. Try pasting a different email.");
         setState("idle");
         return;
       }
@@ -146,7 +144,7 @@ export function EmailPasteModal({
       setState("reviewing");
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Extraction failed.";
-      setError(message);
+      toast.error(message);
       setState("idle");
     }
   }
@@ -154,12 +152,11 @@ export function EmailPasteModal({
   async function handleSave() {
     const selectedMetrics = metrics.filter((_, i) => selected.has(i));
     if (selectedMetrics.length === 0) {
-      setError("Please select at least one metric to save.");
+      toast.error("Please select at least one metric to save.");
       return;
     }
 
     setState("saving");
-    setError(null);
 
     try {
       const submissions = selectedMetrics.map((m) => {
@@ -198,7 +195,7 @@ export function EmailPasteModal({
       }
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Save failed.";
-      setError(message);
+      toast.error(message);
       setState("reviewing");
     }
   }
@@ -227,7 +224,7 @@ export function EmailPasteModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter"
       onClick={(e) => {
         if (e.target === e.currentTarget && state !== "extracting" && state !== "saving") {
           handleClose();
@@ -237,7 +234,7 @@ export function EmailPasteModal({
       aria-modal="true"
       aria-label="Import from Email"
     >
-      <div className="w-full max-w-2xl rounded-xl border border-border-default bg-bg-secondary p-6 shadow-2xl">
+      <div className="w-full max-w-2xl rounded-xl border border-border-default bg-bg-secondary p-6 shadow-2xl modal-dialog-enter">
         {/* Header */}
         <div className="mb-4 flex items-start justify-between">
           <div>
@@ -260,16 +257,6 @@ export function EmailPasteModal({
             <X className="h-5 w-5" />
           </button>
         </div>
-
-        {/* Error message */}
-        {error && (
-          <div
-            className="mb-4 rounded-lg border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]"
-            role="alert"
-          >
-            {error}
-          </div>
-        )}
 
         {/* Idle: Textarea for pasting email */}
         {state === "idle" && (

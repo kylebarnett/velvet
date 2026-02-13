@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DashboardBuilderClient } from "./dashboard-builder-client";
@@ -97,6 +98,7 @@ export default async function DashboardEditPage({
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
+          <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Edit Dashboard" }]} />
           <Link
             href={`/dashboard/${companyId}`}
             className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
@@ -104,7 +106,7 @@ export default async function DashboardEditPage({
             <ArrowLeft className="h-4 w-4" />
             Cancel
           </Link>
-          <h1 className="text-xl font-semibold tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
             Edit Dashboard - {company.name}
           </h1>
         </div>

@@ -57,7 +57,7 @@ export function ValueEditModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -65,7 +65,7 @@ export function ValueEditModal({
       aria-modal="true"
       aria-label="Edit metric value"
     >
-      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-medium text-text-primary">Edit Value</h3>
           <button

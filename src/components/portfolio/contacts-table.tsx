@@ -748,8 +748,21 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                 setSearch(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-8 pr-3 text-sm outline-none placeholder:text-text-faint focus:border-accent focus:ring-2 focus:ring-[var(--ring-focus)]"
+              className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-8 pr-8 text-sm outline-none placeholder:text-text-faint focus:border-accent focus:ring-2 focus:ring-[var(--ring-focus)]"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setPagination((prev) => ({ ...prev, page: 1 }));
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-text-muted hover:text-text-secondary"
+                aria-label="Clear search"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
           <div className="flex gap-2">
             <Select
@@ -828,19 +841,38 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
           </div>
         )}
 
+        {/* Result count when filtering */}
+        {(search || statusFilter !== "all") && contacts.length > 0 && (
+          <div className="px-4 pt-3">
+            <p className="text-xs text-text-muted">
+              Showing {pagination.total} result{pagination.total === 1 ? "" : "s"}
+              {search ? ` for "${search}"` : ""}
+            </p>
+          </div>
+        )}
+
         {/* Content area */}
         {contacts.length === 0 && !fetching ? (
           <div className="px-4 py-8">
-            <EmptyState
-              title="No contacts found"
-              description={
-                pagination.total === 0
-                  ? "Import a CSV to add portfolio companies."
-                  : undefined
-              }
-              className="border-0 bg-transparent"
-              variant={pagination.total === 0 ? "first-use" : "inline"}
-            />
+            {search || statusFilter !== "all" ? (
+              <EmptyState
+                variant="no-results"
+                title="No results found"
+                description={search ? `No matches for "${search}"` : "No contacts match the selected filter"}
+                className="border-0 bg-transparent"
+              />
+            ) : (
+              <EmptyState
+                title="No contacts found"
+                description={
+                  pagination.total === 0
+                    ? "Import a CSV to add portfolio companies."
+                    : undefined
+                }
+                className="border-0 bg-transparent"
+                variant={pagination.total === 0 ? "first-use" : "inline"}
+              />
+            )}
           </div>
         ) : (
           <>

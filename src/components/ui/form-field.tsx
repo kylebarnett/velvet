@@ -5,11 +5,12 @@ interface FormFieldProps {
   label: string;
   htmlFor?: string;
   error?: string;
+  required?: boolean;
   children: React.ReactNode;
   className?: string;
 }
 
-export function FormField({ label, htmlFor, error, children, className }: FormFieldProps) {
+export function FormField({ label, htmlFor, error, required, children, className }: FormFieldProps) {
   return (
     <div className={cn("space-y-1.5", className)}>
       <label
@@ -17,6 +18,7 @@ export function FormField({ label, htmlFor, error, children, className }: FormFi
         className="block text-xs font-medium text-text-tertiary"
       >
         {label}
+        {required && <span className="text-[var(--error-accent)]"> *</span>}
       </label>
       {children}
       {error && (

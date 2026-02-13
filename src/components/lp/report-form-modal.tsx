@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -61,7 +62,6 @@ export function ReportFormModal({
   investments,
 }: ReportFormModalProps) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const backdropRef = useRef<HTMLDivElement>(null);
 
@@ -75,7 +75,6 @@ export function ReportFormModal({
       setTitle(defaultTitle());
       setReportDate(toDateInputValue(new Date()));
       setReportType("quarterly");
-      setError(null);
     }
   }, [open]);
 
@@ -119,16 +118,15 @@ export function ReportFormModal({
   async function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setError(null);
 
     if (!title.trim()) {
-      setError("Report title is required.");
+      toast.error("Report title is required.");
       setSaving(false);
       return;
     }
 
     if (!reportDate) {
-      setError("Report date is required.");
+      toast.error("Report date is required.");
       setSaving(false);
       return;
     }
@@ -156,7 +154,7 @@ export function ReportFormModal({
         onSaved();
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred.");
+      toast.error(err instanceof Error ? err.message : "An error occurred.");
     } finally {
       setSaving(false);
     }
@@ -165,12 +163,12 @@ export function ReportFormModal({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter"
       onClick={(e) => {
         if (e.target === backdropRef.current) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Generate LP Report</h2>
           <button
@@ -182,12 +180,6 @@ export function ReportFormModal({
             <X className="h-4 w-4" />
           </button>
         </div>
-
-        {error && (
-          <div className="mt-3 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]" role="alert">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">
           {/* Title */}
@@ -249,9 +241,9 @@ export function ReportFormModal({
             </Button>
             <Button
               type="submit"
-              disabled={saving}
+              loading={saving}
             >
-              {saving ? "Generating..." : "Generate Report"}
+              Generate Report
             </Button>
           </div>
         </form>

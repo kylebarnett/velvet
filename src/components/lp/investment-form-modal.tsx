@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -40,7 +41,6 @@ export function InvestmentFormModal({
   mode,
   initialValues,
 }: InvestmentFormModalProps) {
-  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const backdropRef = useRef<HTMLDivElement>(null);
 
@@ -71,7 +71,6 @@ export function InvestmentFormModal({
       );
       setInvestmentDate(initialValues?.investment_date ?? "");
       setNotes(initialValues?.notes ?? "");
-      setError(null);
     }
   }, [open, initialValues]);
 
@@ -90,17 +89,16 @@ export function InvestmentFormModal({
   async function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setError(null);
 
     // Validate
     if (!companyId) {
-      setError("Please select a company.");
+      toast.error("Please select a company.");
       setSaving(false);
       return;
     }
     const invested = parseFloat(investedAmount);
     if (isNaN(invested) || invested < 0) {
-      setError("Invested amount must be a non-negative number.");
+      toast.error("Invested amount must be a non-negative number.");
       setSaving(false);
       return;
     }
@@ -113,7 +111,7 @@ export function InvestmentFormModal({
       if (currentValue.trim() !== "") {
         const cv = parseFloat(currentValue);
         if (isNaN(cv) || cv < 0) {
-          setError("Current value must be a non-negative number.");
+          toast.error("Current value must be a non-negative number.");
           setSaving(false);
           return;
         }
@@ -122,7 +120,7 @@ export function InvestmentFormModal({
       if (realizedValue.trim() !== "") {
         const rv = parseFloat(realizedValue);
         if (isNaN(rv) || rv < 0) {
-          setError("Realized value must be a non-negative number.");
+          toast.error("Realized value must be a non-negative number.");
           setSaving(false);
           return;
         }
@@ -151,7 +149,7 @@ export function InvestmentFormModal({
 
       onSaved();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred.");
+      toast.error(err instanceof Error ? err.message : "An error occurred.");
     } finally {
       setSaving(false);
     }
@@ -160,12 +158,12 @@ export function InvestmentFormModal({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter"
       onClick={(e) => {
         if (e.target === backdropRef.current) onClose();
       }}
     >
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-border-default bg-bg-secondary p-6">
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">
             {mode === "create" ? "Add Investment" : "Edit Investment"}
@@ -179,12 +177,6 @@ export function InvestmentFormModal({
             <X className="h-4 w-4" />
           </button>
         </div>
-
-        {error && (
-          <div className="mt-3 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]" role="alert">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">
           {/* Company */}
@@ -282,9 +274,9 @@ export function InvestmentFormModal({
             </Button>
             <Button
               type="submit"
-              disabled={saving}
+              loading={saving}
             >
-              {saving ? "Saving..." : mode === "create" ? "Add Investment" : "Save Changes"}
+              {mode === "create" ? "Add Investment" : "Save Changes"}
             </Button>
           </div>
         </form>
