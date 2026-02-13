@@ -24,14 +24,14 @@ export function useDashboardPreferences() {
   const [isLoaded, setIsLoaded] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load preferences on mount
+  // Load preferences on mount (only dateRange persists;
+  // periodType always starts as quarterly per product requirement)
   useEffect(() => {
     fetch("/api/user/preferences?key=dashboard.preferences")
       .then((res) => res.json())
       .then((json) => {
         if (json.value) {
           const prefs = json.value as Partial<DashboardPreferences>;
-          if (prefs.periodType) setPeriodTypeState(prefs.periodType);
           if (prefs.dateRange) setDateRangeState(prefs.dateRange);
         }
         setIsLoaded(true);
@@ -76,11 +76,10 @@ export function useDashboardPreferences() {
     };
   }, []);
 
-  // Wrapped setters that also persist
+  // Period type is session-only (always starts as quarterly)
   const setPeriodType = useCallback((value: PeriodType) => {
     setPeriodTypeState(value);
-    savePreferences({ periodType: value });
-  }, [savePreferences]);
+  }, []);
 
   const setDateRange = useCallback((value: DateRange) => {
     setDateRangeState(value);

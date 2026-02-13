@@ -91,7 +91,8 @@ export async function POST(
       .maybeSingle();
 
     if (existingMember) {
-      return jsonError("This person is already a member.", 400);
+      logger.info(`[invite] Blocked: ${email} is already a member of org ${orgId}`);
+      return jsonError("Unable to send invitation to this email.", 400);
     }
 
     // Check if already a member of ANY organization
@@ -103,7 +104,8 @@ export async function POST(
       .maybeSingle();
 
     if (existingOrgMember) {
-      return jsonError("This person already belongs to another organization.", 400);
+      logger.info(`[invite] Blocked: ${email} already belongs to another organization`);
+      return jsonError("Unable to send invitation to this email.", 400);
     }
   }
 
@@ -117,7 +119,8 @@ export async function POST(
     .maybeSingle();
 
   if (existingInvite) {
-    return jsonError("An invitation is already pending for this email.", 400);
+    logger.info(`[invite] Blocked: pending invitation already exists for ${email} in org ${orgId}`);
+    return jsonError("Unable to send invitation to this email.", 400);
   }
 
   // Create invitation

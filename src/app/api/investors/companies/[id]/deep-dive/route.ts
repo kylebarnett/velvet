@@ -6,7 +6,7 @@ import { extractNumericValue } from "@/lib/reports/aggregation";
 import { formatValue } from "@/components/charts/types";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { supabase, user } = await getApiUser();
@@ -16,6 +16,8 @@ export async function GET(
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const { id: companyId } = await params;
+  const url = new URL(req.url);
+  const periodType = url.searchParams.get("periodType") ?? "quarterly";
 
   // Verify investor has approved relationship
   const { data: relationship } = await supabase
@@ -53,7 +55,9 @@ export async function GET(
   }
 
   const company = companyResult.data;
-  const allValues = metricsResult.data ?? [];
+  const allValues = (metricsResult.data ?? []).filter(
+    (v) => v.period_type === periodType
+  );
   const allBenchmarks = benchmarksResult.data ?? [];
 
   // Latest value per metric
@@ -160,6 +164,7 @@ export async function GET(
       logoUrl: company.logo_url,
       lastSubmission,
     },
+    periodType,
     latestMetrics,
     timeSeries,
     benchmarkPositions,

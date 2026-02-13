@@ -260,17 +260,17 @@ export function TearSheetsTab() {
       )}
 
       {!loading && !error && tearSheets.length === 0 && (
-        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-          <p className="text-text-tertiary">No tear sheets yet</p>
-          <p className="mt-2 max-w-md mx-auto text-sm text-text-muted">
+        <div className="py-8">
+          <h3 className="text-base font-medium text-text-primary">No tear sheets yet</h3>
+          <p className="mt-1 max-w-lg text-sm text-text-secondary">
             Tear sheets are quarterly summary documents that highlight your company&apos;s key metrics, milestones, and narrative. Create one to share a polished overview with your investors.
           </p>
         </div>
       )}
 
       {!loading && displayed.length === 0 && tearSheets.length > 0 && (
-        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-          <p className="text-sm text-text-tertiary">
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-secondary">
             No tear sheets match the selected filters.
           </p>
         </div>

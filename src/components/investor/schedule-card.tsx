@@ -97,7 +97,7 @@ export function ScheduleCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <Link
-            href={`/campaigns/schedules/${schedule.id}`}
+            href={`/metric-requests/schedules/${schedule.id}`}
             className="font-medium text-text-primary hover:underline"
           >
             {schedule.name}

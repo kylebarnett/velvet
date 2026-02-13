@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { DollarSign, TrendingUp, BarChart3, Flame, Users, PieChart, Building2, CheckCircle2 } from "lucide-react";
 import { formatValue } from "@/components/charts/types";
 
@@ -116,14 +115,13 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
 
   if (kpis.length === 0) {
     return (
-      <div className="card-surface rounded-2xl border border-border-subtle p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated ring-1 ring-border-subtle">
-          <BarChart3 className="h-6 w-6 text-text-muted" />
-        </div>
-        <p className="text-text-secondary">No metric data available yet</p>
-        <p className="mt-1 text-sm text-text-muted">
-          Metrics will appear here once founders submit data
-        </p>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border-subtle p-5 min-h-[120px]">
+            <span className="text-2xl font-bold text-text-faint">--</span>
+            <span className="mt-1 text-xs text-text-muted">No data</span>
+          </div>
+        ))}
       </div>
     );
   }
@@ -146,7 +144,7 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
                 onMetricClick(kpi.metric);
               }
             }}
-            className={`group card-surface relative overflow-hidden rounded-2xl border border-border-subtle p-5 transition-all duration-300 hover:border-border-default ${
+            className={`group card-surface relative overflow-hidden rounded-2xl p-5 transition-all duration-300 ${
               kpi.clickable && onMetricClick ? "cursor-pointer card-hover-lift" : ""
             }`}
             style={{ animationDelay: `${index * 50}ms` }}
@@ -184,16 +182,6 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
                   {kpi.value}
                 </div>
                 <div className="mt-1 text-xs font-medium uppercase tracking-wider text-text-muted">{kpi.label}</div>
-                {kpi.metric && (
-                  <Link
-                    href={`/reports/trends?metric=${encodeURIComponent(kpi.metric)}`}
-                    className="mt-1.5 inline-flex items-center gap-1 text-xs text-text-muted transition-colors hover:text-text-secondary"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <TrendingUp className="h-3 w-3" aria-hidden="true" />
-                    View trend
-                  </Link>
-                )}
               </div>
 
               {/* Footer */}

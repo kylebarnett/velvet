@@ -11,7 +11,10 @@ const reviewSchema = z.object({
       valueId: z.string().uuid(),
       action: z.enum(["approve", "reject"]),
       metricName: z.string().optional(),
-      value: z.string().optional(),
+      value: z.string().optional().refine(
+        (v) => v === undefined || !isNaN(Number(v)),
+        { message: "Value must be numeric" },
+      ),
       periodStart: z.string().optional(),
       periodEnd: z.string().optional(),
     }),

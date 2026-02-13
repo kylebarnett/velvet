@@ -337,10 +337,9 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
 
       {/* Empty state */}
       {!loading && filteredDocuments.length === 0 && (
-        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
-          <FileText className="mx-auto h-8 w-8 text-text-faint" />
-          <p className="mt-2 text-sm text-text-tertiary">No documents found.</p>
-          <p className="mt-1 text-xs text-text-tertiary">
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-secondary">No documents found.</p>
+          <p className="mt-1 text-xs text-text-muted">
             {search || typeFilter || dateFilter !== "all"
               ? "Try adjusting your filters."
               : "Documents uploaded by the founder will appear here."}

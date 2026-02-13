@@ -170,7 +170,7 @@ function MultiSelectDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl">
+        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm">
           {options.length === 0 ? (
             <div className="px-3 py-2 text-sm text-text-muted">No options available</div>
           ) : (
@@ -191,7 +191,7 @@ function MultiSelectDropdown({
                       ? "bg-bg-elevated text-text-primary"
                       : isDisabled
                         ? "cursor-not-allowed text-text-faint"
-                        : "text-text-secondary hover:bg-bg-raised hover:text-text-primary"
+                        : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                   )}
                 >
                   <span
@@ -622,8 +622,8 @@ export function ComparisonClient({
 
       {/* Empty state */}
       {!isLoading && !error && !hasResults && canFetch && companiesData.length === 0 && (
-        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
-          <p className="text-text-tertiary">
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-secondary">
             No metric data found for the selected companies and parameters.
           </p>
         </div>
@@ -631,9 +631,8 @@ export function ComparisonClient({
 
       {/* Initial state */}
       {!canFetch && !isLoading && !error && (
-        <div className="rounded-xl border border-border-subtle bg-bg-raised p-12 text-center">
-          <BarChart3 className="mx-auto mb-3 h-10 w-10 text-text-faint" />
-          <p className="text-text-muted">
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-muted">
             Select at least 2 companies and 1 metric to start comparing.
           </p>
         </div>

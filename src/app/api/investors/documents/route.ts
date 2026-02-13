@@ -16,7 +16,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const companyId = url.searchParams.get("companyId");
   const documentType = url.searchParams.get("type");
-  const search = url.searchParams.get("search");
+  const search = url.searchParams.get("search")?.slice(0, 100) ?? null;
   const { limit, offset } = parsePagination(url);
 
   // Build query for documents in investor's approved portfolio companies

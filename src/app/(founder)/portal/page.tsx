@@ -1,5 +1,3 @@
-import { Building2 } from "lucide-react";
-
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -44,7 +42,6 @@ export default async function FounderDashboardPage() {
           <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
         </div>
         <EmptyState
-          icon={Building2}
           title="No company linked to your account yet"
           description="Your company will appear here once an investor invites you. If you signed up independently, ask your investor to add your email to their portfolio."
         />

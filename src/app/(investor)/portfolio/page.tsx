@@ -78,15 +78,10 @@ export default async function PortfolioPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div data-onboarding="portfolio-title">
-          <h1 className="text-xl sm:text-2xl font-semibold">Portfolio</h1>
-          <p className="text-sm text-text-tertiary">
-            Manage your portfolio companies and founder contacts.
-          </p>
-        </div>
+        <h1 className="text-xl sm:text-2xl font-semibold" data-onboarding="portfolio-title">Portfolio</h1>
         <div className="flex items-center gap-2">
           <DownloadCsvButton />
           <Link

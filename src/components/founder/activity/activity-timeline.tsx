@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Activity } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ActivityItem } from "./activity-item";
 import type { ActivityEntry } from "./types";
@@ -86,7 +85,7 @@ export function ActivityTimeline({ selectedActorId }: ActivityTimelineProps) {
   if (activities.length === 0) {
     return (
       <EmptyState
-        icon={Activity}
+        variant="inline"
         title="No activity yet"
         description={
           selectedActorId

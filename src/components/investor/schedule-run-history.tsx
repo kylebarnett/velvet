@@ -141,11 +141,11 @@ function RunRow({ run }: { run: ScheduleRun }) {
 export function ScheduleRunHistory({ runs }: ScheduleRunHistoryProps) {
   if (runs.length === 0) {
     return (
-      <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-        <div className="text-sm text-text-tertiary">
+      <div className="py-12 text-center">
+        <p className="text-sm text-text-secondary">
           No runs yet. This schedule will run automatically on its next scheduled
           date, or you can trigger it manually.
-        </div>
+        </p>
       </div>
     );
   }

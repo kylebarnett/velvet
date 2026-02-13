@@ -358,9 +358,8 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
 
       {/* Empty state */}
       {!loading && tearSheets.length === 0 && (
-        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
-          <FileSpreadsheet className="mx-auto h-8 w-8 text-text-faint" />
-          <p className="mt-2 text-sm text-text-tertiary">No tear sheets available.</p>
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-secondary">No tear sheets available.</p>
           <p className="mt-1 text-xs text-text-muted">
             Published tear sheets from the founder will appear here.
           </p>
@@ -369,8 +368,8 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
 
       {/* No results after filter */}
       {!loading && filteredTearSheets.length === 0 && tearSheets.length > 0 && (
-        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-          <p className="text-sm text-text-tertiary">
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-secondary">
             No tear sheets match the selected filters.
           </p>
         </div>

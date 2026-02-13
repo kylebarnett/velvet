@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CompanySwitcher } from "@/components/investor/company-switcher";
@@ -202,8 +203,8 @@ export default async function CompanyDashboardPage({
       )}
 
       {!isApproved && (
-        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-          <p className="text-text-tertiary">Metrics will appear here once your access is approved.</p>
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-secondary">Metrics will appear here once your access is approved.</p>
         </div>
       )}
     </div>

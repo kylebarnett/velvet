@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Sun, Moon, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -16,6 +16,21 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
+
+  const handleSetTheme = useCallback(
+    (value: string) => {
+      setTheme(value);
+      // Persist to DB for cross-device and per-user sync
+      fetch("/api/user/preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "theme", value }),
+      }).catch(() => {
+        // Silently fail — localStorage still works as fallback
+      });
+    },
+    [setTheme],
+  );
 
   if (!mounted) {
     return (
@@ -35,7 +50,7 @@ export function ThemeToggle() {
         return (
           <button
             key={m.value}
-            onClick={() => setTheme(m.value)}
+            onClick={() => handleSetTheme(m.value)}
             className={cn(
               "inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors",
               active

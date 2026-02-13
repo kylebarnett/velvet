@@ -164,27 +164,29 @@ export function CompanyCard({
   return (
     <Link
       href={`/dashboard/${id}`}
-      className="card-hover-lift flex flex-col rounded-xl border border-border-subtle card-surface p-5 hover:border-border-default"
+      className="card-hover-lift flex flex-col rounded-xl card-surface p-5"
     >
       <div className="flex items-start justify-between">
         <CompanyLogoDisplay name={name} logoUrl={logoUrl} />
-        {!isApproved && approvalStatus === "pending" && (
-          <span className="rounded-full bg-[var(--status-warning-bg)] px-2 py-0.5 text-xs text-[var(--status-warning-text)]" title="Awaiting founder approval — they need to approve access before you can see their metrics">
-            Pending approval
-          </span>
-        )}
-        {!isApproved && approvalStatus === "denied" && (
-          <span className="rounded-full bg-[var(--status-error-bg)] px-2 py-0.5 text-xs text-[var(--status-error-text)]" title="The founder has denied access to their metrics">
-            Access denied
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {!isApproved && approvalStatus === "pending" && (
+            <span className="rounded-full bg-[var(--status-warning-bg)] px-2 py-0.5 text-xs text-[var(--status-warning-text)]" title="Awaiting founder approval — they need to approve access before you can see their metrics">
+              Pending approval
+            </span>
+          )}
+          {!isApproved && approvalStatus === "denied" && (
+            <span className="rounded-full bg-[var(--status-error-bg)] px-2 py-0.5 text-xs text-[var(--status-error-text)]" title="The founder has denied access to their metrics">
+              Access denied
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="mt-3 mb-2">
         <h3 className="font-medium text-text-primary">{name}</h3>
         <div className="mt-1.5 flex items-center gap-1.5">
-          {industry && <span className="rounded-full bg-[var(--tag-blue-bg)] px-2.5 py-0.5 text-[11px] font-medium capitalize text-[var(--tag-blue-text)]">{industry.replace(/_/g, " ")}</span>}
-          {stage && <span className="rounded-full bg-[var(--tag-violet-bg)] px-2.5 py-0.5 text-[11px] font-medium capitalize text-[var(--tag-violet-text)]">{stage.replace(/_/g, " ")}</span>}
+          {industry && <span className="rounded-full bg-bg-elevated px-2.5 py-0.5 text-[11px] font-medium capitalize text-text-secondary">{industry.replace(/_/g, " ")}</span>}
+          {stage && <span className="rounded-full bg-bg-elevated px-2.5 py-0.5 text-[11px] font-medium capitalize text-text-secondary">{stage.replace(/_/g, " ")}</span>}
         </div>
       </div>
 
@@ -247,11 +249,24 @@ export function CompanyCard({
           <span className="text-xs text-text-muted">No metrics submitted yet</span>
           <span
             className="mt-1 block text-xs text-text-tertiary hover:text-text-secondary"
-            onClick={(e) => e.stopPropagation()}
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              window.location.href = "/historical-upload";
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.stopPropagation();
+                e.preventDefault();
+                window.location.href = "/historical-upload";
+              }
+            }}
           >
-            <Link href="/historical-upload" className="underline underline-offset-2">
+            <span className="underline underline-offset-2 cursor-pointer">
               Import historical data
-            </Link>
+            </span>
           </span>
         </div>
       )}

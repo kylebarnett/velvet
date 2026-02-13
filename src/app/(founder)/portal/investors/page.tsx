@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search, Users, CheckCircle2, Loader2 } from "lucide-react";
+import { Search, CheckCircle2, Loader2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InvestorApprovalCard } from "@/components/founder/investor-approval-card";
 
@@ -188,7 +188,6 @@ export default function FounderInvestorsPage() {
 
       {!loading && !error && investors.length === 0 && (
         <EmptyState
-          icon={Users}
           title="No investors connected yet"
           description="Investors will appear here when they add your company to their portfolio. You'll be able to approve or deny each one before they can see your data. If you were invited by an investor, they'll appear here automatically."
         />

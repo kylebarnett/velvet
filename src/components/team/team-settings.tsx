@@ -147,10 +147,9 @@ export function TeamSettings({ currentUserId }: Props) {
   if (!org) {
     return (
       <div className="space-y-6">
-        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
-          <Users className="mx-auto h-10 w-10 text-text-faint" />
-          <h3 className="mt-4 text-base font-semibold">Create a Team</h3>
-          <p className="mt-2 text-sm text-text-tertiary max-w-sm mx-auto">
+        <div className="py-8">
+          <h3 className="text-base font-medium text-text-primary">Create a Team</h3>
+          <p className="mt-1 max-w-lg text-sm text-text-secondary">
             Invite team members to collaborate on your portfolio. Team members
             share access to portfolio data based on their role.
           </p>
@@ -161,7 +160,7 @@ export function TeamSettings({ currentUserId }: Props) {
             </div>
           )}
 
-          <div className="mt-6 flex gap-2 max-w-xs mx-auto">
+          <div className="mt-4 flex gap-2 max-w-xs">
             <input
               type="text"
               value={orgName}

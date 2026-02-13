@@ -628,11 +628,9 @@ export function TemplatesTabContent() {
               )}
             </div>
             {userTemplates.length === 0 ? (
-              <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-                <div className="text-sm text-text-tertiary">
-                  No custom templates yet.
-                </div>
-                <div className="mt-2 text-xs text-text-tertiary">
+              <div className="py-8">
+                <h3 className="text-base font-medium text-text-primary">No custom templates yet</h3>
+                <p className="mt-1 max-w-lg text-sm text-text-secondary">
                   Clone an industry template above or{" "}
                   <button
                     type="button"
@@ -640,8 +638,8 @@ export function TemplatesTabContent() {
                     className="text-text-primary underline underline-offset-4 hover:text-text-secondary"
                   >
                     create your own
-                  </button>
-                </div>
+                  </button>.
+                </p>
               </div>
             ) : (
               <div className="space-y-3">

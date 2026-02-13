@@ -25,10 +25,10 @@ export async function POST(req: Request) {
     .eq("token", parsed.data.token)
     .single();
 
-  if (!invitation) return jsonError("Invalid invitation.", 404);
+  if (!invitation) return jsonError("Invalid or expired invitation.", 404);
 
   if (invitation.status !== "pending") {
-    return jsonError("This invitation has already been used or cancelled.", 400);
+    return jsonError("Invalid or expired invitation.", 400);
   }
 
   if (new Date(invitation.expires_at) < new Date()) {
@@ -36,12 +36,13 @@ export async function POST(req: Request) {
       .from("organization_invitations")
       .update({ status: "expired" })
       .eq("id", invitation.id);
-    return jsonError("This invitation has expired.", 400);
+    return jsonError("Invalid or expired invitation.", 400);
   }
 
   // Verify email matches
   if (user.email?.toLowerCase() !== invitation.email.toLowerCase()) {
-    return jsonError("This invitation was sent to a different email address.", 403);
+    logger.info(`[join] Email mismatch: user ${user.email} tried to use invite for ${invitation.email}`);
+    return jsonError("Invalid or expired invitation.", 403);
   }
 
   // Check if already a member of THIS organization

@@ -12,6 +12,13 @@ import { SectionWrapper } from "./section-wrapper";
 import { exportElementAsPdf } from "@/lib/utils/export-pdf";
 import { downloadCsv } from "@/lib/utils/csv-export";
 import { downloadExcel } from "@/lib/utils/excel-export";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Lazy-loaded section components
 import { KPICards } from "./portfolio-summary/kpi-cards";
@@ -445,6 +452,7 @@ type DeepDiveResponse = {
     logoUrl: string | null;
     lastSubmission: string | null;
   };
+  periodType: string;
   latestMetrics: Array<{
     name: string;
     value: number | null;
@@ -464,6 +472,14 @@ type DeepDiveResponse = {
   }>;
 };
 
+type DeepDivePeriodType = "monthly" | "quarterly" | "yearly";
+
+const PERIOD_OPTIONS: { value: DeepDivePeriodType; label: string }[] = [
+  { value: "monthly", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+  { value: "yearly", label: "Annual" },
+];
+
 function DeepDiveEditor({
   template,
   visibleSections,
@@ -479,6 +495,7 @@ function DeepDiveEditor({
 }) {
   const [companies, setCompanies] = React.useState<Array<{ id: string; name: string }>>([]);
   const [selectedCompany, setSelectedCompany] = React.useState(companyId ?? "");
+  const [periodType, setPeriodType] = React.useState<DeepDivePeriodType>("quarterly");
   const [deepDiveData, setDeepDiveData] = React.useState<DeepDiveResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
 
@@ -506,7 +523,8 @@ function DeepDiveEditor({
 
     async function fetchDeepDive() {
       try {
-        const res = await fetch(`/api/investors/companies/${selectedCompany}/deep-dive`);
+        const params = new URLSearchParams({ periodType });
+        const res = await fetch(`/api/investors/companies/${selectedCompany}/deep-dive?${params}`);
         if (res.ok) {
           const json = await res.json();
           if (!cancelled) setDeepDiveData(json);
@@ -520,25 +538,47 @@ function DeepDiveEditor({
 
     fetchDeepDive();
     return () => { cancelled = true; };
-  }, [selectedCompany]);
+  }, [selectedCompany, periodType]);
 
   return (
     <>
-      {/* Company selector */}
+      {/* Company & period selectors */}
       <div className="card-surface rounded-xl border border-border-subtle p-4">
-        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
-          Company
-        </label>
-        <select
-          value={selectedCompany}
-          onChange={(e) => setSelectedCompany(e.target.value)}
-          className="h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/15 focus:border-white/20 focus:outline-none"
-        >
-          <option value="">Select a company...</option>
-          {companies.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+              Company
+            </label>
+            <Select value={selectedCompany || "__none__"} onValueChange={(v) => setSelectedCompany(v === "__none__" ? "" : v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a company..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">Select a company...</SelectItem>
+                {companies.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+              Period
+            </label>
+            <Select value={periodType} onValueChange={(v) => setPeriodType(v as DeepDivePeriodType)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PERIOD_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       {loading && (
@@ -573,7 +613,7 @@ function DeepDiveEditor({
                 <CompanyMetricKPIs metrics={deepDiveData.latestMetrics} />
               )}
               {section.id === "company_trends" && (
-                <CompanyMetricTrends timeSeries={deepDiveData.timeSeries} />
+                <CompanyMetricTrends timeSeries={deepDiveData.timeSeries} periodType={periodType} />
               )}
               {section.id === "company_benchmarks" && (
                 <CompanyBenchmarkPosition

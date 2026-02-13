@@ -1355,12 +1355,11 @@ export function MetricsTable({
       )}
 
       {/* Toolbar */}
-      <div data-no-print className="mb-2 flex items-center justify-between">
+      <div data-no-print className="mb-4 flex items-center justify-between">
         <div className="text-xs tabular-nums text-text-muted">
           {sortedPeriods.length} period{sortedPeriods.length !== 1 ? "s" : ""}
         </div>
         <div className="flex items-center gap-2">
-          {headerActions}
           {allowReorder && (
             <button
             type="button"
@@ -1376,6 +1375,7 @@ export function MetricsTable({
             {isReorderMode ? "Done" : "Reorder"}
           </button>
           )}
+          {headerActions}
         </div>
       </div>
 

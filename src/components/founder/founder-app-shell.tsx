@@ -10,6 +10,7 @@ type FounderAppShellProps = {
   nav: NavItem[];
   company?: CompanyInfo;
   user?: UserInfo;
+  initialTheme?: string;
   children: React.ReactNode;
 };
 
@@ -18,6 +19,7 @@ export function FounderAppShell({
   nav,
   company,
   user,
+  initialTheme,
   children,
 }: FounderAppShellProps) {
   const { startTour } = useOnboarding();
@@ -29,6 +31,7 @@ export function FounderAppShell({
       company={company}
       user={user}
       role="founder"
+      initialTheme={initialTheme}
       showTakeTour={true}
       onTakeTour={startTour}
     >

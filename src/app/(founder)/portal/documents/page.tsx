@@ -31,12 +31,7 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight">Documents</h1>
-          <p className="text-sm text-text-tertiary">
-            Upload decks, financials, and other supporting material.
-          </p>
-        </div>
+        <h1 className="text-xl font-semibold tracking-tight">Documents</h1>
         <button
           type="button"
           onClick={() => setShowUpload(true)}

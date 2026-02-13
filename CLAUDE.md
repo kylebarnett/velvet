@@ -99,7 +99,7 @@ When using `createSupabaseAdminClient()` (bypasses RLS):
 
 ### Cron Route Security
 
-Cron endpoints verify `CRON_SECRET` via Bearer token when set. Without it, endpoints are open (dev only).
+Cron endpoints require `CRON_SECRET` via Bearer token. Endpoints reject all requests when the secret is not configured.
 
 ## Styling Rules
 

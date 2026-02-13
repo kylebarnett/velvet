@@ -506,13 +506,13 @@ export function FounderDocumentList() {
       {/* Empty state */}
       {filteredDocuments.length === 0 ? (
         <EmptyState
-          icon={FileText}
           title={searchQuery ? "No documents match your search" : "No documents uploaded yet"}
           description={
             searchQuery
               ? undefined
               : "Upload pitch decks, financial statements, cap tables, and other documents. Approved investors will be able to view them."
           }
+          variant={searchQuery ? "inline" : "first-use"}
         />
       ) : viewMode === "folder" && groupedDocuments ? (
         /* ============================================ */

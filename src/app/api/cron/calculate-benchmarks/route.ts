@@ -86,8 +86,9 @@ async function handler(req: Request) {
     if (batch.length < FETCH_BATCH_SIZE) break;
   }
 
-  if (metricValues.length >= MAX_TOTAL_ROWS) {
-    logger.warn(`Benchmark calculation capped at ${MAX_TOTAL_ROWS} rows`);
+  const dataTruncated = metricValues.length >= MAX_TOTAL_ROWS;
+  if (dataTruncated) {
+    logger.warn(`Benchmark calculation capped at ${MAX_TOTAL_ROWS} rows — results may be incomplete`);
   }
 
   // Deduplicate: keep only the most recent value per company per metric+periodType
@@ -231,6 +232,9 @@ async function handler(req: Request) {
     benchmarksUpdated,
     metricsProcessed,
     groupsWithSufficientData: upsertBatch.length,
+    dataTruncated,
+    rowsFetched: metricValues.length,
+    rowsCap: MAX_TOTAL_ROWS,
   });
 }
 

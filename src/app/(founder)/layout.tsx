@@ -18,6 +18,14 @@ export default async function FounderLayout({
     data: { user: freshUser },
   } = await supabase.auth.getUser();
 
+  // Fetch user's saved theme preference for per-user theme sync
+  const { data: userData } = await supabase
+    .from("users")
+    .select("preferences")
+    .eq("id", freshUser!.id)
+    .single();
+  const savedTheme = (userData?.preferences as Record<string, unknown> | null)?.theme as string | undefined;
+
   const onboardingStep = freshUser?.user_metadata?.founder_onboarding_step ?? null;
   const onboardingComplete =
     freshUser?.user_metadata?.founder_onboarding_complete ?? false;
@@ -73,6 +81,7 @@ export default async function FounderLayout({
       >
         <FounderAppShell
           title="Founder"
+          initialTheme={savedTheme}
           nav={[
             { href: "/portal", label: "Dashboard", icon: "layout-dashboard" },
             { href: "/portal/requests", label: "Metric Requests", icon: "inbox", badge: pendingCount },

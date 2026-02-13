@@ -362,6 +362,9 @@ body {
 .kpi-gradient-emerald {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
 }
+.kpi-gradient-red {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.02) 100%);
+}
 
 /* Respect user motion preferences */
 @media (prefers-reduced-motion: reduce) {

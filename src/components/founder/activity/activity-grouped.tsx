@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Activity } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InvestorSection } from "./investor-section";
 import type { ActivityEntry } from "./types";
@@ -94,7 +93,7 @@ export function ActivityGrouped({ selectedActorId }: ActivityGroupedProps) {
   if (sortedGroups.length === 0) {
     return (
       <EmptyState
-        icon={Activity}
+        variant="inline"
         title="No activity yet"
         description={
           selectedActorId

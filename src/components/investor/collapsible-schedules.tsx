@@ -134,7 +134,7 @@ export function CollapsibleSchedules() {
           )}
         </div>
         <Link
-          href="/campaigns/new"
+          href="/metric-requests/new"
           onClick={(e) => e.stopPropagation()}
           className="inline-flex h-7 items-center gap-1 rounded-md border border-border-default bg-bg-elevated px-2.5 text-xs text-text-secondary hover:bg-bg-hover"
         >
@@ -156,7 +156,7 @@ export function CollapsibleSchedules() {
               {schedules.map((schedule) => (
                 <Link
                   key={schedule.id}
-                  href={`/campaigns/schedules/${schedule.id}`}
+                  href={`/metric-requests/schedules/${schedule.id}`}
                   className="group flex items-start justify-between gap-3 rounded-lg border border-border-default bg-bg-elevated p-3 transition-colors hover:bg-bg-hover"
                 >
                   <div className="min-w-0 flex-1">

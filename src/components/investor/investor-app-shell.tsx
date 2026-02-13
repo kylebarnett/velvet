@@ -10,6 +10,7 @@ type InvestorAppShellProps = {
   nav: NavItem[];
   company?: CompanyInfo;
   user?: UserInfo;
+  initialTheme?: string;
   children: React.ReactNode;
 };
 
@@ -18,6 +19,7 @@ export function InvestorAppShell({
   nav,
   company,
   user,
+  initialTheme,
   children,
 }: InvestorAppShellProps) {
   const { startTour } = useOnboarding();
@@ -29,6 +31,7 @@ export function InvestorAppShell({
       company={company}
       user={user}
       role="investor"
+      initialTheme={initialTheme}
       showTakeTour={true}
       onTakeTour={startTour}
     >

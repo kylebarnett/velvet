@@ -32,7 +32,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10));
   const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") ?? "50", 10)));
-  const search = url.searchParams.get("search")?.trim() ?? "";
+  const search = (url.searchParams.get("search")?.trim() ?? "").slice(0, 100);
   const status = url.searchParams.get("status") ?? "";
   const sortField = url.searchParams.get("sortField") ?? "company";
   const sortDir = url.searchParams.get("sortDir") ?? "asc";

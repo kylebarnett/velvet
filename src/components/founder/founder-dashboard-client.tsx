@@ -14,7 +14,7 @@ import {
   DashboardLayout,
 } from "@/components/dashboard";
 import { DateRange } from "@/components/dashboard/date-range-selector";
-import { Download, Settings, Mail, BarChart3, Clock, FileUp, TrendingDown, TrendingUp, Fuel, ChevronDown, FileSpreadsheet, FileDown, X } from "lucide-react";
+import { Download, Settings, Mail, Clock, FileUp, TrendingDown, TrendingUp, Fuel, ChevronDown, FileSpreadsheet, FileDown, X } from "lucide-react";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 import { EmailPasteModal } from "@/components/founder/email-paste-modal";
@@ -316,12 +316,9 @@ function EmptyMetricsState({
   if (pendingRequests.length > 0) {
     return (
       <div className="rounded-xl border border-border-default card-surface p-6">
-        <div className="flex flex-col items-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--tag-blue-bg)]">
-            <BarChart3 className="h-6 w-6 text-[var(--tag-blue-text)]" />
-          </div>
-          <h3 className="mt-4 text-base font-medium">Welcome to your metrics dashboard</h3>
-          <p className="mt-1 text-sm text-text-tertiary">Your investors have requested the following metrics:</p>
+        <div>
+          <h3 className="text-base font-medium text-text-primary">Welcome to your metrics dashboard</h3>
+          <p className="mt-1 text-sm text-text-secondary">Your investors have requested the following metrics:</p>
         </div>
         <div className="mt-4 space-y-2">
           {pendingRequests.map((req, i) => (
@@ -359,18 +356,13 @@ function EmptyMetricsState({
   }
 
   return (
-    <div className="rounded-xl border border-border-default card-surface p-6">
-      <div className="flex flex-col items-center text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated">
-          <Clock className="h-6 w-6 text-text-muted" />
-        </div>
-        <h3 className="mt-4 text-base font-medium">No metric requests yet</h3>
-        <p className="mt-1 text-sm text-text-tertiary">
-          When your investors request metrics, they&apos;ll appear here.
-          You can also submit metrics proactively:
-        </p>
-      </div>
-      <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+    <div className="py-8">
+      <h3 className="text-base font-medium text-text-primary">No metric requests yet</h3>
+      <p className="mt-1 max-w-lg text-sm text-text-secondary">
+        When your investors request metrics, they&apos;ll appear here.
+        You can also submit metrics proactively.
+      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <Link
           href="/portal/requests"
           className="inline-flex h-10 items-center gap-2 rounded-lg border border-border-default bg-bg-elevated px-4 text-sm font-medium text-text-secondary hover:bg-bg-hover"
@@ -1004,11 +996,8 @@ export function FounderDashboardClient({
       </div>
 
       {widgets.length === 0 && (
-        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-          <p className="text-text-tertiary">No widgets configured for this dashboard.</p>
-          <p className="mt-2 text-sm text-text-muted">
-            Click &quot;Edit Dashboard&quot; to add charts and metrics.
-          </p>
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-secondary">No widgets configured. Click &ldquo;Edit Dashboard&rdquo; to add charts and metrics.</p>
         </div>
       )}
 

@@ -23,7 +23,7 @@ export async function GET(req: Request) {
   // Parse and validate query params
   const url = new URL(req.url);
   const parseResult = querySchema.safeParse({
-    metric: url.searchParams.get("metric") ?? "",
+    metric: (url.searchParams.get("metric") ?? "").slice(0, 100),
     periodType: url.searchParams.get("periodType") ?? "quarterly",
     industry: url.searchParams.get("industry") || undefined,
     stage: url.searchParams.get("stage") || undefined,

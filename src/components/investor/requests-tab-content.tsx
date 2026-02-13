@@ -13,7 +13,6 @@ import {
   Clock,
   AlertTriangle,
   Loader2,
-  Inbox,
 } from "lucide-react";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -510,7 +509,7 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
       setDetailLoading(true);
       try {
         const periodKey = `${campaign.periodStart}_${campaign.periodEnd}`;
-        const res = await fetch(`/api/investors/campaigns/${periodKey}`);
+        const res = await fetch(`/api/investors/metric-requests/${periodKey}`);
         if (res.ok) {
           const json = await res.json();
           setCompanies(json.companies ?? []);
@@ -854,7 +853,7 @@ export function CampaignsTabContent() {
         params.set("periodType", periodFilter);
       }
 
-      const res = await fetch(`/api/investors/campaigns?${params}`);
+      const res = await fetch(`/api/investors/metric-requests?${params}`);
       if (res.ok) {
         const json = await res.json();
         setCampaigns(json.campaigns ?? []);
@@ -931,7 +930,6 @@ export function CampaignsTabContent() {
         </div>
       ) : campaigns.length === 0 ? (
         <EmptyState
-          icon={Inbox}
           title={
             periodFilter !== "all"
               ? "No requests match the selected filter"
@@ -945,13 +943,14 @@ export function CampaignsTabContent() {
           action={
             periodFilter === "all" ? (
               <Link
-                href="/campaigns/new"
+                href="/metric-requests/new"
                 className="inline-flex items-center gap-2 rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
               >
                 Send your first request
               </Link>
             ) : undefined
           }
+          variant={periodFilter !== "all" ? "inline" : "first-use"}
         />
       ) : (
         <>

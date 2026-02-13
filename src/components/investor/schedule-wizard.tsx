@@ -134,7 +134,7 @@ export function ScheduleWizard({ templates, companies }: ScheduleWizardProps) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to create schedule");
 
-      router.push("/campaigns");
+      router.push("/metric-requests");
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create schedule");

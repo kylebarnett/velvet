@@ -37,11 +37,10 @@ export function ScheduleList({ initialSchedules }: ScheduleListProps) {
       )}
 
       {schedules.length === 0 ? (
-        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
-          <div className="text-sm text-text-tertiary">
-            No schedules yet. Create your first schedule to automate metric
-            requests.
-          </div>
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-secondary">
+            No schedules yet. Create your first schedule to automate metric requests.
+          </p>
         </div>
       ) : (
         <div className="space-y-6">

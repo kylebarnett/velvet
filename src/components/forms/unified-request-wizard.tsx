@@ -499,7 +499,7 @@ export function UnifiedRequestWizard() {
           )}
           <div className="mt-6 flex items-center justify-center gap-3">
             <button
-              onClick={() => router.push("/campaigns")}
+              onClick={() => router.push("/metric-requests")}
               className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
@@ -566,7 +566,7 @@ export function UnifiedRequestWizard() {
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             <Link
-              href="/campaigns"
+              href="/metric-requests"
               className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -614,7 +614,7 @@ export function UnifiedRequestWizard() {
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-medium text-text-secondary">My Templates</h2>
                 <Link
-                  href="/campaigns/templates"
+                  href="/metric-requests/templates"
                   className="text-xs text-text-muted hover:text-text-secondary"
                 >
                   Manage templates
@@ -711,14 +711,17 @@ export function UnifiedRequestWizard() {
             </div>
 
             {sortedCompanies.length === 0 ? (
-              <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-                <p className="text-sm text-text-tertiary">No companies in your portfolio.</p>
-                <Link
-                  href="/portfolio"
-                  className="mt-2 inline-block text-sm text-text-primary underline underline-offset-4 hover:text-text-secondary"
-                >
-                  Add companies
-                </Link>
+              <div className="py-8">
+                <h3 className="text-base font-medium text-text-primary">No companies in your portfolio</h3>
+                <p className="mt-1 max-w-lg text-sm text-text-secondary">
+                  <Link
+                    href="/portfolio"
+                    className="text-text-primary underline underline-offset-4 hover:text-text-secondary"
+                  >
+                    Add companies
+                  </Link>{" "}
+                  to get started.
+                </p>
               </div>
             ) : (
               <div className="max-h-80 space-y-1 overflow-y-auto rounded-xl border border-border-default card-surface p-2">

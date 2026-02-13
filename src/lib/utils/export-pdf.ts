@@ -26,29 +26,38 @@ type ExportOptions = {
 };
 
 /**
- * Temporarily forces the document into light mode so the PDF renders with
- * white backgrounds and dark text (paper-friendly). Returns a restore fn.
+ * Clones the target element into an off-screen container with light mode
+ * applied, so the visible page never changes theme. Returns the clone
+ * and a cleanup function.
  */
-function forceLightMode(): () => void {
-  const html = document.documentElement;
-  const hadDark = html.classList.contains("dark");
-  const prevColorScheme = html.style.colorScheme;
+function createLightModeClone(element: HTMLElement): {
+  clone: HTMLElement;
+  cleanup: () => void;
+} {
+  // Create an off-screen wrapper that inherits light theme
+  const wrapper = document.createElement("div");
+  wrapper.classList.add("light");
+  wrapper.style.cssText = [
+    "position: fixed",
+    "left: -9999px",
+    "top: 0",
+    "color-scheme: light",
+    "pointer-events: none",
+    "z-index: -1",
+    // Match width so layout is identical
+    `width: ${element.offsetWidth}px`,
+  ].join(";");
 
-  if (hadDark) {
-    html.classList.remove("dark");
-    html.classList.add("light");
-    html.style.colorScheme = "light";
-  }
+  const clone = element.cloneNode(true) as HTMLElement;
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
 
-  // Force reflow so computed styles update before capture
-  html.offsetHeight;
+  // Force reflow so computed styles update
+  wrapper.offsetHeight;
 
-  return () => {
-    if (hadDark) {
-      html.classList.remove("light");
-      html.classList.add("dark");
-      html.style.colorScheme = prevColorScheme;
-    }
+  return {
+    clone,
+    cleanup: () => wrapper.remove(),
   };
 }
 
@@ -62,15 +71,19 @@ export async function exportElementAsPdf(
 
   const forceLight = options?.forceLight !== false; // default true
 
-  // Force light mode for paper-friendly output
-  let restoreTheme: (() => void) | null = null;
+  // Create off-screen light-mode clone to avoid visible theme flash
+  let captureTarget = element;
+  let cleanupClone: (() => void) | null = null;
+
   if (forceLight) {
-    restoreTheme = forceLightMode();
+    const { clone, cleanup } = createLightModeClone(element);
+    captureTarget = clone;
+    cleanupClone = cleanup;
   }
 
-  // Hide elements marked with data-no-print
+  // Hide elements marked with data-no-print (on the capture target)
   const hidden: HTMLElement[] = [];
-  element.querySelectorAll("[data-no-print]").forEach((el) => {
+  captureTarget.querySelectorAll("[data-no-print]").forEach((el) => {
     const htmlEl = el as HTMLElement;
     if (htmlEl.style.display !== "none") {
       hidden.push(htmlEl);
@@ -79,45 +92,44 @@ export async function exportElementAsPdf(
   });
 
   // Check for page-based layout
-  const pageElements = element.querySelectorAll<HTMLElement>("[data-pdf-page]");
+  const pageElements = captureTarget.querySelectorAll<HTMLElement>("[data-pdf-page]");
 
   if (pageElements.length > 0) {
     try {
-      await exportPageBased(element, pageElements, toPng, jsPDF, filename, options?.title);
+      await exportPageBased(captureTarget, pageElements, toPng, jsPDF, filename, options?.title);
     } finally {
       for (const el of hidden) el.style.display = "";
-      restoreTheme?.();
+      cleanupClone?.();
     }
     return;
   }
 
   // Fallback: single-image capture and page slicing
-  const origStyles = saveStyles(element, [
+  const origStyles = saveStyles(captureTarget, [
     "width", "maxWidth", "minWidth", "padding", "boxSizing", "backgroundColor",
   ]);
 
-  element.style.width = `${A4_WIDTH_PX}px`;
-  element.style.maxWidth = "none";
-  element.style.minWidth = `${A4_WIDTH_PX}px`;
-  element.style.boxSizing = "border-box";
-  element.style.backgroundColor = "#ffffff";
-  element.offsetHeight; // reflow
+  captureTarget.style.width = `${A4_WIDTH_PX}px`;
+  captureTarget.style.maxWidth = "none";
+  captureTarget.style.minWidth = `${A4_WIDTH_PX}px`;
+  captureTarget.style.boxSizing = "border-box";
+  captureTarget.style.backgroundColor = "#ffffff";
+  captureTarget.offsetHeight; // reflow
 
   try {
-    const dataUrl = await toPng(element, {
+    const dataUrl = await toPng(captureTarget, {
       pixelRatio: 2,
       width: A4_WIDTH_PX,
       backgroundColor: "#ffffff",
       style: {
-        // Ensure the element is captured at proper width
         width: `${A4_WIDTH_PX}px`,
         maxWidth: "none",
       },
     });
 
-    restoreStyles(element, origStyles);
+    restoreStyles(captureTarget, origStyles);
     for (const el of hidden) el.style.display = "";
-    restoreTheme?.();
+    cleanupClone?.();
 
     const img = await loadImage(dataUrl);
     const imgHeightMM = (img.height * CONTENT_WIDTH_MM) / img.width;
@@ -167,9 +179,9 @@ export async function exportElementAsPdf(
 
     pdf.save(sanitizeFilename(filename));
   } catch (err: unknown) {
-    restoreStyles(element, origStyles);
+    restoreStyles(captureTarget, origStyles);
     for (const el of hidden) el.style.display = "";
-    restoreTheme?.();
+    cleanupClone?.();
     throw err;
   }
 }

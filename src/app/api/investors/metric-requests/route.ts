@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { parsePagination } from "@/lib/api/pagination";
 import { unwrapJoin } from "@/lib/api/utils";
 
@@ -60,12 +61,21 @@ export async function GET(req: Request) {
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
+  // Rate limit: 60 reads/min per user
+  const { allowed, retryAfter } = checkRateLimit(`metric-requests-read:${user.id}`, 60, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
+
   const url = new URL(req.url);
   const periodTypeFilter = url.searchParams.get("periodType");
   const statusFilter = url.searchParams.get("status");
   const { limit, offset } = parsePagination(url);
 
-  // Fetch all metric_requests for this investor with metric_definitions join
+  // Fetch metric_requests for this investor with metric_definitions join
+  // Safety cap to prevent unbounded memory usage at scale
   const { data: rawRequests, error } = await supabase
     .from("metric_requests")
     .select(
@@ -82,7 +92,9 @@ export async function GET(req: Request) {
       metric_request_schedules:schedule_id (name)
     `,
     )
-    .eq("investor_id", user.id);
+    .eq("investor_id", user.id)
+    .order("period_start", { ascending: false })
+    .limit(5000);
 
   if (error) {
     return jsonError("Failed to fetch requests.", 500);

@@ -1042,14 +1042,14 @@ export function BatchSubmissionTable({
       </div>
 
       {allRows.length === 0 && !reportCard ? (
-        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-          <p className="text-text-tertiary">No metrics requested yet.</p>
-          <p className="mt-1 text-sm text-text-muted">
+        <div className="py-8">
+          <h3 className="text-base font-medium text-text-primary">No metrics requested yet</h3>
+          <p className="mt-1 max-w-lg text-sm text-text-secondary">
             Metrics will appear here when an investor sends you a request.
           </p>
           <Link
             href="/portal/historical-upload"
-            className="mt-3 inline-block text-sm text-text-tertiary hover:text-text-secondary underline underline-offset-2"
+            className="mt-3 inline-block text-sm text-text-secondary hover:text-text-primary underline underline-offset-2"
           >
             Import historical metrics instead
           </Link>

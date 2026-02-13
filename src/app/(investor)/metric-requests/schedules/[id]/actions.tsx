@@ -98,7 +98,7 @@ export function ScheduleDetailActions({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to delete schedule");
 
-      router.push("/campaigns");
+      router.push("/metric-requests");
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to delete schedule");

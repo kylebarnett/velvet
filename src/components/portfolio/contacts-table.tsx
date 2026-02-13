@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check, ArrowUp, ArrowDown, ArrowUpDown, Building2, Users, CheckCircle2, Clock } from "lucide-react";
+import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check, ArrowUp, ArrowDown, ArrowUpDown, Users, CheckCircle2, Clock } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -832,7 +832,6 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
         {contacts.length === 0 && !fetching ? (
           <div className="px-4 py-8">
             <EmptyState
-              icon={Building2}
               title="No contacts found"
               description={
                 pagination.total === 0
@@ -840,6 +839,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                   : undefined
               }
               className="border-0 bg-transparent"
+              variant={pagination.total === 0 ? "first-use" : "inline"}
             />
           </div>
         ) : (

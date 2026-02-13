@@ -7,13 +7,8 @@ export default async function InvestorTeamPage() {
   const user = await requireRole("investor");
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1" data-onboarding="team-title">
-        <h1 className="text-xl font-semibold tracking-tight">Team</h1>
-        <p className="text-sm text-text-tertiary">
-          Manage your team members and their access to portfolio data.
-        </p>
-      </div>
+    <div className="space-y-8">
+      <h1 className="text-xl font-semibold tracking-tight" data-onboarding="team-title">Team</h1>
       <TeamSettings currentUserId={user.id} />
     </div>
   );

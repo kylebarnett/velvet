@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, BarChart3, PieChart as PieChartIcon } from "lucide-react";
+import { Building2, BarChart3 } from "lucide-react";
 import { PieChart } from "@/components/charts/pie-chart";
 
 type DistributionData = {
@@ -44,11 +44,13 @@ export function DistributionCharts({
 
   if (!hasData) {
     return (
-      <div className="card-surface rounded-2xl border border-border-subtle p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated ring-1 ring-border-subtle">
-          <PieChartIcon className="h-6 w-6 text-text-muted" />
-        </div>
-        <p className="text-text-secondary">No distribution data available</p>
+      <div className="flex h-full flex-col gap-4">
+        {[...Array(2)].map((_, i) => (
+          <div key={i} className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border-subtle p-8 min-h-[180px]">
+            <span className="text-2xl font-bold text-text-faint">--</span>
+            <span className="mt-1 text-xs text-text-muted">No data</span>
+          </div>
+        ))}
       </div>
     );
   }
@@ -66,7 +68,7 @@ export function DistributionCharts({
         return (
           <div
             key={config.key}
-            className="card-surface group rounded-2xl border border-border-subtle transition-all duration-300 hover:border-border-default"
+            className="card-surface group rounded-2xl transition-all duration-300"
           >
             <div className="p-5">
               {/* Header */}

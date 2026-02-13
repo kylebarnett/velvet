@@ -31,7 +31,7 @@ export async function GET(
   const url = new URL(req.url);
   const { limit, offset } = parsePagination(url);
   const statusFilter = url.searchParams.get("status");
-  const searchQuery = url.searchParams.get("search");
+  const searchQuery = url.searchParams.get("search")?.slice(0, 100) ?? null;
   const companyIdFilter = url.searchParams.get("companyId");
 
   // Build query for values

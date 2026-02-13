@@ -286,16 +286,11 @@ export default function DocumentsPage() {
   const someSelected = selectedIds.size > 0;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-semibold">Documents</h1>
-        <p className="text-sm text-text-tertiary">
-          View and download documents from your portfolio companies.
-        </p>
-      </div>
+    <div className="space-y-8">
+      <h1 className="text-xl sm:text-2xl font-semibold">Documents</h1>
 
       {/* Filters */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {/* Search - full width on mobile */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
@@ -424,10 +419,9 @@ export default function DocumentsPage() {
 
       {/* Documents table */}
       {!loading && filteredDocuments.length === 0 && (
-        <div className="rounded-xl border border-border-default card-surface p-8 text-center">
-          <FileText className="mx-auto h-8 w-8 text-text-faint" />
-          <p className="mt-2 text-sm text-text-tertiary">No documents found.</p>
-          <p className="mt-1 text-xs text-text-tertiary">
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-secondary">No documents found.</p>
+          <p className="mt-1 text-xs text-text-muted">
             {search || companyFilter || typeFilter || dateFilter !== "all"
               ? "Try adjusting your filters."
               : "Documents uploaded by founders will appear here."}

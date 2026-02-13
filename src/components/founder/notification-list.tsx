@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Inbox, CheckCircle2, Info, ChevronRight } from "lucide-react";
+import { Info, ChevronRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatPeriod } from "@/components/charts/types";
 import { getMetricDefinition, inferMetricValueType } from "@/lib/metric-definitions";
@@ -422,7 +422,7 @@ export function NotificationList({
     return (
       <div className="space-y-3">
         <EmptyState
-          icon={mode === "completed" ? CheckCircle2 : Inbox}
+          variant="inline"
           title={
             mode === "completed"
               ? "No completed submissions yet"

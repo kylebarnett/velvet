@@ -88,29 +88,27 @@ export function ExportButton({ onClick, label, onExport, formats }: ExportButton
 
       {open && (
         <div
-          className="absolute right-0 z-30 mt-1 w-44 rounded-lg border border-border-default bg-bg-raised shadow-lg"
+          className="absolute right-0 z-50 mt-1 w-44 overflow-hidden rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm"
           role="menu"
         >
-          <div className="py-1">
-            {availableOptions.map((option) => {
-              const Icon = option.icon;
-              return (
-                <button
-                  key={option.format}
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    onExport(option.format);
-                    setOpen(false);
-                  }}
-                  className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
-                >
-                  <Icon className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" />
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
+          {availableOptions.map((option) => {
+            const Icon = option.icon;
+            return (
+              <button
+                key={option.format}
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onExport(option.format);
+                  setOpen(false);
+                }}
+                className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary"
+              >
+                <Icon className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" />
+                {option.label}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

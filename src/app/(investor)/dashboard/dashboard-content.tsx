@@ -155,7 +155,7 @@ function CompanyListRow({
   return (
     <Link
       href={`/dashboard/${company.id}`}
-      className="card-hover-lift flex items-center gap-4 rounded-xl border border-border-subtle card-surface px-5 py-3.5 hover:border-border-default"
+      className="card-hover-lift flex items-center gap-4 rounded-xl card-surface px-5 py-3.5"
     >
       <CompanyLogoSmall name={company.name} logoUrl={company.logoUrl} />
 
@@ -170,10 +170,10 @@ function CompanyListRow({
         </div>
         <div className="mt-0.5 flex items-center gap-1.5">
           {company.industry && (
-            <span className="rounded-full bg-[var(--tag-blue-bg)] px-2 py-0.5 text-[11px] capitalize text-[var(--tag-blue-text)]">{company.industry.replace(/_/g, " ")}</span>
+            <span className="rounded-full bg-bg-elevated px-2 py-0.5 text-[11px] capitalize text-text-secondary">{company.industry.replace(/_/g, " ")}</span>
           )}
           {company.stage && (
-            <span className="rounded-full bg-[var(--tag-violet-bg)] px-2 py-0.5 text-[11px] capitalize text-[var(--tag-violet-text)]">{company.stage.replace(/_/g, " ")}</span>
+            <span className="rounded-full bg-bg-elevated px-2 py-0.5 text-[11px] capitalize text-text-secondary">{company.stage.replace(/_/g, " ")}</span>
           )}
         </div>
       </div>
@@ -327,8 +327,8 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
       </div>
 
       {filteredCompanies.length === 0 ? (
-        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-          <p className="text-text-tertiary">
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-secondary">
             {statusFilter !== "all"
               ? "No companies match your search and filter criteria."
               : "No companies match your search."}

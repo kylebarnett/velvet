@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import {
   extractNumericValue,
   aggregateMetricValues,
@@ -40,6 +41,14 @@ export async function GET(req: Request) {
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
+
+  // Rate limit: 60 reads/min per user
+  const { allowed, retryAfter } = checkRateLimit(`summary-read:${user.id}`, 60, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
 
   const url = new URL(req.url);
   const timeRange = url.searchParams.get("timeRange") ?? "latest";
@@ -137,8 +146,16 @@ export async function GET(req: Request) {
     const cutoff = new Date();
     cutoff.setFullYear(cutoff.getFullYear() - 1);
     query = query.gte("period_start", cutoff.toISOString().split("T")[0]);
+  } else if (timeRange === "latest") {
+    // Only need recent data to find latest value per metric — 6 months is sufficient
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - 6);
+    query = query.gte("period_start", cutoff.toISOString().split("T")[0]);
   }
-  // "latest" and "all" fetch everything; "latest" deduplicates below
+  // "all" fetches everything
+
+  // Safety cap to prevent unbounded memory usage
+  query = query.order("period_start", { ascending: false }).limit(10000);
 
   const { data: metricValues, error: mvError } = await query;
 

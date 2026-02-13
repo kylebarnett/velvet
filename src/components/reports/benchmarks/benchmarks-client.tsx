@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Loader2, BarChart3 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils/cn";
 import { getPercentileBgColor } from "@/lib/benchmarks/calculate";
@@ -363,21 +363,18 @@ export function BenchmarksClient() {
         selectedMetric &&
         !hasCompanies &&
         !isLoadingData && (
-          <div className="rounded-xl border border-border-default card-surface p-8 text-center">
-            <p className="text-text-tertiary">
-              None of your portfolio companies have submitted data for this
-              metric.
+          <div className="py-12 text-center">
+            <p className="text-sm text-text-secondary">
+              None of your portfolio companies have submitted data for this metric.
             </p>
           </div>
         )}
 
       {/* Initial empty state */}
       {!selectedMetric && !isLoadingData && !error && (
-        <div className="rounded-xl border border-border-subtle bg-bg-raised p-12 text-center">
-          <BarChart3 className="mx-auto mb-3 h-10 w-10 text-text-faint" />
-          <p className="text-text-muted">
-            Select a metric above to see how your portfolio companies compare to
-            industry benchmarks.
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-muted">
+            Select a metric above to see how your portfolio companies compare to industry benchmarks.
           </p>
         </div>
       )}

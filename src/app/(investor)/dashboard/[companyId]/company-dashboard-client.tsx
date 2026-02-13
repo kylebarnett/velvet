@@ -307,11 +307,8 @@ function MetricsTabContent({
 
   if (!hasMetrics) {
     return (
-      <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-        <p className="text-text-tertiary">No metrics have been submitted for this company yet.</p>
-        <p className="mt-2 text-sm text-text-muted">
-          Metrics will appear here once the founder submits data.
-        </p>
+      <div className="py-12 text-center">
+        <p className="text-sm text-text-secondary">No metrics have been submitted for this company yet.</p>
       </div>
     );
   }
@@ -339,7 +336,7 @@ function MetricsTabContent({
         {!readOnly && (
           <div className="flex items-center gap-2">
             <Link
-              href={`/campaigns/new?companyId=${companyId}`}
+              href={`/metric-requests/new?companyId=${companyId}`}
               className="flex items-center justify-center gap-2 rounded-lg bg-btn-primary-bg px-3 py-2 sm:py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover transition-colors"
             >
               <Send className="h-3.5 w-3.5" />
@@ -394,11 +391,8 @@ function MetricsTabContent({
       </div>
 
       {widgets.length === 0 && (
-        <div className="rounded-xl border border-border-default card-surface p-6 text-center">
-          <p className="text-text-tertiary">No widgets configured for this dashboard.</p>
-          <p className="mt-2 text-sm text-text-muted">
-            Click "Edit Dashboard" to add charts and metrics.
-          </p>
+        <div className="py-12 text-center">
+          <p className="text-sm text-text-secondary">No widgets configured. Click &ldquo;Edit Dashboard&rdquo; to add charts and metrics.</p>
         </div>
       )}
 

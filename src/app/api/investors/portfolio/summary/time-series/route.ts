@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import {
   extractNumericValue,
   canSumMetric,
@@ -28,8 +29,16 @@ export async function GET(req: Request) {
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
+  // Rate limit: 60 reads/min per user
+  const { allowed, retryAfter } = checkRateLimit(`time-series-read:${user.id}`, 60, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
+
   const url = new URL(req.url);
-  const metric = url.searchParams.get("metric");
+  const metric = url.searchParams.get("metric")?.slice(0, 100) ?? null;
   const periodType = url.searchParams.get("periodType") ?? "quarterly";
   const periodsParam = url.searchParams.get("periods");
   const periods = periodsParam ? Math.min(Math.max(parseInt(periodsParam, 10) || 8, 1), 24) : 8;
