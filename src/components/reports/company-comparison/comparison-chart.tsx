@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import { getChartColor, formatValue, formatPeriod } from "@/components/charts/types";
+import { getChartColor, formatValue, formatCompactValue, formatPeriod } from "@/components/charts/types";
 import { useChartTheme } from "@/hooks/use-chart-theme";
 import type { NormalizationMode } from "./normalization-toggle";
 
@@ -52,7 +52,7 @@ function formatYAxisTick(
   if (normalization === "indexed") {
     return value.toFixed(0);
   }
-  return formatValue(value, metricName);
+  return formatCompactValue(value, metricName);
 }
 
 function formatTooltipValue(
@@ -117,7 +117,7 @@ export function ComparisonChart({
             axisLine={false}
             tickFormatter={(v) => formatYAxisTick(v, normalization, metricName)}
             dx={-5}
-            width={80}
+            width={85}
             label={
               yAxisLabel
                 ? {

@@ -55,7 +55,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   // Requests
   {
     id: "requests-intro",
-    page: "/campaigns",
+    page: "/metric-requests",
     target: '[data-onboarding="requests-title"]',
     title: "Campaigns",
     message:
@@ -63,7 +63,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   },
   {
     id: "create-request",
-    page: "/campaigns",
+    page: "/metric-requests",
     target: '[data-onboarding="new-request"]',
     title: "Send a Request",
     message:
@@ -72,7 +72,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   },
   {
     id: "templates-tab",
-    page: "/campaigns",
+    page: "/metric-requests",
     target: '[data-onboarding="templates-tab"]',
     title: "Metric Templates",
     message:
@@ -80,7 +80,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   },
   {
     id: "schedules-tab",
-    page: "/campaigns",
+    page: "/metric-requests",
     target: '[data-onboarding="schedules-tab"]',
     title: "Automated Schedules",
     message:
@@ -93,7 +93,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
     target: '[data-onboarding="reports-title"]',
     title: "Portfolio Reports",
     message:
-      "View aggregated metrics, compare companies, and track portfolio trends.",
+      "Create and manage reports from templates — portfolio summaries, company comparisons, benchmarks, and deep dives.",
   },
   // Funds
   {

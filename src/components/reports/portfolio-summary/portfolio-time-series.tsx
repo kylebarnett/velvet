@@ -13,7 +13,7 @@ import {
 import { Loader2, TrendingUp } from "lucide-react";
 
 import { useChartTheme } from "@/hooks/use-chart-theme";
-import { formatValue } from "@/components/charts/types";
+import { formatValue, formatCompactValue } from "@/components/charts/types";
 import {
   Select,
   SelectContent,
@@ -149,8 +149,8 @@ export function PortfolioTimeSeries({
               tick={{ fill: chartTheme.tick, fontSize: 11 }}
               axisLine={false}
               tickLine={false}
-              tickFormatter={(v: number) => formatValue(v, selectedMetric)}
-              width={70}
+              tickFormatter={(v: number) => formatCompactValue(v, selectedMetric)}
+              width={85}
             />
             <Tooltip
               content={({ active, payload, label }) => {

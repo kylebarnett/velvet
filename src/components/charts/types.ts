@@ -77,6 +77,59 @@ export function formatValue(value: number | null | undefined, metricName?: strin
   return formatWithCommas(value);
 }
 
+// Infer metric type from name — currency checks BEFORE percentage (Burn Rate rule)
+function inferMetricType(metricName?: string): "currency" | "percentage" | "number" {
+  const lowerName = metricName?.toLowerCase() ?? "";
+
+  if (
+    lowerName.includes("revenue") ||
+    lowerName.includes("mrr") ||
+    lowerName.includes("arr") ||
+    lowerName.includes("cac") ||
+    lowerName.includes("ltv") ||
+    lowerName.includes("burn") ||
+    lowerName.includes("cost") ||
+    lowerName.includes("expense") ||
+    lowerName.includes("gmv") ||
+    lowerName.includes("aov") ||
+    lowerName.includes("arpu")
+  ) {
+    return "currency";
+  }
+
+  if (
+    lowerName.includes("rate") ||
+    lowerName.includes("margin") ||
+    lowerName.includes("retention") ||
+    lowerName.includes("churn") ||
+    lowerName.includes("conversion")
+  ) {
+    return "percentage";
+  }
+
+  return "number";
+}
+
+// Format compact values for Y-axis ticks: $1.2M, $500K, 45%, 1,234
+export function formatCompactValue(value: number | null | undefined, metricName?: string): string {
+  if (value == null) return "-";
+
+  const type = inferMetricType(metricName);
+  const abs = Math.abs(value);
+  const sign = value < 0 ? "-" : "";
+
+  function compact(v: number): string {
+    if (v >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(1).replace(/\.0$/, "")}B`;
+    if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+    if (v >= 1_000) return `${(v / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
+    return v % 1 !== 0 ? v.toFixed(1) : v.toString();
+  }
+
+  if (type === "currency") return `${sign}$${compact(abs)}`;
+  if (type === "percentage") return `${sign}${compact(abs)}%`;
+  return `${sign}${compact(abs)}`;
+}
+
 // Format period for display.
 // Uses UTC methods — date-only strings like "2023-10-01" parse as midnight UTC.
 // Local-time getMonth() shifts the result in timezones behind UTC
@@ -96,7 +149,7 @@ export function formatPeriod(periodStart: string, periodType: string): string {
     return `Q${quarter} '${year}`;
   }
 
-  if (periodType === "yearly") {
+  if (periodType === "yearly" || periodType === "annual") {
     return date.getUTCFullYear().toString();
   }
 

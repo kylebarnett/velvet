@@ -7,7 +7,7 @@ import { logger } from "@/lib/logger";
 const createSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  reportType: z.enum(["summary", "comparison", "benchmarks", "trends"]),
+  reportType: z.enum(["summary", "comparison", "benchmarks", "deep_dive"]),
   filters: z.record(z.string(), z.unknown()).optional(),
   companyIds: z.array(z.string().uuid()).optional(),
   normalize: z.string().optional(),

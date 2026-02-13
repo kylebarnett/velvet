@@ -12,7 +12,7 @@ import {
   Cell,
 } from "recharts";
 
-import { formatValue } from "@/components/charts/types";
+import { formatCompactValue } from "@/components/charts/types";
 import { useChartTheme } from "@/hooks/use-chart-theme";
 
 type CompanyBenchmark = {
@@ -167,9 +167,9 @@ export function BenchmarkChart({
             tick={{ fill: chartTheme.tick, fontSize: 11 }}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(v: number) => formatValue(v, metricName)}
+            tickFormatter={(v: number) => formatCompactValue(v, metricName)}
             dx={-5}
-            width={80}
+            width={85}
           />
           <Tooltip
             content={<CustomTooltip />}

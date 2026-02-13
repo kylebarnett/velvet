@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import { ChartProps, getChartColor, formatValue } from "./types";
+import { ChartProps, getChartColor, formatValue, formatCompactValue } from "./types";
 import { useChartTheme } from "@/hooks/use-chart-theme";
 
 export function LineChart({
@@ -54,9 +54,9 @@ export function LineChart({
             tick={{ fill: chartTheme.tick, fontSize: 11 }}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => formatValue(value, metrics[0])}
+            tickFormatter={(value) => formatCompactValue(value, metrics[0])}
             dx={-5}
-            width={80}
+            width={85}
           />
           <Tooltip
             contentStyle={{

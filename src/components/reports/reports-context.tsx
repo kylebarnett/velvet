@@ -1,25 +1,32 @@
 "use client";
 
 import * as React from "react";
+import type { ReportType } from "@/lib/reports/templates";
+import { getDefaultSections } from "@/lib/reports/templates";
+
+export type { ReportType };
 
 export type ReportConfig = {
-  reportType: "summary" | "comparison" | "benchmarks" | "trends";
+  reportType: ReportType;
   filters: Record<string, unknown>;
   companyIds?: string[];
   normalize?: string;
   config?: Record<string, unknown>;
+  visibleSections?: string[];
 };
 
 export type SavedReport = {
   id: string;
   name: string;
   description: string | null;
-  report_type: string;
+  report_type: ReportType;
   is_default: boolean;
   filters?: Record<string, unknown>;
   company_ids?: string[];
   normalize?: string;
   config?: Record<string, unknown>;
+  created_at?: string;
+  updated_at?: string;
 };
 
 type ReportsContextValue = {
@@ -34,6 +41,10 @@ type ReportsContextValue = {
   setActiveReport: (id: string | null, name: string | null) => void;
   markDirty: () => void;
   markClean: () => void;
+  visibleSections: string[];
+  toggleSection: (sectionId: string) => void;
+  resetSections: (reportType: ReportType) => void;
+  setVisibleSections: (sections: string[]) => void;
 };
 
 const ReportsContext = React.createContext<ReportsContextValue | null>(null);
@@ -44,10 +55,10 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
   const [activeReportId, setActiveReportId] = React.useState<string | null>(null);
   const [activeReportName, setActiveReportName] = React.useState<string | null>(null);
   const [isDirty, setIsDirty] = React.useState(false);
+  const [visibleSections, setVisibleSectionsRaw] = React.useState<string[]>([]);
 
   const setCurrentConfig = React.useCallback((config: ReportConfig) => {
     setCurrentConfigRaw((prev) => {
-      // If we have an active report and config changed, mark dirty
       if (prev && activeReportId) {
         const prevStr = JSON.stringify(prev);
         const nextStr = JSON.stringify(config);
@@ -64,6 +75,12 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
     setActiveReportId(report.id);
     setActiveReportName(report.name);
     setIsDirty(false);
+    const savedSections = (report.config as Record<string, unknown> | undefined)?.visibleSections;
+    if (Array.isArray(savedSections)) {
+      setVisibleSectionsRaw(savedSections as string[]);
+    } else {
+      setVisibleSectionsRaw(getDefaultSections(report.report_type));
+    }
   }, []);
 
   const clearLoadedReport = React.useCallback(() => {
@@ -79,6 +96,25 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
   const markDirty = React.useCallback(() => setIsDirty(true), []);
   const markClean = React.useCallback(() => setIsDirty(false), []);
 
+  const toggleSection = React.useCallback((sectionId: string) => {
+    setVisibleSectionsRaw((prev) => {
+      const next = prev.includes(sectionId)
+        ? prev.filter((s) => s !== sectionId)
+        : [...prev, sectionId];
+      setIsDirty(true);
+      return next;
+    });
+  }, []);
+
+  const resetSections = React.useCallback((reportType: ReportType) => {
+    setVisibleSectionsRaw(getDefaultSections(reportType));
+    setIsDirty(true);
+  }, []);
+
+  const setVisibleSections = React.useCallback((sections: string[]) => {
+    setVisibleSectionsRaw(sections);
+  }, []);
+
   const value = React.useMemo(
     () => ({
       currentConfig,
@@ -92,8 +128,28 @@ export function ReportsProvider({ children }: { children: React.ReactNode }) {
       setActiveReport,
       markDirty,
       markClean,
+      visibleSections,
+      toggleSection,
+      resetSections,
+      setVisibleSections,
     }),
-    [currentConfig, setCurrentConfig, loadedReport, loadReport, clearLoadedReport, activeReportId, activeReportName, isDirty, setActiveReport, markDirty, markClean]
+    [
+      currentConfig,
+      setCurrentConfig,
+      loadedReport,
+      loadReport,
+      clearLoadedReport,
+      activeReportId,
+      activeReportName,
+      isDirty,
+      setActiveReport,
+      markDirty,
+      markClean,
+      visibleSections,
+      toggleSection,
+      resetSections,
+      setVisibleSections,
+    ]
   );
 
   return (

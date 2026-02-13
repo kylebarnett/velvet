@@ -45,7 +45,7 @@ export default async function InvestorLayout({
             children: [
               { href: "/dashboard", label: "Companies", icon: "building2" },
               { href: "/portfolio", label: "Contacts", icon: "users" },
-              { href: "/campaigns", label: "Metric Requests", icon: "send" },
+              { href: "/metric-requests", label: "Metric Requests", icon: "send" },
             ],
           },
           {
@@ -53,12 +53,6 @@ export default async function InvestorLayout({
             label: "Reports",
             icon: "bar-chart-3",
             divider: true,
-            children: [
-              { href: "/reports", label: "Overview", icon: "bar-chart-3" },
-              { href: "/reports/compare", label: "Compare", icon: "bar-chart-3" },
-              { href: "/reports/benchmarks", label: "Benchmarks", icon: "bar-chart-3" },
-              { href: "/reports/trends", label: "Trends", icon: "trending-up" },
-            ],
           },
           { href: "/documents", label: "Documents", icon: "file-text" },
           {

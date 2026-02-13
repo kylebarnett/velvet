@@ -1,49 +1,33 @@
-import { Suspense } from "react";
-
 import { requireRole } from "@/lib/auth/require-role";
-import { ReportBuilderBar } from "@/components/reports/report-builder-bar";
-import { SummaryContent } from "./summary-content";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { ReportGallery } from "@/components/reports/report-gallery";
+import type { SavedReport } from "@/components/reports/reports-context";
 
 export const dynamic = "force-dynamic";
 
-type PageProps = {
-  searchParams: Promise<{
-    industries?: string;
-    stages?: string;
-  }>;
-};
+export default async function ReportsPage() {
+  const user = await requireRole("investor");
+  const supabase = await createSupabaseServerClient();
 
-export default async function ReportsPage({ searchParams }: PageProps) {
-  await requireRole("investor");
-  const params = await searchParams;
+  const { data } = await supabase
+    .from("portfolio_reports")
+    .select("*")
+    .eq("investor_id", user.id)
+    .order("updated_at", { ascending: false });
 
-  return (
-    <div className="space-y-6">
-      <Suspense fallback={<div className="h-20 animate-pulse rounded-xl bg-bg-elevated" />}>
-        <ReportBuilderBar />
-      </Suspense>
+  const reports: SavedReport[] = (data ?? []).map((r) => ({
+    id: r.id,
+    name: r.name,
+    description: r.description,
+    report_type: r.report_type,
+    is_default: r.is_default,
+    filters: r.filters,
+    company_ids: r.company_ids,
+    normalize: r.normalize,
+    config: r.config,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+  }));
 
-      <Suspense
-        fallback={
-          <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-24 animate-pulse rounded-xl bg-bg-elevated" />
-              ))}
-            </div>
-            <div className="grid gap-4 lg:grid-cols-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-48 animate-pulse rounded-xl bg-bg-elevated" />
-              ))}
-            </div>
-          </div>
-        }
-      >
-        <SummaryContent
-          industries={params.industries}
-          stages={params.stages}
-        />
-      </Suspense>
-    </div>
-  );
+  return <ReportGallery initialReports={reports} />;
 }
