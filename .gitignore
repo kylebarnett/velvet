@@ -42,3 +42,8 @@ next-env.d.ts
 
 # worktrees
 .worktrees/
+
+# local config
+.agents/
+.claude/
+.cursor/
