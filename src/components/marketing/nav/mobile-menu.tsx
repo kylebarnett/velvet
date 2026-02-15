@@ -7,7 +7,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const NAV_LINKS = [
   { href: "/features", label: "Features" },
@@ -163,13 +162,6 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           </Link>
         </div>
 
-        {/* Theme toggle at bottom */}
-        <div className="mt-auto pb-8 pt-6">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-text-secondary">Theme</span>
-            <ThemeToggle />
-          </div>
-        </div>
       </nav>
     </motion.div>
   );
