@@ -302,6 +302,9 @@ function MetricsTabContent({
     widgets = getDefaultLayout(companyIndustry, templates);
   }
 
+  // Sort by grid position (y then x) so CSS grid renders in spatial order
+  widgets = [...widgets].sort((a, b) => a.y - b.y || a.x - b.x);
+
   // Filter metrics by date range
   const filteredMetrics = filterMetricsByDateRange(metrics, dateRange);
 
