@@ -34,7 +34,7 @@ export default function DocumentsPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Documents" }]} />
-          <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Documents</h1>
+          <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight" data-onboarding="documents-title">Documents</h1>
         </div>
         <button
           type="button"

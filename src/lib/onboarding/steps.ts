@@ -143,16 +143,16 @@ export const FOUNDER_STEPS: OnboardingStep[] = [
   },
   {
     id: "documents-tab",
-    page: "/portal",
-    target: '[data-onboarding="documents-tab"]',
+    page: "/portal/documents",
+    target: '[data-onboarding="documents-title"]',
     title: "Upload Documents",
     message:
       "Upload financial statements, board decks, or investor updates for your investors to review.",
   },
   {
     id: "tear-sheets-tab",
-    page: "/portal",
-    target: '[data-onboarding="tear-sheets-tab"]',
+    page: "/portal/tear-sheets",
+    target: '[data-onboarding="tear-sheets-title"]',
     title: "Tear Sheets",
     message:
       "Create quarterly tear sheets to share highlights, milestones, and key metrics with investors.",

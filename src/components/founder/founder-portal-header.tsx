@@ -1,11 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams, useRouter } from "next/navigation";
 import {
-  BarChart3,
-  FileText,
-  FileSpreadsheet,
   Globe,
   Check,
   X,
@@ -19,33 +15,10 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils/cn";
-import { FounderDashboardClient } from "@/components/founder/founder-dashboard-client";
-import { DocumentsTab } from "@/components/founder/documents-tab";
-import { TearSheetsTab } from "@/components/founder/tear-sheets-tab";
 import { FounderCompanyLogo } from "@/components/founder/company-logo";
-import { MetricValue } from "@/components/dashboard";
-import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import { TAG_OPTIONS, TAG_COLORS, getTagLabel, type TagType } from "@/lib/company/constants";
 
-type Tab = "metrics" | "documents" | "tear-sheets";
-
-type DashboardView = {
-  id: string;
-  name: string;
-  is_default: boolean;
-  layout: unknown;
-};
-
-type DashboardTemplate = {
-  id: string;
-  name: string;
-  description: string | null;
-  target_industry: string | null;
-  layout: unknown;
-  is_system: boolean;
-};
-
-interface FounderPortalTabsProps {
+interface FounderPortalHeaderProps {
   companyId: string;
   companyName: string;
   companyIndustry: string | null;
@@ -53,12 +26,9 @@ interface FounderPortalTabsProps {
   companyStage?: string | null;
   companyBusinessModel?: string | null;
   companyLogoUrl?: string | null;
-  metrics: MetricValue[];
-  views: DashboardView[];
-  templates: DashboardTemplate[];
 }
 
-export function FounderPortalTabs({
+export function FounderPortalHeader({
   companyId,
   companyName,
   companyIndustry,
@@ -66,74 +36,18 @@ export function FounderPortalTabs({
   companyStage,
   companyBusinessModel,
   companyLogoUrl,
-  metrics,
-  views,
-  templates,
-}: FounderPortalTabsProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab");
-  const activeTab: Tab = (
-    tabParam === "documents" || tabParam === "tear-sheets" ? tabParam : "metrics"
-  ) as Tab;
-
-  const tabs: TabItem<Tab>[] = [
-    { value: "metrics", label: "Metrics", icon: BarChart3, dataOnboarding: "metrics-tab" },
-    { value: "documents", label: "Documents", icon: FileText, dataOnboarding: "documents-tab" },
-    { value: "tear-sheets", label: "Tear Sheets", icon: FileSpreadsheet, dataOnboarding: "tear-sheets-tab" },
-  ];
-
-  function handleTabChange(tab: Tab) {
-    if (tab === "metrics") {
-      router.push("/portal");
-    } else {
-      router.push(`/portal?tab=${tab}`);
-    }
-  }
-
+}: FounderPortalHeaderProps) {
   return (
-    <div className="space-y-6" data-onboarding="founder-welcome">
-      {/* Company header + Dashboard title */}
-      <div className="space-y-4">
-        <CompanyHeader
-          companyId={companyId}
-          name={companyName}
-          website={companyWebsite ?? null}
-          stage={companyStage ?? null}
-          industry={companyIndustry ?? null}
-          businessModel={companyBusinessModel ?? null}
-          logoUrl={companyLogoUrl ?? null}
-        />
-
-        {/* Tab navigation */}
-        <SlidingTabs
-          tabs={tabs}
-          value={activeTab}
-          onChange={handleTabChange}
-          variant="underline"
-        />
-      </div>
-
-      {/* Tab content with fade-in animation */}
-      <div
-        key={activeTab}
-        className="animate-fade-in"
-      >
-        {activeTab === "metrics" && (
-          <FounderDashboardClient
-            companyId={companyId}
-            companyName={companyName}
-            companyIndustry={companyIndustry}
-            metrics={metrics}
-            views={views}
-            templates={templates}
-          />
-        )}
-
-        {activeTab === "documents" && <DocumentsTab companyId={companyId} />}
-
-        {activeTab === "tear-sheets" && <TearSheetsTab />}
-      </div>
+    <div data-onboarding="founder-welcome">
+      <CompanyHeader
+        companyId={companyId}
+        name={companyName}
+        website={companyWebsite ?? null}
+        stage={companyStage ?? null}
+        industry={companyIndustry ?? null}
+        businessModel={companyBusinessModel ?? null}
+        logoUrl={companyLogoUrl ?? null}
+      />
     </div>
   );
 }

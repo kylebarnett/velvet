@@ -4,7 +4,8 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GettingStartedChecklist } from "@/components/ui/getting-started-checklist";
-import { FounderPortalTabs } from "@/components/founder/founder-portal-tabs";
+import { FounderPortalHeader } from "@/components/founder/founder-portal-header";
+import { FounderDashboardClient } from "@/components/founder/founder-dashboard-client";
 
 export const dynamic = "force-dynamic";
 
@@ -219,7 +220,7 @@ export default async function FounderDashboardPage() {
         ]}
         dataCompleteness={dataCompleteness}
       />
-    <FounderPortalTabs
+    <FounderPortalHeader
       companyId={company.id}
       companyName={company.name}
       companyIndustry={company.industry}
@@ -227,6 +228,12 @@ export default async function FounderDashboardPage() {
       companyStage={company.stage}
       companyBusinessModel={company.business_model}
       companyLogoUrl={company.logo_url}
+    />
+
+    <FounderDashboardClient
+      companyId={company.id}
+      companyName={company.name}
+      companyIndustry={company.industry}
       metrics={metricValues ?? []}
       views={views ?? []}
       templates={templates ?? []}

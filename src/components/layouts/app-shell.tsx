@@ -12,6 +12,7 @@ import {
   Send,
   BarChart3,
   FileText,
+  FileSpreadsheet,
   UserPlus,
   LayoutDashboard,
   Inbox,
@@ -71,6 +72,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   send: Send,
   "bar-chart-3": BarChart3,
   "file-text": FileText,
+  "file-spreadsheet": FileSpreadsheet,
   "user-plus": UserPlus,
   "layout-dashboard": LayoutDashboard,
   inbox: Inbox,
@@ -473,6 +475,11 @@ export function AppShell({
                       onClick={() => setSidebarCollapsed(false)}
                     >
                       <NavIcon name={item.icon} className="h-[18px] w-[18px] shrink-0" />
+                      {item.badge != null && item.badge > 0 && (
+                        <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">
+                          {item.badge > 99 ? "99+" : item.badge}
+                        </span>
+                      )}
                     </Link>
                   </SidebarTooltip>
                 </React.Fragment>
@@ -494,9 +501,15 @@ export function AppShell({
                 >
                   <NavIcon name={item.icon} className="h-[18px] w-[18px] shrink-0" />
                   <span>{item.label}</span>
+                  {item.badge != null && item.badge > 0 && (
+                    <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-bg-hover px-1.5 text-[10px] font-medium text-text-primary">
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </span>
+                  )}
                   <ChevronDown
                     className={cn(
-                      "ml-auto h-4 w-4 text-text-faint transition-transform",
+                      "h-4 w-4 shrink-0 text-text-faint transition-transform",
+                      !(item.badge != null && item.badge > 0) && "ml-auto",
                       isExpanded && "rotate-180"
                     )}
                   />

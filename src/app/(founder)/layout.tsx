@@ -83,10 +83,19 @@ export default async function FounderLayout({
           title="Founder"
           initialTheme={savedTheme}
           nav={[
-            { href: "/portal", label: "Dashboard", icon: "layout-dashboard" },
-            { href: "/portal/requests", label: "Metric Requests", icon: "inbox", badge: pendingCount },
-            { href: "/portal/documents", label: "Documents", icon: "file-text" },
-            { href: "/portal/investors", label: "Investors", icon: "shield" },
+            {
+              href: "/portal/company",
+              label: "Company",
+              icon: "building2",
+              badge: pendingCount,
+              children: [
+                { href: "/portal", label: "Dashboard", icon: "layout-dashboard" },
+                { href: "/portal/requests", label: "Metric Requests", icon: "inbox", badge: pendingCount },
+                { href: "/portal/documents", label: "Documents", icon: "file-text" },
+                { href: "/portal/tear-sheets", label: "Tear Sheets", icon: "file-spreadsheet" },
+              ],
+            },
+            { href: "/portal/investors", label: "Investors", icon: "shield", divider: true },
           ]}
           company={company}
           user={userInfo}
