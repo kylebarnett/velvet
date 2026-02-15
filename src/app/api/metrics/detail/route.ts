@@ -77,7 +77,7 @@ export async function GET(req: Request) {
   if (valueIds.length > 0) {
     const { data: historyData } = await supabase
       .from("metric_value_history")
-      .select("*")
+      .select("id, metric_value_id, previous_value, new_value, previous_source, new_source, changed_by, change_reason, created_at")
       .in("metric_value_id", valueIds)
       .order("created_at", { ascending: false });
     history = historyData ?? [];
@@ -141,5 +141,10 @@ export async function GET(req: Request) {
     values: enrichedValues,
     history: enrichedHistory,
     documents,
+  },
+  {
+    headers: {
+      "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
+    },
   });
 }

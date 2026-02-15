@@ -74,9 +74,10 @@ export async function GET(req: Request) {
   const statusFilter = url.searchParams.get("status");
   const { limit, offset } = parsePagination(url);
 
-  // Fetch metric_requests for this investor with metric_definitions join
-  // Safety cap to prevent unbounded memory usage at scale
-  const { data: rawRequests, error } = await supabase
+  // Fetch metric_requests for this investor with metric_definitions join.
+  // Use count: "exact" so we know if there are more results beyond the page.
+  // Campaign bucketing requires all requests, but we only need lightweight columns.
+  const { data: rawRequests, error, count: totalRequestCount } = await supabase
     .from("metric_requests")
     .select(
       `
@@ -91,10 +92,10 @@ export async function GET(req: Request) {
       metric_definitions (period_type),
       metric_request_schedules:schedule_id (name)
     `,
+      { count: "exact" },
     )
     .eq("investor_id", user.id)
-    .order("period_start", { ascending: false })
-    .limit(5000);
+    .order("period_start", { ascending: false });
 
   if (error) {
     return jsonError("Failed to fetch requests.", 500);
@@ -431,6 +432,7 @@ export async function GET(req: Request) {
   return NextResponse.json({
     campaigns: paginated,
     total,
+    totalRequests: totalRequestCount ?? 0,
     summary: {
       activeCampaigns,
 
@@ -452,6 +454,11 @@ export async function GET(req: Request) {
       companiesAwaiting,
       urgentCampaigns,
       awaitingCompanies,
+    },
+  },
+  {
+    headers: {
+      "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
     },
   });
 }

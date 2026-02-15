@@ -62,7 +62,7 @@ export async function PATCH(
   // Re-run conflict detection after mapping changes
   const { data: allValues } = await admin
     .from("historical_upload_values")
-    .select("*")
+    .select("id, upload_id, company_id, company_name_detected, metric_name, period_type, period_start, period_end, value, ai_confidence, sheet_name, cell_reference, status")
     .eq("upload_id", uploadId)
     .not("company_id", "is", null);
 

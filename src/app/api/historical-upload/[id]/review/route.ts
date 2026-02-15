@@ -69,26 +69,30 @@ export async function POST(
   // Admin client used after ownership verification above
   const admin = createSupabaseAdminClient();
 
-  let approvedCount = 0;
-  let rejectedCount = 0;
+  // Batch-fetch all target values upfront instead of 1 query per action
+  const valueIds = parsed.data.actions.map((a) => a.valueId);
+  const { data: allValues } = await admin
+    .from("historical_upload_values")
+    .select("*")
+    .in("id", valueIds)
+    .eq("upload_id", uploadId);
+
+  const valueMap = new Map(
+    (allValues ?? []).map((v) => [v.id, v])
+  );
+
+  // Separate actions into approve and reject groups
+  const rejectIds: string[] = [];
+  const approveIds: string[] = [];
+  const founderUpserts: Array<Record<string, unknown>> = [];
+  const investorUpserts: Array<Record<string, unknown>> = [];
 
   for (const action of parsed.data.actions) {
-    // Fetch the value and verify it belongs to this upload
-    const { data: valueRow } = await admin
-      .from("historical_upload_values")
-      .select("*")
-      .eq("id", action.valueId)
-      .eq("upload_id", uploadId)
-      .single();
-
+    const valueRow = valueMap.get(action.valueId);
     if (!valueRow) continue;
 
     if (action.action === "reject") {
-      await admin
-        .from("historical_upload_values")
-        .update({ status: "rejected" })
-        .eq("id", action.valueId);
-      rejectedCount++;
+      rejectIds.push(action.valueId);
       continue;
     }
 
@@ -100,93 +104,106 @@ export async function POST(
     const unit = (valueRow.value as { unit?: string | null })?.unit ?? null;
 
     if (!valueRow.company_id) {
-      // Cannot approve without a company mapping
       logger.warn(`[review] Skipping value ${action.valueId}: no company_id mapped`);
       continue;
     }
 
     if (role === "founder") {
-      // Upsert into company_metric_values (shared)
-      const { error } = await admin
-        .from("company_metric_values")
-        .upsert(
-          {
-            company_id: valueRow.company_id,
-            metric_name: finalMetricName,
-            period_type: valueRow.period_type,
-            period_start: finalPeriodStart,
-            period_end: finalPeriodEnd,
-            value: { raw: rawValue, unit },
-            submitted_by: user.id,
-            source: "historical_upload",
-            source_upload_id: uploadId,
-          },
-          {
-            onConflict: "company_id,metric_name,period_type,period_start,period_end",
-          },
-        );
-
-      if (error) {
-        logger.error(`[review] Failed to upsert founder value:`, error.message);
-        continue;
-      }
+      founderUpserts.push({
+        company_id: valueRow.company_id,
+        metric_name: finalMetricName,
+        period_type: valueRow.period_type,
+        period_start: finalPeriodStart,
+        period_end: finalPeriodEnd,
+        value: { raw: rawValue, unit },
+        submitted_by: user.id,
+        source: "historical_upload",
+        source_upload_id: uploadId,
+      });
     } else {
-      // Upsert into investor_metric_values (private)
-      const { error } = await admin
-        .from("investor_metric_values")
-        .upsert(
-          {
-            investor_id: user.id,
-            company_id: valueRow.company_id,
-            metric_name: finalMetricName,
-            period_type: valueRow.period_type,
-            period_start: finalPeriodStart,
-            period_end: finalPeriodEnd,
-            value: { raw: rawValue, unit },
-            source: "historical_upload",
-            source_upload_id: uploadId,
-          },
-          {
-            onConflict: "investor_id,company_id,metric_name,period_type,period_start,period_end",
-          },
-        );
-
-      if (error) {
-        logger.error(`[review] Failed to upsert investor value:`, error.message);
-        continue;
-      }
+      investorUpserts.push({
+        investor_id: user.id,
+        company_id: valueRow.company_id,
+        metric_name: finalMetricName,
+        period_type: valueRow.period_type,
+        period_start: finalPeriodStart,
+        period_end: finalPeriodEnd,
+        value: { raw: rawValue, unit },
+        source: "historical_upload",
+        source_upload_id: uploadId,
+      });
     }
 
-    // Mark the upload value as approved
+    approveIds.push(action.valueId);
+  }
+
+  let approvedCount = 0;
+  let rejectedCount = 0;
+
+  // Batch reject
+  if (rejectIds.length > 0) {
+    await admin
+      .from("historical_upload_values")
+      .update({ status: "rejected" })
+      .in("id", rejectIds);
+    rejectedCount = rejectIds.length;
+  }
+
+  // Batch approve: upsert into target table, then update statuses
+  if (founderUpserts.length > 0) {
+    const { error } = await admin
+      .from("company_metric_values")
+      .upsert(founderUpserts, {
+        onConflict: "company_id,metric_name,period_type,period_start,period_end",
+      });
+    if (error) {
+      logger.error(`[review] Failed to batch upsert founder values:`, error.message);
+    }
+  }
+
+  if (investorUpserts.length > 0) {
+    const { error } = await admin
+      .from("investor_metric_values")
+      .upsert(investorUpserts, {
+        onConflict: "investor_id,company_id,metric_name,period_type,period_start,period_end",
+      });
+    if (error) {
+      logger.error(`[review] Failed to batch upsert investor values:`, error.message);
+    }
+  }
+
+  if (approveIds.length > 0) {
     await admin
       .from("historical_upload_values")
       .update({ status: "approved" })
-      .eq("id", action.valueId);
-
-    approvedCount++;
+      .in("id", approveIds);
+    approvedCount = approveIds.length;
   }
 
-  // Check if all values are processed — if so, mark as completed
-  const { count: pendingCount } = await admin
-    .from("historical_upload_values")
-    .select("id", { count: "exact", head: true })
-    .eq("upload_id", uploadId)
-    .in("status", ["pending", "conflict"]);
+  // Check completion — parallel count queries
+  const [
+    { count: pendingCount },
+    { count: approvedTotal },
+    { count: rejectedTotal },
+  ] = await Promise.all([
+    admin
+      .from("historical_upload_values")
+      .select("id", { count: "exact", head: true })
+      .eq("upload_id", uploadId)
+      .in("status", ["pending", "conflict"]),
+    admin
+      .from("historical_upload_values")
+      .select("id", { count: "exact", head: true })
+      .eq("upload_id", uploadId)
+      .eq("status", "approved"),
+    admin
+      .from("historical_upload_values")
+      .select("id", { count: "exact", head: true })
+      .eq("upload_id", uploadId)
+      .eq("status", "rejected"),
+  ]);
 
   if (pendingCount === 0) {
-    // Count final approved/rejected
-    const { count: approvedTotal } = await admin
-      .from("historical_upload_values")
-      .select("id", { count: "exact", head: true })
-      .eq("upload_id", uploadId)
-      .eq("status", "approved");
-
-    const { count: rejectedTotal } = await admin
-      .from("historical_upload_values")
-      .select("id", { count: "exact", head: true })
-      .eq("upload_id", uploadId)
-      .eq("status", "rejected");
-
     await admin
       .from("historical_uploads")
       .update({

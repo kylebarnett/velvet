@@ -98,6 +98,18 @@ export async function POST(req: Request) {
     { type: "1d", days: 1 },
   ];
 
+  // Batch-fetch all existing reminder logs for these founders to avoid N+1 dedup queries
+  const { data: existingReminders } = await admin
+    .from("founder_reminder_log")
+    .select("founder_id, reminder_type, period_key")
+    .in("founder_id", founderIds);
+
+  const sentReminderKeys = new Set(
+    (existingReminders ?? []).map(
+      (r) => `${r.founder_id}:${r.reminder_type}:${r.period_key}`
+    )
+  );
+
   const emailsToSend: Array<{
     from: string;
     to: string[];
@@ -153,16 +165,9 @@ export async function POST(req: Request) {
       const periodKeys = [...new Set(urgentRequests.map((r) => r.period_start))];
       const periodKey = `${threshold.type}:${periodKeys.sort().join(",")}`;
 
-      // Check if already sent
-      const { data: existing } = await admin
-        .from("founder_reminder_log")
-        .select("id")
-        .eq("founder_id", company.founder_id!)
-        .eq("reminder_type", threshold.type)
-        .eq("period_key", periodKey)
-        .maybeSingle();
-
-      if (existing) continue;
+      // Check if already sent (in-memory lookup instead of per-row DB query)
+      const dedupKey = `${company.founder_id}:${threshold.type}:${periodKey}`;
+      if (sentReminderKeys.has(dedupKey)) continue;
 
       // Build email
       const metricNames = urgentRequests

@@ -67,16 +67,32 @@ export async function GET(req: Request) {
     return jsonError("Failed to fetch requests.", 500);
   }
 
-  // Also get counts by status for summary cards
-  const { data: allRequests } = await supabase
-    .from("metric_requests")
-    .select("status")
-    .eq("investor_id", user.id);
+  // Get counts by status using parallel aggregate queries (not a full re-fetch)
+  const [
+    { count: totalCount },
+    { count: pendingCount },
+    { count: submittedCount },
+  ] = await Promise.all([
+    supabase
+      .from("metric_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("investor_id", user.id),
+    supabase
+      .from("metric_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("investor_id", user.id)
+      .eq("status", "pending"),
+    supabase
+      .from("metric_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("investor_id", user.id)
+      .eq("status", "submitted"),
+  ]);
 
   const statusCounts = {
-    total: allRequests?.length ?? 0,
-    pending: allRequests?.filter((r) => r.status === "pending").length ?? 0,
-    submitted: allRequests?.filter((r) => r.status === "submitted").length ?? 0,
+    total: totalCount ?? 0,
+    pending: pendingCount ?? 0,
+    submitted: submittedCount ?? 0,
   };
 
   return NextResponse.json({
@@ -85,5 +101,10 @@ export async function GET(req: Request) {
     limit,
     offset,
     statusCounts,
+  },
+  {
+    headers: {
+      "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
+    },
   });
 }

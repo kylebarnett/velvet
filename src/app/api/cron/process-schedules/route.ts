@@ -113,6 +113,75 @@ export async function POST(req: Request) {
   const apiKey = process.env.RESEND_API_KEY;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+  // Batch-fetch relationships for investors whose schedules have no explicit company_ids.
+  // This avoids N+1 relationship queries inside the per-schedule loop.
+  const investorIdsNeedingRels = [
+    ...new Set(
+      (schedules as unknown as Schedule[])
+        .filter((s) => !s.company_ids || s.company_ids.length === 0)
+        .map((s) => s.investor_id)
+    ),
+  ];
+
+  const relsByInvestor = new Map<string, string[]>();
+  if (investorIdsNeedingRels.length > 0) {
+    const { data: allRels } = await adminClient
+      .from("investor_company_relationships")
+      .select("investor_id, company_id")
+      .in("investor_id", investorIdsNeedingRels);
+
+    for (const rel of allRels ?? []) {
+      let arr = relsByInvestor.get(rel.investor_id);
+      if (!arr) {
+        arr = [];
+        relsByInvestor.set(rel.investor_id, arr);
+      }
+      arr.push(rel.company_id);
+    }
+  }
+
+  // Collect ALL company IDs across all schedules to batch-fetch company details
+  const allCompanyIdSet = new Set<string>();
+  for (const rawSchedule of schedules) {
+    const schedule = rawSchedule as unknown as Schedule;
+    if (schedule.company_ids && schedule.company_ids.length > 0) {
+      for (const id of schedule.company_ids) allCompanyIdSet.add(id);
+    } else {
+      const rels = relsByInvestor.get(schedule.investor_id) ?? [];
+      for (const id of rels) allCompanyIdSet.add(id);
+    }
+  }
+
+  // Batch-fetch all companies with founder info in one query
+  const allCompanyIds = [...allCompanyIdSet];
+  const companiesById = new Map<string, {
+    id: string;
+    name: string;
+    founder_id: string | null;
+    users: { id: string; email: string; full_name: string | null } |
+           { id: string; email: string; full_name: string | null }[] | null;
+  }>();
+
+  if (allCompanyIds.length > 0) {
+    const { data: allCompanies } = await adminClient
+      .from("companies")
+      .select(`
+        id,
+        name,
+        founder_id,
+        users!companies_founder_id_fkey (
+          id,
+          email,
+          full_name
+        )
+      `)
+      .in("id", allCompanyIds);
+
+    for (const c of allCompanies ?? []) {
+      companiesById.set(c.id, c);
+    }
+  }
+
   // Process each schedule
   for (const rawSchedule of schedules) {
     const schedule = rawSchedule as unknown as Schedule;
@@ -125,22 +194,11 @@ export async function POST(req: Request) {
     const { periodStart, periodEnd } = calculateReportingPeriod(cadence, now);
     const dueDate = addDays(now, schedule.due_days_offset);
 
-    // Get target companies
+    // Get target companies from pre-fetched data
     let companyIds: string[] = schedule.company_ids || [];
 
     if (!schedule.company_ids || schedule.company_ids.length === 0) {
-      // Get all portfolio companies for this investor
-      const { data: relationships, error: relError } = await adminClient
-        .from("investor_company_relationships")
-        .select("company_id")
-        .eq("investor_id", schedule.investor_id);
-
-      if (relError) {
-        logger.error(`Failed to fetch companies for schedule ${schedule.id}:`, relError);
-        continue;
-      }
-
-      companyIds = (relationships ?? []).map((r) => r.company_id);
+      companyIds = relsByInvestor.get(schedule.investor_id) ?? [];
     }
 
     if (companyIds.length === 0) {
@@ -156,25 +214,10 @@ export async function POST(req: Request) {
 
     const templateItems = template.metric_template_items;
 
-    // Get companies with founder info
-    const { data: companies, error: companyError } = await adminClient
-      .from("companies")
-      .select(`
-        id,
-        name,
-        founder_id,
-        users!companies_founder_id_fkey (
-          id,
-          email,
-          full_name
-        )
-      `)
-      .in("id", companyIds);
-
-    if (companyError) {
-      logger.error(`Failed to fetch companies for schedule ${schedule.id}:`, companyError);
-      continue;
-    }
+    // Get companies from pre-fetched map
+    const companies = companyIds
+      .map((id) => companiesById.get(id))
+      .filter((c): c is NonNullable<typeof c> => c != null);
 
     const errors: { company?: string; metric?: string; message: string }[] = [];
     let requestsCreated = 0;

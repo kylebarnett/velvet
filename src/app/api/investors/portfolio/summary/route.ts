@@ -154,8 +154,10 @@ export async function GET(req: Request) {
   }
   // "all" fetches everything
 
-  // Safety cap to prevent unbounded memory usage
-  query = query.order("period_start", { ascending: false }).limit(10000);
+  // Order by period_start desc so latest values come first.
+  // No artificial limit — query is already scoped to this investor's approved companies
+  // and filtered by time range. Unbounded only for "all" which is explicitly opt-in.
+  query = query.order("period_start", { ascending: false });
 
   const { data: metricValues, error: mvError } = await query;
 
@@ -323,7 +325,17 @@ export async function GET(req: Request) {
     if (breakdown.length > 0) drilldownData[metric] = breakdown;
   }
 
-  // Company breakdown
+  // Company breakdown — pre-index values by company_id to avoid O(n*m) filtering
+  const valuesByCompany = new Map<string, MetricValue[]>();
+  for (const mv of values) {
+    let arr = valuesByCompany.get(mv.company_id);
+    if (!arr) {
+      arr = [];
+      valuesByCompany.set(mv.company_id, arr);
+    }
+    arr.push(mv);
+  }
+
   const byCompany: Array<{
     companyId: string;
     companyName: string;
@@ -334,9 +346,8 @@ export async function GET(req: Request) {
   }> = [];
 
   for (const company of companies) {
-    const companyValues = values
-      .filter((v) => v.company_id === company.id)
-      .sort((a, b) => new Date(b.period_start).getTime() - new Date(a.period_start).getTime());
+    // Values are already sorted by period_start DESC from DB query
+    const companyValues = valuesByCompany.get(company.id) ?? [];
 
     const metricLatest = new Map<string, { latest: number; previous: number | null }>();
     for (const mv of companyValues) {

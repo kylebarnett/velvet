@@ -110,91 +110,94 @@ export async function POST(
       continue;
     }
 
-    // approve_all: insert values into target table
-    for (const valueRow of chunk) {
+    // approve_all: batch upsert values into target table
+    const rows = chunk.map((valueRow) => {
       const rawValue = valueRow.user_edited_value ?? (valueRow.value as { raw: string })?.raw ?? "0";
       const unit = (valueRow.value as { unit?: string | null })?.unit ?? null;
       const metricName = valueRow.user_edited_metric_name ?? valueRow.metric_name;
       const periodStart = valueRow.user_edited_period_start ?? valueRow.period_start;
       const periodEnd = valueRow.user_edited_period_end ?? valueRow.period_end;
+      return { valueRow, rawValue, unit, metricName, periodStart, periodEnd };
+    });
 
-      if (role === "founder") {
-        const { error } = await admin
-          .from("company_metric_values")
-          .upsert(
-            {
-              company_id: valueRow.company_id,
-              metric_name: metricName,
-              period_type: valueRow.period_type,
-              period_start: periodStart,
-              period_end: periodEnd,
-              value: { raw: rawValue, unit },
-              submitted_by: user.id,
-              source: "historical_upload",
-              source_upload_id: uploadId,
-            },
-            {
-              onConflict: "company_id,metric_name,period_type,period_start,period_end",
-            },
-          );
+    if (role === "founder") {
+      const upsertPayload = rows.map((r) => ({
+        company_id: r.valueRow.company_id,
+        metric_name: r.metricName,
+        period_type: r.valueRow.period_type,
+        period_start: r.periodStart,
+        period_end: r.periodEnd,
+        value: { raw: r.rawValue, unit: r.unit },
+        submitted_by: user.id,
+        source: "historical_upload" as const,
+        source_upload_id: uploadId,
+      }));
 
-        if (error) {
-          logger.error(`[bulk-action] Failed to upsert founder value:`, error.message);
-          continue;
-        }
-      } else {
-        const { error } = await admin
-          .from("investor_metric_values")
-          .upsert(
-            {
-              investor_id: user.id,
-              company_id: valueRow.company_id,
-              metric_name: metricName,
-              period_type: valueRow.period_type,
-              period_start: periodStart,
-              period_end: periodEnd,
-              value: { raw: rawValue, unit },
-              source: "historical_upload",
-              source_upload_id: uploadId,
-            },
-            {
-              onConflict: "investor_id,company_id,metric_name,period_type,period_start,period_end",
-            },
-          );
+      const { error } = await admin
+        .from("company_metric_values")
+        .upsert(upsertPayload, {
+          onConflict: "company_id,metric_name,period_type,period_start,period_end",
+        });
 
-        if (error) {
-          logger.error(`[bulk-action] Failed to upsert investor value:`, error.message);
-          continue;
-        }
+      if (error) {
+        logger.error(`[bulk-action] Failed to batch upsert founder values:`, error.message);
       }
+    } else {
+      const upsertPayload = rows.map((r) => ({
+        investor_id: user.id,
+        company_id: r.valueRow.company_id,
+        metric_name: r.metricName,
+        period_type: r.valueRow.period_type,
+        period_start: r.periodStart,
+        period_end: r.periodEnd,
+        value: { raw: r.rawValue, unit: r.unit },
+        source: "historical_upload" as const,
+        source_upload_id: uploadId,
+      }));
 
-      await admin
-        .from("historical_upload_values")
-        .update({ status: "approved" })
-        .eq("id", valueRow.id);
+      const { error } = await admin
+        .from("investor_metric_values")
+        .upsert(upsertPayload, {
+          onConflict: "investor_id,company_id,metric_name,period_type,period_start,period_end",
+        });
 
-      approvedCount++;
+      if (error) {
+        logger.error(`[bulk-action] Failed to batch upsert investor values:`, error.message);
+      }
     }
+
+    // Batch update all chunk statuses to approved
+    const chunkIds = chunk.map((v) => v.id);
+    await admin
+      .from("historical_upload_values")
+      .update({ status: "approved" })
+      .in("id", chunkIds);
+
+    approvedCount += chunk.length;
   }
 
-  // Update counters and check completion
-  const { count: pendingCount } = await admin
-    .from("historical_upload_values")
-    .select("id", { count: "exact", head: true })
-    .eq("upload_id", uploadId)
-    .in("status", ["pending", "conflict"]);
-
-  const { count: approvedTotal } = await admin
-    .from("historical_upload_values")
-    .select("id", { count: "exact", head: true })
-    .eq("upload_id", uploadId)
-    .eq("status", "approved");
-
-  const { count: rejectedTotal } = await admin
-    .from("historical_upload_values")
-    .select("id", { count: "exact", head: true })
-    .eq("upload_id", uploadId)
-    .eq("status", "rejected");
+  // Update counters and check completion — parallel count queries
+  const [
+    { count: pendingCount },
+    { count: approvedTotal },
+    { count: rejectedTotal },
+  ] = await Promise.all([
+    admin
+      .from("historical_upload_values")
+      .select("id", { count: "exact", head: true })
+      .eq("upload_id", uploadId)
+      .in("status", ["pending", "conflict"]),
+    admin
+      .from("historical_upload_values")
+      .select("id", { count: "exact", head: true })
+      .eq("upload_id", uploadId)
+      .eq("status", "approved"),
+    admin
+      .from("historical_upload_values")
+      .select("id", { count: "exact", head: true })
+      .eq("upload_id", uploadId)
+      .eq("status", "rejected"),
+  ]);
 
   await admin
     .from("historical_uploads")
