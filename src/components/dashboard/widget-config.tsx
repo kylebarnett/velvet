@@ -74,7 +74,7 @@ export function WidgetConfig({
             }
             onChange={(e) => updateConfig({ title: e.target.value || undefined })}
             placeholder="Widget title"
-            className="h-9 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm placeholder:text-text-muted focus:border-[var(--border-default)] focus:outline-none"
+            className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm placeholder:text-text-muted focus:border-[var(--border-default)] focus:outline-none"
           />
         </div>
 

@@ -1,10 +1,7 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { DashboardBuilderClient } from "./dashboard-builder-client";
+import { DashboardBuilder } from "@/components/dashboard/dashboard-builder";
 
 export const dynamic = "force-dynamic";
 
@@ -40,17 +37,8 @@ export default async function DashboardEditPage({
 
   if (!isApproved) {
     return (
-      <div className="space-y-4">
-        <Link
-          href={`/dashboard/${companyId}`}
-          className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to dashboard
-        </Link>
-        <div className="rounded-xl border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] p-4 text-sm text-[var(--status-warning-text)]">
-          Your access is pending approval. You can edit the dashboard once the founder approves your access.
-        </div>
+      <div className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]">
+        Your access is pending approval. You can edit the dashboard once the founder approves your access.
       </div>
     );
   }
@@ -70,14 +58,20 @@ export default async function DashboardEditPage({
     );
   }
 
-  // Get metric values to know available metrics
+  // Get metric values (names for widget config + full values for live preview)
   const { data: metricValues } = await supabase
     .from("company_metric_values")
-    .select("metric_name")
-    .eq("company_id", companyId);
+    .select("id, metric_name, period_type, period_start, period_end, value, notes, submitted_at, updated_at")
+    .eq("company_id", companyId)
+    .order("period_start", { ascending: false });
+
+  const metrics = (metricValues ?? []).map((m) => ({
+    ...m,
+    period_type: m.period_type as "monthly" | "quarterly" | "yearly",
+  }));
 
   const availableMetrics = Array.from(
-    new Set((metricValues ?? []).map((m) => m.metric_name))
+    new Set(metrics.map((m) => m.metric_name))
   ).sort();
 
   // Get dashboard views for this company
@@ -96,29 +90,23 @@ export default async function DashboardEditPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Edit Dashboard" }]} />
-          <Link
-            href={`/dashboard/${companyId}`}
-            className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Cancel
-          </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            Edit Dashboard - {company.name}
-          </h1>
-        </div>
+      <div className="space-y-1">
+        <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Edit Dashboard" }]} />
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          Edit Dashboard - {company.name}
+        </h1>
       </div>
 
-      <DashboardBuilderClient
+      <DashboardBuilder
         companyId={companyId}
         companyName={company.name}
         companyIndustry={company.industry}
         availableMetrics={availableMetrics}
+        metrics={metrics}
         views={views ?? []}
         templates={templates ?? []}
+        apiBasePath="/api/investors/dashboard-views"
+        redirectPath={`/dashboard/${companyId}`}
       />
     </div>
   );

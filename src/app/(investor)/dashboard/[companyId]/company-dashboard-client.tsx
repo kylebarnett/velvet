@@ -14,6 +14,7 @@ import {
   MetricValue,
   PeriodType,
   DashboardLayout,
+  ensureMetricsTable,
 } from "@/components/dashboard";
 import { DateRange } from "@/components/dashboard/date-range-selector";
 import { CompanyDocumentsTab } from "@/components/investor/company-documents-tab";
@@ -288,11 +289,12 @@ function MetricsTabContent({
   let widgets: Widget[];
 
   if (currentView?.layout) {
+    // Saved views: preserve user's custom positions, only ensure a table exists
     const layout = currentView.layout as DashboardLayout | Widget[];
     if (Array.isArray(layout)) {
-      widgets = reorderWidgetsWithCardsFirst(layout);
+      widgets = ensureMetricsTable(layout);
     } else if (layout.widgets) {
-      widgets = reorderWidgetsWithCardsFirst(layout.widgets);
+      widgets = ensureMetricsTable(layout.widgets);
     } else {
       widgets = getDefaultLayout(companyIndustry, templates);
     }

@@ -5,10 +5,13 @@ import { GridLayout, Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { GripVertical, Settings } from "lucide-react";
-import { Widget, isChartConfig, isMetricCardConfig, isTableConfig } from "./types";
+import { Widget, MetricValue, PeriodType, isChartConfig, isMetricCardConfig, isTableConfig } from "./types";
+import { DashboardWidget } from "./dashboard-widget";
 
 type DashboardCanvasProps = {
   widgets: Widget[];
+  metrics?: MetricValue[];
+  periodType?: PeriodType;
   onLayoutChange: (widgets: Widget[]) => void;
   onSelectWidget: (widgetId: string | null) => void;
   selectedWidgetId: string | null;
@@ -16,6 +19,8 @@ type DashboardCanvasProps = {
 
 export function DashboardCanvas({
   widgets,
+  metrics,
+  periodType,
   onLayoutChange,
   onSelectWidget,
   selectedWidgetId,
@@ -82,20 +87,22 @@ export function DashboardCanvas({
     handleLayoutChange(layout);
   }
 
-  function getWidgetPreview(widget: Widget): string {
+  function getWidgetLabel(widget: Widget): string {
     const { config } = widget;
+    if (isChartConfig(config) && config.title) return config.title;
+    if (isMetricCardConfig(config) && config.title) return config.title;
+    if (isTableConfig(config) && config.title) return config.title;
+    // Fallback
     if (isChartConfig(config)) {
       const type = config.chartType.charAt(0).toUpperCase() + config.chartType.slice(1);
-      return `${type} Chart: ${config.metrics.join(", ") || "No metrics"}`;
+      return `${type} Chart`;
     }
-    if (isMetricCardConfig(config)) {
-      return `Card: ${config.metric || "No metric"}`;
-    }
-    if (isTableConfig(config)) {
-      return `Table: ${config.metrics.join(", ") || "No metrics"}`;
-    }
-    return "Unknown widget";
+    if (isMetricCardConfig(config)) return config.metric || "Metric Card";
+    if (isTableConfig(config)) return "Metrics Table";
+    return "Widget";
   }
+
+  const hasMetrics = metrics && metrics.length > 0;
 
   if (widgets.length === 0) {
     return (
@@ -141,13 +148,7 @@ export function DashboardCanvas({
               <div className="flex items-center gap-1.5">
                 <GripVertical className="h-3.5 w-3.5 text-text-faint" />
                 <span className="text-xs text-text-tertiary truncate max-w-[200px]">
-                  {isChartConfig(widget.config) && widget.config.title
-                    ? widget.config.title
-                    : isMetricCardConfig(widget.config) && widget.config.title
-                      ? widget.config.title
-                      : isTableConfig(widget.config) && widget.config.title
-                        ? widget.config.title
-                        : getWidgetPreview(widget)}
+                  {getWidgetLabel(widget)}
                 </span>
               </div>
               <button
@@ -162,11 +163,23 @@ export function DashboardCanvas({
               </button>
             </div>
 
-            {/* Widget preview */}
-            <div className="p-3 flex items-center justify-center h-[calc(100%-28px)]">
-              <span className="text-xs text-text-faint text-center">
-                {getWidgetPreview(widget)}
-              </span>
+            {/* Widget preview — live preview if metrics available, text fallback otherwise */}
+            <div className="h-[calc(100%-28px)] overflow-hidden">
+              {hasMetrics ? (
+                <div className="h-full w-full scale-[0.85] origin-top-left" style={{ width: "117.6%" }}>
+                  <DashboardWidget
+                    widget={widget}
+                    metrics={metrics}
+                    periodTypeOverride={periodType}
+                  />
+                </div>
+              ) : (
+                <div className="flex h-full items-center justify-center p-3">
+                  <span className="text-xs text-text-faint text-center">
+                    {getWidgetLabel(widget)}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         ))}

@@ -104,6 +104,49 @@ export type MetricValue = {
   ai_confidence?: number | null;
 };
 
+// Parse a layout from the DB (handles both array and { widgets } formats)
+export function parseLayout(layout: unknown): Widget[] {
+  let widgets: Widget[] = [];
+  if (!layout) return widgets;
+  if (Array.isArray(layout)) {
+    widgets = layout as Widget[];
+  } else if (typeof layout === "object" && layout !== null && "widgets" in layout) {
+    widgets = (layout as DashboardLayout).widgets;
+  }
+  // Ensure all table widgets have showAllMetrics so they cannot be deleted
+  return widgets.map((w) => {
+    if (w.type === "table" && w.config && typeof w.config === "object") {
+      return { ...w, config: { ...w.config, showAllMetrics: true } };
+    }
+    return w;
+  });
+}
+
+// Ensure a metrics table exists without reordering positions (for saved views)
+export function ensureMetricsTable(widgets: Widget[]): Widget[] {
+  const hasTable = widgets.some((w) => w.type === "table");
+  if (hasTable) return widgets;
+
+  const maxY = widgets.reduce((max, w) => Math.max(max, w.y + w.h), 0);
+  return [
+    ...widgets,
+    {
+      id: "table-all",
+      type: "table" as const,
+      x: 0,
+      y: maxY,
+      w: 12,
+      h: 3,
+      config: {
+        metrics: [],
+        periodType: "quarterly" as const,
+        title: "All Metrics",
+        showAllMetrics: true,
+      },
+    },
+  ];
+}
+
 // Extract numeric value from metric value
 export function getNumericValue(value: unknown): number | null {
   if (value == null) return null;
