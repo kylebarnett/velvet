@@ -94,7 +94,7 @@ export function InvestmentTable({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border-subtle text-left text-xs uppercase tracking-wider text-text-muted">
+              <tr className="border-b border-border-subtle text-left text-xs uppercase tracking-wide text-text-muted">
                 <th className="px-4 py-2.5 font-medium">Company</th>
                 <th className="px-4 py-2.5 font-medium text-right">Invested</th>
                 <th className="px-4 py-2.5 font-medium text-right">Current Value</th>

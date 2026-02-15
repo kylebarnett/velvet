@@ -597,7 +597,7 @@ function RunwayCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-text-muted">
             <Fuel className="h-4 w-4" aria-hidden="true" />
-            <span className="text-xs font-medium uppercase tracking-wider">Runway</span>
+            <span className="text-xs font-medium uppercase tracking-wide">Runway</span>
           </div>
           <button
             type="button"
@@ -702,7 +702,7 @@ function RunwayCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-text-muted">
           <Fuel className="h-4 w-4" aria-hidden="true" />
-          <span className="text-xs font-medium uppercase tracking-wider">Runway</span>
+          <span className="text-xs font-medium uppercase tracking-wide">Runway</span>
         </div>
         <div className="flex items-center gap-2">
           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${style.text}`}>
@@ -753,6 +753,7 @@ export function FounderDashboardClient({
   const [detailSelection, setDetailSelection] = React.useState<{
     metricName: string;
     periodStart?: string;
+    periodType?: string;
   } | null>(null);
   const [showEmailModal, setShowEmailModal] = React.useState(false);
   const [showAddMetricModal, setShowAddMetricModal] = React.useState(false);
@@ -978,7 +979,7 @@ export function FounderDashboardClient({
                 metrics={filteredMetrics}
                 periodTypeOverride={periodType}
                 onMetricClick={(name, period) =>
-                  setDetailSelection({ metricName: name, periodStart: period })
+                  setDetailSelection({ metricName: name, periodStart: period, periodType })
                 }
                 companyId={companyId}
                 onAddMetric={() => setShowAddMetricModal(true)}
@@ -1006,6 +1007,7 @@ export function FounderDashboardClient({
           companyId={companyId}
           metricName={detailSelection.metricName}
           initialPeriod={detailSelection.periodStart}
+          periodType={detailSelection.periodType}
           onClose={() => setDetailSelection(null)}
           editable
           onValueUpdated={() => router.refresh()}

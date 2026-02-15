@@ -181,7 +181,7 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
                 <div className="text-4xl font-bold tabular-nums tracking-tighter text-text-primary">
                   {kpi.value}
                 </div>
-                <div className="mt-1 text-xs font-medium uppercase tracking-wider text-text-muted">{kpi.label}</div>
+                <div className="mt-1 text-xs font-medium uppercase tracking-wide text-text-muted">{kpi.label}</div>
               </div>
 
               {/* Footer */}

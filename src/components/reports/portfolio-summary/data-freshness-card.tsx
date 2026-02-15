@@ -53,7 +53,7 @@ export function DataFreshnessCard({ freshness }: DataFreshnessCardProps) {
 
   return (
     <div className="card-surface flex h-full flex-col rounded-xl border border-border-subtle p-4">
-      <h3 className="text-xs font-medium uppercase tracking-wider text-text-muted">
+      <h3 className="text-xs font-medium uppercase tracking-wide text-text-muted">
         Data Freshness
       </h3>
       <p className="mb-3 mt-1 text-sm text-text-secondary">

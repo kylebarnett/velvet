@@ -104,7 +104,7 @@ function KpiMini({
 }) {
   return (
     <div className="min-w-0 flex-1">
-      <p className="text-xs uppercase tracking-wider text-text-muted">{label}</p>
+      <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
       <p
         className={cn(
           "mt-0.5 text-lg font-semibold",

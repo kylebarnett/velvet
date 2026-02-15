@@ -201,7 +201,7 @@ export function BenchmarksClient() {
         <div className="grid gap-4 md:grid-cols-3">
           {/* Metric selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Metric
             </label>
             {isLoadingMetrics ? (
@@ -228,7 +228,7 @@ export function BenchmarksClient() {
 
           {/* Industry filter */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Industry
             </label>
             <Select
@@ -250,7 +250,7 @@ export function BenchmarksClient() {
 
           {/* Stage filter */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Stage
             </label>
             <Select

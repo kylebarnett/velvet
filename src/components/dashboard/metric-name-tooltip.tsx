@@ -179,7 +179,7 @@ export function MetricNameTooltip({
           </div>
 
           <div>
-            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-text-muted">
+            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-text-muted">
               Description *
             </label>
             <textarea
@@ -192,7 +192,7 @@ export function MetricNameTooltip({
           </div>
 
           <div>
-            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-text-muted">
+            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-text-muted">
               Formula (optional)
             </label>
             <input
@@ -293,7 +293,7 @@ export function MetricNameTooltip({
           {/* Formula */}
           {info?.formula && (
             <div className="rounded-md bg-bg-raised px-2 py-1.5">
-              <span className="block text-[9px] font-medium uppercase tracking-wider text-text-faint mb-0.5">
+              <span className="block text-[9px] font-medium uppercase tracking-wide text-text-faint mb-0.5">
                 Formula
               </span>
               <span className="block text-[11px] font-mono text-[var(--tag-emerald-text)]">

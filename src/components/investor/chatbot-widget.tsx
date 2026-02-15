@@ -253,7 +253,7 @@ function ResultTable({ data }: { data: Record<string, unknown>[] }) {
             {columns.map((col) => (
               <th
                 key={col}
-                className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-text-muted"
+                className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wide text-text-muted"
               >
                 {col}
               </th>
@@ -512,7 +512,7 @@ export function ChatbotWidget() {
                 {/* Recent queries */}
                 {recentQueries.length > 0 && (
                   <div>
-                    <h3 className="mb-2 text-[10px] font-medium uppercase tracking-wider text-text-faint">
+                    <h3 className="mb-2 text-[10px] font-medium uppercase tracking-wide text-text-faint">
                       Recent
                     </h3>
                     <div className="space-y-1">

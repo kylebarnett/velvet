@@ -7,9 +7,9 @@ import {
   SelectTrigger,
   SelectContent,
   SelectItem,
-  SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils/cn";
 import { FounderCompanyLogo } from "@/components/founder/company-logo";
 import { TAG_OPTIONS, TAG_COLORS, getTagLabel, type TagType } from "@/lib/company/constants";
 
@@ -92,7 +92,7 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Company Profile</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Company Profile</h1>
         <p className="text-sm text-text-tertiary">
           View and update your company information.
         </p>
@@ -469,58 +469,39 @@ function InlineTagBadge({
   saving: boolean;
   onChange: (value: string | null) => void;
 }) {
-  const [editing, setEditing] = React.useState(false);
-
-  if (editing) {
-    return (
-      <Select
-        value={value ?? NONE}
-        onValueChange={(v) => {
-          onChange(v === NONE ? null : v);
-          setEditing(false);
-        }}
-        disabled={saving}
-        open
-        onOpenChange={(open) => {
-          if (!open) setEditing(false);
-        }}
-      >
-        <SelectTrigger size="sm" className="h-7 min-w-[100px] text-xs">
-          <SelectValue placeholder={label} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={NONE}>None</SelectItem>
-          {TAG_OPTIONS[type].map((opt) => (
-            <SelectItem key={opt.value} value={opt.value}>
-              {opt.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    );
-  }
-
-  if (value) {
-    return (
-      <button
-        type="button"
-        onClick={() => setEditing(true)}
-        className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium transition-opacity hover:opacity-80 ${TAG_COLORS[type]}`}
-        title={`Change ${label.toLowerCase()}`}
-      >
-        {getTagLabel(type, value)}
-      </button>
-    );
-  }
+  const [open, setOpen] = React.useState(false);
 
   return (
-    <button
-      type="button"
-      onClick={() => setEditing(true)}
-      className="inline-flex rounded-full border border-dashed border-border-default px-2.5 py-0.5 text-xs text-text-faint hover:text-text-tertiary hover:border-border-default transition-colors"
-      title={`Set ${label.toLowerCase()}`}
+    <Select
+      value={value ?? NONE}
+      onValueChange={(v) => {
+        onChange(v === NONE ? null : v);
+        setOpen(false);
+      }}
+      disabled={saving}
+      open={open}
+      onOpenChange={setOpen}
     >
-      + {label}
-    </button>
+      <SelectTrigger
+        size="sm"
+        className={cn(
+          "h-auto w-auto border-0 bg-transparent p-0 shadow-none [&>svg]:hidden",
+          value
+            ? `inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium transition-opacity hover:opacity-80 ${TAG_COLORS[type]}`
+            : "inline-flex rounded-full border border-dashed border-border-default px-2.5 py-0.5 text-xs text-text-faint hover:text-text-tertiary hover:border-border-default transition-colors"
+        )}
+        title={value ? `Change ${label.toLowerCase()}` : `Set ${label.toLowerCase()}`}
+      >
+        <span>{value ? getTagLabel(type, value) : `+ ${label}`}</span>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={NONE}>None</SelectItem>
+        {TAG_OPTIONS[type].map((opt) => (
+          <SelectItem key={opt.value} value={opt.value}>
+            {opt.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

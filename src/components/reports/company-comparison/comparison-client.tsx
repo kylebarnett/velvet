@@ -492,7 +492,7 @@ export function ComparisonClient({
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Company selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Companies (2-8)
             </label>
             <MultiSelectDropdown
@@ -506,7 +506,7 @@ export function ComparisonClient({
 
           {/* Metric selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Metrics
             </label>
             <MultiSelectDropdown
@@ -519,7 +519,7 @@ export function ComparisonClient({
 
           {/* Period type selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Period
             </label>
             <Select value={periodType} onValueChange={(v) => setPeriodType(v as PeriodType)}>

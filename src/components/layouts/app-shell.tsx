@@ -357,7 +357,7 @@ export function AppShell({
                 className={cn(
                   "flex items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors",
                   mobile ? "h-11" : "h-9",
-                  "text-text-tertiary hover:bg-bg-raised hover:text-text-secondary",
+                  "text-text-tertiary hover:bg-bg-raised hover:text-text-primary",
                   teamActive && "bg-bg-elevated text-text-primary",
                 )}
                 onClick={mobile ? () => setMobileMenuOpen(false) : undefined}
@@ -375,7 +375,7 @@ export function AppShell({
                     onTakeTour();
                   }}
                   className={cn(
-                    "flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm text-text-tertiary transition-colors hover:bg-bg-raised hover:text-text-secondary",
+                    "flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm text-text-tertiary transition-colors hover:bg-bg-raised hover:text-text-primary",
                     mobile ? "h-11" : "h-9",
                   )}
                   type="button"
@@ -389,7 +389,7 @@ export function AppShell({
               <button
                 onClick={onLogout}
                 className={cn(
-                  "flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm text-text-tertiary transition-colors hover:bg-bg-raised hover:text-text-secondary",
+                  "flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm text-text-tertiary transition-colors hover:bg-bg-raised hover:text-text-primary",
                   mobile ? "h-11" : "h-9",
                 )}
                 type="button"
@@ -465,7 +465,7 @@ export function AppShell({
                     <Link
                       className={cn(
                         "relative flex h-9 items-center justify-center rounded-md transition-colors",
-                        "text-text-tertiary hover:bg-bg-raised hover:text-text-secondary",
+                        "text-text-tertiary hover:bg-bg-raised hover:text-text-primary",
                         (active || isChildActive) &&
                           "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-accent",
                       )}
@@ -487,7 +487,7 @@ export function AppShell({
                   className={cn(
                     "relative flex w-full items-center gap-2.5 rounded-md px-3 text-sm transition-colors",
                     mobile ? "h-12" : "h-9",
-                    "text-text-tertiary hover:bg-bg-raised hover:text-text-secondary",
+                    "text-text-tertiary hover:bg-bg-raised hover:text-text-primary",
                     (active || isChildActive) && "text-text-primary",
                   )}
                   type="button"
@@ -512,7 +512,7 @@ export function AppShell({
                           className={cn(
                             "relative flex items-center gap-2.5 rounded-r-md pl-4 pr-3 text-sm transition-colors",
                             mobile ? "h-11" : "h-8",
-                            "text-text-tertiary hover:bg-bg-raised hover:text-text-secondary",
+                            "text-text-tertiary hover:bg-bg-raised hover:text-text-primary",
                             childActive &&
                               "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-accent",
                           )}
@@ -541,7 +541,7 @@ export function AppShell({
                 "relative flex items-center rounded-md transition-colors",
                 collapsed ? "h-9 justify-center" : "h-9 gap-2.5 px-3",
                 mobile && "h-12",
-                "text-text-tertiary hover:bg-bg-raised hover:text-text-secondary",
+                "text-text-tertiary hover:bg-bg-raised hover:text-text-primary",
                 active &&
                   "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-accent",
               )}

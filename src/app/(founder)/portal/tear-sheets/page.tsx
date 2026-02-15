@@ -171,7 +171,7 @@ export default function TearSheetsPage() {
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
           <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Tear Sheets" }]} />
-          <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight">Tear Sheets</h1>
+          <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Tear Sheets</h1>
           <p className="text-sm text-text-tertiary">
             Create quarterly summaries to share with investors.
           </p>

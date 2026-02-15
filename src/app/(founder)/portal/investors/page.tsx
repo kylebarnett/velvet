@@ -157,7 +157,7 @@ export default function FounderInvestorsPage() {
       <div className="space-y-1" data-onboarding="investors-title">
         <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Investors" }]} />
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Investors</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Investors</h1>
           {!loading && investors.length > 0 && (
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center rounded-full bg-bg-elevated px-2.5 py-0.5 text-xs font-medium text-text-secondary">

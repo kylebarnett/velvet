@@ -11,7 +11,7 @@ export default async function FounderTeamPage() {
     <div className="space-y-6">
       <div className="space-y-1" data-onboarding="team-title">
         <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Team" }]} />
-        <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight">Team</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Team</h1>
         <p className="text-sm text-text-tertiary">
           Manage your team members and their access to company data.
         </p>

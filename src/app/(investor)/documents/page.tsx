@@ -291,7 +291,7 @@ export default function DocumentsPage() {
     <div className="space-y-8">
       <div>
         <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Documents" }]} />
-        <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight">Documents</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Documents</h1>
       </div>
 
       {/* Filters */}

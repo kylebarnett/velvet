@@ -769,7 +769,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         >
           {/* Metadata */}
           <div className="rounded-xl border border-border-default card-surface p-4">
-            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
               Report Details
             </h3>
             <div className="space-y-3">
@@ -811,7 +811,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
 
           {/* Report Theme */}
           <div className="rounded-xl border border-border-default card-surface p-4">
-            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
               Report Theme
             </h3>
             <ThemeSelector value={themeId} onChange={setThemeId} />
@@ -820,7 +820,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           {/* Investment Selection */}
           <div className="rounded-xl border border-border-default card-surface p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-xs font-medium uppercase tracking-wider text-text-muted">
+              <h3 className="text-xs font-medium uppercase tracking-wide text-text-muted">
                 Investments ({selectedIds.size}/{investments.length})
               </h3>
               <button
@@ -923,7 +923,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
 
           {/* Live Performance KPIs */}
           <div className="rounded-xl border border-border-default card-surface p-4">
-            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
               Live Performance
             </h3>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -941,7 +941,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
 
           {/* Quarterly Summary - Rich Text */}
           <div className="rounded-xl border border-border-default card-surface p-4">
-            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
               Quarterly Summary
             </h3>
             <RichTextEditor
@@ -959,7 +959,7 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             mobileTab === "edit" && "hidden lg:block",
           )}
         >
-          <p className="mb-2 hidden text-[11px] font-medium uppercase tracking-wider text-text-faint lg:block">
+          <p className="mb-2 hidden text-[11px] font-medium uppercase tracking-wide text-text-faint lg:block">
             PDF Preview
           </p>
           <ScaledPreview>
@@ -1111,7 +1111,7 @@ function ScaledPreview({ children }: { children: React.ReactNode }) {
 function MiniKPI({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-border-subtle bg-bg-raised px-2 py-1.5 text-center">
-      <p className="text-[10px] uppercase tracking-wider text-text-muted">{label}</p>
+      <p className="text-[10px] uppercase tracking-wide text-text-muted">{label}</p>
       <p className="mt-0.5 text-sm font-medium text-text-primary">{value}</p>
     </div>
   );

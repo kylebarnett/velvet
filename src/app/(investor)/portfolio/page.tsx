@@ -85,7 +85,7 @@ export default async function PortfolioPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Portfolio", href: "/portfolio" }, { label: "Contacts" }]} />
-          <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight" data-onboarding="portfolio-title">Portfolio</h1>
+          <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight" data-onboarding="portfolio-title">Portfolio</h1>
         </div>
         <div className="flex items-center gap-2">
           <AddContactButton />

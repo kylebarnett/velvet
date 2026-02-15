@@ -172,7 +172,7 @@ export function MetricDrilldownPanel({
 
         {/* Sort Controls */}
         <div className="flex items-center gap-2 border-b border-border-default px-6 py-3">
-          <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
+          <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
             Sort by
           </span>
           <div className="flex gap-1">

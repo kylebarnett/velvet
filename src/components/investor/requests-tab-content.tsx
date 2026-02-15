@@ -224,13 +224,13 @@ function ResponseRateTile({
         aria-expanded={hasContent ? expanded : undefined}
       >
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-text-muted">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-text-muted">
             <BarChart3 className="h-3.5 w-3.5" aria-hidden="true" />
             Response rate
           </div>
           <div className="mt-2 flex items-baseline gap-3">
             <span
-              className={`text-2xl font-semibold tracking-tight ${hasContent ? getProgressTextColor(pct) : "text-text-muted"}`}
+              className={`text-2xl font-bold tracking-tight ${hasContent ? getProgressTextColor(pct) : "text-text-muted"}`}
             >
               {hasContent ? `${pct}%` : "—"}
             </span>
@@ -279,7 +279,7 @@ function ResponseRateTile({
           <div className="border-t border-border-subtle px-4 pb-4 pt-3">
             {summary.urgentCampaigns.length > 0 ? (
               <>
-                <div className="mb-2 text-xs font-medium uppercase tracking-wider text-text-faint">
+                <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-faint">
                   Active request periods
                 </div>
                 <div className="flex flex-col gap-1">
@@ -347,12 +347,12 @@ function NeedsAttentionTile({ summary }: { summary: CampaignSummary }) {
         aria-expanded={hasContent ? expanded : undefined}
       >
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-text-muted">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-text-muted">
             <Clock className="h-3.5 w-3.5" aria-hidden="true" />
             Needs attention
           </div>
           <div className="mt-2 flex items-baseline gap-3">
-            <span className="text-2xl font-semibold tracking-tight text-text-primary">
+            <span className="text-2xl font-bold tracking-tight text-text-primary">
               {needsAttentionTotal}
             </span>
             {summary.overdueCompanyCount > 0 && (
@@ -418,7 +418,7 @@ function NeedsAttentionTile({ summary }: { summary: CampaignSummary }) {
           <div className="border-t border-border-subtle px-4 pb-4 pt-3">
             {summary.awaitingCompanies.length > 0 ? (
               <>
-                <div className="mb-2 text-xs font-medium uppercase tracking-wider text-text-faint">
+                <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-faint">
                   Outstanding companies
                 </div>
                 <div className="flex flex-col gap-1">
@@ -754,7 +754,7 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
               </div>
             ) : companies && companies.length > 0 ? (
               <>
-                <div className="mb-2 text-xs font-medium uppercase tracking-wider text-text-faint">
+                <div className="mb-2 text-xs font-medium uppercase tracking-wide text-text-faint">
                   Company breakdown
                 </div>
 

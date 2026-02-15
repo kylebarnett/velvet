@@ -33,7 +33,7 @@ export function MetricCard({
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") onClick(); } : undefined}
     >
-      <div className="text-xs font-medium uppercase tracking-wider text-text-muted">
+      <div className="text-xs font-medium uppercase tracking-wide text-text-muted">
         {title}
         {periodLabel && (
           <span className="ml-1.5 font-normal normal-case tracking-normal text-text-faint">
@@ -42,7 +42,7 @@ export function MetricCard({
         )}
       </div>
       <div className="mt-2 flex items-end justify-between">
-        <span className="text-2xl font-semibold">
+        <span className="text-2xl font-bold">
           {formatValue(value, title)}
         </span>
         {showTrend && (

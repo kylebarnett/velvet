@@ -125,7 +125,7 @@ export function TopPerformers({ companies }: TopPerformersProps) {
                   {company.revenueGrowth?.toFixed(1)}%
                 </span>
                 {company.revenueMetric && (
-                  <span className="text-[10px] uppercase tracking-wider text-text-faint">
+                  <span className="text-[10px] uppercase tracking-wide text-text-faint">
                     {company.revenueMetric}
                   </span>
                 )}

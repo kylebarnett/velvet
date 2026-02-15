@@ -104,7 +104,7 @@ function SummaryFilters({
     <div className="card-surface rounded-xl border border-border-subtle p-4 space-y-3">
       {/* Time range */}
       <div className="flex items-center gap-2">
-        <span className="text-xs font-medium uppercase tracking-wider text-text-muted">Time</span>
+        <span className="text-xs font-medium uppercase tracking-wide text-text-muted">Time</span>
         <div className="flex items-center gap-1 rounded-lg border border-border-subtle bg-bg-elevated p-1">
           {TIME_RANGE_OPTIONS.map((opt) => (
             <button
@@ -125,7 +125,7 @@ function SummaryFilters({
 
       {/* Industry chips */}
       <div className="flex flex-wrap items-center gap-3">
-        <span className="text-xs font-medium uppercase tracking-wider text-text-muted">Industry</span>
+        <span className="text-xs font-medium uppercase tracking-wide text-text-muted">Industry</span>
         <div className="flex flex-wrap gap-1.5">
           {INDUSTRIES.map((option) => {
             const isSelected = industries.includes(option.value);
@@ -149,7 +149,7 @@ function SummaryFilters({
 
       {/* Stage chips */}
       <div className="flex flex-wrap items-center gap-3">
-        <span className="text-xs font-medium uppercase tracking-wider text-text-muted">Stage</span>
+        <span className="text-xs font-medium uppercase tracking-wide text-text-muted">Stage</span>
         <div className="flex flex-wrap gap-1.5">
           {STAGES.map((option) => {
             const isSelected = stages.includes(option.value);

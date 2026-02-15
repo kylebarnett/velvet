@@ -28,6 +28,7 @@ import {
 import { formatValue, formatPeriod } from "@/components/charts/types";
 import { getNumericValue } from "@/components/dashboard/types";
 import { useChartTheme } from "@/hooks/use-chart-theme";
+import { computeRollups } from "@/lib/metrics/rollup";
 import { SourceBadge } from "./source-badge";
 import { MetricHistoryTimeline } from "./metric-history-timeline";
 import { MetricCommentThread } from "./metric-comment-thread";
@@ -87,6 +88,8 @@ type Props = {
   onValueUpdated?: () => void;
   /** Optional initial period to select (period_start string). Defaults to most recent. */
   initialPeriod?: string;
+  /** Optional period type filter (monthly/quarterly/yearly). Filters values to this granularity. */
+  periodType?: string;
 };
 
 export function MetricDetailPanel({
@@ -96,10 +99,11 @@ export function MetricDetailPanel({
   editable = false,
   onValueUpdated,
   initialPeriod,
+  periodType,
 }: Props) {
   const chartTheme = useChartTheme();
   const [loading, setLoading] = React.useState(true);
-  const [values, setValues] = React.useState<MetricValue[]>([]);
+  const [allValues, setAllValues] = React.useState<MetricValue[]>([]);
   const [history, setHistory] = React.useState<HistoryEntry[]>([]);
   const [documents, setDocuments] = React.useState<LinkedDocument[]>([]);
   const [error, setError] = React.useState<string | null>(null);
@@ -116,6 +120,41 @@ export function MetricDetailPanel({
   const [editValue, setEditValue] = React.useState("");
   const [editReason, setEditReason] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
+
+  // Derive filtered values from allValues + periodType.
+  // When the requested period type (e.g. quarterly) has no native DB rows,
+  // use computeRollups to aggregate from finer-grained data (e.g. monthly → quarterly).
+  const values = React.useMemo(() => {
+    if (!periodType || allValues.length === 0) return allValues;
+    const dbPt = periodType === "yearly" ? "annual" : periodType;
+
+    // Check for native values at the requested granularity
+    const native = allValues.filter((v) => v.period_type === dbPt);
+    if (native.length > 0) return native;
+
+    // No native values — compute rollups from finer-grained data
+    if (periodType === "monthly") return allValues; // can't roll up to monthly
+    const rollups = computeRollups(allValues, periodType as "monthly" | "quarterly" | "yearly");
+    if (rollups.length === 0) return allValues; // fallback to all data
+
+    // Convert rollup results into MetricValue shape for display
+    return rollups
+      .map((r) => ({
+        id: `rollup-${r.period_start}`,
+        metric_name: r.metric_name,
+        period_type: r.period_type,
+        period_start: r.period_start,
+        period_end: r.period_end,
+        value: { raw: String(r.value) },
+        notes: null,
+        source: "rollup",
+        source_document_id: null,
+        ai_confidence: null,
+        submitted_at: "",
+        submitted_by_name: null,
+      }))
+      .sort((a, b) => a.period_start.localeCompare(b.period_start));
+  }, [allValues, periodType]);
 
   const contentRef = React.useRef<HTMLDivElement>(null);
   const periodDropdownRef = React.useRef<HTMLDivElement>(null);
@@ -190,21 +229,13 @@ export function MetricDetailPanel({
         if (controller.signal.aborted) return;
 
         const loadedValues: MetricValue[] = json.values ?? [];
-        setValues(loadedValues);
+        setAllValues(loadedValues);
         setHistory(json.history ?? []);
         setDocuments(json.documents ?? []);
 
-        // Initialize selected period
-        if (initialPeriod && loadedValues.length > 0) {
-          const idx = loadedValues.findIndex(
-            (v) => v.period_start === initialPeriod,
-          );
-          setSelectedPeriodIndex(idx >= 0 ? idx : loadedValues.length - 1);
-        } else {
-          setSelectedPeriodIndex(
-            loadedValues.length > 0 ? loadedValues.length - 1 : 0,
-          );
-        }
+        // Reset selected period; the separate effect below will pick the right index
+        // once `values` (derived from allValues via useMemo) updates.
+        setSelectedPeriodIndex(-1);
       } catch (err: unknown) {
         if (controller.signal.aborted) return;
         setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -216,6 +247,23 @@ export function MetricDetailPanel({
 
     return () => controller.abort();
   }, [companyId, metricName, initialPeriod]);
+
+  // Track which period_start to select (updated on user selection and refreshes)
+  const desiredPeriodRef = React.useRef<string | undefined>(initialPeriod);
+
+  // Set selected period after values (possibly rolled up) are derived
+  React.useEffect(() => {
+    if (values.length === 0) return;
+    if (selectedPeriodIndex >= 0 && selectedPeriodIndex < values.length) return; // already valid
+
+    const target = desiredPeriodRef.current;
+    if (target) {
+      const idx = values.findIndex((v) => v.period_start === target);
+      setSelectedPeriodIndex(idx >= 0 ? idx : values.length - 1);
+    } else {
+      setSelectedPeriodIndex(values.length - 1);
+    }
+  }, [values, selectedPeriodIndex]);
 
   // Compute chart data
   const chartData = React.useMemo(() => {
@@ -281,15 +329,13 @@ export function MetricDetailPanel({
       );
       const refreshJson = await refreshRes.json();
       const refreshedValues: MetricValue[] = refreshJson.values ?? [];
-      setValues(refreshedValues);
+      setAllValues(refreshedValues);
       setHistory(refreshJson.history ?? []);
 
-      // Re-find the selected period in refreshed data
+      // Keep the same period selected after refresh
       if (current) {
-        const newIdx = refreshedValues.findIndex(
-          (v) => v.period_start === current.period_start,
-        );
-        if (newIdx >= 0) setSelectedPeriodIndex(newIdx);
+        desiredPeriodRef.current = current.period_start;
+        setSelectedPeriodIndex(-1);
       }
 
       setEditing(false);
@@ -399,6 +445,7 @@ export function MetricDetailPanel({
                         role="option"
                         aria-selected={isSelected}
                         onClick={() => {
+                          desiredPeriodRef.current = v.period_start;
                           setSelectedPeriodIndex(realIdx);
                           setPeriodDropdownOpen(false);
                           setEditing(false);
@@ -672,13 +719,11 @@ export function MetricDetailPanel({
                               );
                               const refreshJson = await refreshRes.json();
                               const rv: MetricValue[] = refreshJson.values ?? [];
-                              setValues(rv);
+                              setAllValues(rv);
                               setHistory(refreshJson.history ?? []);
                               if (current) {
-                                const ni = rv.findIndex(
-                                  (v) => v.period_start === current.period_start,
-                                );
-                                if (ni >= 0) setSelectedPeriodIndex(ni);
+                                desiredPeriodRef.current = current.period_start;
+                                setSelectedPeriodIndex(-1);
                               }
                               onValueUpdated?.();
                             } catch (err: unknown) {

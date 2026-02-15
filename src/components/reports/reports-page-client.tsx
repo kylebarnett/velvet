@@ -76,7 +76,7 @@ export function ReportsPageClient({ initialReports }: ReportsPageClientProps) {
       <div>
         <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Reports" }]} />
         <h1
-          className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight text-text-primary"
+          className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-text-primary"
           data-onboarding="reports-title"
         >
           Reports

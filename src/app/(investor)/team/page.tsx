@@ -11,7 +11,7 @@ export default async function InvestorTeamPage() {
     <div className="space-y-8">
       <div>
         <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Team" }]} />
-        <h1 className="mt-2 text-xl sm:text-2xl font-semibold tracking-tight" data-onboarding="team-title">Team</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight" data-onboarding="team-title">Team</h1>
       </div>
       <TeamSettings currentUserId={user.id} />
     </div>

@@ -546,7 +546,7 @@ function DeepDiveEditor({
       <div className="card-surface rounded-xl border border-border-subtle p-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Company
             </label>
             <Select value={selectedCompany || "__none__"} onValueChange={(v) => setSelectedCompany(v === "__none__" ? "" : v)}>
@@ -562,7 +562,7 @@ function DeepDiveEditor({
             </Select>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-text-muted">
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Period
             </label>
             <Select value={periodType} onValueChange={(v) => setPeriodType(v as DeepDivePeriodType)}>

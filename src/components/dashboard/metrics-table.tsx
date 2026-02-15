@@ -646,7 +646,7 @@ function MetricsTableBody({
         <th className="sticky left-0 z-10 w-8 bg-[var(--table-bg)] py-2 pl-2" />
       )}
       <th
-        className={`group/header relative sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-[var(--table-bg)] py-2 pl-3 pr-4 text-left text-[11px] font-medium uppercase tracking-wider text-text-muted`}
+        className={`group/header relative sticky ${isReorderMode ? "left-8" : "left-0"} z-10 bg-[var(--table-bg)] py-2 pl-3 pr-4 text-left text-[11px] font-medium uppercase tracking-wide text-text-muted`}
         style={{ boxShadow: "4px 0 6px -4px var(--table-sticky-shadow)" }}
       >
         Metric
@@ -672,7 +672,7 @@ function MetricsTableBody({
               periodHeaderRefs.current.delete(period);
             }
           }}
-          className="overflow-hidden px-3 py-2 text-right text-[11px] font-medium uppercase tracking-wider text-text-muted"
+          className="overflow-hidden px-3 py-2 text-right text-[11px] font-medium uppercase tracking-wide text-text-muted"
         >
           <span className="block truncate whitespace-nowrap">
             {formatPeriod(period, displayData[0]?.periodType ?? "quarterly")}
@@ -681,7 +681,7 @@ function MetricsTableBody({
       ))}
       {showTotals && (
         <th
-          className="sticky right-0 z-10 bg-[var(--table-bg)] py-2 px-3 text-right text-[11px] font-medium uppercase tracking-wider text-text-muted"
+          className="sticky right-0 z-10 bg-[var(--table-bg)] py-2 px-3 text-right text-[11px] font-medium uppercase tracking-wide text-text-muted"
           style={{ boxShadow: "-4px 0 6px -4px var(--table-sticky-shadow)" }}
         >
           <span className="inline-flex items-center justify-end gap-1">

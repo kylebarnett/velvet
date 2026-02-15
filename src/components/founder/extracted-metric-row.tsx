@@ -341,7 +341,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
         <div className="mt-3 space-y-3 border-t border-border-subtle pt-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] text-text-tertiary uppercase tracking-wider">
+              <label className="text-[10px] text-text-tertiary uppercase tracking-wide">
                 Metric Name
               </label>
               <input
@@ -352,7 +352,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
               />
             </div>
             <div>
-              <label className="text-[10px] text-text-tertiary uppercase tracking-wider">
+              <label className="text-[10px] text-text-tertiary uppercase tracking-wide">
                 Value
               </label>
               <input
@@ -366,7 +366,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
 
           {/* Period selector */}
           <div>
-            <label className="text-[10px] text-text-tertiary uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[10px] text-text-tertiary uppercase tracking-wide flex items-center gap-1.5">
               Period
               {periodChanged && (
                 <span className="text-[var(--tag-amber-text)] normal-case flex items-center gap-1">

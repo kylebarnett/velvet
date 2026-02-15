@@ -106,7 +106,7 @@ export default async function DashboardEditPage({
             <ArrowLeft className="h-4 w-4" />
             Cancel
           </Link>
-          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
             Edit Dashboard - {company.name}
           </h1>
         </div>

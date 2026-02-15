@@ -63,7 +63,7 @@ export function PendingInvitations({
 
   return (
     <div>
-      <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
+      <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
         Pending Invitations ({pending.length})
       </h3>
       <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">

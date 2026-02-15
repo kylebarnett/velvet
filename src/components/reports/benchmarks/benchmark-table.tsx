@@ -135,7 +135,7 @@ export function BenchmarkTable({
                 <button
                   type="button"
                   onClick={() => toggleSort("name")}
-                  className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-tertiary"
+                  className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-text-muted transition-colors hover:text-text-tertiary"
                 >
                   Company
                   <SortIcon field="name" />
@@ -145,7 +145,7 @@ export function BenchmarkTable({
                 <button
                   type="button"
                   onClick={() => toggleSort("value")}
-                  className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-tertiary"
+                  className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-text-muted transition-colors hover:text-text-tertiary"
                 >
                   Value
                   <SortIcon field="value" />
@@ -155,7 +155,7 @@ export function BenchmarkTable({
                 <button
                   type="button"
                   onClick={() => toggleSort("percentile")}
-                  className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-tertiary"
+                  className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-text-muted transition-colors hover:text-text-tertiary"
                 >
                   Percentile
                   <SortIcon field="percentile" />
@@ -166,7 +166,7 @@ export function BenchmarkTable({
                   <button
                     type="button"
                     onClick={() => toggleSort("delta")}
-                    className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-tertiary"
+                    className="ml-auto flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-text-muted transition-colors hover:text-text-tertiary"
                   >
                     vs Median
                     <SortIcon field="delta" />

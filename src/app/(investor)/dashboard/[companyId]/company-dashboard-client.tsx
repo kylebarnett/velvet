@@ -259,6 +259,7 @@ function MetricsTabContent({
   const [detailSelection, setDetailSelection] = React.useState<{
     metricName: string;
     periodStart?: string;
+    periodType?: string;
   } | null>(null);
 
   async function handleDeleteView(viewId: string) {
@@ -377,7 +378,7 @@ function MetricsTabContent({
                 periodTypeOverride={periodType}
                 companyId={companyId}
                 onMetricClick={(name, period) =>
-                  setDetailSelection({ metricName: name, periodStart: period })
+                  setDetailSelection({ metricName: name, periodStart: period, periodType })
                 }
                 headerActions={
                   widget.type === "table" && !readOnly ? (
@@ -401,6 +402,7 @@ function MetricsTabContent({
           companyId={companyId}
           metricName={detailSelection.metricName}
           initialPeriod={detailSelection.periodStart}
+          periodType={detailSelection.periodType}
           onClose={() => setDetailSelection(null)}
         />
       )}

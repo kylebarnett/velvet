@@ -82,13 +82,13 @@ export function ComparisonTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border-default">
-              <th className="sticky left-0 bg-bg-secondary/80 px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-muted">
+              <th className="sticky left-0 bg-bg-secondary/80 px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-text-muted">
                 Period
               </th>
               {companies.map((company, index) => (
                 <th
                   key={company}
-                  className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary"
+                  className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-text-tertiary"
                 >
                   <span className="flex items-center justify-end gap-2">
                     <span

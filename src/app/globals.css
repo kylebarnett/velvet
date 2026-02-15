@@ -23,15 +23,15 @@
   --border-default: rgba(0, 0, 0, 0.12);
   --border-subtle: rgba(0, 0, 0, 0.07);
 
-  /* Accent — indigo */
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --accent-subtle: rgba(99, 102, 241, 0.10);
-  --accent-text: #4f46e5;
+  /* Accent — monochrome */
+  --accent: #18181b;
+  --accent-hover: #27272a;
+  --accent-subtle: rgba(0, 0, 0, 0.06);
+  --accent-text: #18181b;
 
-  --btn-primary-bg: #6366f1;
-  --btn-primary-text: #ffffff;
-  --btn-primary-hover: #4f46e5;
+  --btn-primary-bg: #18181b;
+  --btn-primary-text: #fafafa;
+  --btn-primary-hover: #27272a;
 
   /* Cards — solid white on gray page */
   --card-bg: #ffffff;
@@ -47,7 +47,7 @@
   --chart-tooltip-shadow: rgba(0, 0, 0, 0.1);
   --chart-cursor: rgba(0, 0, 0, 0.03);
   --chart-secondary-line: rgba(0, 0, 0, 0.3);
-  --ring-focus: rgba(99, 102, 241, 0.35);
+  --ring-focus: rgba(0, 0, 0, 0.20);
 
   /* Tags — bumped from 0.08 */
   --tag-blue-bg: rgba(59, 130, 246, 0.12);
@@ -112,19 +112,19 @@
   /* Info glow (for timeline dots, etc.) */
   --info-glow: rgba(37, 99, 235, 0.35);
 
-  /* KPI accent colors — monochromatic indigo */
-  --kpi-1-bg: rgba(99, 102, 241, 0.06);
-  --kpi-1-accent: #4f46e5;
-  --kpi-1-ring: rgba(99, 102, 241, 0.15);
-  --kpi-2-bg: rgba(99, 102, 241, 0.10);
-  --kpi-2-accent: #6366f1;
-  --kpi-2-ring: rgba(99, 102, 241, 0.22);
-  --kpi-3-bg: rgba(99, 102, 241, 0.04);
-  --kpi-3-accent: #818cf8;
-  --kpi-3-ring: rgba(99, 102, 241, 0.12);
-  --kpi-4-bg: rgba(99, 102, 241, 0.08);
-  --kpi-4-accent: #6366f1;
-  --kpi-4-ring: rgba(99, 102, 241, 0.18);
+  /* KPI accent colors — neutral gray */
+  --kpi-1-bg: rgba(0, 0, 0, 0.04);
+  --kpi-1-accent: #3f3f46;
+  --kpi-1-ring: rgba(0, 0, 0, 0.10);
+  --kpi-2-bg: rgba(0, 0, 0, 0.06);
+  --kpi-2-accent: #52525b;
+  --kpi-2-ring: rgba(0, 0, 0, 0.14);
+  --kpi-3-bg: rgba(0, 0, 0, 0.03);
+  --kpi-3-accent: #71717a;
+  --kpi-3-ring: rgba(0, 0, 0, 0.08);
+  --kpi-4-bg: rgba(0, 0, 0, 0.05);
+  --kpi-4-accent: #52525b;
+  --kpi-4-ring: rgba(0, 0, 0, 0.12);
 
   /* Surface colors */
   --surface-primary: #f5f6fa;
@@ -168,15 +168,15 @@
   --border-default: rgba(255, 255, 255, 0.10);
   --border-subtle: rgba(255, 255, 255, 0.06);
 
-  /* Accent — brighter indigo for dark bg */
-  --accent: #818cf8;
-  --accent-hover: #a5b4fc;
-  --accent-subtle: rgba(129, 140, 248, 0.15);
-  --accent-text: #a5b4fc;
+  /* Accent — monochrome white */
+  --accent: #ffffff;
+  --accent-hover: rgba(255, 255, 255, 0.85);
+  --accent-subtle: rgba(255, 255, 255, 0.08);
+  --accent-text: rgba(255, 255, 255, 0.9);
 
-  --btn-primary-bg: #6366f1;
-  --btn-primary-text: #ffffff;
-  --btn-primary-hover: #818cf8;
+  --btn-primary-bg: #ffffff;
+  --btn-primary-text: #111114;
+  --btn-primary-hover: rgba(255, 255, 255, 0.9);
 
   /* Cards — distinct elevated surface */
   --card-bg: #1a1a21;
@@ -192,7 +192,7 @@
   --chart-tooltip-shadow: rgba(0, 0, 0, 0.4);
   --chart-cursor: rgba(255, 255, 255, 0.03);
   --chart-secondary-line: rgba(255, 255, 255, 0.3);
-  --ring-focus: rgba(129, 140, 248, 0.35);
+  --ring-focus: rgba(255, 255, 255, 0.25);
 
   /* Tags — bumped from 0.15 */
   --tag-blue-bg: rgba(59, 130, 246, 0.20);
@@ -257,20 +257,19 @@
   /* Info glow (for timeline dots, etc.) */
   --info-glow: rgba(59, 130, 246, 0.50);
 
-  /* KPI accent colors */
-  /* KPI accent colors — monochromatic indigo (dark) */
-  --kpi-1-bg: rgba(129, 140, 248, 0.10);
-  --kpi-1-accent: #a5b4fc;
-  --kpi-1-ring: rgba(129, 140, 248, 0.25);
-  --kpi-2-bg: rgba(129, 140, 248, 0.14);
-  --kpi-2-accent: #c7d2fe;
-  --kpi-2-ring: rgba(129, 140, 248, 0.30);
-  --kpi-3-bg: rgba(129, 140, 248, 0.07);
-  --kpi-3-accent: #a5b4fc;
-  --kpi-3-ring: rgba(129, 140, 248, 0.18);
-  --kpi-4-bg: rgba(129, 140, 248, 0.12);
-  --kpi-4-accent: #c7d2fe;
-  --kpi-4-ring: rgba(129, 140, 248, 0.22);
+  /* KPI accent colors — neutral white-alpha (dark) */
+  --kpi-1-bg: rgba(255, 255, 255, 0.06);
+  --kpi-1-accent: rgba(255, 255, 255, 0.7);
+  --kpi-1-ring: rgba(255, 255, 255, 0.15);
+  --kpi-2-bg: rgba(255, 255, 255, 0.08);
+  --kpi-2-accent: rgba(255, 255, 255, 0.8);
+  --kpi-2-ring: rgba(255, 255, 255, 0.20);
+  --kpi-3-bg: rgba(255, 255, 255, 0.04);
+  --kpi-3-accent: rgba(255, 255, 255, 0.6);
+  --kpi-3-ring: rgba(255, 255, 255, 0.12);
+  --kpi-4-bg: rgba(255, 255, 255, 0.07);
+  --kpi-4-accent: rgba(255, 255, 255, 0.75);
+  --kpi-4-ring: rgba(255, 255, 255, 0.17);
 
   /* Surface colors */
   --surface-primary: #111114;
@@ -352,18 +351,18 @@ body {
   box-shadow: var(--card-shadow-hover);
 }
 
-/* KPI gradient backgrounds */
-.kpi-gradient-blue {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.02) 100%);
-}
-.kpi-gradient-amber {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.02) 100%);
-}
-.kpi-gradient-emerald {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
-}
+/* KPI gradient backgrounds — neutral */
+.kpi-gradient-blue,
+.kpi-gradient-amber,
+.kpi-gradient-emerald,
 .kpi-gradient-red {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.02) 100%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.01) 100%);
+}
+.dark .kpi-gradient-blue,
+.dark .kpi-gradient-amber,
+.dark .kpi-gradient-emerald,
+.dark .kpi-gradient-red {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
 }
 
 /* Modal enter animations */

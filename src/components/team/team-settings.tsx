@@ -219,7 +219,7 @@ export function TeamSettings({ currentUserId }: Props) {
 
       {/* Members */}
       <div>
-        <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-tertiary">
+        <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary">
           Members
         </h3>
         <MemberList

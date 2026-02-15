@@ -57,7 +57,7 @@ function Section({
 }) {
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold uppercase tracking-wider text-text-tertiary print:text-gray-500">
+      <h3 className="text-sm font-semibold uppercase tracking-wide text-text-tertiary print:text-gray-500">
         {title}
       </h3>
       <div className="text-sm leading-relaxed text-text-primary print:text-gray-700">
@@ -124,7 +124,7 @@ export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) 
         {/* Header */}
         <div className="border-b border-border-default pb-5 print:border-gray-200">
           {tearSheet.companyName && (
-            <div className="text-xs font-medium uppercase tracking-wider text-text-muted print:text-gray-400">
+            <div className="text-xs font-medium uppercase tracking-wide text-text-muted print:text-gray-400">
               {tearSheet.companyName}
             </div>
           )}
@@ -146,7 +146,7 @@ export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) 
           {/* Key Metrics */}
           {filteredMetrics.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-text-tertiary print:text-gray-500">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-text-tertiary print:text-gray-500">
                 Key Metrics
               </h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

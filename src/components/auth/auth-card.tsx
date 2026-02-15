@@ -127,9 +127,9 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
   }
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-2xl border border-border-default bg-bg-elevated p-4 sm:p-6 shadow-sm">
+    <div className="mx-auto w-full max-w-[440px] rounded-2xl border border-border-default bg-bg-elevated p-6 sm:p-8 shadow-sm">
       <div className="space-y-2">
-        <h1 className="text-lg font-semibold tracking-tight">
+        <h1 className="text-2xl font-bold tracking-tight">
           {mode === "login" ? "Welcome back" : "Create your account"}
         </h1>
         <p className="text-sm text-text-tertiary">
@@ -152,7 +152,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
             </label>
             <input
               id="fullName"
-              className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
+              className="h-11 rounded-lg border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
               placeholder="Jane Doe"
               {...form.register("fullName")}
             />
@@ -170,7 +170,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
           </label>
           <input
             id="email"
-            className={`h-11 rounded-md border border-border-default px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)] ${
+            className={`h-11 rounded-lg border border-border-default px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)] ${
               inviteEmail ? "bg-bg-raised text-text-secondary cursor-not-allowed" : "bg-bg-input"
             }`}
             placeholder="you@company.com"
@@ -197,7 +197,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
           </label>
           <input
             id="password"
-            className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
+            className="h-11 rounded-lg border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
             placeholder="••••••••"
             type="password"
             autoComplete={
@@ -210,6 +210,11 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
               {String(form.formState.errors.password.message)}
             </p>
           )}
+          {mode === "login" && (
+            <Link className="text-xs text-text-tertiary hover:text-text-primary" href="/forgot-password">
+              Forgot password?
+            </Link>
+          )}
         </div>
 
         {mode === "signup" && inviteToken && companyName && (
@@ -218,7 +223,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
               <label className="text-sm text-text-secondary">
                 Company
               </label>
-              <div className="flex h-11 items-center rounded-md border border-border-default bg-bg-raised px-3 text-sm text-text-secondary">
+              <div className="flex h-11 items-center rounded-lg border border-border-default bg-bg-raised px-3 text-sm text-text-secondary">
                 {companyName}
               </div>
             </div>
@@ -229,7 +234,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
               </label>
               <input
                 id="companyWebsite"
-                className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
+                className="h-11 rounded-lg border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
                 placeholder="acme.com"
                 {...form.register("companyWebsite")}
               />
@@ -273,7 +278,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
               </label>
               <input
                 id="companyName"
-                className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
+                className="h-11 rounded-lg border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
                 placeholder="Acme Inc."
                 {...form.register("companyName")}
               />
@@ -291,7 +296,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
               </label>
               <input
                 id="companyWebsite"
-                className="h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
+                className="h-11 rounded-lg border border-border-default bg-bg-input px-3 text-sm outline-none ring-0 placeholder:text-text-faint focus:border-[var(--ring-focus)]"
                 placeholder="acme.com"
                 {...form.register("companyWebsite")}
               />
@@ -305,13 +310,13 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
         )}
 
         {error && (
-          <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
+          <div className="rounded-lg border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
             {error}
           </div>
         )}
 
         <button
-          className="inline-flex h-11 w-full items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+          className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-btn-primary-bg px-4 text-sm font-semibold text-btn-primary-text hover:bg-btn-primary-hover disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           disabled={isSubmitting}
           type="submit"
         >

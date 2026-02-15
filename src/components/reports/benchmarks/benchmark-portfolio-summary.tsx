@@ -69,11 +69,11 @@ export function BenchmarkPortfolioSummary({
     <div className="grid gap-4 sm:grid-cols-3">
       {/* Above Median */}
       <div className="card-surface rounded-xl border border-border-subtle p-4">
-        <div className="text-xs font-medium uppercase tracking-wider text-text-muted">
+        <div className="text-xs font-medium uppercase tracking-wide text-text-muted">
           Above Median
         </div>
         <div className="mt-2 flex items-baseline gap-1">
-          <span className="text-2xl font-semibold tabular-nums text-text-primary">
+          <span className="text-2xl font-bold tabular-nums text-text-primary">
             {aboveMedian}
           </span>
           <span className="text-sm text-text-tertiary">of {companies.length}</span>
@@ -89,7 +89,7 @@ export function BenchmarkPortfolioSummary({
 
       {/* Avg Percentile */}
       <div className="card-surface rounded-xl border border-border-subtle p-4">
-        <div className="text-xs font-medium uppercase tracking-wider text-text-muted">
+        <div className="text-xs font-medium uppercase tracking-wide text-text-muted">
           Avg Percentile
         </div>
         <div className="mt-2">
@@ -113,7 +113,7 @@ export function BenchmarkPortfolioSummary({
 
       {/* Quartile Distribution */}
       <div className="card-surface rounded-xl border border-border-subtle p-4">
-        <div className="text-xs font-medium uppercase tracking-wider text-text-muted">
+        <div className="text-xs font-medium uppercase tracking-wide text-text-muted">
           Quartile Distribution
         </div>
         <div className="mt-2 flex items-center gap-1">

@@ -566,7 +566,7 @@ export function UnifiedRequestWizard() {
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div className="space-y-1">
-              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 Select a template
               </h1>
               <p className="text-sm text-text-tertiary">
@@ -644,7 +644,7 @@ export function UnifiedRequestWizard() {
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div className="space-y-1">
-              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 Select companies
               </h1>
               <p className="text-sm text-text-tertiary">
@@ -776,7 +776,7 @@ export function UnifiedRequestWizard() {
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div className="space-y-1">
-              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 {frequency === null
                   ? "Choose frequency"
                   : frequency === "one-time"

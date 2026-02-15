@@ -169,11 +169,11 @@ export function PerformanceSummary({
         {kpis.map((kpi) => (
           <div key={kpi.label} className="rounded-xl border border-border-default card-surface p-4">
             <KpiTooltip tooltip={kpi.tooltip} formula={kpi.formula}>
-              <p className="inline-flex cursor-help text-xs uppercase tracking-wider text-text-muted border-b border-dashed border-text-muted/30">
+              <p className="inline-flex cursor-help text-xs uppercase tracking-wide text-text-muted border-b border-dashed border-text-muted/30">
                 {kpi.label}
               </p>
             </KpiTooltip>
-            <p className={cn("mt-1 text-2xl font-semibold", kpi.color)}>
+            <p className={cn("mt-1 text-2xl font-bold", kpi.color)}>
               {kpi.value}
             </p>
           </div>
@@ -197,7 +197,7 @@ export function PerformanceSummary({
 function SummaryItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-wider text-text-muted">{label}</p>
+      <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
       <p className="mt-0.5 text-sm font-medium text-text-primary">{value}</p>
     </div>
   );

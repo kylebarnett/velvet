@@ -231,7 +231,7 @@ function ContactsDesktopTable({
   );
 
   const theadContent = (
-    <tr className="border-b border-border-default text-left text-xs uppercase tracking-wider text-text-muted">
+    <tr className="border-b border-border-default text-left text-xs uppercase tracking-wide text-text-muted">
       <th className="p-3">
         <input
           type="checkbox"
@@ -693,7 +693,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
             <Users className="h-4 w-4 text-[var(--info-accent)]" aria-hidden="true" />
             Total Contacts
           </div>
-          <div className="mt-1 text-lg sm:text-2xl font-semibold">{pagination.total}</div>
+          <div className="mt-1 text-lg sm:text-2xl font-bold">{pagination.total}</div>
           <p className="mt-1 text-xs text-text-muted">All founders in your portfolio</p>
         </div>
         <div className="rounded-xl card-surface kpi-gradient-emerald p-3 sm:p-4">
@@ -701,7 +701,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
             <CheckCircle2 className="h-4 w-4 text-[var(--success-accent)]" aria-hidden="true" />
             Accepted
           </div>
-          <div className="mt-1 text-lg sm:text-2xl font-semibold">{stats.accepted}</div>
+          <div className="mt-1 text-lg sm:text-2xl font-bold">{stats.accepted}</div>
           <p className="mt-1 text-xs text-text-muted">Founders who joined and can submit metrics</p>
         </div>
         <div className="rounded-xl card-surface kpi-gradient-amber p-3 sm:p-4">
@@ -709,7 +709,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
             <Clock className="h-4 w-4 text-[var(--warning-accent)]" aria-hidden="true" />
             Awaiting Response
           </div>
-          <div className="mt-1 text-lg sm:text-2xl font-semibold">{stats.awaiting}</div>
+          <div className="mt-1 text-lg sm:text-2xl font-bold">{stats.awaiting}</div>
           <p className="mt-1 text-xs text-text-muted">Pending or sent invitations not yet accepted</p>
         </div>
       </div>
