@@ -82,6 +82,7 @@ type ContactsDesktopTableProps = {
   startEdit: (contact: Contact) => void;
   openDeleteModal: (contact: Contact) => void;
   sendInvite: (ids: string[]) => Promise<void>;
+  onRequestInvite: (contact: Contact) => void;
   loading: boolean;
   fetching: boolean;
   getCompanyName: (contact: Contact) => string;
@@ -104,6 +105,7 @@ function ContactsDesktopTable({
   startEdit,
   openDeleteModal,
   sendInvite,
+  onRequestInvite,
   loading,
   fetching,
   getCompanyName,
@@ -198,7 +200,7 @@ function ContactsDesktopTable({
           <div className="flex items-center gap-1">
             {contact.status !== "accepted" && (
               <button
-                onClick={() => sendInvite([contact.id])}
+                onClick={() => onRequestInvite(contact)}
                 disabled={loading}
                 className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                 title={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
@@ -353,6 +355,25 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
     open: false,
     contact: null,
   });
+  const [inviteConfirm, setInviteConfirm] = React.useState<
+    | { type: "single"; contact: Contact }
+    | { type: "selected"; ids: string[] }
+    | { type: "all" }
+    | null
+  >(null);
+
+  // Sync state when server-rendered props change (e.g. after router.refresh())
+  React.useEffect(() => {
+    setContacts(initialContacts);
+  }, [initialContacts]);
+
+  React.useEffect(() => {
+    setPagination(initialPagination);
+  }, [initialPagination]);
+
+  React.useEffect(() => {
+    setStats(initialStats);
+  }, [initialStats]);
 
   // Debounce search for server-side filtering
   const debouncedSearch = useDebounce(search, 300);
@@ -804,7 +825,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
             <DownloadCsvButton />
             {pendingCount > 0 && (
               <button
-                onClick={sendAllPending}
+                onClick={() => setInviteConfirm({ type: "all" })}
                 disabled={loading}
                 className="hidden sm:inline-flex h-9 items-center gap-2 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
               >
@@ -819,7 +840,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
         {pendingCount > 0 && (
           <div className="border-b border-border-subtle px-4 py-2 sm:hidden">
             <button
-              onClick={sendAllPending}
+              onClick={() => setInviteConfirm({ type: "all" })}
               disabled={loading}
               className="flex w-full h-10 items-center justify-center gap-2 rounded-md bg-btn-primary-bg text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             >
@@ -835,7 +856,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
             <span className="text-sm text-text-secondary font-medium">{selectedIds.size} selected</span>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => sendInvite(Array.from(selectedIds))}
+                onClick={() => setInviteConfirm({ type: "selected", ids: Array.from(selectedIds) })}
                 disabled={loading}
                 className="inline-flex h-8 items-center gap-1.5 rounded-md bg-bg-hover px-3 text-sm hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               >
@@ -982,7 +1003,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                       <div className="mt-2 flex items-center justify-end gap-1 pt-2">
                         {contact.status !== "accepted" && (
                           <button
-                            onClick={() => sendInvite([contact.id])}
+                            onClick={() => setInviteConfirm({ type: "single", contact })}
                             disabled={loading}
                             className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm hover:bg-bg-hover disabled:opacity-60"
                             title={contact.status === "sent" ? "Resend" : "Send"}
@@ -1032,6 +1053,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
               startEdit={startEdit}
               openDeleteModal={openDeleteModal}
               sendInvite={sendInvite}
+              onRequestInvite={(c) => setInviteConfirm({ type: "single", contact: c })}
               loading={loading}
               fetching={fetching}
               getCompanyName={getCompanyName}
@@ -1110,6 +1132,49 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
         variant="danger"
         onConfirm={confirmDelete}
         onCancel={closeDeleteModal}
+      />
+
+      {/* Invite confirmation modal */}
+      <ConfirmModal
+        open={inviteConfirm !== null}
+        title={
+          inviteConfirm?.type === "single"
+            ? inviteConfirm.contact.status === "sent"
+              ? "Resend Invitation"
+              : "Send Invitation"
+            : inviteConfirm?.type === "selected"
+              ? "Send Invitations"
+              : "Send All Pending Invitations"
+        }
+        message={
+          inviteConfirm?.type === "single"
+            ? inviteConfirm.contact.status === "sent"
+              ? `Resend the invitation email to ${inviteConfirm.contact.email}? A new email will be sent. Their existing invitation link will still work.`
+              : `Send an invitation email to ${inviteConfirm.contact.email}? They'll receive a link to join Velvet as a founder, where they can submit metrics and share documents with you.`
+            : inviteConfirm?.type === "selected"
+              ? `Send invitation emails to ${inviteConfirm.ids.length} selected contact${inviteConfirm.ids.length === 1 ? "" : "s"}?`
+              : `Send invitation emails to all ${pendingCount} pending contact${pendingCount === 1 ? "" : "s"}? They'll each receive a link to join Velvet as a founder.`
+        }
+        confirmLabel={
+          inviteConfirm?.type === "single" && inviteConfirm.contact.status === "sent"
+            ? "Resend invitation"
+            : inviteConfirm?.type === "all"
+              ? `Send all (${pendingCount})`
+              : inviteConfirm?.type === "selected"
+                ? `Send ${inviteConfirm.ids.length} invitation${inviteConfirm.ids.length === 1 ? "" : "s"}`
+                : "Send invitation"
+        }
+        onConfirm={() => {
+          if (inviteConfirm?.type === "single") {
+            sendInvite([inviteConfirm.contact.id]);
+          } else if (inviteConfirm?.type === "selected") {
+            sendInvite(inviteConfirm.ids);
+          } else {
+            sendAllPending();
+          }
+          setInviteConfirm(null);
+        }}
+        onCancel={() => setInviteConfirm(null)}
       />
     </div>
   );
