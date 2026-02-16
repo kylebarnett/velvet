@@ -243,6 +243,7 @@ DROP POLICY IF EXISTS "investors_manage_comments" ON public.metric_comments;
 
 DROP POLICY IF EXISTS "metric_value_history_founder_select" ON public.metric_value_history;
 DROP POLICY IF EXISTS "metric_value_history_investor_select" ON public.metric_value_history;
+DROP POLICY IF EXISTS "metric_value_history_select" ON public.metric_value_history;
 
 CREATE POLICY "metric_value_history_select"
 ON public.metric_value_history FOR SELECT TO authenticated
@@ -284,6 +285,7 @@ WITH CHECK (
 
 -- SELECT: fully wrapped in SECURITY DEFINER — no RLS chain
 DROP POLICY IF EXISTS "metric_submissions_select_investor_or_founder" ON public.metric_submissions;
+DROP POLICY IF EXISTS "metric_submissions_select" ON public.metric_submissions;
 CREATE POLICY "metric_submissions_select"
 ON public.metric_submissions FOR SELECT TO authenticated
 USING (

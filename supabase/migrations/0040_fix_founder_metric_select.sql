@@ -9,6 +9,7 @@
 --
 -- This restores a simple, direct founder SELECT policy.
 
+DROP POLICY IF EXISTS "company_metric_values_founder_select" ON public.company_metric_values;
 CREATE POLICY "company_metric_values_founder_select"
 ON public.company_metric_values
 FOR SELECT TO authenticated
