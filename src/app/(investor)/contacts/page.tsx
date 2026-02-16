@@ -84,13 +84,13 @@ export default async function PortfolioPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Portfolio", href: "/portfolio" }, { label: "Contacts" }]} />
-          <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight" data-onboarding="portfolio-title">Portfolio</h1>
+          <Breadcrumbs items={[{ label: "Portfolio" }]} />
+          <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight" data-onboarding="portfolio-title">Contacts</h1>
         </div>
         <div className="flex items-center gap-2">
           <AddContactButton />
           <Link
-            href="/portfolio/import"
+            href="/contacts/import"
             className="inline-flex items-center gap-2 rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
             data-onboarding="import-csv"
           >

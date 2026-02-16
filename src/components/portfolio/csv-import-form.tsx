@@ -233,7 +233,7 @@ export function CsvImportForm() {
 
       if (json.imported > 0) {
         setTimeout(() => {
-          router.push("/portfolio");
+          router.push("/contacts");
           router.refresh();
         }, 2000);
       }

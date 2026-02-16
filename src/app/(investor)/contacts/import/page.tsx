@@ -35,10 +35,10 @@ export default async function ImportPage() {
         <div className="flex items-center gap-3">
           {hasExistingContacts && <DownloadCsvButton />}
           <Link
-            href="/portfolio"
+            href="/contacts"
             className="text-sm text-text-tertiary hover:text-text-primary"
           >
-            Back to Portfolio
+            Back to Contacts
           </Link>
         </div>
       </div>

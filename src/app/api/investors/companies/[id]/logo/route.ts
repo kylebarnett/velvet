@@ -98,7 +98,7 @@ export async function POST(
 
   // Revalidate pages that show company logos
   revalidatePath("/dashboard");
-  revalidatePath("/portfolio");
+  revalidatePath("/contacts");
 
   return NextResponse.json({ logoUrl, ok: true });
 }
@@ -151,7 +151,7 @@ export async function DELETE(
 
   // Revalidate pages that show company logos
   revalidatePath("/dashboard");
-  revalidatePath("/portfolio");
+  revalidatePath("/contacts");
 
   return NextResponse.json({ ok: true });
 }

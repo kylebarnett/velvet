@@ -709,7 +709,7 @@ export function UnifiedRequestWizard() {
                 <h3 className="text-base font-medium text-text-primary">No companies in your portfolio</h3>
                 <p className="mt-1 max-w-lg text-sm text-text-secondary">
                   <Link
-                    href="/portfolio"
+                    href="/contacts"
                     className="text-text-primary underline underline-offset-4 hover:text-text-secondary"
                   >
                     Add companies

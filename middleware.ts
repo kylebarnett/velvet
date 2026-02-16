@@ -3,7 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 
 const PROTECTED_PATHS = [
   "/dashboard",
-  "/portfolio",
+  "/contacts",
   "/reports",
   "/metric-requests",
   "/documents",

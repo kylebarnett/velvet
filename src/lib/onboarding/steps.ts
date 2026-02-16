@@ -12,7 +12,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   // Portfolio
   {
     id: "portfolio-welcome",
-    page: "/portfolio",
+    page: "/contacts",
     target: '[data-onboarding="portfolio-title"]',
     title: "Welcome to Your Portfolio",
     message:
@@ -20,7 +20,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   },
   {
     id: "import-csv",
-    page: "/portfolio",
+    page: "/contacts",
     target: '[data-onboarding="import-csv"]',
     title: "Import Companies",
     message:
@@ -29,7 +29,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   },
   {
     id: "add-contact",
-    page: "/portfolio",
+    page: "/contacts",
     target: '[data-onboarding="add-contact"]',
     title: "Add a Contact",
     message: "Or add founders one at a time with their email and company details.",

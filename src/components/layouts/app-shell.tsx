@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
+  Activity,
   Briefcase,
   Building2,
   Users,
@@ -66,6 +67,7 @@ export type UserInfo = {
 /* ------------------------------------------------------------------ */
 
 const ICON_MAP: Record<string, LucideIcon> = {
+  activity: Activity,
   briefcase: Briefcase,
   building2: Building2,
   users: Users,
@@ -127,7 +129,7 @@ function SidebarTooltip({ label, children }: { label: string; children: React.Re
       {children}
       {pos && (
         <div
-          className="fixed z-[100] whitespace-nowrap rounded-md border border-border-default bg-bg-elevated px-2.5 py-1.5 text-xs font-medium text-text-primary shadow-lg"
+          className="fixed z-[var(--z-popover)] whitespace-nowrap rounded-md border border-border-default bg-bg-elevated px-2.5 py-1.5 text-xs font-medium text-text-primary shadow-lg"
           style={{ top: pos.top, left: pos.left, transform: "translateY(-50%)" }}
         >
           {label}
@@ -151,6 +153,7 @@ export function AppShell({
   children,
   showTakeTour,
   onTakeTour,
+  profileLinks,
 }: {
   title: string;
   nav: NavItem[];
@@ -161,6 +164,7 @@ export function AppShell({
   children: React.ReactNode;
   showTakeTour?: boolean;
   onTakeTour?: () => void;
+  profileLinks?: NavItem[];
 }) {
   const [logoError, setLogoError] = React.useState(false);
   const [expandedSections, setExpandedSections] = React.useState<Set<string>>(new Set());
@@ -352,6 +356,28 @@ export function AppShell({
                 <span className="text-sm text-text-tertiary">Theme</span>
                 <ThemeToggle />
               </div>
+
+              {/* Profile links */}
+              {profileLinks?.map((link) => {
+                const Icon = link.icon ? ICON_MAP[link.icon] : null;
+                const active = pathname === link.href || pathname?.startsWith(link.href + "/");
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "flex items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors",
+                      mobile ? "h-11" : "h-9",
+                      "text-text-tertiary hover:bg-bg-raised hover:text-text-primary",
+                      active && "bg-bg-elevated text-text-primary",
+                    )}
+                    onClick={mobile ? () => setMobileMenuOpen(false) : undefined}
+                  >
+                    {Icon && <Icon className="h-[18px] w-[18px] shrink-0" />}
+                    <span>{link.label}</span>
+                  </Link>
+                );
+              })}
 
               {/* Team link */}
               <Link

@@ -224,13 +224,13 @@ function CompanyListRow({
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                window.location.href = "/portfolio";
+                window.location.href = "/contacts";
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.stopPropagation();
                   e.preventDefault();
-                  window.location.href = "/portfolio";
+                  window.location.href = "/contacts";
                 }
               }}
             >

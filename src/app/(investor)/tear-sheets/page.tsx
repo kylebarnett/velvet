@@ -1,0 +1,413 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { ArrowUpDown, FileSpreadsheet, LayoutGrid, List, Trash2 } from "lucide-react";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SlidingTabs, SlidingIconTabs, TabItem } from "@/components/ui/sliding-tabs";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+
+type TearSheet = {
+  id: string;
+  title: string;
+  quarter: string;
+  year: number;
+  status: string;
+  share_enabled: boolean;
+  share_token: string | null;
+  created_at: string;
+  updated_at: string;
+  companyName: string | null;
+};
+
+type ViewMode = "grid" | "list";
+type SortField = "date" | "status";
+type SortDir = "asc" | "desc";
+type QuarterFilter = "All" | "Q1" | "Q2" | "Q3" | "Q4";
+
+const QUARTER_TABS: TabItem<QuarterFilter>[] = [
+  { value: "All", label: "All" },
+  { value: "Q1", label: "Q1" },
+  { value: "Q2", label: "Q2" },
+  { value: "Q3", label: "Q3" },
+  { value: "Q4", label: "Q4" },
+];
+
+const VIEW_MODE_TABS: { value: ViewMode; icon: typeof LayoutGrid; label: string }[] = [
+  { value: "grid", icon: LayoutGrid, label: "Grid view" },
+  { value: "list", icon: List, label: "List view" },
+];
+
+function quarterNum(q: string): number {
+  return { Q1: 1, Q2: 2, Q3: 3, Q4: 4 }[q] ?? 0;
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {[0, 1].map((i) => (
+        <div
+          key={i}
+          className="animate-pulse rounded-xl border border-border-default card-surface p-4"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-48 rounded bg-bg-hover" />
+              <div className="flex gap-2">
+                <div className="h-5 w-16 rounded-full bg-bg-hover" />
+                <div className="h-5 w-14 rounded bg-bg-elevated" />
+              </div>
+            </div>
+            <div className="h-7 w-7 rounded-md bg-bg-elevated" />
+          </div>
+          <div className="mt-3 h-3 w-28 rounded bg-bg-elevated" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function InvestorTearSheetsPage() {
+  const [tearSheets, setTearSheets] = React.useState<TearSheet[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const [viewMode, setViewMode] = React.useState<ViewMode>("list");
+  const [filterQuarter, setFilterQuarter] = React.useState<QuarterFilter>("All");
+  const [filterYear, setFilterYear] = React.useState("All");
+  const [sortField, setSortField] = React.useState<SortField>("date");
+  const [sortDir, setSortDir] = React.useState<SortDir>("desc");
+
+  async function loadTearSheets() {
+    try {
+      const res = await fetch("/api/investors/tear-sheets");
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.error ?? "Failed to load.");
+      setTearSheets(json.tearSheets ?? []);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  React.useEffect(() => {
+    loadTearSheets();
+  }, []);
+
+  const [deleteId, setDeleteId] = React.useState<string | null>(null);
+
+  async function handleDelete(id: string) {
+    try {
+      const res = await fetch(`/api/investors/tear-sheets/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete.");
+      setTearSheets((prev) => prev.filter((t) => t.id !== id));
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to delete.");
+    } finally {
+      setDeleteId(null);
+    }
+  }
+
+  const availableYears = React.useMemo(() => {
+    const years = Array.from(new Set(tearSheets.map((t) => t.year)));
+    years.sort((a, b) => b - a);
+    return years;
+  }, [tearSheets]);
+
+  const displayed = React.useMemo(() => {
+    let list = tearSheets;
+
+    if (filterQuarter !== "All") {
+      list = list.filter((t) => t.quarter === filterQuarter);
+    }
+    if (filterYear !== "All") {
+      list = list.filter((t) => t.year === Number(filterYear));
+    }
+
+    const sorted = [...list].sort((a, b) => {
+      if (sortField === "date") {
+        const diff = a.year - b.year || quarterNum(a.quarter) - quarterNum(b.quarter);
+        return sortDir === "desc" ? -diff : diff;
+      }
+      const statusOrder = { published: 1, draft: 0 };
+      const diff =
+        (statusOrder[a.status as keyof typeof statusOrder] ?? 0) -
+        (statusOrder[b.status as keyof typeof statusOrder] ?? 0);
+      return sortDir === "desc" ? -diff : diff;
+    });
+
+    return sorted;
+  }, [tearSheets, filterQuarter, filterYear, sortField, sortDir]);
+
+  function toggleSort(field: SortField) {
+    if (sortField === field) {
+      setSortDir((d) => (d === "desc" ? "asc" : "desc"));
+    } else {
+      setSortField(field);
+      setSortDir("desc");
+    }
+  }
+
+  const showFilters = tearSheets.length > 0;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <Breadcrumbs items={[{ label: "Portfolio", href: "/contacts" }, { label: "Tear Sheets" }]} />
+          <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Tear Sheets</h1>
+          <p className="text-sm text-text-tertiary">
+            Create internal investment memos and summaries about portfolio companies.
+          </p>
+        </div>
+        <Link
+          href="/tear-sheets/new"
+          className="inline-flex h-9 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+        >
+          New Tear Sheet
+        </Link>
+      </div>
+
+      {loading && <LoadingSkeleton />}
+
+      {error && (
+        <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
+          {error}
+        </div>
+      )}
+
+      {showFilters && (
+        <div className="flex flex-wrap items-center gap-3">
+          <SlidingTabs
+            tabs={QUARTER_TABS}
+            value={filterQuarter}
+            onChange={setFilterQuarter}
+            size="sm"
+            showIcons={false}
+          />
+
+          {availableYears.length > 1 && (
+            <Select value={filterYear} onValueChange={setFilterYear}>
+              <SelectTrigger size="sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All years</SelectItem>
+                {availableYears.map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => toggleSort("date")}
+              className={`flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
+                sortField === "date"
+                  ? "border-border-default bg-bg-hover text-text-primary"
+                  : "border-border-default bg-bg-input text-text-muted hover:text-text-secondary"
+              }`}
+            >
+              Date
+              {sortField === "date" && <ArrowUpDown className="h-3 w-3" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleSort("status")}
+              className={`flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
+                sortField === "status"
+                  ? "border-border-default bg-bg-hover text-text-primary"
+                  : "border-border-default bg-bg-input text-text-muted hover:text-text-secondary"
+              }`}
+            >
+              Status
+              {sortField === "status" && <ArrowUpDown className="h-3 w-3" />}
+            </button>
+
+            <SlidingIconTabs
+              tabs={VIEW_MODE_TABS}
+              value={viewMode}
+              onChange={setViewMode}
+            />
+          </div>
+        </div>
+      )}
+
+      {!loading && !error && tearSheets.length === 0 && (
+        <EmptyState
+          icon={FileSpreadsheet}
+          title="No tear sheets yet"
+          description="Create internal investment memos about your portfolio companies. Tear sheets help you track metrics, notes, and action items for each company."
+          action={
+            <Link
+              href="/tear-sheets/new"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+            >
+              Create Tear Sheet
+            </Link>
+          }
+        />
+      )}
+
+      {!loading && displayed.length === 0 && tearSheets.length > 0 && (
+        <EmptyState
+          variant="no-results"
+          title="No tear sheets match the selected filters"
+          description="Try adjusting your quarter or year filter."
+        />
+      )}
+
+      {displayed.length > 0 && viewMode === "grid" && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {displayed.map((ts) => (
+            <div key={ts.id} className="rounded-xl border border-border-default card-surface p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1 space-y-1">
+                  <Link
+                    href={`/tear-sheets/${ts.id}`}
+                    className="block truncate text-sm font-medium hover:text-text-secondary"
+                  >
+                    {ts.title}
+                  </Link>
+                  {ts.companyName && (
+                    <div className="text-xs text-text-muted">{ts.companyName}</div>
+                  )}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        ts.status === "published"
+                          ? "bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
+                          : "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]"
+                      }`}
+                    >
+                      {ts.status === "published" ? "Published" : "Draft"}
+                    </span>
+                    <span className="text-xs text-text-tertiary">
+                      {ts.quarter} {ts.year}
+                    </span>
+                    {ts.share_enabled && (
+                      <span className="rounded-full bg-[var(--status-info-bg)] px-2 py-0.5 text-xs font-medium text-[var(--status-info-text)]">
+                        Shared
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDeleteId(ts.id)}
+                  className="shrink-0 rounded-md p-1.5 text-text-faint hover:bg-bg-elevated hover:text-[var(--status-error-text)]"
+                  aria-label="Delete tear sheet"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="mt-3 text-xs text-text-muted">
+                Updated {new Date(ts.updated_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {displayed.length > 0 && viewMode === "list" && (
+        <div className="overflow-hidden rounded-xl border border-border-default">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border-default bg-bg-raised text-left text-xs font-medium text-text-tertiary">
+                <th className="px-4 py-2.5">Title</th>
+                <th className="px-4 py-2.5">Company</th>
+                <th className="px-4 py-2.5">Period</th>
+                <th className="px-4 py-2.5">Status</th>
+                <th className="px-4 py-2.5">Updated</th>
+                <th className="w-10 px-4 py-2.5" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border-subtle">
+              {displayed.map((ts) => {
+                const updatedAt = new Date(ts.updated_at).toLocaleDateString(
+                  "en-US",
+                  { month: "short", day: "numeric", year: "numeric" },
+                );
+                return (
+                  <tr
+                    key={ts.id}
+                    className="group transition-colors hover:bg-bg-raised"
+                  >
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/tear-sheets/${ts.id}`}
+                        className="font-medium hover:text-text-secondary"
+                      >
+                        {ts.title}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-text-tertiary">
+                      {ts.companyName ?? "\u2014"}
+                    </td>
+                    <td className="px-4 py-3 text-text-tertiary">
+                      {ts.quarter} {ts.year}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                            ts.status === "published"
+                              ? "bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
+                              : "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]"
+                          }`}
+                        >
+                          {ts.status === "published" ? "Published" : "Draft"}
+                        </span>
+                        {ts.share_enabled && (
+                          <span className="rounded-full bg-[var(--status-info-bg)] px-2 py-0.5 text-xs font-medium text-[var(--status-info-text)]">
+                            Shared
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-text-muted">{updatedAt}</td>
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => setDeleteId(ts.id)}
+                        className="shrink-0 rounded-md p-1.5 text-text-faint hover:bg-bg-elevated hover:text-[var(--status-error-text)]"
+                        aria-label="Delete tear sheet"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <ConfirmModal
+        open={deleteId !== null}
+        title="Delete tear sheet?"
+        message="This tear sheet will be permanently deleted. This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+        onCancel={() => setDeleteId(null)}
+      />
+    </div>
+  );
+}

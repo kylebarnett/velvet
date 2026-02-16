@@ -188,7 +188,7 @@ export default async function CompanyDashboardPage({
           {relationship.approval_status === "denied"
             ? "The founder has denied access to their data. Metric data is not available."
             : !company.founder_id
-              ? <>This company&apos;s founder hasn&apos;t joined Velvet yet. You can manage their invitation from your <Link href="/portfolio" className="underline underline-offset-2 hover:text-[var(--status-warning-text)]">contacts page</Link>.</>
+              ? <>This company&apos;s founder hasn&apos;t joined Velvet yet. You can manage their invitation from your <Link href="/contacts" className="underline underline-offset-2 hover:text-[var(--status-warning-text)]">contacts page</Link>.</>
               : `Pending founder approval${relationship.created_at ? ` since ${new Date(relationship.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : ""}. The founder needs to approve your access before you can view their metrics and documents.`}
         </div>
       )}

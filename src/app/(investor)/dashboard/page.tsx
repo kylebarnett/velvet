@@ -339,7 +339,7 @@ export default async function InvestorDashboardPage() {
 
       <div className="grid gap-5 md:grid-cols-3">
         {[
-          { label: "Portfolio companies", subtitle: "Total companies in your portfolio", value: String(companies.length), href: "/portfolio", icon: Building2, gradient: "kpi-gradient-blue" },
+          { label: "Portfolio companies", subtitle: "Total companies in your portfolio", value: String(companies.length), href: "/contacts", icon: Building2, gradient: "kpi-gradient-blue" },
           { label: "Awaiting submission", subtitle: "Companies with pending metric requests", value: String(awaitingCompanyCount), href: "/metric-requests", icon: Building2, gradient: "kpi-gradient-amber" },
           { label: "Submitted this week", subtitle: "Companies that sent data in the last 7 days", value: String(submittedThisWeekCount), href: "/metric-requests", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
         ].map((card) => (
@@ -366,7 +366,7 @@ export default async function InvestorDashboardPage() {
             id: "import",
             label: "Import portfolio companies",
             description: "Add companies via CSV or manually to start tracking",
-            href: "/portfolio/import",
+            href: "/contacts/import",
             completed: companies.length > 0,
           },
           {
@@ -408,7 +408,7 @@ export default async function InvestorDashboardPage() {
           </p>
           <div className="mt-4 flex items-center gap-3">
             <Link
-              href="/portfolio/import"
+              href="/contacts/import"
               className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
             >
               Import contacts

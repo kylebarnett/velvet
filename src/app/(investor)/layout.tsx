@@ -48,13 +48,14 @@ export default async function InvestorLayout({
         initialTheme={savedTheme}
         nav={[
           {
-            href: "/portfolio",
+            href: "/contacts",
             label: "Portfolio",
             icon: "briefcase",
             children: [
               { href: "/dashboard", label: "Companies", icon: "building2" },
-              { href: "/portfolio", label: "Contacts", icon: "users" },
+              { href: "/contacts", label: "Contacts", icon: "users" },
               { href: "/metric-requests", label: "Metric Requests", icon: "send" },
+              { href: "/tear-sheets", label: "Tear Sheets", icon: "file-spreadsheet" },
             ],
           },
           {
@@ -73,6 +74,9 @@ export default async function InvestorLayout({
               { href: "/funds/lp-reports", label: "LP Reports", icon: "file-text" },
             ],
           },
+        ]}
+        profileLinks={[
+          { href: "/historical-upload", label: "Import Data", icon: "upload" },
         ]}
         user={userInfo}
       >
