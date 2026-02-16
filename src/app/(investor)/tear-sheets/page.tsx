@@ -38,6 +38,7 @@ type TearSheet = {
   created_at: string;
   updated_at: string;
   creator_role: string;
+  creatorName: string | null;
   company_id: string;
   companyName: string | null;
   content?: Record<string, unknown>;
@@ -113,8 +114,11 @@ function LoadingSkeleton() {
   );
 }
 
-function CreatorBadge({ role }: { role: string }) {
+function CreatorBadge({ role, name }: { role: string; name: string | null }) {
   const isInvestor = role === "investor";
+  const label = name
+    ? `${name}${isInvestor ? "" : " (Founder)"}`
+    : isInvestor ? "Mine" : "Founder";
   return (
     <span
       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -123,7 +127,7 @@ function CreatorBadge({ role }: { role: string }) {
           : "bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)]"
       }`}
     >
-      {isInvestor ? "Mine" : "Founder"}
+      {label}
     </span>
   );
 }
@@ -502,11 +506,18 @@ export default function InvestorTearSheetsPage() {
           {displayed.map((ts) => {
             const isInvestor = ts.creator_role === "investor";
             return (
-              <button
+              <div
                 key={ts.id}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onClick={() => handleClickTearSheet(ts)}
-                className="w-full text-left rounded-xl border border-border-default card-surface p-4 hover:bg-bg-hover transition-colors group"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleClickTearSheet(ts);
+                  }
+                }}
+                className="w-full text-left rounded-xl border border-border-default card-surface p-4 hover:bg-bg-hover transition-colors group cursor-pointer"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1 space-y-1">
@@ -521,7 +532,7 @@ export default function InvestorTearSheetsPage() {
                       <span className="text-xs text-text-tertiary">
                         {ts.quarter} {ts.year}
                       </span>
-                      <CreatorBadge role={ts.creator_role} />
+                      <CreatorBadge role={ts.creator_role} name={ts.creatorName} />
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
@@ -544,7 +555,7 @@ export default function InvestorTearSheetsPage() {
                 <div className="mt-3 text-xs text-text-muted">
                   Updated {formatDate(ts.updated_at)}
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
@@ -583,7 +594,7 @@ export default function InvestorTearSheetsPage() {
                       {ts.companyName ?? "\u2014"}
                     </td>
                     <td className="px-4 py-3">
-                      <CreatorBadge role={ts.creator_role} />
+                      <CreatorBadge role={ts.creator_role} name={ts.creatorName} />
                     </td>
                     <td className="px-4 py-3 text-text-tertiary">
                       {ts.quarter} {ts.year}

@@ -24,7 +24,13 @@ export async function GET() {
   // + published founder tear sheets for approved companies
   const { data: tearSheets, error } = await supabase
     .from("tear_sheets")
-    .select("id, title, quarter, year, status, share_enabled, share_token, created_at, updated_at, creator_role, company_id, companies(name)")
+    .select(`
+      id, title, quarter, year, status, share_enabled, share_token,
+      created_at, updated_at, creator_role, company_id,
+      companies(name),
+      founder:users!tear_sheets_founder_id_fkey(full_name),
+      investor:users!tear_sheets_investor_id_fkey(full_name)
+    `)
     .order("year", { ascending: false })
     .order("quarter", { ascending: false });
 
@@ -33,13 +39,21 @@ export async function GET() {
     return jsonError("Failed to load tear sheets.", 500);
   }
 
-  // Flatten company name from join
+  // Flatten joined fields
   const result = (tearSheets ?? []).map((ts) => {
     const company = Array.isArray(ts.companies) ? ts.companies[0] : ts.companies;
+    const founder = Array.isArray(ts.founder) ? ts.founder[0] : ts.founder;
+    const investor = Array.isArray(ts.investor) ? ts.investor[0] : ts.investor;
+    const creatorName = ts.creator_role === "founder"
+      ? (founder?.full_name ?? null)
+      : (investor?.full_name ?? null);
     return {
       ...ts,
       companyName: company?.name ?? null,
+      creatorName,
       companies: undefined,
+      founder: undefined,
+      investor: undefined,
     };
   });
 
