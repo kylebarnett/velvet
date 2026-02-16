@@ -44,15 +44,15 @@ DROP POLICY IF EXISTS "company_metric_values_founder_select" ON public.company_m
 -- SECURITY DEFINER bypasses RLS on investor_company_relationships,
 -- preventing the circular dependency that occurs when both tables
 -- have policies that subquery each other.
-CREATE OR REPLACE FUNCTION public.user_has_company_access(p_company_id uuid)
+CREATE OR REPLACE FUNCTION public.user_has_company_access(company_id uuid)
 RETURNS boolean
 LANGUAGE sql STABLE SECURITY DEFINER
 SET search_path = ''
 AS $$
   SELECT EXISTS (
-    SELECT 1 FROM public.investor_company_relationships
-    WHERE company_id = p_company_id
-    AND investor_id = ANY(public.user_org_members())
+    SELECT 1 FROM public.investor_company_relationships icr
+    WHERE icr.company_id = user_has_company_access.company_id
+    AND icr.investor_id = ANY(public.user_org_members())
   );
 $$;
 
