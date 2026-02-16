@@ -78,7 +78,7 @@ export function parseExcelBuffer(
 
     // Sanitize all cell values
     const rows: CellValue[][] = rawRows.map((row) =>
-      (row as unknown[]).map((cell): CellValue => {
+      row.map((cell): CellValue => {
         if (cell === null || cell === undefined) return null;
         if (typeof cell === "string") return sanitizeCell(cell.trim());
         if (typeof cell === "number") return cell;

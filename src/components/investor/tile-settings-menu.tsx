@@ -34,8 +34,9 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
   );
   const menuRef = React.useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside — only attach when open
   React.useEffect(() => {
+    if (!isOpen) return;
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
@@ -43,7 +44,7 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [isOpen]);
 
   async function handleSelectCompany(company: Company) {
     setSelectedCompany(company);
@@ -111,7 +112,7 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
         </button>
 
         {isOpen && (
-          <div className="absolute left-0 top-full z-50 mt-1 w-64 max-w-[calc(100vw-2rem)] rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl">
+          <div className="dropdown-enter absolute left-0 top-full z-50 mt-1 w-64 max-w-[calc(100vw-2rem)] rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl">
             <div className="px-3 py-2 border-b border-border-default">
               <p className="text-xs text-text-tertiary">
                 Configure which metrics appear on company tiles

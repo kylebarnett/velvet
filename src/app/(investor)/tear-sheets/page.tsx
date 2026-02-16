@@ -174,18 +174,25 @@ export default function InvestorTearSheetsPage() {
   React.useEffect(() => {
     async function load() {
       try {
-        const [tsRes, compRes] = await Promise.all([
+        const [tsResult, compResult] = await Promise.allSettled([
           fetch("/api/investors/tear-sheets"),
           fetch("/api/investors/companies?limit=200"),
         ]);
-        const tsJson = await tsRes.json().catch(() => null);
-        const compJson = await compRes.json().catch(() => null);
 
-        if (!tsRes.ok) throw new Error(tsJson?.error ?? "Failed to load tear sheets.");
+        if (tsResult.status === "rejected" || !tsResult.value.ok) {
+          const tsJson = tsResult.status === "fulfilled"
+            ? await tsResult.value.json().catch(() => null)
+            : null;
+          throw new Error(tsJson?.error ?? "Failed to load tear sheets.");
+        }
 
+        const tsJson = await tsResult.value.json().catch(() => null);
         setTearSheets(tsJson.tearSheets ?? []);
 
-        if (compRes.ok && compJson?.companies) {
+        const compRes = compResult.status === "fulfilled" ? compResult.value : null;
+        const compJson = compRes?.ok ? await compRes.json().catch(() => null) : null;
+
+        if (compJson?.companies) {
           const mapped: Company[] = compJson.companies
             .filter(
               (c: Record<string, unknown>) =>

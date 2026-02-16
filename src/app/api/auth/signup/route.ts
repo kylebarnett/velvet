@@ -73,8 +73,9 @@ export async function POST(request: NextRequest) {
   }
 
   // Check for duplicate email (Supabase returns empty identities array for existing emails)
+  // Use generic message to prevent email enumeration
   if (data.user && data.user.identities?.length === 0) {
-    return jsonError("An account with this email already exists.", 400);
+    return jsonError("Failed to create account.", 400);
   }
 
   // Wait for the trigger to create the public.users row

@@ -17,6 +17,7 @@ import {
   DOCUMENT_TYPES,
   getDocumentTypeColor,
 } from "@/lib/utils/document-colors";
+import { toast } from "sonner";
 import { logActivity } from "@/lib/activity/log-activity";
 import { DocumentPreviewModal } from "@/components/investor/document-preview-modal";
 
@@ -176,7 +177,7 @@ export default function DocumentsPage() {
     );
     if (!res.ok) {
       const json = await res.json().catch(() => null);
-      alert(json?.error ?? "Download failed.");
+      toast.error(json?.error ?? "Download failed.");
       return;
     }
 
@@ -210,7 +211,7 @@ export default function DocumentsPage() {
 
       if (!res.ok) {
         const json = await res.json().catch(() => null);
-        alert(json?.error ?? "Download failed.");
+        toast.error(json?.error ?? "Download failed.");
         return;
       }
 
@@ -256,7 +257,7 @@ export default function DocumentsPage() {
 
       if (!res.ok) {
         const json = await res.json().catch(() => null);
-        alert(json?.error ?? "Download failed.");
+        toast.error(json?.error ?? "Download failed.");
         return;
       }
 

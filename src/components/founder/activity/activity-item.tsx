@@ -32,7 +32,7 @@ interface ActivityItemProps {
   showActor?: boolean;
 }
 
-export function ActivityItem({ entry, showActor = true }: ActivityItemProps) {
+export const ActivityItem = React.memo(function ActivityItem({ entry, showActor = true }: ActivityItemProps) {
   const config = ACTION_CONFIG[entry.action] ?? {
     icon: Activity,
     label: entry.action.replace(/_/g, " "),
@@ -82,4 +82,4 @@ export function ActivityItem({ entry, showActor = true }: ActivityItemProps) {
       </div>
     </div>
   );
-}
+});

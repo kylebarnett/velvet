@@ -2,8 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
+import { CompanyCardMenu } from "@/components/investor/company-card-menu";
 
 type MetricSnapshot = {
   name: string;
@@ -21,6 +23,7 @@ type CompanyCardProps = {
   logoUrl: string | null;
   founderId: string | null;
   approvalStatus: string;
+  isHidden?: boolean;
   latestMetric?: MetricSnapshot | null;
   secondaryMetric?: MetricSnapshot | null;
   lastSubmittedAt?: string | null;
@@ -153,10 +156,12 @@ export function CompanyCard({
   logoUrl,
   founderId,
   approvalStatus,
+  isHidden = false,
   latestMetric,
   secondaryMetric,
   lastSubmittedAt,
 }: CompanyCardProps) {
+  const router = useRouter();
   const isApproved = ["auto_approved", "approved"].includes(approvalStatus);
   const hasFounder = !!founderId;
   const hasAnyMetric = latestMetric && latestMetric.value != null;
@@ -179,6 +184,7 @@ export function CompanyCard({
               Access denied
             </span>
           )}
+          <CompanyCardMenu companyId={id} companyName={name} isHidden={isHidden} />
         </div>
       </div>
 
@@ -254,13 +260,13 @@ export function CompanyCard({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              window.location.href = "/historical-upload";
+              router.push("/historical-upload");
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.stopPropagation();
                 e.preventDefault();
-                window.location.href = "/historical-upload";
+                router.push("/historical-upload");
               }
             }}
           >
@@ -281,13 +287,13 @@ export function CompanyCard({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              window.location.href = "/contacts";
+              router.push("/contacts");
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.stopPropagation();
                 e.preventDefault();
-                window.location.href = "/contacts";
+                router.push("/contacts");
               }
             }}
           >

@@ -4,9 +4,8 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Play, Pause, Trash2, RefreshCw } from "lucide-react";
 
+import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
-import { useToast } from "@/hooks/use-toast";
-import { calculateNextRunDate } from "@/lib/schedules";
 
 interface ScheduleDetailActionsProps {
   scheduleId: string;
@@ -23,13 +22,11 @@ export function ScheduleDetailActions({
 }: ScheduleDetailActionsProps) {
   const router = useRouter();
   const [loading, setLoading] = React.useState<string | null>(null);
-  const { error, success, setError, setSuccess } = useToast();
   const [active, setActive] = React.useState(isActive);
   const [deleteModal, setDeleteModal] = React.useState(false);
 
   const handlePause = async () => {
     setLoading("pause");
-    setError(null);
     try {
       const res = await fetch(`/api/investors/schedules/${scheduleId}/pause`, {
         method: "POST",
@@ -37,10 +34,10 @@ export function ScheduleDetailActions({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to pause schedule");
       setActive(false);
-      setSuccess("Schedule paused");
+      toast.success("Schedule paused");
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to pause schedule");
+      toast.error(err instanceof Error ? err.message : "Failed to pause schedule");
     } finally {
       setLoading(null);
     }
@@ -48,7 +45,6 @@ export function ScheduleDetailActions({
 
   const handleResume = async () => {
     setLoading("resume");
-    setError(null);
     try {
       const res = await fetch(`/api/investors/schedules/${scheduleId}/resume`, {
         method: "POST",
@@ -56,10 +52,10 @@ export function ScheduleDetailActions({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to resume schedule");
       setActive(true);
-      setSuccess("Schedule resumed");
+      toast.success("Schedule resumed");
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to resume schedule");
+      toast.error(err instanceof Error ? err.message : "Failed to resume schedule");
     } finally {
       setLoading(null);
     }
@@ -67,7 +63,6 @@ export function ScheduleDetailActions({
 
   const handleRunNow = async () => {
     setLoading("run");
-    setError(null);
     try {
       const res = await fetch(`/api/investors/schedules/${scheduleId}/run-now`, {
         method: "POST",
@@ -79,10 +74,10 @@ export function ScheduleDetailActions({
         json.requestsCreated > 0
           ? `Created ${json.requestsCreated} requests, sent ${json.emailsSent} emails`
           : "No new requests created (may already exist)";
-      setSuccess(message);
+      toast.success(message);
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to run schedule");
+      toast.error(err instanceof Error ? err.message : "Failed to run schedule");
     } finally {
       setLoading(null);
     }
@@ -90,7 +85,6 @@ export function ScheduleDetailActions({
 
   const handleDelete = async () => {
     setLoading("delete");
-    setError(null);
     try {
       const res = await fetch(`/api/investors/schedules/${scheduleId}`, {
         method: "DELETE",
@@ -101,7 +95,7 @@ export function ScheduleDetailActions({
       router.push("/metric-requests");
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to delete schedule");
+      toast.error(err instanceof Error ? err.message : "Failed to delete schedule");
       setDeleteModal(false);
     } finally {
       setLoading(null);
@@ -110,19 +104,6 @@ export function ScheduleDetailActions({
 
   return (
     <>
-      {/* Messages */}
-      {(error || success) && (
-        <div
-          className={`fixed top-4 right-4 z-50 max-w-sm rounded-lg border p-3 text-sm shadow-lg ${
-            error
-              ? "border-[var(--status-error-bg)] bg-[var(--status-error-bg)] text-[var(--status-error-text)]"
-              : "border-[var(--status-success-bg)] bg-[var(--status-success-bg)] text-[var(--status-success-text)]"
-          }`}
-        >
-          {error || success}
-        </div>
-      )}
-
       {/* Action buttons */}
       <div className="flex items-center gap-2">
         <button

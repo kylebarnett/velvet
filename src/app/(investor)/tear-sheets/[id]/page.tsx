@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { TearSheetEditor } from "@/components/founder/tear-sheet-editor";
+import { InvestorTearSheetEditor } from "@/components/investor/investor-tear-sheet-editor";
 import { TearSheetPreview } from "@/components/founder/tear-sheet-preview";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ type TearSheet = {
   content: Record<string, unknown>;
   share_enabled: boolean;
   share_token: string | null;
+  companyName?: string;
 };
 
 type TearSheetMetric = {
@@ -35,9 +36,8 @@ type TearSheetMetric = {
   trend: "up" | "down" | "flat";
 };
 
-export default function EditTearSheetPage() {
+export default function EditInvestorTearSheetPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
 
   const [tearSheet, setTearSheet] = React.useState<TearSheet | null>(null);
@@ -47,47 +47,51 @@ export default function EditTearSheetPage() {
   const [saving, setSaving] = React.useState(false);
   const [mobileView, setMobileView] = React.useState<MobileViewMode>("editor");
   const [exportingPdf, setExportingPdf] = React.useState(false);
+  const [liveContent, setLiveContent] = React.useState<Record<string, unknown> | null>(null);
   const previewRef = React.useRef<HTMLDivElement>(null);
+
+  // Load tear sheet and metrics
+  const loadMetrics = React.useCallback(async (source?: string) => {
+    const sourceParam = source ? `?source=${source}` : "";
+    try {
+      const res = await fetch(`/api/investors/tear-sheets/${id}/metrics${sourceParam}`);
+      const json = await res.json().catch(() => null);
+      if (res.ok) {
+        setMetrics(json.metrics ?? []);
+      }
+    } catch (e: unknown) {
+      logger.error("Failed to load metrics:", e);
+    }
+  }, [id]);
 
   React.useEffect(() => {
     async function load() {
       try {
-        const [tsResult, metricsResult] = await Promise.allSettled([
-          fetch(`/api/founder/tear-sheets/${id}`),
-          fetch(`/api/founder/tear-sheets/${id}/metrics`),
-        ]);
+        const tsRes = await fetch(`/api/investors/tear-sheets/${id}`);
+        const tsJson = await tsRes.json().catch(() => null);
 
-        if (tsResult.status === "rejected" || !tsResult.value.ok) {
-          const tsJson = tsResult.status === "fulfilled"
-            ? await tsResult.value.json().catch(() => null)
-            : null;
+        if (!tsRes.ok)
           throw new Error(tsJson?.error ?? "Failed to load tear sheet.");
-        }
-
-        const tsJson = await tsResult.value.json().catch(() => null);
         setTearSheet(tsJson.tearSheet);
 
-        if (metricsResult.status === "fulfilled" && metricsResult.value.ok) {
-          const metricsJson = await metricsResult.value.json().catch(() => null);
-          setMetrics(metricsJson.metrics ?? []);
-        }
+        // Load metrics with the saved source preference
+        const savedSource = (tsJson.tearSheet?.content?.metricSources as string) ?? "all";
+        await loadMetrics(savedSource);
       } catch (e: unknown) {
-        const message =
-          e instanceof Error ? e.message : "Something went wrong.";
-        setError(message);
+        setError(e instanceof Error ? e.message : "Something went wrong.");
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [id]);
+  }, [id, loadMetrics]);
 
   async function handleSave(content: Record<string, unknown> | object) {
     setSaving(true);
     setError(null);
 
     try {
-      const res = await fetch(`/api/founder/tear-sheets/${id}`, {
+      const res = await fetch(`/api/investors/tear-sheets/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
@@ -97,12 +101,14 @@ export default function EditTearSheetPage() {
       setTearSheet(json.tearSheet);
       toast.success("Saved.");
     } catch (e: unknown) {
-      const message =
-        e instanceof Error ? e.message : "Something went wrong.";
-      setError(message);
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleMetricSourceChange(source: string) {
+    await loadMetrics(source);
   }
 
   async function handlePublish() {
@@ -110,7 +116,7 @@ export default function EditTearSheetPage() {
     setError(null);
 
     try {
-      const res = await fetch(`/api/founder/tear-sheets/${id}`, {
+      const res = await fetch(`/api/investors/tear-sheets/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "published" }),
@@ -120,9 +126,7 @@ export default function EditTearSheetPage() {
       setTearSheet(json.tearSheet);
       toast.success("Published.");
     } catch (e: unknown) {
-      const message =
-        e instanceof Error ? e.message : "Something went wrong.";
-      setError(message);
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setSaving(false);
     }
@@ -133,7 +137,7 @@ export default function EditTearSheetPage() {
     setError(null);
 
     try {
-      const res = await fetch(`/api/founder/tear-sheets/${id}`, {
+      const res = await fetch(`/api/investors/tear-sheets/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "draft" }),
@@ -143,9 +147,7 @@ export default function EditTearSheetPage() {
       setTearSheet(json.tearSheet);
       toast.success("Unpublished. Sharing has been disabled.");
     } catch (e: unknown) {
-      const message =
-        e instanceof Error ? e.message : "Something went wrong.";
-      setError(message);
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setSaving(false);
     }
@@ -156,7 +158,7 @@ export default function EditTearSheetPage() {
     setError(null);
 
     try {
-      const res = await fetch(`/api/founder/tear-sheets/${id}/share`, {
+      const res = await fetch(`/api/investors/tear-sheets/${id}/share`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enabled: !tearSheet.share_enabled }),
@@ -170,9 +172,7 @@ export default function EditTearSheetPage() {
       });
       toast.success(json.shareEnabled ? "Sharing enabled." : "Sharing disabled.");
     } catch (e: unknown) {
-      const message =
-        e instanceof Error ? e.message : "Something went wrong.";
-      setError(message);
+      setError(e instanceof Error ? e.message : "Something went wrong.");
     }
   }
 
@@ -202,7 +202,7 @@ export default function EditTearSheetPage() {
     return (
       <div className="space-y-4">
         <Link
-          href="/portal/tear-sheets"
+          href="/tear-sheets"
           className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -227,7 +227,7 @@ export default function EditTearSheetPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <Link
-            href="/portal/tear-sheets"
+            href="/tear-sheets"
             className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -249,6 +249,11 @@ export default function EditTearSheetPage() {
             <span className="text-xs text-text-tertiary">
               {tearSheet.quarter} {tearSheet.year}
             </span>
+            {tearSheet.companyName && (
+              <span className="text-xs text-text-muted">
+                {tearSheet.companyName}
+              </span>
+            )}
           </div>
         </div>
 
@@ -309,7 +314,7 @@ export default function EditTearSheetPage() {
         </div>
       </div>
 
-      {/* Share URL — copy to clipboard only, no visible link */}
+      {/* Share URL */}
       {tearSheet.share_enabled && shareUrl && (
         <div className="rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-3 py-2">
           <div className="flex items-center justify-between">
@@ -344,10 +349,12 @@ export default function EditTearSheetPage() {
             mobileView !== "editor" ? "hidden md:block" : ""
           }`}
         >
-          <TearSheetEditor
+          <InvestorTearSheetEditor
             tearSheet={tearSheet}
             metrics={metrics}
             onSave={handleSave}
+            onMetricSourceChange={handleMetricSourceChange}
+            onContentChange={setLiveContent}
             saving={saving}
           />
         </div>
@@ -359,7 +366,14 @@ export default function EditTearSheetPage() {
           }`}
         >
           <div ref={previewRef}>
-            <TearSheetPreview tearSheet={tearSheet} metrics={metrics} />
+            <TearSheetPreview
+              tearSheet={liveContent ? {
+                ...tearSheet,
+                content: { ...tearSheet.content, ...liveContent },
+              } : tearSheet}
+              metrics={metrics}
+              variant="investor"
+            />
           </div>
         </div>
       </div>

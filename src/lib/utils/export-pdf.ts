@@ -303,11 +303,16 @@ function sanitizeFilename(filename: string): string {
   return clean.endsWith(".pdf") ? clean : `${clean}.pdf`;
 }
 
+/** Convert camelCase to kebab-case for CSS property names. */
+function camelToKebab(str: string): string {
+  return str.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
+}
+
 /** Save inline style properties for later restoration. */
 function saveStyles(el: HTMLElement, props: string[]): Record<string, string> {
   const saved: Record<string, string> = {};
   for (const prop of props) {
-    saved[prop] = (el.style as unknown as Record<string, string>)[prop] ?? "";
+    saved[prop] = el.style.getPropertyValue(camelToKebab(prop));
   }
   return saved;
 }
@@ -315,6 +320,11 @@ function saveStyles(el: HTMLElement, props: string[]): Record<string, string> {
 /** Restore inline style properties from a saved record. */
 function restoreStyles(el: HTMLElement, saved: Record<string, string>): void {
   for (const [prop, value] of Object.entries(saved)) {
-    (el.style as unknown as Record<string, string>)[prop] = value;
+    const kebab = camelToKebab(prop);
+    if (value) {
+      el.style.setProperty(kebab, value);
+    } else {
+      el.style.removeProperty(kebab);
+    }
   }
 }

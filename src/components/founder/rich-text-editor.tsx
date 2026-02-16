@@ -11,6 +11,7 @@ import {
   ListOrdered,
   Link as LinkIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 
 type RichTextEditorProps = {
   content: string;
@@ -63,12 +64,12 @@ export function RichTextEditor({
     try {
       const parsed = new URL(url);
       if (!["http:", "https:"].includes(parsed.protocol)) {
-        window.alert("Only http and https links are allowed.");
+        toast.error("Only http and https links are allowed.");
         return;
       }
       editor.chain().focus().setLink({ href: url }).run();
     } catch {
-      window.alert("Please enter a valid URL (e.g. https://example.com).");
+      toast.error("Please enter a valid URL (e.g. https://example.com).");
     }
   }
 

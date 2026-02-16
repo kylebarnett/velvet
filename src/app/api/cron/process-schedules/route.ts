@@ -113,11 +113,16 @@ export async function POST(req: Request) {
   const apiKey = process.env.RESEND_API_KEY;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+  // Type-assert Supabase join result once to avoid repeated casts in the loop.
+  // `as unknown` is needed because Supabase returns arrays for joined relations
+  // while the Schedule interface uses unwrapped single objects (handled by unwrapJoin).
+  const typedSchedules = schedules as unknown as Schedule[];
+
   // Batch-fetch relationships for investors whose schedules have no explicit company_ids.
   // This avoids N+1 relationship queries inside the per-schedule loop.
   const investorIdsNeedingRels = [
     ...new Set(
-      (schedules as unknown as Schedule[])
+      typedSchedules
         .filter((s) => !s.company_ids || s.company_ids.length === 0)
         .map((s) => s.investor_id)
     ),
@@ -142,8 +147,7 @@ export async function POST(req: Request) {
 
   // Collect ALL company IDs across all schedules to batch-fetch company details
   const allCompanyIdSet = new Set<string>();
-  for (const rawSchedule of schedules) {
-    const schedule = rawSchedule as unknown as Schedule;
+  for (const schedule of typedSchedules) {
     if (schedule.company_ids && schedule.company_ids.length > 0) {
       for (const id of schedule.company_ids) allCompanyIdSet.add(id);
     } else {
@@ -183,9 +187,7 @@ export async function POST(req: Request) {
   }
 
   // Process each schedule
-  for (const rawSchedule of schedules) {
-    const schedule = rawSchedule as unknown as Schedule;
-
+  for (const schedule of typedSchedules) {
     const investor = schedule.users;
     const investorName = investor?.full_name ?? "An investor";
 

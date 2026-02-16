@@ -22,7 +22,7 @@ function getInitials(name: string): string {
     .join("");
 }
 
-export function InvestorSection({
+export const InvestorSection = React.memo(function InvestorSection({
   actorId,
   actorName,
   actorOrg,
@@ -83,4 +83,4 @@ export function InvestorSection({
       )}
     </div>
   );
-}
+});

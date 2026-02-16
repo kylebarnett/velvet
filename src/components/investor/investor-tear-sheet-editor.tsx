@@ -28,32 +28,38 @@ type Milestone = {
   description: string;
 };
 
-type TearSheetContent = {
+type MetricSourceMode = "all" | "founder" | "investor";
+
+type InvestorTearSheetContent = {
   highlights: string;
   visibleMetrics: string[];
   milestones: Milestone[];
   challenges: string;
-  teamUpdates: string;
+  notes: string;
   outlook: string;
-  askOfInvestors: string;
+  actionItems: string;
+  metricSources: MetricSourceMode;
 };
 
-type TearSheetEditorProps = {
+type InvestorTearSheetEditorProps = {
   tearSheet: TearSheet;
   metrics: TearSheetMetric[];
-  onSave: (content: TearSheetContent) => void;
+  onSave: (content: InvestorTearSheetContent) => void;
+  onMetricSourceChange: (source: MetricSourceMode) => void;
+  onContentChange?: (content: InvestorTearSheetContent) => void;
   saving: boolean;
 };
 
-function parseContent(content: Record<string, unknown>): TearSheetContent {
+function parseContent(content: Record<string, unknown>): InvestorTearSheetContent {
   return {
     highlights: (content.highlights as string) ?? "",
     visibleMetrics: (content.visibleMetrics as string[]) ?? [],
     milestones: (content.milestones as Milestone[]) ?? [],
     challenges: (content.challenges as string) ?? "",
-    teamUpdates: (content.teamUpdates as string) ?? "",
+    notes: (content.notes as string) ?? "",
     outlook: (content.outlook as string) ?? "",
-    askOfInvestors: (content.askOfInvestors as string) ?? "",
+    actionItems: (content.actionItems as string) ?? "",
+    metricSources: (content.metricSources as MetricSourceMode) ?? "all",
   };
 }
 
@@ -72,12 +78,20 @@ const TrendIcon = ({ trend }: { trend: "up" | "down" | "flat" }) => {
   return <Minus className="h-3.5 w-3.5 text-text-muted" />;
 };
 
-export function TearSheetEditor({
+const METRIC_SOURCE_OPTIONS: { value: MetricSourceMode; label: string }[] = [
+  { value: "all", label: "All Sources" },
+  { value: "founder", label: "Founder Only" },
+  { value: "investor", label: "My Uploads" },
+];
+
+export function InvestorTearSheetEditor({
   tearSheet,
   metrics,
   onSave,
+  onMetricSourceChange,
+  onContentChange,
   saving,
-}: TearSheetEditorProps) {
+}: InvestorTearSheetEditorProps) {
   const initial = React.useRef(parseContent(tearSheet.content));
 
   const [highlights, setHighlights] = React.useState(initial.current.highlights);
@@ -90,10 +104,11 @@ export function TearSheetEditor({
     initial.current.milestones,
   );
   const [challenges, setChallenges] = React.useState(initial.current.challenges);
-  const [teamUpdates, setTeamUpdates] = React.useState(initial.current.teamUpdates);
+  const [notes, setNotes] = React.useState(initial.current.notes);
   const [outlook, setOutlook] = React.useState(initial.current.outlook);
-  const [askOfInvestors, setAskOfInvestors] = React.useState(
-    initial.current.askOfInvestors,
+  const [actionItems, setActionItems] = React.useState(initial.current.actionItems);
+  const [metricSources, setMetricSources] = React.useState<MetricSourceMode>(
+    initial.current.metricSources,
   );
 
   // Dirty state tracking
@@ -102,9 +117,10 @@ export function TearSheetEditor({
     return (
       highlights !== init.highlights ||
       challenges !== init.challenges ||
-      teamUpdates !== init.teamUpdates ||
+      notes !== init.notes ||
       outlook !== init.outlook ||
-      askOfInvestors !== init.askOfInvestors ||
+      actionItems !== init.actionItems ||
+      metricSources !== init.metricSources ||
       JSON.stringify(milestones) !== JSON.stringify(init.milestones) ||
       JSON.stringify(visibleMetrics) !== JSON.stringify(
         init.visibleMetrics.length > 0
@@ -112,7 +128,7 @@ export function TearSheetEditor({
           : metrics.map((m) => m.metricName),
       )
     );
-  }, [highlights, challenges, teamUpdates, outlook, askOfInvestors, milestones, visibleMetrics, metrics]);
+  }, [highlights, challenges, notes, outlook, actionItems, metricSources, milestones, visibleMetrics, metrics]);
 
   // Warn on navigate away when dirty
   React.useEffect(() => {
@@ -126,19 +142,38 @@ export function TearSheetEditor({
   }, [isDirty]);
 
   function handleSave() {
-    const content: TearSheetContent = {
+    const content: InvestorTearSheetContent = {
       highlights,
       visibleMetrics,
       milestones,
       challenges,
-      teamUpdates,
+      notes,
       outlook,
-      askOfInvestors,
+      actionItems,
+      metricSources,
     };
-    // Update initial ref after save
     initial.current = content;
     onSave(content);
   }
+
+  function handleMetricSourceChange(source: MetricSourceMode) {
+    setMetricSources(source);
+    onMetricSourceChange(source);
+  }
+
+  // Sync all editor content to parent for live preview
+  React.useEffect(() => {
+    onContentChange?.({
+      highlights,
+      visibleMetrics,
+      milestones,
+      challenges,
+      notes,
+      outlook,
+      actionItems,
+      metricSources,
+    });
+  }, [highlights, visibleMetrics, milestones, challenges, notes, outlook, actionItems, metricSources]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggleMetric(name: string) {
     setVisibleMetrics((prev) =>
@@ -168,15 +203,36 @@ export function TearSheetEditor({
     <div className="space-y-6">
       {/* Key Metrics */}
       <section className="rounded-xl border border-border-default card-surface p-5">
-        <h2 className="text-sm font-medium">Key Metrics</h2>
-        <p className="mt-1 text-xs text-text-tertiary">
-          Auto-populated from your {tearSheet.quarter} {tearSheet.year}{" "}
-          submissions. Toggle which metrics to include.
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-medium">Key Metrics</h2>
+            <p className="mt-1 text-xs text-text-tertiary">
+              Metrics from {tearSheet.quarter} {tearSheet.year}. Toggle which to include.
+            </p>
+          </div>
+        </div>
+
+        {/* Metric source toggle */}
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {METRIC_SOURCE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => handleMetricSourceChange(opt.value)}
+              className={`rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
+                metricSources === opt.value
+                  ? "border-border-default bg-bg-hover text-text-primary"
+                  : "border-border-default bg-bg-input text-text-muted hover:text-text-secondary"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
 
         {metrics.length === 0 ? (
           <div className="mt-4 rounded-md border border-border-default bg-bg-input px-3 py-4 text-center text-sm text-text-muted">
-            No metrics submitted for this period yet.
+            No metrics available for this period and source.
           </div>
         ) : (
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -296,30 +352,30 @@ export function TearSheetEditor({
           Challenges
         </label>
         <p className="mt-1 text-xs text-text-tertiary">
-          Issues faced and how you&apos;re addressing them.
+          Issues faced and areas of concern.
         </p>
         <div className="mt-3">
           <RichTextEditor
             content={challenges}
             onChange={setChallenges}
-            placeholder="Challenges this quarter..."
+            placeholder="Challenges and risks..."
           />
         </div>
       </section>
 
-      {/* Team Updates */}
+      {/* Notes (replaces Team Updates) */}
       <section className="rounded-xl border border-border-default card-surface p-5">
         <label className="text-sm font-medium">
-          Team Updates
+          Notes
         </label>
         <p className="mt-1 text-xs text-text-tertiary">
-          Hires, departures, and organizational changes.
+          Internal observations, context, and commentary.
         </p>
         <div className="mt-3">
           <RichTextEditor
-            content={teamUpdates}
-            onChange={setTeamUpdates}
-            placeholder="Team changes and updates..."
+            content={notes}
+            onChange={setNotes}
+            placeholder="Your observations and notes..."
           />
         </div>
       </section>
@@ -330,7 +386,7 @@ export function TearSheetEditor({
           Outlook
         </label>
         <p className="mt-1 text-xs text-text-tertiary">
-          Goals and expectations for next quarter.
+          Expectations and projections for next quarter.
         </p>
         <div className="mt-3">
           <RichTextEditor
@@ -341,19 +397,19 @@ export function TearSheetEditor({
         </div>
       </section>
 
-      {/* Ask of Investors */}
+      {/* Action Items (replaces Ask of Investors) */}
       <section className="rounded-xl border border-border-default card-surface p-5">
         <label className="text-sm font-medium">
-          Ask of Investors
+          Action Items
         </label>
         <p className="mt-1 text-xs text-text-tertiary">
-          How can your investors help right now?
+          Follow-up tasks and next steps for this investment.
         </p>
         <div className="mt-3">
           <RichTextEditor
-            content={askOfInvestors}
-            onChange={setAskOfInvestors}
-            placeholder="Introductions, advice, resources..."
+            content={actionItems}
+            onChange={setActionItems}
+            placeholder="Tasks, follow-ups, decisions needed..."
           />
         </div>
       </section>

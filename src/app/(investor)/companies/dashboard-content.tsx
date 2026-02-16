@@ -2,10 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { LayoutGrid, List, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LayoutGrid, List, TrendingUp, TrendingDown, Minus, ChevronRight } from "lucide-react";
 import { CompanyCard } from "@/components/investor/company-card";
 import { CompanySearch } from "@/components/investor/company-search";
 import { TileSettingsMenu } from "@/components/investor/tile-settings-menu";
+import { CompanyCardMenu } from "@/components/investor/company-card-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
 
@@ -18,6 +20,7 @@ type Company = {
   industry: string | null;
   approvalStatus: string;
   logoUrl: string | null;
+  isHidden: boolean;
   tilePrimaryMetric: string | null;
   tileSecondaryMetric: string | null;
 };
@@ -149,6 +152,7 @@ function CompanyListRow({
   latestMetric: MetricSnapshot | null;
   secondaryMetric: MetricSnapshot | null;
 }) {
+  const router = useRouter();
   const isApproved = ["auto_approved", "approved"].includes(company.approvalStatus);
   const hasFounder = !!company.founder_id;
 
@@ -224,13 +228,13 @@ function CompanyListRow({
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                window.location.href = "/contacts";
+                router.push("/contacts");
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.stopPropagation();
                   e.preventDefault();
-                  window.location.href = "/contacts";
+                  router.push("/contacts");
                 }
               }}
             >
@@ -240,12 +244,14 @@ function CompanyListRow({
         ) : isApproved ? (
           <span className="text-xs text-text-tertiary">No metrics yet</span>
         ) : null}
+        <CompanyCardMenu companyId={company.id} companyName={company.name} isHidden={company.isHidden} />
       </div>
     </Link>
   );
 }
 
 export function DashboardContent({ companies, latestMetrics, secondaryMetrics = {}, lastSubmittedAt = {} }: DashboardContentProps) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [viewMode, setViewMode] = React.useState<ViewMode>(() => {
     if (typeof window !== "undefined") {
@@ -254,6 +260,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
     return "grid";
   });
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
+  const [hiddenExpanded, setHiddenExpanded] = React.useState(false);
 
   function handleViewModeChange(mode: ViewMode) {
     setViewMode(mode);
@@ -265,20 +272,24 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
     }).catch(() => {});
   }
 
+  // Split into visible and hidden companies
+  const visibleCompanies = React.useMemo(() => companies.filter(c => !c.isHidden), [companies]);
+  const hiddenCompanies = React.useMemo(() => companies.filter(c => c.isHidden), [companies]);
+
   const statusGroups = React.useMemo(() => {
     const groups = new Set<string>();
-    for (const c of companies) {
+    for (const c of visibleCompanies) {
       if (["auto_approved", "approved"].includes(c.approvalStatus)) groups.add("approved");
       else if (c.approvalStatus === "pending") groups.add("pending");
       else if (c.approvalStatus === "denied") groups.add("denied");
     }
     return groups;
-  }, [companies]);
+  }, [visibleCompanies]);
 
   const showStatusFilter = statusGroups.size > 1;
 
   const filteredCompanies = React.useMemo(() => {
-    let filtered = companies;
+    let filtered = visibleCompanies;
 
     if (statusFilter !== "all") {
       filtered = filtered.filter((c) => {
@@ -293,7 +304,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
     }
 
     return filtered;
-  }, [companies, searchQuery, statusFilter]);
+  }, [visibleCompanies, searchQuery, statusFilter]);
 
   return (
     <div className="space-y-5">
@@ -320,10 +331,10 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
             </Select>
           )}
           <div className="rounded-full bg-bg-elevated px-2.5 py-1 text-xs text-text-tertiary">
-            {filteredCompanies.length} of {companies.length}
+            {filteredCompanies.length} of {visibleCompanies.length}
           </div>
           <TileSettingsMenu
-            companies={companies
+            companies={visibleCompanies
               .filter(c => ["auto_approved", "approved"].includes(c.approvalStatus))
               .map(c => ({
                 id: c.id,
@@ -362,6 +373,59 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
         </div>
       </div>
 
+      {/* Hidden companies collapsible section */}
+      {hiddenCompanies.length > 0 && (
+        <div className="rounded-xl border border-border-subtle bg-bg-elevated/50 px-4 py-3">
+          <button
+            type="button"
+            onClick={() => setHiddenExpanded((v) => !v)}
+            className="flex w-full items-center gap-2 text-sm text-text-tertiary transition-colors hover:text-text-secondary"
+          >
+            <ChevronRight
+              className={`h-4 w-4 transition-transform ${hiddenExpanded ? "rotate-90" : ""}`}
+              aria-hidden="true"
+            />
+            Hidden companies ({hiddenCompanies.length})
+          </button>
+
+          {hiddenExpanded && (
+            <div className="mt-4 opacity-70">
+              {viewMode === "grid" ? (
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {hiddenCompanies.map((company) => (
+                    <CompanyCard
+                      key={company.id}
+                      id={company.id}
+                      name={company.name}
+                      stage={company.stage}
+                      industry={company.industry}
+                      logoUrl={company.logoUrl}
+                      founderId={company.founder_id}
+                      approvalStatus={company.approvalStatus}
+                      isHidden={company.isHidden}
+                      latestMetric={latestMetrics[company.id] ?? null}
+                      secondaryMetric={secondaryMetrics[company.id] ?? null}
+                      lastSubmittedAt={lastSubmittedAt[company.id] ?? null}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  {hiddenCompanies.map((company) => (
+                    <CompanyListRow
+                      key={company.id}
+                      company={company}
+                      latestMetric={latestMetrics[company.id] ?? null}
+                      secondaryMetric={secondaryMetrics[company.id] ?? null}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {filteredCompanies.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-sm text-text-secondary">
@@ -382,6 +446,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
                 logoUrl={company.logoUrl}
                 founderId={company.founder_id}
                 approvalStatus={company.approvalStatus}
+                isHidden={company.isHidden}
                 latestMetric={latestMetrics[company.id] ?? null}
                 secondaryMetric={secondaryMetrics[company.id] ?? null}
                 lastSubmittedAt={lastSubmittedAt[company.id] ?? null}

@@ -120,8 +120,12 @@ export async function POST(req: Request) {
   // Collect reminder IDs to batch-cancel instead of updating one-by-one
   const cancelIds: string[] = [];
 
-  for (const rawReminder of reminders) {
-    const reminder = rawReminder as unknown as ReminderWithDetails;
+  // Type-assert Supabase join result once.
+  // `as unknown` is needed because Supabase returns arrays for joined relations
+  // while the ReminderWithDetails interface uses unwrapped single objects (handled by unwrapJoin).
+  const typedReminders = reminders as unknown as ReminderWithDetails[];
+
+  for (const reminder of typedReminders) {
     const request = unwrapJoin(reminder.metric_requests);
 
     if (!request) {
