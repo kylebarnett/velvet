@@ -151,7 +151,7 @@ export function MetricNameTooltip({
   return createPortal(
     <div
       ref={tooltipRef}
-      className="z-[100] w-[280px] rounded-lg border border-border-default bg-bg-secondary shadow-xl"
+      className="z-[var(--z-popover)] w-[280px] rounded-lg border border-border-default bg-bg-secondary shadow-xl"
       style={style}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

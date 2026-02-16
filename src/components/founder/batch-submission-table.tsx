@@ -103,6 +103,8 @@ function MetricInfoTooltip({ metricName }: { metricName: string }) {
         className="mt-0.5 text-text-faint hover:text-text-tertiary transition-colors"
         onMouseEnter={() => setShow(true)}
         onMouseLeave={() => setShow(false)}
+        onFocus={() => setShow(true)}
+        onBlur={() => setShow(false)}
         onClick={(e) => { e.stopPropagation(); setShow(!show); }}
         aria-label={`Info about ${metricName}`}
       >
@@ -238,7 +240,7 @@ function BatchTableBody({
 
   const renderRow = (row: BatchRow, muted: boolean) => (
     <>
-      <td className="sticky left-0 z-10 bg-bg-primary px-4 py-2">
+      <th scope="row" className="sticky left-0 z-10 bg-bg-primary px-4 py-2 text-left font-normal">
         <div className="flex items-start gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-start gap-1.5">
@@ -260,7 +262,7 @@ function BatchTableBody({
             )}
           </div>
         </div>
-      </td>
+      </th>
       {periods.map((p) => {
         const existing = existingValues[row.metricName]?.[p.key];
         const hasExisting = !!existing;
@@ -670,6 +672,23 @@ export function BatchSubmissionTable({
       notes?: string;
     }>
   >([]);
+
+  // Track whether user has unsaved changes
+  const hasUnsavedChanges = React.useMemo(() => {
+    return Object.values(userValues).some((periodValues) =>
+      Object.values(periodValues).some((v) => v.trim() !== "")
+    );
+  }, [userValues]);
+
+  // Warn before navigating away with unsaved changes
+  React.useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasUnsavedChanges]);
 
   // When a prefilterPeriod is set (founder clicked "Submit" on a specific
   // request group), only show the single requested period — no extras.

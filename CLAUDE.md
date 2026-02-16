@@ -113,8 +113,9 @@ Cron endpoints require `CRON_SECRET` via Bearer token. Endpoints reject all requ
 
 ### Component Classes
 
-- **Inputs/Selects**: `h-11 rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white` with `hover:border-white/15 focus:border-white/20 focus:outline-none`
-- **Never** use `h-9` or `text-white/80` for inputs/selects — always `h-11` and `text-white`
+- **Inputs/Selects**: `h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary outline-none placeholder:text-text-faint focus:border-[var(--ring-focus)]`
+- **Never** use `h-9` for inputs/selects — always `h-11`
+- **Never** use hardcoded `border-white/10 bg-black/30 text-white` for form elements — always use semantic variables for theme compatibility
 - **Buttons (primary)**: `bg-white text-black hover:bg-white/90`
 - **Buttons (secondary)**: `border border-white/10 bg-white/5 hover:bg-white/10`
 - **Cards**: `rounded-xl border border-white/10 bg-white/5 p-4`

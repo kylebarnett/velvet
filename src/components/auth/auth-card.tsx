@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -320,9 +321,12 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
           disabled={isSubmitting}
           type="submit"
         >
-          {isSubmitting
-            ? "Please wait…"
-            : mode === "login"
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Please wait…
+            </>
+          ) : mode === "login"
               ? "Login"
               : "Create account"}
         </button>

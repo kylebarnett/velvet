@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpDown, LayoutGrid, List } from "lucide-react";
+import { ArrowUpDown, FileSpreadsheet, LayoutGrid, List } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { TearSheetCard } from "@/components/founder/tear-sheet-card";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { EmptyState } from "@/components/ui/empty-state";
 import { SlidingTabs, SlidingIconTabs, TabItem } from "@/components/ui/sliding-tabs";
 import {
   Select,
@@ -108,6 +110,8 @@ export default function TearSheetsPage() {
     loadTearSheets();
   }, []);
 
+  const [deleteId, setDeleteId] = React.useState<string | null>(null);
+
   async function handleDelete(id: string) {
     try {
       const res = await fetch(`/api/founder/tear-sheets/${id}`, {
@@ -118,6 +122,8 @@ export default function TearSheetsPage() {
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Failed to delete.";
       setError(message);
+    } finally {
+      setDeleteId(null);
     }
   }
 
@@ -262,20 +268,27 @@ export default function TearSheetsPage() {
       )}
 
       {!loading && !error && tearSheets.length === 0 && (
-        <div className="py-8">
-          <h3 className="text-base font-medium text-text-primary">No tear sheets yet</h3>
-          <p className="mt-1 max-w-lg text-sm text-text-secondary">
-            Create your first quarterly summary to share with investors.
-          </p>
-        </div>
+        <EmptyState
+          icon={FileSpreadsheet}
+          title="No tear sheets yet"
+          description="Create your first quarterly summary to share with investors. Tear sheets give investors a snapshot of your company's key metrics and highlights for a given period."
+          action={
+            <Link
+              href="/portal/tear-sheets/new"
+              className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+            >
+              Create Tear Sheet
+            </Link>
+          }
+        />
       )}
 
       {!loading && displayed.length === 0 && tearSheets.length > 0 && (
-        <div className="py-12 text-center">
-          <p className="text-sm text-text-secondary">
-            No tear sheets match the selected filters.
-          </p>
-        </div>
+        <EmptyState
+          variant="no-results"
+          title="No tear sheets match the selected filters"
+          description="Try adjusting your quarter or year filter."
+        />
       )}
 
       {displayed.length > 0 && viewMode === "grid" && (
@@ -284,7 +297,7 @@ export default function TearSheetsPage() {
             <TearSheetCard
               key={ts.id}
               tearSheet={ts}
-              onDelete={() => handleDelete(ts.id)}
+              onDelete={() => setDeleteId(ts.id)}
             />
           ))}
         </div>
@@ -346,7 +359,7 @@ export default function TearSheetsPage() {
                     <td className="px-4 py-3">
                       <TearSheetCard
                         tearSheet={ts}
-                        onDelete={() => handleDelete(ts.id)}
+                        onDelete={() => setDeleteId(ts.id)}
                         deleteOnly
                       />
                     </td>
@@ -357,6 +370,16 @@ export default function TearSheetsPage() {
           </table>
         </div>
       )}
+
+      <ConfirmModal
+        open={deleteId !== null}
+        title="Delete tear sheet?"
+        message="This tear sheet will be permanently deleted. This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

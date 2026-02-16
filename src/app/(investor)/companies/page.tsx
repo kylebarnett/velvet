@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { computeRollups } from "@/lib/metrics/rollup";
 import { GettingStartedChecklist } from "@/components/ui/getting-started-checklist";
+import { AddCompanyFlow } from "@/components/investor/add-company-flow";
 import { DashboardContent } from "./dashboard-content";
 
 export const dynamic = "force-dynamic";
@@ -71,6 +72,7 @@ export default async function InvestorDashboardPage() {
       id,
       approval_status,
       logo_url,
+      is_hidden,
       tile_primary_metric,
       tile_secondary_metric,
       companies (
@@ -108,6 +110,7 @@ export default async function InvestorDashboardPage() {
       industry: company?.industry ?? null,
       approvalStatus: r.approval_status,
       logoUrl: r.logo_url,
+      isHidden: r.is_hidden ?? false,
       tilePrimaryMetric: r.tile_primary_metric,
       tileSecondaryMetric: r.tile_secondary_metric,
     };
@@ -335,11 +338,14 @@ export default async function InvestorDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" data-onboarding="dashboard-title">Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" data-onboarding="dashboard-title">Dashboard</h1>
+        <AddCompanyFlow />
+      </div>
 
       <div className="grid gap-5 md:grid-cols-3">
         {[
-          { label: "Portfolio companies", subtitle: "Total companies in your portfolio", value: String(companies.length), href: "/contacts", icon: Building2, gradient: "kpi-gradient-blue" },
+          { label: "Portfolio companies", subtitle: "Total companies in your portfolio", value: String(companies.filter(c => !c.isHidden).length), href: "/contacts", icon: Building2, gradient: "kpi-gradient-blue" },
           { label: "Awaiting submission", subtitle: "Companies with pending metric requests", value: String(awaitingCompanyCount), href: "/metric-requests", icon: Building2, gradient: "kpi-gradient-amber" },
           { label: "Submitted this week", subtitle: "Companies that sent data in the last 7 days", value: String(submittedThisWeekCount), href: "/metric-requests", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
         ].map((card) => (
@@ -384,10 +390,10 @@ export default async function InvestorDashboardPage() {
             completed: awaitingCompanyCount > 0 || submittedThisWeekCount > 0,
           },
           {
-            id: "historical_upload",
-            label: "Import historical data",
-            description: "Bulk import past metrics from Excel or CSV files",
-            href: "/historical-upload",
+            id: "add_metrics",
+            label: "Add metrics for a company",
+            description: "Enter metrics manually or upload historical data",
+            href: "/companies",
             completed: false,
           },
           {
@@ -404,20 +410,15 @@ export default async function InvestorDashboardPage() {
         <div className="py-8">
           <h3 className="text-base font-medium text-text-primary">No companies in your portfolio yet</h3>
           <p className="mt-1 max-w-lg text-sm text-text-secondary">
-            Import your portfolio companies to start collecting metrics. Once imported, invite founders to connect and begin submitting data.
+            Add a company to start tracking metrics, or import your portfolio in bulk. Once added, invite founders to connect and begin submitting data.
           </p>
           <div className="mt-4 flex items-center gap-3">
+            <AddCompanyFlow />
             <Link
               href="/contacts/import"
-              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
-            >
-              Import contacts
-            </Link>
-            <Link
-              href="/historical-upload"
               className="text-sm text-text-tertiary hover:text-text-secondary underline underline-offset-2"
             >
-              Or import historical metrics
+              Or import in bulk
             </Link>
           </div>
         </div>

@@ -2,38 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { logger } from "@/lib/logger";
-
-/** Map quarter to period_start and period_end date strings. */
-function getQuarterDates(quarter: string, year: number) {
-  switch (quarter) {
-    case "Q1":
-      return { periodStart: `${year}-01-01`, periodEnd: `${year}-03-31` };
-    case "Q2":
-      return { periodStart: `${year}-04-01`, periodEnd: `${year}-06-30` };
-    case "Q3":
-      return { periodStart: `${year}-07-01`, periodEnd: `${year}-09-30` };
-    case "Q4":
-      return { periodStart: `${year}-10-01`, periodEnd: `${year}-12-31` };
-    default:
-      return null;
-  }
-}
-
-/** Get the previous quarter and year. */
-function getPreviousQuarter(quarter: string, year: number) {
-  switch (quarter) {
-    case "Q1":
-      return { quarter: "Q4", year: year - 1 };
-    case "Q2":
-      return { quarter: "Q1", year };
-    case "Q3":
-      return { quarter: "Q2", year };
-    case "Q4":
-      return { quarter: "Q3", year };
-    default:
-      return null;
-  }
-}
+import { getQuarterDates, getPreviousQuarter } from "@/lib/tear-sheets/quarter-utils";
 
 // GET - Get metrics for the tear sheet's quarter
 export async function GET(

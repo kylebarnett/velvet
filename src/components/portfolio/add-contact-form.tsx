@@ -24,9 +24,10 @@ type FormValues = z.infer<typeof schema>;
 type Props = {
   open: boolean;
   onClose: () => void;
+  onSuccess?: (company: { id: string; name: string }) => void;
 };
 
-export function AddContactModal({ open, onClose }: Props) {
+export function AddContactModal({ open, onClose, onSuccess }: Props) {
   const router = useRouter();
   const dialogRef = React.useRef<HTMLDivElement>(null);
   const titleId = React.useId();
@@ -110,6 +111,11 @@ export function AddContactModal({ open, onClose }: Props) {
 
       if (json.errors && json.errors.length > 0) {
         throw new Error(json.errors[0].message);
+      }
+
+      if (onSuccess && json.companies?.length > 0) {
+        onSuccess({ id: json.companies[0].id, name: json.companies[0].name });
+        return;
       }
 
       toast.success("Contact added successfully.");

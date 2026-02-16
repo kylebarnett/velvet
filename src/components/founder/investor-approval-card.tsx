@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { toast } from "sonner";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 
@@ -61,6 +62,11 @@ export function InvestorApprovalCard({
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? "Failed to update.");
       setStatus(newStatus);
+      toast.success(
+        newStatus === "approved"
+          ? `${displayName} approved — they can now view your data.`
+          : `Access denied for ${displayName}.`
+      );
     } catch (e: unknown) {
       const message =
         e instanceof Error ? e.message : "Something went wrong.";

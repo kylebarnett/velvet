@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Search, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -111,6 +112,7 @@ export default function FounderInvestorsPage() {
   async function handleBulkApprove() {
     if (pendingInvestors.length === 0) return;
     setBulkApproving(true);
+    setError(null);
     try {
       await Promise.all(
         pendingInvestors.map((inv) =>
@@ -121,8 +123,15 @@ export default function FounderInvestorsPage() {
           })
         )
       );
-      // Reload page to reflect changes
-      window.location.reload();
+      const count = pendingInvestors.length;
+      setInvestors((prev) =>
+        prev.map((inv) =>
+          inv.approval_status === "pending"
+            ? { ...inv, approval_status: "approved" }
+            : inv
+        )
+      );
+      toast.success(`${count} investor${count !== 1 ? "s" : ""} approved.`);
     } catch {
       setError("Failed to approve all investors. Please try again.");
     } finally {
@@ -132,8 +141,10 @@ export default function FounderInvestorsPage() {
 
   async function handleBulkDeny() {
     if (pendingInvestors.length === 0) return;
+    const count = pendingInvestors.length;
     setBulkDenying(true);
     setShowBulkDenyConfirm(false);
+    setError(null);
     try {
       await Promise.all(
         pendingInvestors.map((inv) =>
@@ -144,7 +155,14 @@ export default function FounderInvestorsPage() {
           })
         )
       );
-      window.location.reload();
+      setInvestors((prev) =>
+        prev.map((inv) =>
+          inv.approval_status === "pending"
+            ? { ...inv, approval_status: "denied" }
+            : inv
+        )
+      );
+      toast.success(`${count} investor${count !== 1 ? "s" : ""} denied.`);
     } catch {
       setError("Failed to deny all investors. Please try again.");
     } finally {
@@ -255,6 +273,7 @@ export default function FounderInvestorsPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search investors..."
+                aria-label="Search investors"
                 className="h-11 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm text-text-primary outline-none placeholder:text-text-faint focus:border-border-default sm:w-64"
               />
             </div>

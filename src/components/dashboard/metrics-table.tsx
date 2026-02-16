@@ -165,7 +165,7 @@ function CellTooltip({
   return createPortal(
     <div
       ref={tooltipRef}
-      className="z-[100] w-56 rounded-lg border border-border-default bg-bg-secondary p-3 shadow-xl"
+      className="z-[var(--z-popover)] w-56 rounded-lg border border-border-default bg-bg-secondary p-3 shadow-xl"
       style={style}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -509,7 +509,7 @@ function TotalColumnTooltip({ periodType, periodsVisible }: { periodType: string
       </button>
       {isOpen && pos && createPortal(
         <div
-          className="fixed z-[100] w-64 rounded-lg border border-border-default bg-bg-secondary p-3 text-xs shadow-xl"
+          className="fixed z-[var(--z-popover)] w-64 rounded-lg border border-border-default bg-bg-secondary p-3 text-xs shadow-xl"
           style={{ top: pos.top, right: pos.right }}
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}

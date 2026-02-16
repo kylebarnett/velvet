@@ -1,0 +1,104 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+
+import { getApiUser, jsonError } from "@/lib/api/auth";
+import { logger } from "@/lib/logger";
+
+const createSchema = z.object({
+  companyId: z.string().uuid(),
+  title: z.string().min(1).max(200),
+  quarter: z.enum(["Q1", "Q2", "Q3", "Q4"]),
+  year: z.number().int().min(2000).max(2100),
+  content: z.record(z.string(), z.unknown()).default({}),
+});
+
+// GET - List all investor tear sheets across companies
+export async function GET() {
+  const { supabase, user } = await getApiUser();
+  if (!user) return jsonError("Unauthorized.", 401);
+
+  const role = user.user_metadata?.role;
+  if (role !== "investor") return jsonError("Forbidden.", 403);
+
+  // RLS handles filtering: returns investor's own tear sheets (any status)
+  // + published founder tear sheets for approved companies
+  const { data: tearSheets, error } = await supabase
+    .from("tear_sheets")
+    .select("id, title, quarter, year, status, share_enabled, share_token, created_at, updated_at, creator_role, company_id, companies(name)")
+    .order("year", { ascending: false })
+    .order("quarter", { ascending: false });
+
+  if (error) {
+    logger.error("Investor tear sheet list error:", error);
+    return jsonError("Failed to load tear sheets.", 500);
+  }
+
+  // Flatten company name from join
+  const result = (tearSheets ?? []).map((ts) => {
+    const company = Array.isArray(ts.companies) ? ts.companies[0] : ts.companies;
+    return {
+      ...ts,
+      companyName: company?.name ?? null,
+      companies: undefined,
+    };
+  });
+
+  return NextResponse.json({ tearSheets: result });
+}
+
+// POST - Create an investor tear sheet
+export async function POST(req: Request) {
+  const { supabase, user } = await getApiUser();
+  if (!user) return jsonError("Unauthorized.", 401);
+
+  const role = user.user_metadata?.role;
+  if (role !== "investor") return jsonError("Forbidden.", 403);
+
+  const parsed = createSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    return jsonError("Invalid request body.", 400);
+  }
+
+  const { companyId, title, quarter, year, content } = parsed.data;
+
+  // Verify investor has an approved relationship with this company
+  const { data: relationship } = await supabase
+    .from("investor_company_relationships")
+    .select("id")
+    .eq("investor_id", user.id)
+    .eq("company_id", companyId)
+    .in("approval_status", ["auto_approved", "approved"])
+    .single();
+
+  if (!relationship) {
+    return jsonError("Company not in portfolio or not approved.", 403);
+  }
+
+  const { data: tearSheet, error } = await supabase
+    .from("tear_sheets")
+    .insert({
+      company_id: companyId,
+      investor_id: user.id,
+      creator_role: "investor",
+      title,
+      quarter,
+      year,
+      content,
+      status: "draft",
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    if (error.code === "23505") {
+      return jsonError(
+        "A tear sheet for this quarter already exists for this company.",
+        409,
+      );
+    }
+    logger.error("Investor tear sheet create error:", error);
+    return jsonError("Failed to create tear sheet.", 500);
+  }
+
+  return NextResponse.json({ tearSheet, ok: true }, { status: 201 });
+}

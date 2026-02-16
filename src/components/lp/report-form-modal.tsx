@@ -168,9 +168,14 @@ export function ReportFormModal({
         if (e.target === backdropRef.current) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="report-form-title"
+        className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter"
+      >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Generate LP Report</h2>
+          <h2 id="report-form-title" className="text-lg font-semibold">Generate LP Report</h2>
           <button
             onClick={onClose}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-primary"

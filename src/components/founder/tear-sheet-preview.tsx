@@ -31,6 +31,7 @@ type Milestone = {
 type TearSheetPreviewProps = {
   tearSheet: TearSheet;
   metrics: TearSheetMetric[];
+  variant?: "founder" | "investor";
 };
 
 function formatMetricValue(value: string | null, metricName: string): string {
@@ -67,15 +68,20 @@ function Section({
   );
 }
 
-export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) {
+export function TearSheetPreview({ tearSheet, metrics, variant = "founder" }: TearSheetPreviewProps) {
   const content = tearSheet.content ?? {};
   const highlights = (content.highlights as string) ?? "";
   const visibleMetrics = (content.visibleMetrics as string[]) ?? [];
   const milestones = (content.milestones as Milestone[]) ?? [];
   const challenges = (content.challenges as string) ?? "";
-  const teamUpdates = (content.teamUpdates as string) ?? "";
   const outlook = (content.outlook as string) ?? "";
-  const askOfInvestors = (content.askOfInvestors as string) ?? "";
+
+  // Variant-specific content keys
+  const teamUpdates = variant === "founder" ? ((content.teamUpdates as string) ?? "") : "";
+  const askOfInvestors = variant === "founder" ? ((content.askOfInvestors as string) ?? "") : "";
+  const notes = variant === "investor" ? ((content.notes as string) ?? "") : "";
+  const actionItems = variant === "investor" ? ((content.actionItems as string) ?? "") : "";
+  const metricSources = variant === "investor" ? ((content.metricSources as string) ?? "all") : null;
 
   const filteredMetrics =
     visibleMetrics.length > 0
@@ -89,7 +95,9 @@ export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) 
     challenges ||
     teamUpdates ||
     outlook ||
-    askOfInvestors;
+    askOfInvestors ||
+    notes ||
+    actionItems;
 
   return (
     <>
@@ -131,8 +139,13 @@ export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) 
           <h1 className="mt-1 text-xl font-semibold tracking-tight print:text-gray-900">
             {tearSheet.title}
           </h1>
-          <div className="mt-1 text-sm text-text-tertiary print:text-gray-500">
-            {tearSheet.quarter} {tearSheet.year}
+          <div className="mt-1 flex items-center gap-2 text-sm text-text-tertiary print:text-gray-500">
+            <span>{tearSheet.quarter} {tearSheet.year}</span>
+            {metricSources && metricSources !== "all" && (
+              <span className="rounded-full bg-[var(--status-info-bg)] px-2 py-0.5 text-xs font-medium text-[var(--status-info-text)]">
+                {metricSources === "founder" ? "Founder metrics" : "My metrics"}
+              </span>
+            )}
           </div>
         </div>
 
@@ -207,10 +220,17 @@ export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) 
             </Section>
           )}
 
-          {/* Team Updates */}
+          {/* Founder variant: Team Updates */}
           {teamUpdates && (
             <Section title="Team Updates">
               <RichTextDisplay html={teamUpdates} />
+            </Section>
+          )}
+
+          {/* Investor variant: Notes */}
+          {notes && (
+            <Section title="Notes">
+              <RichTextDisplay html={notes} />
             </Section>
           )}
 
@@ -221,10 +241,17 @@ export function TearSheetPreview({ tearSheet, metrics }: TearSheetPreviewProps) 
             </Section>
           )}
 
-          {/* Ask of Investors */}
+          {/* Founder variant: Ask of Investors */}
           {askOfInvestors && (
             <Section title="Ask of Investors">
               <RichTextDisplay html={askOfInvestors} />
+            </Section>
+          )}
+
+          {/* Investor variant: Action Items */}
+          {actionItems && (
+            <Section title="Action Items">
+              <RichTextDisplay html={actionItems} />
             </Section>
           )}
         </div>

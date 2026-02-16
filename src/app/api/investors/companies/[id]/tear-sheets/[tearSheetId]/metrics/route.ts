@@ -74,7 +74,7 @@ export async function GET(
   // Fetch the tear sheet to get quarter and year
   const { data: tearSheet, error: tsError } = await supabase
     .from("tear_sheets")
-    .select("id, quarter, year, content")
+    .select("id, title, quarter, year, status, content, share_enabled, share_token, created_at, updated_at, creator_role")
     .eq("id", tearSheetId)
     .eq("company_id", companyId)
     .eq("status", "published")
@@ -156,5 +156,5 @@ export async function GET(
     ? metrics.filter((m) => visibleMetrics.includes(m.metricName))
     : metrics;
 
-  return NextResponse.json({ metrics: filteredMetrics });
+  return NextResponse.json({ metrics: filteredMetrics, tearSheet });
 }

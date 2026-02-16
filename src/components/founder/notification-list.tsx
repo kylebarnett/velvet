@@ -460,10 +460,15 @@ export function NotificationList({
           ...group.metrics.map((m) => m.investorCount),
         );
 
+        const isOverdue = urgency?.label === "Overdue";
         return (
           <div
             key={`${group.periodType}-${group.periodStart}`}
-            className="rounded-xl border border-border-default card-surface p-4"
+            className={`rounded-xl border p-4 ${
+              isOverdue
+                ? "border-[var(--error-border)] bg-[var(--status-error-bg)]"
+                : "border-border-default card-surface"
+            }`}
           >
             <div className="flex items-start justify-between gap-4">
               <div>

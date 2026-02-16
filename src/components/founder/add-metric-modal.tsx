@@ -122,7 +122,7 @@ function PeriodDropdown({
       {isOpen && ReactDOM.createPortal(
         <ul
           ref={menuRef}
-          className="fixed z-[100] max-h-48 overflow-y-auto rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm"
+          className="fixed z-[var(--z-popover)] max-h-48 overflow-y-auto rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm"
           style={{ top: pos.top, left: pos.left, width: pos.width }}
         >
           {options.map((p) => (

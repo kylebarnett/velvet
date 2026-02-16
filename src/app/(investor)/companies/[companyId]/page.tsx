@@ -6,6 +6,8 @@ import { InlineTags } from "@/components/investor/inline-tag";
 import { InlineWebsite } from "@/components/investor/inline-website";
 import { CompanyDashboardTabs } from "@/components/investor/company-dashboard-tabs";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { AddMetricButton } from "@/components/investor/add-metric-button";
+import { CompanyCardMenu } from "@/components/investor/company-card-menu";
 import type { MetricValue } from "@/components/dashboard";
 import { CompanyDashboardClient } from "./company-dashboard-client";
 
@@ -24,7 +26,7 @@ export default async function CompanyDashboardPage({
   // Verify relationship
   const { data: relationship } = await supabase
     .from("investor_company_relationships")
-    .select("id, approval_status, logo_url, created_at")
+    .select("id, approval_status, logo_url, is_hidden, created_at")
     .eq("investor_id", user.id)
     .eq("company_id", companyId)
     .single();
@@ -176,11 +178,17 @@ export default async function CompanyDashboardPage({
             <InlineWebsite companyId={company.id} website={company.website} />
           </div>
         </div>
-        {isApproved && (
-          <div className="shrink-0">
+        <div className="flex shrink-0 items-center gap-2">
+          <AddMetricButton companyId={companyId} companyName={company.name} />
+          {isApproved && (
             <CompanyDashboardTabs companyId={companyId} />
-          </div>
-        )}
+          )}
+          <CompanyCardMenu
+            companyId={companyId}
+            companyName={company.name}
+            isHidden={relationship.is_hidden ?? false}
+          />
+        </div>
       </div>
 
       {!isApproved && (
@@ -206,7 +214,13 @@ export default async function CompanyDashboardPage({
 
       {!isApproved && (
         <div className="py-12 text-center">
-          <p className="text-sm text-text-secondary">Metrics will appear here once your access is approved.</p>
+          <p className="text-sm text-text-secondary">
+            Founder metrics will appear here once your access is approved.
+            You can add your own metrics in the meantime.
+          </p>
+          <div className="mt-4">
+            <AddMetricButton companyId={companyId} companyName={company.name} size="md" />
+          </div>
         </div>
       )}
     </div>

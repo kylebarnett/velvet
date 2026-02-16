@@ -45,7 +45,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
         <ChevronDown className="h-3 w-3" />
       </button>
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 min-w-[120px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary shadow-xl">
+        <div className="dropdown-enter absolute right-0 top-full z-50 mt-1 min-w-[120px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary shadow-xl">
           {options.map((option) => (
             <button
               key={option.value}

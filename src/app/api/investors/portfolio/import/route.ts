@@ -42,9 +42,14 @@ export async function POST(req: Request) {
   const { rows } = parsed.data;
   const adminClient = createSupabaseAdminClient();
 
-  const results: { imported: number; errors: { row: number; message: string }[] } = {
+  const results: {
+    imported: number;
+    errors: { row: number; message: string }[];
+    companies: { id: string; name: string }[];
+  } = {
     imported: 0,
     errors: [],
+    companies: [],
   };
 
   // Normalize all emails upfront
@@ -297,6 +302,17 @@ export async function POST(req: Request) {
     }
 
     results.imported = invitationsToCreate.length;
+
+    // Collect company IDs + names for the response
+    for (const { row, companyId } of rowsWithExistingCompany) {
+      results.companies.push({ id: companyId, name: row.company_name });
+    }
+    for (const c of companiesToCreate) {
+      const companyId = rowIndexToNewCompanyId.get(c.rowIndex);
+      if (companyId) {
+        results.companies.push({ id: companyId, name: c.name });
+      }
+    }
   }
 
   return NextResponse.json(results);

@@ -39,7 +39,12 @@ type ResumableUpload = {
   companies_detected: DetectedCompany[] | null;
 };
 
-export function UploadWizard({ role }: { role: "investor" | "founder" }) {
+type UploadWizardProps = {
+  role: "investor" | "founder";
+  preSelectedCompany?: { id: string; name: string };
+};
+
+export function UploadWizard({ role, preSelectedCompany }: UploadWizardProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<WizardStep>("upload");
@@ -201,7 +206,25 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
         return;
       }
 
-      if (role === "investor" && result.companiesDetected.length > 0) {
+      if (preSelectedCompany) {
+        // Auto-map all detected companies to the pre-selected one, then skip to review
+        try {
+          const mappings = result.companiesDetected.map((c) => ({
+            detectedName: c.name,
+            companyId: preSelectedCompany.id,
+          }));
+          if (mappings.length > 0) {
+            await fetch(`/api/historical-upload/${result.uploadId}/company-mapping`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ mappings }),
+            });
+          }
+        } catch {
+          // Non-critical — mapping can be done in review
+        }
+        setStep("review");
+      } else if (role === "investor" && result.companiesDetected.length > 0) {
         setStep("map-companies");
       } else {
         setStep("review");
@@ -285,6 +308,15 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
           </React.Fragment>
         ))}
       </nav>
+
+      {/* Pre-selected company banner */}
+      {preSelectedCompany && step !== "complete" && (
+        <div className="rounded-lg border border-[var(--status-info-bg)] bg-[var(--status-info-bg)] px-4 py-3">
+          <p className="text-sm text-[var(--status-info-text)]">
+            Uploading metrics for <span className="font-medium">{preSelectedCompany.name}</span>
+          </p>
+        </div>
+      )}
 
       {/* Step content */}
       {step === "upload" && (
@@ -466,7 +498,14 @@ export function UploadWizard({ role }: { role: "investor" | "founder" }) {
           </div>
 
           <div className="mt-8 flex gap-3">
-            {role === "investor" ? (
+            {preSelectedCompany ? (
+              <button
+                onClick={() => router.push(`/companies/${preSelectedCompany.id}`)}
+                className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+              >
+                View {preSelectedCompany.name}
+              </button>
+            ) : role === "investor" ? (
               <button
                 onClick={() => router.push("/reports")}
                 className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"

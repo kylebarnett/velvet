@@ -170,7 +170,7 @@ function MultiSelectDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm">
+        <div className="dropdown-enter absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm">
           {options.length === 0 ? (
             <div className="px-3 py-2 text-sm text-text-muted">No options available</div>
           ) : (

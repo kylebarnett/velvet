@@ -6,7 +6,7 @@ import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -349,7 +349,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
   const [editForm, setEditForm] = React.useState({ first_name: "", last_name: "", email: "", position: "" });
   const [loading, setLoading] = React.useState(false);
   const [fetching, setFetching] = React.useState(false);
-  const { error, success, setError, setSuccess } = useToast();
+  const [error, setError] = React.useState<string | null>(null);
   const [inviteLinks, setInviteLinks] = React.useState<{ email: string; url: string }[] | null>(null);
   const [deleteModal, setDeleteModal] = React.useState<{ open: boolean; contact: Contact | null }>({
     open: false,
@@ -485,7 +485,6 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
   async function sendInvite(ids: string[]) {
     setLoading(true);
     setError(null);
-    setSuccess(null);
     setInviteLinks(null);
 
     try {
@@ -501,7 +500,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
         throw new Error(json?.error ?? "Failed to send invitations.");
       }
 
-      setSuccess(`Sent ${json.sent} invitation${json.sent === 1 ? "" : "s"}.`);
+      toast.success(`Sent ${json.sent} invitation${json.sent === 1 ? "" : "s"}.`);
 
       // Show invite links in dev mode for manual testing
       if (json.inviteLinks && json.inviteLinks.length > 0) {
@@ -525,7 +524,6 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
   async function sendAllPending() {
     setLoading(true);
     setError(null);
-    setSuccess(null);
 
     try {
       const res = await fetch("/api/investors/portfolio/invite", {
@@ -540,7 +538,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
         throw new Error(json?.error ?? "Failed to send invitations.");
       }
 
-      setSuccess(`Sent ${json.sent} invitation${json.sent === 1 ? "" : "s"}.`);
+      toast.success(`Sent ${json.sent} invitation${json.sent === 1 ? "" : "s"}.`);
 
       // Update local state
       setContacts((prev) =>
@@ -588,7 +586,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
         prev.map((c) => (c.id === editingId ? { ...c, ...editForm } : c))
       );
       setEditingId(null);
-      setSuccess("Contact updated.");
+      toast.success("Contact updated.");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -632,7 +630,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
         accepted: contact.status === "accepted" ? prev.accepted - 1 : prev.accepted,
         awaiting: contact.status === "pending" || contact.status === "sent" ? prev.awaiting - 1 : prev.awaiting,
       }));
-      setSuccess("Contact deleted.");
+      toast.success("Contact deleted.");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -645,7 +643,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
 
     setLoading(true);
     setError(null);
-    setSuccess(null);
+    
 
     const ids = Array.from(selectedIds);
     let deleted = 0;
@@ -682,7 +680,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
         accepted: prev.accepted - deletedAccepted,
         awaiting: prev.awaiting - deletedAwaiting,
       }));
-      setSuccess(`Deleted ${deleted} contact${deleted === 1 ? "" : "s"}.`);
+      toast.success(`Deleted ${deleted} contact${deleted === 1 ? "" : "s"}.`);
     }
     if (errors.length > 0) {
       setError(`${errors.length} deletion${errors.length === 1 ? "" : "s"} failed.`);
@@ -739,11 +737,6 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
       {error && (
         <div role="alert" className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-2 text-sm text-[var(--status-error-text)]">
           {error}
-        </div>
-      )}
-      {success && (
-        <div role="alert" className="rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-4 py-2 text-sm text-[var(--status-success-text)]">
-          {success}
         </div>
       )}
       {inviteLinks && inviteLinks.length > 0 && (

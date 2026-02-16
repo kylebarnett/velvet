@@ -73,7 +73,7 @@ export function ViewSelector({
           <ChevronDown className="h-3 w-3" />
         </button>
         {isOpen && (
-          <div className="absolute left-0 top-full z-50 mt-1 min-w-[200px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary shadow-xl">
+          <div className="dropdown-enter absolute left-0 top-full z-50 mt-1 min-w-[200px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary shadow-xl">
             {views.length === 0 ? (
               <div className="px-3 py-2 text-xs text-text-tertiary">No saved views</div>
             ) : (

@@ -88,7 +88,7 @@ export function ExportButton({ onClick, label, onExport, formats }: ExportButton
 
       {open && (
         <div
-          className="absolute right-0 z-50 mt-1 w-44 overflow-hidden rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm"
+          className="dropdown-enter absolute right-0 z-50 mt-1 w-44 overflow-hidden rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm"
           role="menu"
         >
           {availableOptions.map((option) => {

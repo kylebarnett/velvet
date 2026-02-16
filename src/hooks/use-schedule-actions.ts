@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { toast } from "sonner";
 import type { Schedule } from "@/components/investor/schedule-card";
 
 type ScheduleAction = "pause" | "resume" | "run-now" | "delete";
@@ -10,15 +11,6 @@ export function useScheduleActions(
 ) {
   const [loadingId, setLoadingId] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
-  const [success, setSuccess] = React.useState<string | null>(null);
-
-  // Auto-dismiss messages
-  React.useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
 
   async function execute(id: string, action: ScheduleAction) {
     setLoadingId(id);
@@ -41,7 +33,7 @@ export function useScheduleActions(
               s.id === id ? { ...s, isActive: false, nextRunAt: null } : s,
             ),
           );
-          setSuccess("Schedule paused");
+          toast.success("Schedule paused");
           break;
         case "resume":
           onUpdate((prev) =>
@@ -51,7 +43,7 @@ export function useScheduleActions(
                 : s,
             ),
           );
-          setSuccess("Schedule resumed");
+          toast.success("Schedule resumed");
           break;
         case "run-now":
           onUpdate((prev) =>
@@ -59,7 +51,7 @@ export function useScheduleActions(
               s.id === id ? { ...s, lastRunAt: new Date().toISOString() } : s,
             ),
           );
-          setSuccess(
+          toast.success(
             json.requestsCreated > 0
               ? `Created ${json.requestsCreated} requests, sent ${json.emailsSent} emails`
               : "No new requests created (may already exist)",
@@ -67,7 +59,7 @@ export function useScheduleActions(
           break;
         case "delete":
           onUpdate((prev) => prev.filter((s) => s.id !== id));
-          setSuccess("Schedule deleted");
+          toast.success("Schedule deleted");
           break;
       }
     } catch (err: unknown) {
@@ -84,8 +76,6 @@ export function useScheduleActions(
     remove: (id: string) => execute(id, "delete"),
     loadingId,
     error,
-    success,
     setError,
-    setSuccess,
   };
 }

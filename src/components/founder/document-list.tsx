@@ -17,6 +17,7 @@ import {
   List,
   ChevronDown,
   ChevronRight,
+  ArrowUpDown,
 } from "lucide-react";
 
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -33,6 +34,7 @@ import {
   DOCUMENT_TYPE_SHORT_LABELS,
   DOCUMENT_TYPE_COLORS,
 } from "@/lib/utils/document-colors";
+import { toast } from "sonner";
 import { ExtractionStatusBadge } from "./extraction-status-badge";
 import { ExtractionReviewPanel } from "./extraction-review-panel";
 
@@ -295,19 +297,14 @@ export function FounderDocumentList() {
     document: null,
   });
   const [deleting, setDeleting] = React.useState(false);
-  const [success, setSuccess] = React.useState<string | null>(null);
   const [previewDoc, setPreviewDoc] = React.useState<Document | null>(null);
   const [reviewDoc, setReviewDoc] = React.useState<Document | null>(null);
   const [viewMode, setViewMode] = React.useState<"flat" | "folder">("flat");
   const [collapsedFolders, setCollapsedFolders] = React.useState<Set<string>>(new Set());
-
-  // Auto-dismiss success message
-  React.useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
+  const [sortField, setSortField] = React.useState<"name" | "type" | "size" | "date">("date");
+  const [sortDir, setSortDir] = React.useState<"asc" | "desc">("desc");
+  // Track per-type counts from the unfiltered document set
+  const [typeCounts, setTypeCounts] = React.useState<Record<string, number>>({});
 
   // Fetch documents on mount and when filter changes
   React.useEffect(() => {
@@ -323,6 +320,14 @@ export function FounderDocumentList() {
         if (!res.ok) throw new Error(json?.error ?? "Failed to load documents.");
         if (json.companyName) setCompanyName(json.companyName);
         setDocuments(json.documents);
+        // Compute per-type counts from unfiltered results
+        if (typeFilter === "all") {
+          const counts: Record<string, number> = {};
+          for (const doc of json.documents as Document[]) {
+            counts[doc.document_type] = (counts[doc.document_type] ?? 0) + 1;
+          }
+          setTypeCounts(counts);
+        }
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
       } finally {
@@ -340,6 +345,39 @@ export function FounderDocumentList() {
       doc.file_name.toLowerCase().includes(q),
     );
   }, [documents, searchQuery]);
+
+  // Sorted documents for desktop table view
+  const sortedDocuments = React.useMemo(() => {
+    const sorted = [...filteredDocuments];
+    sorted.sort((a, b) => {
+      let cmp = 0;
+      switch (sortField) {
+        case "name":
+          cmp = a.file_name.localeCompare(b.file_name);
+          break;
+        case "type":
+          cmp = a.document_type.localeCompare(b.document_type);
+          break;
+        case "size":
+          cmp = a.file_size - b.file_size;
+          break;
+        case "date":
+          cmp = new Date(a.uploaded_at).getTime() - new Date(b.uploaded_at).getTime();
+          break;
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return sorted;
+  }, [filteredDocuments, sortField, sortDir]);
+
+  function handleSort(field: "name" | "type" | "size" | "date") {
+    if (sortField === field) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir("desc");
+    }
+  }
 
   // Group documents by year → quarter for folder view
   const groupedDocuments = React.useMemo(() => {
@@ -397,7 +435,7 @@ export function FounderDocumentList() {
       if (!res.ok) throw new Error(json?.error ?? "Failed to delete document.");
       setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
       if (previewDoc?.id === doc.id) setPreviewDoc(null);
-      setSuccess("Document deleted.");
+      toast.success("Document deleted.");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -448,6 +486,7 @@ export function FounderDocumentList() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search documents..."
+            aria-label="Search documents"
             className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default sm:w-64"
           />
         </div>
@@ -459,10 +498,10 @@ export function FounderDocumentList() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
+                <SelectItem value="all">All types{Object.keys(typeCounts).length > 0 ? ` (${Object.values(typeCounts).reduce((a, b) => a + b, 0)})` : ""}</SelectItem>
                 {Object.entries(documentTypeLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
-                    {label}
+                    {label}{typeCounts[value] ? ` (${typeCounts[value]})` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -475,6 +514,7 @@ export function FounderDocumentList() {
               className={`inline-flex h-8 w-8 items-center justify-center rounded-l-md transition-colors ${viewMode === "flat" ? "bg-bg-elevated text-text-primary" : "text-text-muted hover:text-text-tertiary"}`}
               title="List view"
               aria-label="List view"
+              aria-pressed={viewMode === "flat"}
             >
               <List className="h-3.5 w-3.5" />
             </button>
@@ -484,6 +524,7 @@ export function FounderDocumentList() {
               className={`inline-flex h-8 w-8 items-center justify-center rounded-r-md border-l border-border-default transition-colors ${viewMode === "folder" ? "bg-bg-elevated text-text-primary" : "text-text-muted hover:text-text-tertiary"}`}
               title="Folder view"
               aria-label="Folder view"
+              aria-pressed={viewMode === "folder"}
             >
               <FolderOpen className="h-3.5 w-3.5" />
             </button>
@@ -497,12 +538,6 @@ export function FounderDocumentList() {
           {error}
         </div>
       )}
-      {success && (
-        <div className="rounded-md border border-[var(--status-success-bg)] bg-[var(--status-success-bg)] px-4 py-2 text-sm text-[var(--status-success-text)]">
-          {success}
-        </div>
-      )}
-
       {/* Empty state */}
       {filteredDocuments.length === 0 ? (
         <EmptyState
@@ -584,7 +619,7 @@ export function FounderDocumentList() {
                                         <button
                                           type="button"
                                           onClick={() => downloadDocument(doc)}
-                                          className="inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-bg-hover"
+                                          className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover"
                                           title="Download"
                                           aria-label="Download"
                                         >
@@ -593,7 +628,7 @@ export function FounderDocumentList() {
                                         <button
                                           type="button"
                                           onClick={() => openDeleteModal(doc)}
-                                          className="inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-bg-hover"
+                                          className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover"
                                           title="Delete"
                                           aria-label="Delete"
                                         >
@@ -657,8 +692,17 @@ export function FounderDocumentList() {
                         )}
                         <span className="text-xs text-text-tertiary">{formatFileSize(doc.file_size)}</span>
                       </div>
-                      <div className="mt-1.5">
+                      <div className="mt-1.5 flex items-center gap-2">
                         <ExtractionStatusBadge status={doc.ingestion_status} />
+                        {(doc.ingestion_status === "completed" || doc.ingestion_status === "pending") && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setReviewDoc(doc); }}
+                            className="rounded-full border border-[var(--tag-violet-bg)] bg-[var(--tag-violet-bg)] px-2 py-0.5 text-[11px] font-medium text-[var(--tag-violet-text)] hover:opacity-80"
+                          >
+                            {doc.ingestion_status === "completed" ? "Review" : "Extract"}
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -727,17 +771,53 @@ export function FounderDocumentList() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border-default text-left text-text-tertiary">
-                        <th className="p-3 font-medium">Name</th>
-                        <th className="p-3 font-medium">Type</th>
+                        <th
+                          className="cursor-pointer select-none p-3 font-medium hover:text-text-secondary"
+                          onClick={() => handleSort("name")}
+                          aria-sort={sortField === "name" ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
+                        >
+                          <span className="inline-flex items-center gap-1">
+                            Name
+                            {sortField === "name" && <ArrowUpDown className="h-3 w-3" />}
+                          </span>
+                        </th>
+                        <th
+                          className="cursor-pointer select-none p-3 font-medium hover:text-text-secondary"
+                          onClick={() => handleSort("type")}
+                          aria-sort={sortField === "type" ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
+                        >
+                          <span className="inline-flex items-center gap-1">
+                            Type
+                            {sortField === "type" && <ArrowUpDown className="h-3 w-3" />}
+                          </span>
+                        </th>
                         <th className="p-3 font-medium">Period</th>
-                        <th className="p-3 font-medium">Size</th>
-                        <th className="p-3 font-medium">Uploaded</th>
+                        <th
+                          className="cursor-pointer select-none p-3 font-medium hover:text-text-secondary"
+                          onClick={() => handleSort("size")}
+                          aria-sort={sortField === "size" ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
+                        >
+                          <span className="inline-flex items-center gap-1">
+                            Size
+                            {sortField === "size" && <ArrowUpDown className="h-3 w-3" />}
+                          </span>
+                        </th>
+                        <th
+                          className="cursor-pointer select-none p-3 font-medium hover:text-text-secondary"
+                          onClick={() => handleSort("date")}
+                          aria-sort={sortField === "date" ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
+                        >
+                          <span className="inline-flex items-center gap-1">
+                            Uploaded
+                            {sortField === "date" && <ArrowUpDown className="h-3 w-3" />}
+                          </span>
+                        </th>
                         <th className="p-3 font-medium">AI</th>
                         <th className="p-3 font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredDocuments.map((doc) => (
+                      {sortedDocuments.map((doc) => (
                         <tr
                           key={doc.id}
                           className="cursor-pointer border-b border-border-subtle hover:bg-bg-elevated"
