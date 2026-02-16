@@ -14,6 +14,7 @@ import { Loader2, TrendingUp } from "lucide-react";
 
 import { useChartTheme } from "@/hooks/use-chart-theme";
 import { formatValue, formatCompactValue } from "@/components/charts/types";
+import { findDefaultMetric } from "@/lib/reports/constants";
 import {
   Select,
   SelectContent,
@@ -41,9 +42,6 @@ type PortfolioTimeSeriesProps = {
   stages?: string;
 };
 
-// Prioritize revenue-like metrics for initial selection
-const REVENUE_PRIORITY = ["mrr", "arr", "revenue", "net revenue", "gmv"];
-
 export function PortfolioTimeSeries({
   availableMetrics,
   industries,
@@ -51,9 +49,7 @@ export function PortfolioTimeSeries({
 }: PortfolioTimeSeriesProps) {
   const chartTheme = useChartTheme();
 
-  const defaultMetric = REVENUE_PRIORITY.find((m) =>
-    availableMetrics.some((am) => am.toLowerCase() === m)
-  ) ?? availableMetrics[0] ?? "";
+  const defaultMetric = findDefaultMetric(availableMetrics);
 
   const [selectedMetric, setSelectedMetric] = useState(defaultMetric);
   const [data, setData] = useState<TimeSeriesData | null>(null);
@@ -95,25 +91,22 @@ export function PortfolioTimeSeries({
   return (
     <div className="card-surface rounded-2xl border border-border-subtle p-5">
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
-          <h3 className="text-sm font-semibold text-text-primary">Portfolio Trend</h3>
-        </div>
-        <div className="w-44">
-          <Select value={selectedMetric} onValueChange={setSelectedMetric}>
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Select metric" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableMetrics.map((m) => (
-                <SelectItem key={m} value={m}>
-                  {m}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="mb-4 flex items-center gap-2">
+        <TrendingUp className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
+        <h3 className="text-sm font-semibold text-text-primary">Portfolio Trend</h3>
+        <span className="text-sm text-text-muted" aria-hidden="true">&middot;</span>
+        <Select value={selectedMetric} onValueChange={setSelectedMetric}>
+          <SelectTrigger className="h-auto w-auto gap-1 border-none bg-transparent px-1 py-0.5 text-sm font-semibold text-text-primary shadow-none hover:bg-bg-elevated rounded-md transition-colors">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {availableMetrics.map((m) => (
+              <SelectItem key={m} value={m}>
+                {m}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Chart */}

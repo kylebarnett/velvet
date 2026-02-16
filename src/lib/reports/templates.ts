@@ -73,15 +73,8 @@ export const REPORT_TEMPLATES: Record<ReportType, ReportTemplate> = {
     sections: [
       {
         id: "comparison_charts",
-        label: "Comparison Charts",
+        label: "Company Comparison",
         description: "Line charts comparing companies on selected metrics",
-        defaultVisible: true,
-        exportable: true,
-      },
-      {
-        id: "comparison_table",
-        label: "Data Tables",
-        description: "Tabular view of raw metric values",
         defaultVisible: true,
         exportable: true,
       },
@@ -97,22 +90,8 @@ export const REPORT_TEMPLATES: Record<ReportType, ReportTemplate> = {
     sections: [
       {
         id: "benchmark_chart",
-        label: "Benchmark Chart",
-        description: "Bar chart with percentile reference lines",
-        defaultVisible: true,
-        exportable: true,
-      },
-      {
-        id: "benchmark_portfolio",
-        label: "Portfolio Distribution",
-        description: "How your portfolio is distributed across percentile bands",
-        defaultVisible: true,
-        exportable: true,
-      },
-      {
-        id: "benchmark_table",
-        label: "Rankings Table",
-        description: "Detailed company rankings with percentile scores",
+        label: "Metric Benchmarks",
+        description: "Bar chart with percentile reference lines, portfolio distribution, and rankings",
         defaultVisible: true,
         exportable: true,
       },

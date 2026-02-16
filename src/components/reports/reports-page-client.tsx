@@ -114,9 +114,6 @@ export function ReportsPageClient({ initialReports }: ReportsPageClientProps) {
                 <p className="mt-1 text-xs leading-relaxed text-text-muted">
                   {template.description}
                 </p>
-                <div className="mt-4 text-xs font-medium text-text-tertiary">
-                  {template.sections.length} sections
-                </div>
               </button>
             );
           })}

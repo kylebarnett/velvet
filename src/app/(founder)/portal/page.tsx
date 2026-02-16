@@ -158,6 +158,16 @@ export default async function FounderDashboardPage() {
     <div className="space-y-6">
       <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
 
+      <FounderPortalHeader
+        companyId={company.id}
+        companyName={company.name}
+        companyIndustry={company.industry}
+        companyWebsite={company.website}
+        companyStage={company.stage}
+        companyBusinessModel={company.business_model}
+        companyLogoUrl={company.logo_url}
+      />
+
       <div className="grid gap-5 md:grid-cols-3">
         {[
           { label: "Linked investors", subtitle: "Investors connected to your company", value: String(investorCount ?? 0), href: "/portal/investors", icon: Users, gradient: "kpi-gradient-blue" },
@@ -178,6 +188,15 @@ export default async function FounderDashboardPage() {
           </Link>
         ))}
       </div>
+
+      <FounderDashboardClient
+        companyId={company.id}
+        companyName={company.name}
+        companyIndustry={company.industry}
+        metrics={metricValues ?? []}
+        views={views ?? []}
+        templates={templates ?? []}
+      />
 
       <GettingStartedChecklist
         role="founder"
@@ -220,24 +239,6 @@ export default async function FounderDashboardPage() {
         ]}
         dataCompleteness={dataCompleteness}
       />
-    <FounderPortalHeader
-      companyId={company.id}
-      companyName={company.name}
-      companyIndustry={company.industry}
-      companyWebsite={company.website}
-      companyStage={company.stage}
-      companyBusinessModel={company.business_model}
-      companyLogoUrl={company.logo_url}
-    />
-
-    <FounderDashboardClient
-      companyId={company.id}
-      companyName={company.name}
-      companyIndustry={company.industry}
-      metrics={metricValues ?? []}
-      views={views ?? []}
-      templates={templates ?? []}
-    />
     </div>
   );
 }

@@ -5,6 +5,8 @@ import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils/cn";
 import { getPercentileBgColor } from "@/lib/benchmarks/calculate";
+import { findDefaultMetric } from "@/lib/reports/constants";
+import { formatValue } from "@/components/charts/types";
 import {
   Select,
   SelectTrigger,
@@ -117,7 +119,12 @@ export function BenchmarksClient() {
         if (!res.ok) throw new Error("Failed to load metrics");
         const data = await res.json();
         if (!cancelled) {
-          setMetricNames(data.metricNames ?? []);
+          const names: string[] = data.metricNames ?? [];
+          setMetricNames(names);
+          // Auto-select a default metric (functional updater so saved-report restore isn't overwritten)
+          if (names.length > 0) {
+            setSelectedMetric((prev) => prev || findDefaultMetric(names));
+          }
         }
       } catch {
         if (!cancelled) setError("Failed to load available metrics.");
@@ -208,14 +215,13 @@ export function BenchmarksClient() {
               <div className="h-11 animate-pulse rounded-md bg-bg-elevated" />
             ) : (
               <Select
-                value={selectedMetric || NONE}
-                onValueChange={(v) => setSelectedMetric(v === NONE ? "" : v)}
+                value={selectedMetric}
+                onValueChange={setSelectedMetric}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a metric..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={NONE}>Select a metric...</SelectItem>
                   {metricNames.map((name) => (
                     <SelectItem key={name} value={name}>
                       {name}
@@ -307,9 +313,7 @@ export function BenchmarksClient() {
             >
               <div className="text-xs font-medium text-text-muted">{label}</div>
               <div className="mt-1 text-lg font-semibold tabular-nums text-text-primary">
-                {benchmarkData![key].toLocaleString("en-US", {
-                  maximumFractionDigits: 2,
-                })}
+                {formatValue(benchmarkData![key], selectedMetric)}
               </div>
               <div className="mt-0.5 text-[10px] text-text-faint">
                 {benchmarkData!.sample_size} companies
@@ -352,8 +356,7 @@ export function BenchmarksClient() {
         !hasBenchmark &&
         hasCompanies && (
           <div className="rounded-xl border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] p-4 text-sm text-[var(--status-warning-text)]">
-            No benchmark data available for this metric yet. Benchmarks are
-            calculated daily when at least 5 companies have submitted data.
+            Currently {companies.length} {companies.length === 1 ? "company has" : "companies have"} data for this metric. Benchmarks require at least 5 companies and are calculated daily.
           </div>
         )}
 
@@ -370,11 +373,13 @@ export function BenchmarksClient() {
           </div>
         )}
 
-      {/* Initial empty state */}
-      {!selectedMetric && !isLoadingData && !error && (
+      {/* Initial empty state — only when no metrics exist at all */}
+      {!selectedMetric && !isLoadingMetrics && !isLoadingData && !error && (
         <div className="py-12 text-center">
           <p className="text-sm text-text-muted">
-            Select a metric above to see how your portfolio companies compare to industry benchmarks.
+            {metricNames.length === 0
+              ? "No metrics available yet. Benchmarks will appear once your portfolio companies submit data."
+              : "Select a metric above to see how your portfolio companies compare to industry benchmarks."}
           </p>
         </div>
       )}

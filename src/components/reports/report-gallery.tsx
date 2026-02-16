@@ -157,7 +157,7 @@ export function ReportGallery({ initialReports, onReportsChange }: ReportGallery
               type="text"
               value={renameValue}
               onChange={(e) => setRenameValue(e.target.value)}
-              className="mt-3 h-11 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white focus:border-white/20 focus:outline-none"
+              className="mt-3 h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary outline-none placeholder:text-text-faint focus:border-[var(--ring-focus)]"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleRenameSubmit();

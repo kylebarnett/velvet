@@ -93,11 +93,13 @@ export default async function FounderLayout({
                 { href: "/portal/requests", label: "Metric Requests", icon: "inbox", badge: pendingCount },
                 { href: "/portal/documents", label: "Documents", icon: "file-text" },
                 { href: "/portal/tear-sheets", label: "Tear Sheets", icon: "file-spreadsheet" },
-                { href: "/portal/historical-upload", label: "Import Data", icon: "upload" },
               ],
             },
-            { href: "/portal/investors", label: "Investors", icon: "shield" },
-            { href: "/portal/activity", label: "Activity", icon: "activity", divider: true },
+            { href: "/portal/investors", label: "Investors", icon: "shield", divider: true },
+            { href: "/portal/activity", label: "Activity", icon: "activity" },
+          ]}
+          profileLinks={[
+            { href: "/portal/historical-upload", label: "Import Data", icon: "upload" },
           ]}
           company={company}
           user={userInfo}

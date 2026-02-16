@@ -366,9 +366,6 @@ function ComparisonEditor({
   onToggleSection: (id: string) => void;
   isSectionVisible: (id: string) => boolean;
 }) {
-  // The ComparisonClient manages its own state and sections
-  const allVisible = template.sections.every((s) => isSectionVisible(s.id));
-
   return (
     <>
       {template.sections.map((section) => (
@@ -386,11 +383,6 @@ function ComparisonEditor({
               companies={data.companies}
               availableMetrics={data.availableMetrics}
             />
-          )}
-          {section.id === "comparison_table" && (
-            <div className="text-sm text-text-muted">
-              Data table is shown within the comparison view above.
-            </div>
           )}
         </SectionWrapper>
       ))}
@@ -424,16 +416,6 @@ function BenchmarksEditor({
           exportable={section.exportable}
         >
           {section.id === "benchmark_chart" && <BenchmarksClient />}
-          {section.id === "benchmark_portfolio" && (
-            <div className="text-sm text-text-muted">
-              Portfolio distribution is shown within the benchmark view above.
-            </div>
-          )}
-          {section.id === "benchmark_table" && (
-            <div className="text-sm text-text-muted">
-              Rankings table is shown within the benchmark view above.
-            </div>
-          )}
         </SectionWrapper>
       ))}
     </>
@@ -499,14 +481,18 @@ function DeepDiveEditor({
   const [deepDiveData, setDeepDiveData] = React.useState<DeepDiveResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
 
-  // Fetch available companies
+  // Fetch available companies + auto-select first if none pre-selected
   React.useEffect(() => {
     async function loadCompanies() {
       try {
         const res = await fetch("/api/investors/companies");
         if (res.ok) {
           const json = await res.json();
-          setCompanies(json.companies ?? []);
+          const list: Array<{ id: string; name: string }> = json.companies ?? [];
+          setCompanies(list);
+          if (list.length > 0) {
+            setSelectedCompany((prev) => prev || list[0].id);
+          }
         }
       } catch {
         // Silently fail
@@ -549,12 +535,11 @@ function DeepDiveEditor({
             <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Company
             </label>
-            <Select value={selectedCompany || "__none__"} onValueChange={(v) => setSelectedCompany(v === "__none__" ? "" : v)}>
+            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a company..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">Select a company...</SelectItem>
                 {companies.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
@@ -626,9 +611,9 @@ function DeepDiveEditor({
         </>
       )}
 
-      {!selectedCompany && (
+      {!selectedCompany && companies.length === 0 && (
         <div className="py-12 text-center text-sm text-text-muted">
-          Select a company above to see its deep dive analysis.
+          No portfolio companies available.
         </div>
       )}
     </>

@@ -14,7 +14,7 @@ import {
   DashboardLayout,
 } from "@/components/dashboard";
 import { DateRange } from "@/components/dashboard/date-range-selector";
-import { Download, Settings, Mail, Clock, FileUp, TrendingDown, TrendingUp, Fuel, ChevronDown, FileSpreadsheet, FileDown, X } from "lucide-react";
+import { Download, Settings, Mail, TrendingDown, TrendingUp, Fuel, ChevronDown, FileSpreadsheet, FileDown, X } from "lucide-react";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 import { EmailPasteModal } from "@/components/founder/email-paste-modal";
@@ -271,116 +271,6 @@ function filterMetricsByDateRange(
   }
 
   return metrics.filter((m) => new Date(m.period_start) >= cutoffDate);
-}
-
-type PendingRequest = {
-  metricName: string;
-  periodType: string;
-  periodStart: string;
-  periodEnd: string;
-  dueDate: string | null;
-};
-
-function EmptyMetricsState({
-  companyId,
-  onImportEmail,
-}: {
-  companyId: string;
-  onImportEmail: () => void;
-}) {
-  const [pendingRequests, setPendingRequests] = React.useState<PendingRequest[]>([]);
-  const [loaded, setLoaded] = React.useState(false);
-
-  React.useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/founder/metric-requests");
-        if (res.ok) {
-          const data = await res.json();
-          const pending = (data.requests ?? [])
-            .filter((r: { status: string }) => r.status === "pending")
-            .slice(0, 5);
-          setPendingRequests(pending);
-        }
-      } catch {
-        // Non-fatal
-      } finally {
-        setLoaded(true);
-      }
-    }
-    load();
-  }, []);
-
-  if (!loaded) return null;
-
-  if (pendingRequests.length > 0) {
-    return (
-      <div className="rounded-xl border border-border-default card-surface p-6">
-        <div>
-          <h3 className="text-base font-medium text-text-primary">Welcome to your metrics dashboard</h3>
-          <p className="mt-1 text-sm text-text-secondary">Your investors have requested the following metrics:</p>
-        </div>
-        <div className="mt-4 space-y-2">
-          {pendingRequests.map((req, i) => (
-            <div key={i} className="flex items-center justify-between rounded-lg bg-bg-input px-3 py-2">
-              <div className="flex items-center gap-2">
-                <Clock className="h-3.5 w-3.5 text-[var(--tag-amber-text)]" />
-                <span className="text-sm text-text-primary">{req.metricName}</span>
-              </div>
-              {req.dueDate && (
-                <span className="text-xs text-text-muted">
-                  Due {new Date(req.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/portal/requests"
-            className="inline-flex h-10 items-center gap-2 rounded-lg bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
-          >
-            Submit Metrics
-          </Link>
-          <button
-            type="button"
-            onClick={onImportEmail}
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-border-default bg-bg-elevated px-4 text-sm font-medium text-text-secondary hover:bg-bg-hover"
-          >
-            <Mail className="h-4 w-4" />
-            Import from Email
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="py-8">
-      <h3 className="text-base font-medium text-text-primary">No metric requests yet</h3>
-      <p className="mt-1 max-w-lg text-sm text-text-secondary">
-        When your investors request metrics, they&apos;ll appear here.
-        You can also submit metrics proactively.
-      </p>
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Link
-          href="/portal/requests"
-          className="inline-flex h-10 items-center gap-2 rounded-lg border border-border-default bg-bg-elevated px-4 text-sm font-medium text-text-secondary hover:bg-bg-hover"
-        >
-          <FileUp className="h-4 w-4" />
-          Add Metrics Manually
-        </Link>
-        <button
-          type="button"
-          onClick={onImportEmail}
-          className="inline-flex h-10 items-center gap-2 rounded-lg border border-border-default bg-bg-elevated px-4 text-sm font-medium text-text-secondary hover:bg-bg-hover"
-        >
-          <Mail className="h-4 w-4" />
-          Import from Email
-        </button>
-      </div>
-    </div>
-  );
 }
 
 function ExportDropdown({ isExporting, onExport }: { isExporting: boolean; onExport: (format: "csv" | "excel") => void }) {
@@ -894,24 +784,6 @@ export function FounderDashboardClient({
   );
 
   const filteredMetrics = filterMetricsByDateRange(metrics, dateRange);
-  const hasMetrics = metrics.length > 0;
-
-  if (!hasMetrics) {
-    return (
-      <>
-        <EmptyMetricsState
-          companyId={companyId}
-          onImportEmail={() => setShowEmailModal(true)}
-        />
-        <EmailPasteModal
-          open={showEmailModal}
-          companyId={companyId}
-          onClose={() => setShowEmailModal(false)}
-          onMetricsSaved={() => router.refresh()}
-        />
-      </>
-    );
-  }
 
   return (
     <div className="space-y-4">

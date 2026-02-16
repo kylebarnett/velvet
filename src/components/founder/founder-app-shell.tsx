@@ -8,6 +8,7 @@ import { useOnboarding } from "@/contexts/onboarding-context";
 type FounderAppShellProps = {
   title: string;
   nav: NavItem[];
+  profileLinks?: NavItem[];
   company?: CompanyInfo;
   user?: UserInfo;
   initialTheme?: string;
@@ -17,6 +18,7 @@ type FounderAppShellProps = {
 export function FounderAppShell({
   title,
   nav,
+  profileLinks,
   company,
   user,
   initialTheme,
@@ -28,6 +30,7 @@ export function FounderAppShell({
     <AppShell
       title={title}
       nav={nav}
+      profileLinks={profileLinks}
       company={company}
       user={user}
       role="founder"
