@@ -373,7 +373,7 @@ export default async function InvestorDashboardPage() {
             id: "founder-connected",
             label: "Connect with a founder",
             description: "Wait for a founder to join and approve your access",
-            href: "/dashboard",
+            href: "/companies",
             completed: companies.some((c) => c.founder_id !== null),
           },
           {

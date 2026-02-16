@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseRouteHandlerClient } from "@/lib/supabase/route-handler";
 
 // Allowed redirect paths (whitelist)
-const ALLOWED_REDIRECTS = ["/app", "/dashboard", "/portal", "/contacts", "/metric-requests"];
+const ALLOWED_REDIRECTS = ["/app", "/companies", "/portal", "/contacts", "/metric-requests"];
 
 function isValidRedirect(path: string): boolean {
   // Must be a relative path starting with /

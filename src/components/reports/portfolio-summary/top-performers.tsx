@@ -77,7 +77,7 @@ export function TopPerformers({ companies }: TopPerformersProps) {
           {topCompanies.map((company, index) => (
             <Link
               key={company.companyId}
-              href={`/dashboard/${company.companyId}`}
+              href={`/companies/${company.companyId}`}
               className="group relative flex items-center gap-4 rounded-xl p-3 transition-all duration-200 hover:bg-bg-hover"
             >
               {/* Rank badge */}

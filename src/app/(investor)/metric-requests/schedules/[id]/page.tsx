@@ -308,7 +308,7 @@ export default async function ScheduleDetailPage({
             {companies.map((company) => (
               <Link
                 key={company.id}
-                href={`/dashboard/${company.id}`}
+                href={`/companies/${company.id}`}
                 className="rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
               >
                 {company.name}

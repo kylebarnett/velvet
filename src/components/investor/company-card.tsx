@@ -163,7 +163,7 @@ export function CompanyCard({
 
   return (
     <Link
-      href={`/dashboard/${id}`}
+      href={`/companies/${id}`}
       className="card-hover-lift flex flex-col rounded-xl card-surface p-5"
     >
       <div className="flex items-start justify-between">

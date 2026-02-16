@@ -13,6 +13,16 @@ const nextConfig: NextConfig = {
         destination: "/metric-requests",
         permanent: true,
       },
+      {
+        source: "/dashboard/:path*",
+        destination: "/companies/:path*",
+        permanent: true,
+      },
+      {
+        source: "/dashboard",
+        destination: "/companies",
+        permanent: true,
+      },
     ];
   },
   async headers() {

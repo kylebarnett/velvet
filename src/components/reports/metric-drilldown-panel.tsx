@@ -77,7 +77,7 @@ export function MetricDrilldownPanel({
   }
 
   function handleCompanyClick(companyId: string) {
-    router.push(`/dashboard/${companyId}`);
+    router.push(`/companies/${companyId}`);
   }
 
   const sortedCompanies = React.useMemo(() => {

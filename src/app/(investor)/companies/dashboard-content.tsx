@@ -154,7 +154,7 @@ function CompanyListRow({
 
   return (
     <Link
-      href={`/dashboard/${company.id}`}
+      href={`/companies/${company.id}`}
       className="card-hover-lift flex items-center gap-4 rounded-xl card-surface px-5 py-3.5"
     >
       <CompanyLogoSmall name={company.name} logoUrl={company.logoUrl} />

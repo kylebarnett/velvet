@@ -232,7 +232,7 @@ export function BenchmarkTable({
                 )}
                 <td className="px-4 py-3 text-right">
                   <Link
-                    href={`/dashboard/${company.id}`}
+                    href={`/companies/${company.id}`}
                     className="text-text-faint transition-colors hover:text-text-muted"
                     aria-label={`View ${company.name} dashboard`}
                   >

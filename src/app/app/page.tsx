@@ -14,7 +14,7 @@ export default async function AppEntryPage() {
 
   const role = (user.user_metadata?.role as string | undefined) ?? "founder";
 
-  if (role === "investor") redirect("/dashboard");
+  if (role === "investor") redirect("/companies");
   redirect("/portal");
 }
 

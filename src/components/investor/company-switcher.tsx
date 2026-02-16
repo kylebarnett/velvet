@@ -73,7 +73,7 @@ export function CompanySwitcher({ currentCompanyId, currentCompanyName, companie
 
   function handleSelect(companyId: string) {
     if (companyId !== currentCompanyId) {
-      router.push(`/dashboard/${companyId}`);
+      router.push(`/companies/${companyId}`);
     }
     setIsOpen(false);
     setSearch("");
@@ -92,7 +92,7 @@ export function CompanySwitcher({ currentCompanyId, currentCompanyName, companie
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border-default bg-bg-secondary/95 shadow-2xl backdrop-blur-sm">
+        <div className="dropdown-enter absolute left-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border-default bg-bg-secondary/95 shadow-2xl backdrop-blur-sm">
           {/* Search input */}
           <div className="border-b border-border-default p-3">
             <div className="relative">

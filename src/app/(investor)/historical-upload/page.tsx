@@ -13,7 +13,7 @@ export default async function HistoricalUploadPage() {
     <div className="space-y-6">
       <Breadcrumbs
         items={[
-          { label: "Portfolio", href: "/contacts" },
+          { label: "Companies", href: "/companies" },
           { label: "Import Historical Data" },
         ]}
       />

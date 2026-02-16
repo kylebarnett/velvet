@@ -349,7 +349,7 @@ function MetricsTabContent({
               <span className="hidden sm:inline">Request Metrics</span>
             </Link>
             <Link
-              href={`/dashboard/${companyId}/edit`}
+              href={`/companies/${companyId}/edit`}
               className="flex items-center justify-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-2 sm:py-1.5 text-xs font-medium text-text-tertiary hover:border-border-default hover:text-text-secondary transition-colors"
             >
               <Settings className="h-3.5 w-3.5" />

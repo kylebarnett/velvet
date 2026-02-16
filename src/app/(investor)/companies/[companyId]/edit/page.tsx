@@ -91,7 +91,7 @@ export default async function DashboardEditPage({
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Edit Dashboard" }]} />
+        <Breadcrumbs items={[{ label: "Companies", href: "/companies" }, { label: "Edit Dashboard" }]} />
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           Edit Dashboard - {company.name}
         </h1>
@@ -106,7 +106,7 @@ export default async function DashboardEditPage({
         views={views ?? []}
         templates={templates ?? []}
         apiBasePath="/api/investors/dashboard-views"
-        redirectPath={`/dashboard/${companyId}`}
+        redirectPath={`/companies/${companyId}`}
       />
     </div>
   );

@@ -40,7 +40,7 @@ const UnifiedRequestWizard = dynamic(
 export default function NewRequestPage() {
   return (
     <div className="space-y-4">
-      <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Metric Requests", href: "/metric-requests" }, { label: "New Request" }]} />
+      <Breadcrumbs items={[{ label: "Companies", href: "/companies" }, { label: "Metric Requests", href: "/metric-requests" }, { label: "New Request" }]} />
       <UnifiedRequestWizard />
     </div>
   );

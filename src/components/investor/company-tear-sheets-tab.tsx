@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { FileSpreadsheet, ChevronRight, Download, X, ArrowLeft } from "lucide-react";
-import { TearSheetPreview } from "@/components/founder/tear-sheet-preview";
+import { FileSpreadsheet, ChevronRight, Plus } from "lucide-react";
+import { TearSheetViewer } from "@/components/investor/tear-sheet-viewer";
+import type { TearSheetMetric } from "@/components/investor/tear-sheet-viewer";
+import { NewTearSheetModal } from "@/components/investor/new-tear-sheet-modal";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import {
   Select,
@@ -15,6 +17,7 @@ import { logActivity } from "@/lib/activity/log-activity";
 import { logger } from "@/lib/logger";
 
 type QuarterFilter = "All" | "Q1" | "Q2" | "Q3" | "Q4";
+type SourceFilter = "all" | "founder" | "mine";
 
 const QUARTER_TABS: TabItem<QuarterFilter>[] = [
   { value: "All", label: "All" },
@@ -22,6 +25,12 @@ const QUARTER_TABS: TabItem<QuarterFilter>[] = [
   { value: "Q2", label: "Q2" },
   { value: "Q3", label: "Q3" },
   { value: "Q4", label: "Q4" },
+];
+
+const SOURCE_TABS: TabItem<SourceFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "founder", label: "Founder" },
+  { value: "mine", label: "Mine" },
 ];
 
 type TearSheet = {
@@ -34,14 +43,8 @@ type TearSheet = {
   share_enabled: boolean;
   share_token: string | null;
   updated_at: string;
+  creator_role?: string;
   companyName?: string;
-};
-
-type TearSheetMetric = {
-  metricName: string;
-  currentValue: string | null;
-  previousValue: string | null;
-  trend: "up" | "down" | "flat";
 };
 
 type CompanyTearSheetsTabProps = {
@@ -65,6 +68,8 @@ function TearSheetCard({
   tearSheet: TearSheet;
   onClick: () => void;
 }) {
+  const isInvestor = tearSheet.creator_role === "investor";
+
   return (
     <button
       type="button"
@@ -76,12 +81,25 @@ function TearSheetCard({
           <h3 className="font-medium text-text-primary truncate group-hover:text-text-primary">
             {tearSheet.title}
           </h3>
-          <div className="mt-1 flex items-center gap-2">
-            <span className="rounded-full bg-[var(--success-bg-muted)] px-2 py-0.5 text-xs text-[var(--status-success-text)]">
-              Published
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                tearSheet.status === "published"
+                  ? "bg-[var(--success-bg-muted)] text-[var(--status-success-text)]"
+                  : "bg-[var(--status-warning-bg)] text-[var(--status-warning-text)]"
+              }`}
+            >
+              {tearSheet.status === "published" ? "Published" : "Draft"}
             </span>
             <span className="text-xs text-text-tertiary">
               {tearSheet.quarter} {tearSheet.year}
+            </span>
+            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+              isInvestor
+                ? "bg-[var(--status-info-bg)] text-[var(--status-info-text)]"
+                : "bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)]"
+            }`}>
+              {isInvestor ? "Mine" : "Founder"}
             </span>
           </div>
         </div>
@@ -91,91 +109,6 @@ function TearSheetCard({
         Updated {formatDate(tearSheet.updated_at)}
       </div>
     </button>
-  );
-}
-
-function TearSheetViewer({
-  tearSheet,
-  metrics,
-  companyId,
-  companyName,
-  onClose,
-}: {
-  tearSheet: TearSheet;
-  metrics: TearSheetMetric[];
-  companyId: string;
-  companyName: string;
-  onClose: () => void;
-}) {
-  const previewRef = React.useRef<HTMLDivElement>(null);
-  const [exporting, setExporting] = React.useState(false);
-
-  async function handleExportPdf() {
-    if (!previewRef.current) return;
-    setExporting(true);
-
-    try {
-      const { exportElementAsPdf } = await import("@/lib/utils/export-pdf");
-      await exportElementAsPdf(
-        previewRef.current,
-        `${tearSheet.title}.pdf`
-      );
-
-      logActivity({
-        companyId,
-        action: "view_tear_sheet",
-        metadata: { tear_sheet_title: tearSheet.title, format: "pdf" },
-      });
-    } catch (e: unknown) {
-      logger.error("PDF export failed:", e);
-    } finally {
-      setExporting(false);
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-bg-primary">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-border-default px-4 py-3 sm:px-6">
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex items-center gap-2 text-sm text-text-tertiary hover:text-text-primary transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Back to tear sheets</span>
-          <span className="sm:hidden">Back</span>
-        </button>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleExportPdf}
-            disabled={exporting}
-            className="inline-flex items-center gap-2 rounded-md border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default disabled:opacity-50"
-          >
-            <Download className="h-3.5 w-3.5" />
-            {exporting ? "Generating..." : "Download PDF"}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md p-2 text-text-muted hover:bg-bg-hover hover:text-text-primary sm:hidden"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-        <div ref={previewRef}>
-          <TearSheetPreview
-            tearSheet={{ ...tearSheet, companyName }}
-            metrics={metrics}
-          />
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -189,11 +122,15 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
   const [selectedMetrics, setSelectedMetrics] = React.useState<TearSheetMetric[]>([]);
   const [loadingMetrics, setLoadingMetrics] = React.useState(false);
 
+  // Create modal state
+  const [showCreateModal, setShowCreateModal] = React.useState(false);
+
   // Filters
   const [filterQuarter, setFilterQuarter] = React.useState<QuarterFilter>("All");
   const [filterYear, setFilterYear] = React.useState("All");
+  const [filterSource, setFilterSource] = React.useState<SourceFilter>("all");
 
-  // Fetch tear sheets for this company
+  // Fetch tear sheets for this company (both founder + investor)
   React.useEffect(() => {
     async function loadTearSheets() {
       setLoading(true);
@@ -218,8 +155,15 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
     loadTearSheets();
   }, [companyId]);
 
-  // Fetch metrics when a tear sheet is selected
+  // Handle selecting a tear sheet
   async function handleSelectTearSheet(tearSheet: TearSheet) {
+    // Investor's own tear sheets navigate to edit page
+    if (tearSheet.creator_role === "investor") {
+      window.location.href = `/tear-sheets/${tearSheet.id}`;
+      return;
+    }
+
+    // Founder tear sheets open in viewer
     setSelectedTearSheet(tearSheet);
     setLoadingMetrics(true);
     setSelectedMetrics([]);
@@ -266,6 +210,11 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
     if (filterYear !== "All") {
       list = list.filter((t) => t.year === Number(filterYear));
     }
+    if (filterSource === "founder") {
+      list = list.filter((t) => t.creator_role === "founder");
+    } else if (filterSource === "mine") {
+      list = list.filter((t) => t.creator_role === "investor");
+    }
 
     // Sort by year and quarter descending
     return [...list].sort((a, b) => {
@@ -275,26 +224,48 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
       const qB = parseInt(b.quarter.replace("Q", ""), 10);
       return qB - qA;
     });
-  }, [tearSheets, filterQuarter, filterYear]);
+  }, [tearSheets, filterQuarter, filterYear, filterSource]);
 
   // Show viewer when a tear sheet is selected
   if (selectedTearSheet) {
     return (
       <TearSheetViewer
         tearSheet={selectedTearSheet}
-        metrics={loadingMetrics ? [] : selectedMetrics}
+        metrics={selectedMetrics}
         companyId={companyId}
         companyName={companyName}
         onClose={handleClose}
+        metricsLoading={loadingMetrics}
       />
     );
   }
 
   return (
     <div className="space-y-4">
+      {/* Header with create button */}
+      <div className="flex items-center justify-between">
+        <div />
+        <button
+          type="button"
+          onClick={() => setShowCreateModal(true)}
+          className="inline-flex items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Create Tear Sheet
+        </button>
+      </div>
+
       {/* Filters */}
       {tearSheets.length > 0 && (
         <div className="flex flex-wrap items-center gap-3">
+          <SlidingTabs
+            tabs={SOURCE_TABS}
+            value={filterSource}
+            onChange={setFilterSource}
+            size="sm"
+            showIcons={false}
+          />
+
           <SlidingTabs
             tabs={QUARTER_TABS}
             value={filterQuarter}
@@ -359,10 +330,19 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
       {/* Empty state */}
       {!loading && tearSheets.length === 0 && (
         <div className="py-12 text-center">
-          <p className="text-sm text-text-secondary">No tear sheets available.</p>
+          <FileSpreadsheet className="mx-auto h-10 w-10 text-text-faint" />
+          <p className="mt-3 text-sm text-text-secondary">No tear sheets yet.</p>
           <p className="mt-1 text-xs text-text-muted">
-            Published tear sheets from the founder will appear here.
+            Create your own or wait for the founder to publish one.
           </p>
+          <button
+            type="button"
+            onClick={() => setShowCreateModal(true)}
+            className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+          >
+            <Plus className="h-4 w-4" />
+            Create Tear Sheet
+          </button>
         </div>
       )}
 
@@ -387,6 +367,14 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
           ))}
         </div>
       )}
+
+      <NewTearSheetModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        companies={[{ id: companyId, name: companyName }]}
+        loadingCompanies={false}
+        preselectedCompanyId={companyId}
+      />
     </div>
   );
 }

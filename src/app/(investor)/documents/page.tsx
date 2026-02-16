@@ -290,7 +290,7 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Documents" }]} />
+        <Breadcrumbs items={[{ label: "Companies", href: "/companies" }, { label: "Documents" }]} />
         <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Documents</h1>
       </div>
 
@@ -305,6 +305,7 @@ export default function DocumentsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-10 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-8 text-sm placeholder:text-text-muted focus:border-border-default focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+            aria-label="Search by filename"
           />
           {search && (
             <button
@@ -483,6 +484,7 @@ export default function DocumentsPage() {
                 checked={allSelected}
                 onChange={toggleSelectAll}
                 className="h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
+                aria-label="Select all documents"
               />
               <span className="text-xs text-text-tertiary">Select all</span>
             </div>
@@ -557,6 +559,7 @@ export default function DocumentsPage() {
                   checked={allSelected}
                   onChange={toggleSelectAll}
                   className="h-4 w-4 rounded border-border-default bg-bg-input text-text-primary accent-white"
+                  aria-label="Select all documents"
                 />
               </div>
               <div className="flex-1 min-w-0">Name</div>

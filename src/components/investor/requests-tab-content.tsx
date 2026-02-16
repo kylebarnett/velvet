@@ -438,7 +438,7 @@ function NeedsAttentionTile({ summary }: { summary: CampaignSummary }) {
                           logoUrl={company.logoUrl}
                         />
                         <Link
-                          href={`/dashboard/${company.companyId}`}
+                          href={`/companies/${company.companyId}`}
                           className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary hover:underline"
                         >
                           {company.companyName}
@@ -583,7 +583,11 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
   const pendingCompanyCount = campaign.companiesNotResponded + campaign.companiesPartial;
 
   return (
-    <div className="rounded-xl border border-border-subtle bg-bg-raised transition-colors">
+    <div className={`rounded-xl border transition-colors ${
+      campaign.isOverdue
+        ? "border-[var(--error-border)] bg-[var(--status-error-bg)]"
+        : "border-border-subtle bg-bg-raised"
+    }`}>
       <button
         type="button"
         onClick={handleToggle}
@@ -777,7 +781,7 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
                         />
 
                         <Link
-                          href={`/dashboard/${company.companyId}`}
+                          href={`/companies/${company.companyId}`}
                           className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary hover:underline"
                         >
                           {company.companyName}

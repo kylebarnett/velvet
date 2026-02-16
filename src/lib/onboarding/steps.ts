@@ -38,7 +38,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   // Dashboard
   {
     id: "dashboard-intro",
-    page: "/dashboard",
+    page: "/companies",
     target: '[data-onboarding="dashboard-title"]',
     title: "Company Dashboard",
     message:
@@ -46,7 +46,7 @@ export const INVESTOR_STEPS: OnboardingStep[] = [
   },
   {
     id: "company-card",
-    page: "/dashboard",
+    page: "/companies",
     target: '[data-onboarding="company-card"]',
     title: "Company Overview",
     message:

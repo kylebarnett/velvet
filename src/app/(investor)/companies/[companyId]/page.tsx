@@ -120,7 +120,7 @@ export default async function CompanyDashboardPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-3">
           <Breadcrumbs items={[
-            { label: "Companies", href: "/dashboard" },
+            { label: "Companies", href: "/companies" },
             { label: company.name },
           ]} />
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">

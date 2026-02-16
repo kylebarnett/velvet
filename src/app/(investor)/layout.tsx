@@ -52,7 +52,7 @@ export default async function InvestorLayout({
             label: "Portfolio",
             icon: "briefcase",
             children: [
-              { href: "/dashboard", label: "Companies", icon: "building2" },
+              { href: "/companies", label: "Companies", icon: "building2" },
               { href: "/contacts", label: "Contacts", icon: "users" },
               { href: "/metric-requests", label: "Metric Requests", icon: "send" },
               { href: "/tear-sheets", label: "Tear Sheets", icon: "file-spreadsheet" },

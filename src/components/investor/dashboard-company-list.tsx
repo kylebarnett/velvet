@@ -42,7 +42,7 @@ export function DashboardCompanyList({ companies }: { companies: Company[] }) {
       {companies.map((company) => (
         <Link
           key={company.id}
-          href={`/dashboard/${company.id}`}
+          href={`/companies/${company.id}`}
           className="flex items-center justify-between rounded-lg border border-border-subtle px-3 py-2 hover:bg-bg-elevated"
         >
           <div className="flex items-center gap-3">
