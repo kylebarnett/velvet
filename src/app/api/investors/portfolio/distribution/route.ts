@@ -12,7 +12,6 @@ const BUSINESS_MODEL_LABELS: Record<string, string> = {
   other: "Other",
 };
 
-// GET - Portfolio distribution by industry, stage, and business model
 export async function GET(_req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
@@ -20,7 +19,6 @@ export async function GET(_req: Request) {
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
-  // Get all approved company relationships with company data
   const { data: relationships, error: relError } = await supabase
     .from("investor_company_relationships")
     .select(`
@@ -42,7 +40,6 @@ export async function GET(_req: Request) {
     return jsonError("Failed to process request.", 500);
   }
 
-  // Count companies by each dimension
   const industryCounts = new Map<string, number>();
   const stageCounts = new Map<string, number>();
   const businessModelCounts = new Map<string, number>();
@@ -55,20 +52,16 @@ export async function GET(_req: Request) {
 
     if (!company) continue;
 
-    // Count by industry
     const industry = company.industry ?? "unspecified";
     industryCounts.set(industry, (industryCounts.get(industry) ?? 0) + 1);
 
-    // Count by stage
     const stage = company.stage ?? "unspecified";
     stageCounts.set(stage, (stageCounts.get(stage) ?? 0) + 1);
 
-    // Count by business model
     const businessModel = company.business_model ?? "unspecified";
     businessModelCounts.set(businessModel, (businessModelCounts.get(businessModel) ?? 0) + 1);
   }
 
-  // Format as arrays for charts
   const byIndustry = [...industryCounts.entries()]
     .map(([key, value]) => ({
       name: INDUSTRY_LABELS[key] ?? key.charAt(0).toUpperCase() + key.slice(1),
@@ -84,7 +77,6 @@ export async function GET(_req: Request) {
       key,
     }))
     .sort((a, b) => {
-      // Sort stages by typical order
       const stageOrder = ["seed", "series_a", "series_b", "series_c", "growth", "unspecified"];
       return stageOrder.indexOf(a.key) - stageOrder.indexOf(b.key);
     });

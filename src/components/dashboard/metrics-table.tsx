@@ -157,7 +157,6 @@ function CellTooltip({
   const isAi = periodData.source === "ai_extracted";
   const displayDate = periodData.updatedAt || periodData.submittedAt;
 
-  // Render invisible initially to measure, then position
   const style: React.CSSProperties = position
     ? { position: "fixed", top: position.top, left: position.left, opacity: 1 }
     : { position: "fixed", top: -9999, left: -9999, opacity: 0 };
@@ -303,7 +302,6 @@ function SortableMetricRow({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // Determine aggregation type for total
   const aggregationType = metric.aggregationType ?? getDefaultAggregationType(metric.metricName);
   const { symbol: aggSymbol } = getAggregationIndicator(aggregationType);
 
@@ -529,7 +527,6 @@ function TotalColumnTooltip({ periodType, periodsVisible }: { periodType: string
   );
 }
 
-// Helper to sort data by saved order
 function sortDataByOrder(data: MetricRow[], savedOrder: string[]): MetricRow[] {
   if (!savedOrder.length) return data;
 
@@ -539,19 +536,15 @@ function sortDataByOrder(data: MetricRow[], savedOrder: string[]): MetricRow[] {
     const aIdx = orderMap.get(a.metricName.toLowerCase());
     const bIdx = orderMap.get(b.metricName.toLowerCase());
 
-    // If both have saved positions, sort by those
     if (aIdx !== undefined && bIdx !== undefined) {
       return aIdx - bIdx;
     }
-    // Items with saved positions come first
     if (aIdx !== undefined) return -1;
     if (bIdx !== undefined) return 1;
-    // Otherwise maintain original order
     return 0;
   });
 }
 
-// Preference key for metric order
 function getPreferenceKey(storageKey: string): string {
   return `metric_order.${storageKey}`;
 }
@@ -650,7 +643,6 @@ function MetricsTableBody({
         style={{ boxShadow: "4px 0 6px -4px var(--table-sticky-shadow)" }}
       >
         Metric
-        {/* Resize handle */}
         <div
           onMouseDown={handleResizeStart}
           className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize opacity-0 transition-opacity group-hover/header:opacity-100 hover:!opacity-100"
@@ -743,7 +735,6 @@ function MetricsTableBody({
     );
   }
 
-  // Virtualized rendering
   const virtualItems = virtualizer.getVirtualItems();
 
   return (
@@ -764,7 +755,6 @@ function MetricsTableBody({
           {theadContent}
         </thead>
         <tbody>
-          {/* Top spacer */}
           {virtualItems.length > 0 && virtualItems[0].start > 0 && (
             <tr>
               <td
@@ -800,7 +790,6 @@ function MetricsTableBody({
               />
             );
           })}
-          {/* Bottom spacer */}
           {virtualItems.length > 0 && (
             <tr>
               <td
@@ -835,7 +824,6 @@ export function MetricsTable({
   const [hoveredCell, setHoveredCell] = useState<HoveredCell>(null);
   const [metricInfoTooltip, setMetricInfoTooltip] = useState<MetricInfoTooltipState>(null);
 
-  // Inline editing state
   const [editingCell, setEditingCell] = useState<EditingCell>(null);
   const [editInputValue, setEditInputValue] = useState("");
   const [editSaving, setEditSaving] = useState(false);
@@ -853,7 +841,6 @@ export function MetricsTable({
   const [visiblePeriodSet, setVisiblePeriodSet] = useState<string[]>([]);
   const periodHeaderRefs = useRef<Map<string, HTMLTableCellElement>>(new Map());
 
-  // Resizable metric column
   const DEFAULT_METRIC_COL_WIDTH = 200;
   const MIN_METRIC_COL_WIDTH = 120;
   const MAX_METRIC_COL_WIDTH = 400;
@@ -868,10 +855,8 @@ export function MetricsTable({
   const TOTAL_COL_WIDTH = showTotals ? 110 : 0;
   const GRIP_COL_WIDTH = isReorderMode ? 32 : 0;
 
-  // Track when loading completes so effects that need scrollRef re-run
   const isTableLoading = (savedOrder === null || !metricColLoaded) && !!storageKey;
 
-  // Load saved metric column width from preferences
   useEffect(() => {
     if (!storageKey) return;
     const prefKey = `metric_col_width.${storageKey}`;
@@ -886,7 +871,6 @@ export function MetricsTable({
       .finally(() => setMetricColLoaded(true));
   }, [storageKey]);
 
-  // Save metric column width to preferences (debounced)
   const saveMetricColWidth = useCallback((width: number) => {
     if (!storageKey) return;
     if (colWidthSaveRef.current) clearTimeout(colWidthSaveRef.current);
@@ -904,7 +888,6 @@ export function MetricsTable({
     return () => { if (colWidthSaveRef.current) clearTimeout(colWidthSaveRef.current); };
   }, []);
 
-  // Column resize handler
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -932,7 +915,6 @@ export function MetricsTable({
     document.body.style.userSelect = "none";
   }, [metricColWidth]);
 
-  // Save width whenever it changes (after load) via a separate effect
   const metricColWidthPrevRef = useRef(metricColWidth);
   useEffect(() => {
     if (!metricColLoaded) return;
@@ -942,7 +924,7 @@ export function MetricsTable({
     }
   }, [metricColWidth, metricColLoaded, saveMetricColWidth]);
 
-  // Measure container and compute period column width so exactly 4 fit
+  // Compute period column width so exactly 4 fit in view
   useEffect(() => {
     const scrollEl = scrollRef.current;
     if (!scrollEl) return;
@@ -961,8 +943,6 @@ export function MetricsTable({
     return () => observer.disconnect();
   }, [showTotals, TOTAL_COL_WIDTH, GRIP_COL_WIDTH, METRIC_COL_WIDTH, isTableLoading]);
 
-  // Track which period columns are visible using IntersectionObserver
-  // This is more reliable than scroll-event + getBoundingClientRect
   const visibleMapRef = useRef(new Map<string, boolean>());
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -1009,7 +989,6 @@ export function MetricsTable({
     return () => observerRef.current?.disconnect();
   }, [METRIC_COL_WIDTH, GRIP_COL_WIDTH, TOTAL_COL_WIDTH, periodColWidth, isTableLoading]);
 
-  // Load saved order from API on mount
   useEffect(() => {
     if (!storageKey) {
       setSavedOrder([]); // Empty array means "loaded, but no custom order"
@@ -1032,7 +1011,6 @@ export function MetricsTable({
       });
   }, [storageKey]); // Only run on mount, not when data changes
 
-  // Apply saved order when it's loaded or when data changes
   useEffect(() => {
     // Wait for savedOrder to be loaded (non-null)
     if (savedOrder === null) return;
@@ -1051,7 +1029,6 @@ export function MetricsTable({
     }
   }, [data, savedOrder]);
 
-  // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -1063,7 +1040,6 @@ export function MetricsTable({
     })
   );
 
-  // Save order to API immediately (no debounce — drag-end fires once per reorder)
   const saveOrderToApi = useCallback((order: string[]) => {
     if (!storageKey) return;
 
@@ -1099,7 +1075,6 @@ export function MetricsTable({
     }
   }, [orderedData, onReorder, saveOrderToApi]);
 
-  // Use orderedData for rendering
   const displayData = orderedData;
 
   useEffect(() => {
@@ -1107,7 +1082,6 @@ export function MetricsTable({
     return () => setMounted(false);
   }, []);
 
-  // Auto-scroll to most recent periods (rightmost) on data load
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
@@ -1160,7 +1134,6 @@ export function MetricsTable({
     return () => clearHoverTimeout();
   }, [clearHoverTimeout]);
 
-  // Metric info tooltip handlers
   const handleMetricInfoHover = useCallback(
     (metricName: string, periodType: string, rect: DOMRect) => {
       if (metricInfoTimeoutRef.current) {
@@ -1213,7 +1186,6 @@ export function MetricsTable({
     };
   }, []);
 
-  // Inline edit handlers
   const handleEditStart = useCallback(
     (metricName: string, periodStart: string, currentValue: string) => {
       setEditingCell({ metricName, periodStart });
@@ -1270,7 +1242,6 @@ export function MetricsTable({
     setEditingCell(null);
   }, [editSaving]);
 
-  // Get all unique periods across metrics, sorted chronologically
   const sortedPeriods = useMemo(() => {
     const allPeriods = new Set<string>();
     displayData.forEach((metric) => {
@@ -1281,9 +1252,7 @@ export function MetricsTable({
     );
   }, [displayData]);
 
-  // Ensure minimum columns so the table feels complete:
-  //   monthly  → 12 months
-  //   yearly   → 5 years
+  // Pad to minimum columns: monthly=12, yearly=5
   const displayPeriods = useMemo(() => {
     const pType = displayData[0]?.periodType ?? "quarterly";
     const minPeriods = pType === "monthly" ? 12 : pType === "yearly" ? 5 : 0;
@@ -1309,8 +1278,7 @@ export function MetricsTable({
     return sortedPeriods;
   }, [displayData, sortedPeriods]);
 
-  // The periods currently visible in the scroll viewport (for totals)
-  // Default to last 4 periods before scroll tracking kicks in (matches auto-scroll-right)
+  // Default to last 4 periods before scroll tracking kicks in
   const visiblePeriods = useMemo(
     () =>
       visiblePeriodSet.length > 0
@@ -1319,7 +1287,6 @@ export function MetricsTable({
     [visiblePeriodSet, sortedPeriods],
   );
 
-  // Find the period data for the hovered cell
   const hoveredPeriodData = useMemo(
     () =>
       hoveredCell
@@ -1330,8 +1297,7 @@ export function MetricsTable({
     [hoveredCell, displayData],
   );
 
-  // Show loading state while preferences are being fetched
-  // This prevents flash of unsorted content on page load
+  // Prevent flash of unsorted content while preferences load
   if ((savedOrder === null || !metricColLoaded) && storageKey) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -1354,7 +1320,6 @@ export function MetricsTable({
         <h3 className="mb-2 text-sm font-medium text-text-primary">{title}</h3>
       )}
 
-      {/* Toolbar */}
       <div data-no-print className="mb-4 flex items-center justify-between">
         <div className="text-xs tabular-nums text-text-muted">
           {sortedPeriods.length} period{sortedPeriods.length !== 1 ? "s" : ""}
@@ -1431,7 +1396,6 @@ export function MetricsTable({
         </button>
       )}
 
-      {/* Render cell tooltip via portal */}
       {mounted && hoveredCell && hoveredPeriodData && (
         <CellTooltip
           periodData={hoveredPeriodData}
@@ -1446,7 +1410,6 @@ export function MetricsTable({
         />
       )}
 
-      {/* Render metric definition tooltip via portal */}
       {mounted && metricInfoTooltip && (
         <MetricNameTooltip
           metricName={metricInfoTooltip.metricName}

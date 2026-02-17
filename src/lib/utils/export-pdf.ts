@@ -271,8 +271,6 @@ async function exportPageBased(
   }
 }
 
-/* ---------- Helpers ---------- */
-
 function loadImage(dataUrl: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();

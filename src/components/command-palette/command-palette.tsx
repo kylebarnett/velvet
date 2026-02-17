@@ -40,10 +40,6 @@ import { useRecentItems, useAddRecent, type RecentItem } from "./use-recent-item
 import { intentFilter } from "./intent-filter";
 import { useAICommandResolve } from "./use-ai-resolve";
 
-/* ------------------------------------------------------------------ */
-/*  Icon map                                                           */
-/* ------------------------------------------------------------------ */
-
 const ICON_MAP: Record<string, LucideIcon> = {
   activity: Activity,
   briefcase: Briefcase,
@@ -71,10 +67,6 @@ function getIcon(name: string): LucideIcon | null {
   return ICON_MAP[name] ?? null;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Search result type                                                 */
-/* ------------------------------------------------------------------ */
-
 type SearchResult = {
   type: string;
   id: string;
@@ -83,10 +75,6 @@ type SearchResult = {
   href: string;
   icon: string;
 };
-
-/* ------------------------------------------------------------------ */
-/*  AI query detection                                                 */
-/* ------------------------------------------------------------------ */
 
 const AI_PREFIXES = ["show", "what", "which", "how", "compare", "find", "list"];
 
@@ -97,10 +85,6 @@ function shouldShowAI(query: string, role: "investor" | "founder"): boolean {
   const first = words[0]?.toLowerCase() ?? "";
   return AI_PREFIXES.includes(first);
 }
-
-/* ------------------------------------------------------------------ */
-/*  Main component                                                     */
-/* ------------------------------------------------------------------ */
 
 export function CommandPalette({ role }: { role: "investor" | "founder" }) {
   const { isOpen, close } = useCommandPalette();
@@ -171,10 +155,6 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
     };
   }, [search]);
 
-  /* ---------------------------------------------------------------- */
-  /*  Handlers                                                         */
-  /* ---------------------------------------------------------------- */
-
   function handleSelect(cmd: CommandDef) {
     if (cmd.id === "act-toggle-theme") {
       setTheme(theme === "dark" ? "light" : "dark");
@@ -241,10 +221,6 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
     }
   }
 
-  /* ---------------------------------------------------------------- */
-  /*  Render                                                           */
-  /* ---------------------------------------------------------------- */
-
   const showAI = shouldShowAI(search, role);
   const hasSearch = search.trim().length >= 2;
 
@@ -265,7 +241,6 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
         <DialogPrimitive.Title>Command palette</DialogPrimitive.Title>
       </VisuallyHidden.Root>
       <div className="relative mx-4 w-full max-w-[1080px] overflow-hidden rounded-2xl border border-border-default bg-bg-secondary shadow-2xl">
-        {/* Search input */}
         <div className="flex items-center gap-3 border-b border-border-default px-6">
           <Search className="h-5 w-5 shrink-0 text-text-muted" />
           <Command.Input
@@ -279,21 +254,17 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
           </kbd>
         </div>
 
-        {/* Results list */}
         <Command.List className="max-h-[min(520px,60vh)] overflow-y-auto px-3 py-2">
-          {/* Loading indicator */}
           {isSearching && (
             <Command.Loading className="px-3 py-2 text-xs text-text-muted">
               Searching...
             </Command.Loading>
           )}
 
-          {/* Empty state */}
           <Command.Empty className="px-4 py-8 text-center text-sm text-text-muted">
             No results found.
           </Command.Empty>
 
-          {/* AI suggested commands */}
           {aiSuggestions.length > 0 && (
             <Command.Group
               heading={
@@ -328,7 +299,6 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
             </Command.Group>
           )}
 
-          {/* AI analyzing micro-indicator */}
           {isAIResolving && aiSuggestions.length === 0 && hasSearch && (
             <div className="flex items-center gap-1.5 px-4 py-1.5 text-[11px] text-text-muted">
               <Sparkles className="h-3 w-3 animate-pulse" />
@@ -336,7 +306,6 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
             </div>
           )}
 
-          {/* AI answer inline */}
           {aiAnswer && (
             <div className="mx-1 mb-2 rounded-lg border border-border-default bg-bg-primary p-4">
               <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-text-muted">
@@ -347,7 +316,6 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
             </div>
           )}
 
-          {/* Search results from server */}
           {hasSearch && searchResults.length > 0 && (
             <Command.Group heading="Results">
               {searchResults.map((result) => {
@@ -372,7 +340,6 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
             </Command.Group>
           )}
 
-          {/* Recent items */}
           {!hasSearch && recentItems.length > 0 && (
             <Command.Group heading="Recent">
               {recentItems.map((item) => {
@@ -392,7 +359,6 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
             </Command.Group>
           )}
 
-          {/* Navigation commands */}
           <Command.Group heading="Navigation">
             {navigationCommands.map((cmd) => {
               const Icon = getIcon(cmd.icon);
@@ -415,7 +381,6 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
             })}
           </Command.Group>
 
-          {/* Action commands */}
           <Command.Group heading="Actions">
             {actionCommands.map((cmd) => {
               const Icon = getIcon(cmd.icon);
@@ -438,7 +403,6 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
             })}
           </Command.Group>
 
-          {/* AI query option */}
           {showAI && hasSearch && (
             <Command.Group heading="AI">
               <Command.Item
@@ -456,7 +420,6 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
           )}
         </Command.List>
 
-        {/* Footer with keyboard hints */}
         <div className="flex items-center gap-5 border-t border-border-default px-6 py-3">
           <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
             <kbd className="rounded border border-border-default bg-bg-primary px-1.5 py-0.5 font-medium">↑↓</kbd>

@@ -51,7 +51,6 @@ type Document = {
   uploaded_at: string;
 };
 
-// Aliases for brevity (imported from shared utility)
 const documentTypeLabels = DOCUMENT_TYPE_LABELS;
 const documentTypeShortLabels = DOCUMENT_TYPE_SHORT_LABELS;
 const documentTypeColors = DOCUMENT_TYPE_COLORS;
@@ -102,9 +101,6 @@ function LoadingSkeleton() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Preview pane (inline, not overlay)                                 */
-/* ------------------------------------------------------------------ */
 function PreviewPane({
   doc,
   companyName,
@@ -163,9 +159,7 @@ function PreviewPane({
 
   return (
     <div className="flex h-full flex-col">
-      {/* Header bar */}
       <div className="flex items-center gap-3 border-b border-border-default px-4 py-3">
-        {/* Mobile back button */}
         <button
           type="button"
           onClick={onClose}
@@ -215,7 +209,6 @@ function PreviewPane({
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
-          {/* Desktop close */}
           <button
             type="button"
             onClick={onClose}
@@ -227,7 +220,6 @@ function PreviewPane({
         </div>
       </div>
 
-      {/* Description if present */}
       {doc.description && (
         <div className="border-b border-border-subtle px-4 py-2">
           <p className="text-xs text-text-tertiary leading-relaxed">
@@ -236,7 +228,6 @@ function PreviewPane({
         </div>
       )}
 
-      {/* Content area */}
       <div className="flex-1 overflow-auto bg-bg-input">
         {loading && (
           <div className="flex items-center justify-center py-20">
@@ -281,9 +272,6 @@ function PreviewPane({
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Main component                                                     */
-/* ------------------------------------------------------------------ */
 export function FounderDocumentList() {
   const router = useRouter();
   const [documents, setDocuments] = React.useState<Document[]>([]);
@@ -306,7 +294,6 @@ export function FounderDocumentList() {
   // Track per-type counts from the unfiltered document set
   const [typeCounts, setTypeCounts] = React.useState<Record<string, number>>({});
 
-  // Fetch documents on mount and when filter changes
   React.useEffect(() => {
     async function fetchDocuments() {
       setLoading(true);
@@ -337,7 +324,6 @@ export function FounderDocumentList() {
     fetchDocuments();
   }, [typeFilter]);
 
-  // Client-side search filter
   const filteredDocuments = React.useMemo(() => {
     if (!searchQuery.trim()) return documents;
     const q = searchQuery.toLowerCase();
@@ -346,7 +332,6 @@ export function FounderDocumentList() {
     );
   }, [documents, searchQuery]);
 
-  // Sorted documents for desktop table view
   const sortedDocuments = React.useMemo(() => {
     const sorted = [...filteredDocuments];
     sorted.sort((a, b) => {
@@ -379,7 +364,6 @@ export function FounderDocumentList() {
     }
   }
 
-  // Group documents by year → quarter for folder view
   const groupedDocuments = React.useMemo(() => {
     if (viewMode !== "folder") return null;
     const groups: Record<string, Record<string, Document[]>> = {};
@@ -477,7 +461,6 @@ export function FounderDocumentList() {
 
   return (
     <div className="space-y-4">
-      {/* Search + Filter bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
@@ -532,13 +515,11 @@ export function FounderDocumentList() {
         </div>
       </div>
 
-      {/* Messages */}
       {error && (
         <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-4 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
-      {/* Empty state */}
       {filteredDocuments.length === 0 ? (
         <EmptyState
           title={searchQuery ? "No documents match your search" : "No documents uploaded yet"}
@@ -550,9 +531,6 @@ export function FounderDocumentList() {
           variant={searchQuery ? "inline" : "first-use"}
         />
       ) : viewMode === "folder" && groupedDocuments ? (
-        /* ============================================ */
-        /*  FOLDER VIEW                                 */
-        /* ============================================ */
         <div className="space-y-2">
           {Object.entries(groupedDocuments)
             .sort(([a], [b]) => b.localeCompare(a))
@@ -650,11 +628,7 @@ export function FounderDocumentList() {
         </div>
       ) : (
         <>
-          {/* ============================================ */}
-          {/*  MOBILE: card list + full-screen preview     */}
-          {/* ============================================ */}
           <div className="sm:hidden">
-            {/* Full-screen mobile preview */}
             {previewDoc && createPortal(
               <div className="fixed inset-0 z-50 bg-bg-primary">
                 <PreviewPane
@@ -669,7 +643,6 @@ export function FounderDocumentList() {
               document.body,
             )}
 
-            {/* Card list */}
             <div className="space-y-3">
               {filteredDocuments.map((doc) => (
                 <div
@@ -711,11 +684,7 @@ export function FounderDocumentList() {
             </div>
           </div>
 
-          {/* ============================================ */}
-          {/*  DESKTOP: split pane (list + preview)        */}
-          {/* ============================================ */}
           <div className="hidden sm:flex gap-4" style={{ height: "calc(100vh - 14rem)" }}>
-            {/* Left pane — document list */}
             <div
               className={`shrink-0 overflow-hidden rounded-xl border border-border-default card-surface transition-all duration-200 ${
                 hasPreview ? "w-80" : "flex-1"
@@ -723,7 +692,6 @@ export function FounderDocumentList() {
             >
               <div className="h-full overflow-y-auto">
                 {hasPreview ? (
-                  /* ---- Compact sidebar list ---- */
                   <div className="p-1.5 space-y-0.5">
                     {filteredDocuments.map((doc) => {
                       const isSelected = previewDoc?.id === doc.id;
@@ -767,7 +735,6 @@ export function FounderDocumentList() {
                     })}
                   </div>
                 ) : (
-                  /* ---- Full table ---- */
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border-default text-left text-text-tertiary">
@@ -893,7 +860,6 @@ export function FounderDocumentList() {
               </div>
             </div>
 
-            {/* Right pane — preview */}
             {hasPreview && (
               <div className="flex-1 overflow-hidden rounded-xl border border-border-default card-surface">
                 <PreviewPane
@@ -911,7 +877,6 @@ export function FounderDocumentList() {
         </>
       )}
 
-      {/* Extraction review panel */}
       {reviewDoc && (
         <ExtractionReviewPanel
           documentId={reviewDoc.id}
@@ -924,7 +889,6 @@ export function FounderDocumentList() {
         />
       )}
 
-      {/* Delete confirmation modal */}
       <ConfirmModal
         open={deleteModal.open}
         title="Delete Document"

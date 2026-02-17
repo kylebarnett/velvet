@@ -115,7 +115,6 @@ export function MetricDetailPanel({
   // Selected period index (into the values array). -1 means "not yet initialized"
   const [selectedPeriodIndex, setSelectedPeriodIndex] = React.useState(-1);
 
-  // Edit state
   const [editing, setEditing] = React.useState(false);
   const [editValue, setEditValue] = React.useState("");
   const [editReason, setEditReason] = React.useState("");
@@ -162,7 +161,6 @@ export function MetricDetailPanel({
   // so that ResponsiveContainer can correctly measure its parent dimensions.
   const [chartReady, setChartReady] = React.useState(false);
 
-  // Animate in
   React.useEffect(() => {
     requestAnimationFrame(() => setIsVisible(true));
     const timer = setTimeout(() => setChartReady(true), 400);
@@ -180,7 +178,6 @@ export function MetricDetailPanel({
     panelRef.current?.focus({ preventScroll: true });
   }, [metricName, initialPeriod]);
 
-  // Escape to close
   React.useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") handleClose();
@@ -194,7 +191,6 @@ export function MetricDetailPanel({
     setTimeout(onClose, 200);
   }
 
-  // Close period dropdown on outside click
   React.useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (
@@ -210,7 +206,6 @@ export function MetricDetailPanel({
     }
   }, [periodDropdownOpen]);
 
-  // Fetch data with abort support to prevent state updates on unmounted component
   React.useEffect(() => {
     const controller = new AbortController();
 
@@ -248,10 +243,8 @@ export function MetricDetailPanel({
     return () => controller.abort();
   }, [companyId, metricName, initialPeriod]);
 
-  // Track which period_start to select (updated on user selection and refreshes)
   const desiredPeriodRef = React.useRef<string | undefined>(initialPeriod);
 
-  // Set selected period after values (possibly rolled up) are derived
   React.useEffect(() => {
     if (values.length === 0) return;
     if (selectedPeriodIndex >= 0 && selectedPeriodIndex < values.length) return; // already valid
@@ -265,7 +258,6 @@ export function MetricDetailPanel({
     }
   }, [values, selectedPeriodIndex]);
 
-  // Compute chart data
   const chartData = React.useMemo(() => {
     return values.map((v) => {
       return {
@@ -276,7 +268,6 @@ export function MetricDetailPanel({
     });
   }, [values]);
 
-  // Selected period value (from dropdown, defaults to most recent)
   const safeIndex =
     selectedPeriodIndex >= 0 && selectedPeriodIndex < values.length
       ? selectedPeriodIndex
@@ -292,7 +283,6 @@ export function MetricDetailPanel({
       ? ((currentNum - previousNum) / Math.abs(previousNum)) * 100
       : null;
 
-  // Period label for the selected value
   const selectedPeriodLabel = current
     ? formatPeriod(current.period_start, current.period_type)
     : null;
@@ -358,7 +348,6 @@ export function MetricDetailPanel({
 
   return createPortal(
     <>
-      {/* Backdrop */}
       <div
         className={`fixed inset-0 z-40 bg-bg-backdrop backdrop-blur-sm transition-opacity duration-300 ${
           isVisible ? "opacity-100" : "opacity-0"
@@ -367,7 +356,6 @@ export function MetricDetailPanel({
         aria-hidden="true"
       />
 
-      {/* Panel */}
       <div
         ref={panelRef}
         tabIndex={-1}
@@ -378,14 +366,11 @@ export function MetricDetailPanel({
         aria-modal="true"
         aria-labelledby="metric-detail-title"
       >
-        {/* Left edge — layered glow effect */}
         <div className="absolute left-0 top-0 bottom-0 w-[6px] bg-gradient-to-b from-[var(--tag-blue-bg)] via-transparent to-transparent opacity-60 blur-md" />
         <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-[var(--tag-blue-text)] via-border-default to-transparent opacity-50" />
         <div className="absolute left-0 top-0 bottom-0 w-px bg-border-default" />
 
-        {/* Header */}
         <div className="relative px-8 pt-9 pb-8">
-          {/* Close button */}
           <button
             onClick={handleClose}
             className="absolute right-7 top-7 flex h-8 w-8 items-center justify-center rounded-lg border border-border-subtle bg-bg-raised text-text-muted transition-all duration-200 hover:border-border-default hover:bg-bg-hover hover:text-text-primary active:scale-95"
@@ -394,7 +379,6 @@ export function MetricDetailPanel({
             <X className="h-3.5 w-3.5" />
           </button>
 
-          {/* Metric label */}
           <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-text-faint">
             Metric Detail
           </span>
@@ -406,7 +390,6 @@ export function MetricDetailPanel({
             {metricName}
           </h2>
 
-          {/* Period selector */}
           {values.length > 0 && selectedPeriodLabel && (
             <div ref={periodDropdownRef} className="relative mt-3">
               <button
@@ -493,11 +476,9 @@ export function MetricDetailPanel({
             </div>
           )}
 
-          {/* Accent line under header */}
           <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border-default to-transparent" />
         </div>
 
-        {/* Scrollable content */}
         <div ref={contentRef} className="flex-1 overflow-y-auto">
           {loading && (
             <div className="flex flex-col items-center justify-center gap-3 py-24">
@@ -520,7 +501,6 @@ export function MetricDetailPanel({
 
           {!loading && values.length > 0 && (
             <div className="space-y-8 px-8 pt-8 pb-12">
-              {/* Trend Chart */}
               {chartData.length > 1 && (
                 <section>
                   <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-text-faint">
@@ -588,7 +568,6 @@ export function MetricDetailPanel({
                 </section>
               )}
 
-              {/* Source Info */}
               {current && (
                 <section>
                   <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-text-faint">
@@ -627,7 +606,6 @@ export function MetricDetailPanel({
                 </section>
               )}
 
-              {/* Notes */}
               {current?.notes && (
                 <section>
                   <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-text-faint">
@@ -663,7 +641,6 @@ export function MetricDetailPanel({
                 </section>
               )}
 
-              {/* AI Resolution (founder only, when source is ai_extracted) */}
               {editable && current && current.source === "ai_extracted" && (
                 <section>
                   <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-text-faint">
@@ -756,7 +733,6 @@ export function MetricDetailPanel({
                 </section>
               )}
 
-              {/* Edit (founder only) */}
               {editable && current && (
                 <section>
                   <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-text-faint">
@@ -823,7 +799,6 @@ export function MetricDetailPanel({
                 </section>
               )}
 
-              {/* Activity Log */}
               <section>
                 <button
                   type="button"
@@ -846,7 +821,6 @@ export function MetricDetailPanel({
                 )}
               </section>
 
-              {/* Comment Thread */}
               <section className="rounded-lg border border-border-subtle overflow-hidden">
                 <MetricCommentThread
                   companyId={companyId}

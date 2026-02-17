@@ -162,14 +162,12 @@ export function AddMetricModal({
   const dialogRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Form state
   const [metricName, setMetricName] = React.useState("");
   const [periodType, setPeriodType] = React.useState<PeriodType>("monthly");
   const [rows, setRows] = React.useState<PeriodRow[]>(() => [
     { id: makeRowId(), periodKey: "", value: "" },
   ]);
 
-  // AI definition suggestion
   const { definition: aiDefinition, isLoading: aiLoading } = useAIMetricDefinition(metricName);
   const { customDefinitions, saveDefinition } = useMetricDefinitions();
 
@@ -179,27 +177,23 @@ export function AddMetricModal({
   const listboxRef = React.useRef<HTMLUListElement>(null);
   const hasTypedRef = React.useRef(false);
 
-  // Submit state
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>(
     {},
   );
 
-  // Available periods for the selected type
   const allPeriods = React.useMemo(
     () => generatePeriods(periodType),
     [periodType],
   );
 
-  // Set first period row when periods change
   React.useEffect(() => {
     if (allPeriods.length > 0) {
       setRows([{ id: makeRowId(), periodKey: allPeriods[0].key, value: "" }]);
     }
   }, [allPeriods]);
 
-  // Merged + deduplicated autocomplete options
   const allMetricNames = React.useMemo(() => {
     const set = new Set<string>();
     for (const key of Object.keys(METRIC_DEFINITIONS)) set.add(key);
@@ -217,12 +211,10 @@ export function AddMetricModal({
       .slice(0, 8);
   }, [metricName, allMetricNames]);
 
-  // Is this a currency metric?
   const isCurrency =
     metricName.trim() !== "" &&
     inferMetricValueType(metricName) === "currency";
 
-  // Does this metric already exist?
   const alreadyExists = existingMetricNames.some(
     (n) => n.toLowerCase() === metricName.trim().toLowerCase(),
   );
@@ -233,7 +225,6 @@ export function AddMetricModal({
     [rows],
   );
 
-  // Reset form state
   function resetForm() {
     setMetricName("");
     setPeriodType("monthly");
@@ -257,7 +248,6 @@ export function AddMetricModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Escape to close
   React.useEffect(() => {
     if (!open) return;
     function handleKeyDown(e: KeyboardEvent) {
@@ -273,7 +263,6 @@ export function AddMetricModal({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose, showSuggestions]);
 
-  // Focus trap
   React.useEffect(() => {
     if (!open) return;
     function handleFocusTrap(e: KeyboardEvent) {
@@ -347,7 +336,6 @@ export function AddMetricModal({
     }
   }
 
-  // Scroll highlighted item into view
   React.useEffect(() => {
     if (highlightedIndex >= 0 && listboxRef.current) {
       const item = listboxRef.current.children[highlightedIndex] as HTMLElement;
@@ -488,14 +476,12 @@ export function AddMetricModal({
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter">
-      {/* Backdrop click to close */}
       <div
         className="absolute inset-0"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Modal */}
       <div
         ref={dialogRef}
         role="dialog"
@@ -503,7 +489,6 @@ export function AddMetricModal({
         aria-labelledby={titleId}
         className="relative mx-4 flex max-h-[min(90vh,680px)] w-full max-w-lg flex-col rounded-xl border border-border-default bg-bg-secondary shadow-2xl modal-dialog-enter"
       >
-        {/* Header — pinned */}
         <div className="flex items-center justify-between border-b border-border-subtle px-6 py-4">
           <h3
             id={titleId}
@@ -521,13 +506,11 @@ export function AddMetricModal({
           </button>
         </div>
 
-        {/* Scrollable body */}
         <form
           onSubmit={handleSubmit}
           className="flex flex-1 flex-col overflow-hidden"
         >
           <div data-scroll-body className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
-            {/* Metric name autocomplete */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-text-secondary">
                 Metric Name
@@ -619,7 +602,6 @@ export function AddMetricModal({
               )}
             </div>
 
-            {/* Period type selector */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-text-secondary">
                 Period Type
@@ -634,7 +616,6 @@ export function AddMetricModal({
               />
             </div>
 
-            {/* Period rows */}
             <div>
               <label className="mb-2 block text-sm font-medium text-text-secondary">
                 Periods &amp; Values
@@ -710,7 +691,6 @@ export function AddMetricModal({
               </div>
             </div>
 
-            {/* "Already exists" info */}
             {alreadyExists && (
               <div className="flex items-start gap-2.5 rounded-lg bg-[var(--tag-blue-bg)] px-3.5 py-3 text-sm text-[var(--tag-blue-text)]">
                 <Info
@@ -726,7 +706,6 @@ export function AddMetricModal({
 
           </div>
 
-          {/* Footer — pinned */}
           <div className="flex items-center justify-end gap-3 border-t border-border-subtle px-6 py-4">
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel

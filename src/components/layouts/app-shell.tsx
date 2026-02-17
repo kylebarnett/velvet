@@ -40,10 +40,6 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils/cn";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
-
 export type NavItem = {
   href: string;
   label: string;
@@ -63,10 +59,6 @@ export type UserInfo = {
   fullName: string | null;
   email: string;
 };
-
-/* ------------------------------------------------------------------ */
-/*  Icon map (string keys → Lucide components)                         */
-/* ------------------------------------------------------------------ */
 
 const ICON_MAP: Record<string, LucideIcon> = {
   activity: Activity,
@@ -97,10 +89,6 @@ function NavIcon({ name, className }: { name?: string; className?: string }) {
   return Icon ? <Icon className={className} /> : null;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
-/* ------------------------------------------------------------------ */
-
 function getInitials(name: string | null, email: string): string {
   if (name) {
     const parts = name.trim().split(/\s+/);
@@ -109,10 +97,6 @@ function getInitials(name: string | null, email: string): string {
   }
   return email.substring(0, 2).toUpperCase();
 }
-
-/* ------------------------------------------------------------------ */
-/*  Sidebar tooltip (fixed position, escapes overflow)                 */
-/* ------------------------------------------------------------------ */
 
 function SidebarTooltip({ label, children }: { label: string; children: React.ReactNode }) {
   const ref = React.useRef<HTMLDivElement>(null);
@@ -142,10 +126,6 @@ function SidebarTooltip({ label, children }: { label: string; children: React.Re
     </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/*  AppShell                                                           */
-/* ------------------------------------------------------------------ */
 
 export function AppShell({
   title,
@@ -255,10 +235,6 @@ export function AppShell({
     return title;
   }, [pathname, nav, title]);
 
-  /* ---------------------------------------------------------------- */
-  /*  Brand header                                                     */
-  /* ---------------------------------------------------------------- */
-
   const brandHeader = (
     <div className={cn("pb-4 pt-5", sidebarCollapsed ? "px-2" : "px-4")}>
       {sidebarCollapsed ? (
@@ -315,7 +291,6 @@ export function AppShell({
       )}
       <div className="mx-0 mt-4 border-t border-border-subtle" />
 
-      {/* Search trigger */}
       {onOpenCommandPalette && (
         <div className={cn("pt-3", sidebarCollapsed ? "px-1.5" : "px-2")}>
           {sidebarCollapsed ? (
@@ -345,10 +320,6 @@ export function AppShell({
     </div>
   );
 
-  /* ---------------------------------------------------------------- */
-  /*  User settings panel                                              */
-  /* ---------------------------------------------------------------- */
-
   const teamHref = role === "founder" ? "/portal/team" : "/team";
   const teamActive = pathname === teamHref || pathname?.startsWith(teamHref + "/");
 
@@ -377,14 +348,12 @@ export function AppShell({
 
     return (
       <div className="border-t border-border-subtle">
-        {/* Expandable content */}
         <div
           className="grid transition-[grid-template-rows] duration-200 ease-in-out"
           style={{ gridTemplateRows: settingsPanelOpen ? "1fr" : "0fr" }}
         >
           <div className="overflow-hidden">
             <div className="px-3 pt-2 pb-1 space-y-0.5">
-              {/* Theme toggle row */}
               <div className={cn(
                 "flex items-center justify-between rounded-md px-2.5",
                 mobile ? "h-11" : "h-9",
@@ -393,7 +362,6 @@ export function AppShell({
                 <ThemeToggle />
               </div>
 
-              {/* Profile links */}
               {profileLinks?.map((link) => {
                 const Icon = link.icon ? ICON_MAP[link.icon] : null;
                 const active = pathname === link.href || pathname?.startsWith(link.href + "/");
@@ -415,7 +383,6 @@ export function AppShell({
                 );
               })}
 
-              {/* Team link */}
               <Link
                 href={teamHref}
                 className={cn(
@@ -430,7 +397,6 @@ export function AppShell({
                 <span>Team</span>
               </Link>
 
-              {/* Take tour */}
               {showTakeTour && onTakeTour && (
                 <button
                   onClick={() => {
@@ -449,7 +415,6 @@ export function AppShell({
                 </button>
               )}
 
-              {/* Help guide */}
               {onOpenHelp && (
                 <button
                   onClick={() => {
@@ -468,7 +433,6 @@ export function AppShell({
                 </button>
               )}
 
-              {/* Logout button */}
               <button
                 onClick={onLogout}
                 className={cn(
@@ -484,7 +448,6 @@ export function AppShell({
           </div>
         </div>
 
-        {/* Trigger button — always visible */}
         <button
           type="button"
           className="flex w-full items-center gap-2.5 p-3 text-left transition-colors hover:bg-bg-elevated"
@@ -518,10 +481,6 @@ export function AppShell({
       </div>
     );
   };
-
-  /* ---------------------------------------------------------------- */
-  /*  Nav rendering                                                    */
-  /* ---------------------------------------------------------------- */
 
   const renderNavItems = (mobile = false) => {
     const collapsed = !mobile && sidebarCollapsed;
@@ -665,10 +624,6 @@ export function AppShell({
     );
   };
 
-  /* ---------------------------------------------------------------- */
-  /*  Render                                                           */
-  /* ---------------------------------------------------------------- */
-
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
       {/* Skip to main content link — visible on focus for keyboard users */}
@@ -679,7 +634,6 @@ export function AppShell({
         Skip to main content
       </a>
 
-      {/* Mobile Header */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border-default bg-bg-primary/95 px-4 backdrop-blur-sm md:hidden">
         <button
           onClick={() => setMobileMenuOpen(true)}
@@ -704,7 +658,6 @@ export function AppShell({
         )}
       </header>
 
-      {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 z-50 bg-bg-backdrop backdrop-blur-sm md:hidden"
@@ -712,14 +665,12 @@ export function AppShell({
         />
       )}
 
-      {/* Mobile Drawer */}
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-72 transform flex-col bg-bg-primary border-r border-border-default transition-transform duration-300 ease-in-out md:hidden",
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {/* Mobile brand header */}
         <div className="flex items-center justify-between px-4 pt-5 pb-2">
           <Link
             className="flex items-center gap-2.5"
@@ -765,12 +716,10 @@ export function AppShell({
         {settingsPanel(true)}
       </aside>
 
-      {/* Desktop Layout */}
       <div
         className="hidden md:grid md:min-h-screen transition-[grid-template-columns] duration-200"
         style={{ gridTemplateColumns: sidebarCollapsed ? "64px 1fr" : "280px 1fr" }}
       >
-        {/* Desktop Sidebar */}
         <aside className="sticky top-0 flex h-screen flex-col border-r border-border-default bg-bg-sidebar overflow-hidden">
           {brandHeader}
           <nav aria-label="Main navigation" className={cn("flex-1 overflow-y-auto", sidebarCollapsed ? "px-1.5" : "px-2")}>
@@ -779,13 +728,11 @@ export function AppShell({
           {settingsPanel(false)}
         </aside>
 
-        {/* Desktop Main Content */}
         <div className="min-w-0">
           <main id="main-content" className="p-4 md:p-6">{children}</main>
         </div>
       </div>
 
-      {/* Mobile Main Content */}
       <main id="main-content-mobile" className="p-4 md:hidden">{children}</main>
     </div>
   );

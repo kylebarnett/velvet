@@ -21,7 +21,6 @@ type ContactRow = {
   companies: { id: string; name: string; founder_id: string | null } | { id: string; name: string; founder_id: string | null }[] | null;
 };
 
-// GET - List contacts for investor with pagination and search
 export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
@@ -29,7 +28,6 @@ export async function GET(req: Request) {
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
-  // Parse query params
   const url = new URL(req.url);
   const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10));
   const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") ?? "50", 10)));
@@ -38,16 +36,13 @@ export async function GET(req: Request) {
   const sortField = url.searchParams.get("sortField") ?? "company";
   const sortDir = url.searchParams.get("sortDir") ?? "asc";
 
-  // Calculate offset
   const offset = (page - 1) * limit;
 
-  // Build base query for counting
   let countQuery = supabase
     .from("portfolio_invitations")
     .select("id", { count: "exact", head: true })
     .eq("investor_id", user.id);
 
-  // Build data query
   let dataQuery = supabase
     .from("portfolio_invitations")
     .select(`
@@ -70,26 +65,20 @@ export async function GET(req: Request) {
     `)
     .eq("investor_id", user.id);
 
-  // Apply status filter
   const validStatuses = ["pending", "sent", "accepted"];
   if (status && validStatuses.includes(status)) {
     countQuery = countQuery.eq("status", status);
     dataQuery = dataQuery.eq("status", status);
   }
 
-  // Apply search filter (server-side ILIKE search)
   if (search) {
-    // Escape special characters for ILIKE pattern and PostgREST filter syntax
-    // First escape ILIKE wildcards, then escape characters that break PostgREST filter parsing
     const escapedSearch = search
-      .replace(/[%_]/g, "\\$&")  // Escape ILIKE wildcards
-      .replace(/[(),."'\\]/g, ""); // Remove chars that could break PostgREST syntax
+      .replace(/[%_]/g, "\\$&")
+      .replace(/[(),."'\\]/g, "");
 
-    // Only search if there's something left after sanitization
     if (escapedSearch.trim()) {
       const searchPattern = `%${escapedSearch.trim()}%`;
 
-      // Search across first_name, last_name, and email
       countQuery = countQuery.or(
         `first_name.ilike.${searchPattern},last_name.ilike.${searchPattern},email.ilike.${searchPattern}`
       );
@@ -99,7 +88,6 @@ export async function GET(req: Request) {
     }
   }
 
-  // Get total count
   const { count: totalCount, error: countError } = await countQuery;
   if (countError) {
     logger.error("Failed to count contacts:", countError.message);
@@ -164,7 +152,6 @@ export async function GET(req: Request) {
   });
 }
 
-// PUT - Update contact info
 const updateSchema = z.object({
   id: z.string().uuid(),
   first_name: z.string().min(1).optional(),
@@ -187,7 +174,6 @@ export async function PUT(req: Request) {
 
   const { id, ...updates } = parsed.data;
 
-  // Only update if there's something to update
   if (Object.keys(updates).length === 0) {
     return jsonError("No fields to update.", 400);
   }
@@ -208,7 +194,6 @@ export async function PUT(req: Request) {
   return NextResponse.json({ contact: data });
 }
 
-// DELETE - Remove contact, company, and relationship
 const deleteSchema = z.object({
   id: z.string().uuid(),
 });
@@ -227,7 +212,6 @@ export async function DELETE(req: Request) {
 
   const { id } = parsed.data;
 
-  // First get the invitation and company info
   const { data: invitation, error: fetchError } = await supabase
     .from("portfolio_invitations")
     .select("company_id, companies(founder_id)")
@@ -239,10 +223,8 @@ export async function DELETE(req: Request) {
     return jsonError("Contact not found.", 404);
   }
 
-  // Use admin client to delete related records
   const adminClient = createSupabaseAdminClient();
 
-  // Delete invitation and relationship
   await adminClient.from("portfolio_invitations").delete().eq("id", id);
   await adminClient
     .from("investor_company_relationships")

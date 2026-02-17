@@ -16,10 +16,6 @@ export type CashFlow = {
   amount: number; // negative = outflow, positive = inflow
 };
 
-/* ------------------------------------------------------------------ */
-/*  TVPI — Total Value to Paid-In                                      */
-/* ------------------------------------------------------------------ */
-
 export function calculateTVPI(investments: Investment[]): number | null {
   if (investments.length === 0) return null;
 
@@ -38,10 +34,6 @@ export function calculateTVPI(investments: Investment[]): number | null {
   return (totalUnrealized + totalRealized) / totalInvested;
 }
 
-/* ------------------------------------------------------------------ */
-/*  DPI — Distributions to Paid-In                                     */
-/* ------------------------------------------------------------------ */
-
 export function calculateDPI(investments: Investment[]): number | null {
   if (investments.length === 0) return null;
 
@@ -57,10 +49,6 @@ export function calculateDPI(investments: Investment[]): number | null {
 
   return totalRealized / totalInvested;
 }
-
-/* ------------------------------------------------------------------ */
-/*  RVPI — Residual Value to Paid-In                                   */
-/* ------------------------------------------------------------------ */
 
 export function calculateRVPI(investments: Investment[]): number | null {
   if (investments.length === 0) return null;
@@ -78,10 +66,6 @@ export function calculateRVPI(investments: Investment[]): number | null {
   return totalUnrealized / totalInvested;
 }
 
-/* ------------------------------------------------------------------ */
-/*  MOIC — Multiple on Invested Capital                                */
-/* ------------------------------------------------------------------ */
-
 export function calculateMOIC(investments: Investment[]): number | null {
   if (investments.length === 0) return null;
 
@@ -97,10 +81,6 @@ export function calculateMOIC(investments: Investment[]): number | null {
 
   return totalValue / totalInvested;
 }
-
-/* ------------------------------------------------------------------ */
-/*  IRR — Internal Rate of Return (Newton-Raphson)                     */
-/* ------------------------------------------------------------------ */
 
 /**
  * Calculates IRR using Newton-Raphson on dated cash flows.
@@ -118,7 +98,6 @@ export function calculateIRR(cashFlows: CashFlow[]): number | null {
   const hasPositive = cashFlows.some((cf) => cf.amount > 0);
   if (!hasNegative || !hasPositive) return null;
 
-  // Sort by date
   const sorted = [...cashFlows].sort(
     (a, b) => a.date.getTime() - b.date.getTime(),
   );
@@ -126,12 +105,10 @@ export function calculateIRR(cashFlows: CashFlow[]): number | null {
   const firstDate = sorted[0].date.getTime();
   const DAYS_PER_YEAR = 365.25;
 
-  // Calculate year fractions from first cash flow
   const yearFractions = sorted.map(
     (cf) => (cf.date.getTime() - firstDate) / (DAYS_PER_YEAR * 86400000),
   );
 
-  // NPV function: sum of cf / (1 + r)^t
   function npv(rate: number): number {
     let total = 0;
     for (let i = 0; i < sorted.length; i++) {
@@ -142,7 +119,6 @@ export function calculateIRR(cashFlows: CashFlow[]): number | null {
     return total;
   }
 
-  // Derivative of NPV with respect to rate
   function npvDerivative(rate: number): number {
     let total = 0;
     for (let i = 0; i < sorted.length; i++) {
@@ -154,8 +130,8 @@ export function calculateIRR(cashFlows: CashFlow[]): number | null {
     return total;
   }
 
-  // Newton-Raphson iteration
-  let rate = 0.1; // initial guess 10%
+  let rate = 0.1;
+
   const MAX_ITERATIONS = 100;
   const TOLERANCE = 1e-8;
 

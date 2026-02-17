@@ -14,10 +14,6 @@
 
 import { getDefaultAggregationType, type AggregationType } from "./temporal-aggregation";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 export type RolledUpValue = {
   metric_name: string;
   period_type: string; // target: "quarterly" or "annual"
@@ -40,10 +36,6 @@ type MetricInput = {
 };
 
 type PeriodType = "monthly" | "quarterly" | "yearly";
-
-// ---------------------------------------------------------------------------
-// Date helpers — all UTC per project convention
-// ---------------------------------------------------------------------------
 
 function utcYear(d: Date): number {
   return d.getUTCFullYear();
@@ -134,10 +126,6 @@ function formatChildPeriod(periodStart: string, sourceType: "monthly" | "quarter
   return `Q${q} '${yr}`;
 }
 
-// ---------------------------------------------------------------------------
-// Numeric extraction (inline to avoid import cycles)
-// ---------------------------------------------------------------------------
-
 function extractNumber(value: unknown): number | null {
   if (value == null) return null;
   if (typeof value === "number") return value;
@@ -155,10 +143,6 @@ function extractNumber(value: unknown): number | null {
   }
   return null;
 }
-
-// ---------------------------------------------------------------------------
-// Main function
-// ---------------------------------------------------------------------------
 
 /**
  * Compute rolled-up metric values for a target period type.
@@ -293,10 +277,6 @@ function rollupFromSource(
 
   return results;
 }
-
-// ---------------------------------------------------------------------------
-// Detail string generator — for tooltip display
-// ---------------------------------------------------------------------------
 
 /**
  * Build a human-readable detail string for a rollup.

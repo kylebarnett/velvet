@@ -4,7 +4,6 @@ import { z } from "zod";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { logger } from "@/lib/logger";
 
-// GET - List all schedules for investor
 export async function GET() {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
@@ -51,7 +50,6 @@ export async function GET() {
     return jsonError("Failed to fetch schedules.", 500);
   }
 
-  // Format response
   const schedules = (data ?? []).map((s) => {
     const template = Array.isArray(s.metric_templates)
       ? s.metric_templates[0]
@@ -89,7 +87,6 @@ export async function GET() {
   return NextResponse.json({ schedules });
 }
 
-// POST - Create a new schedule
 const createSchema = z.object({
   name: z.string().min(1, "Name is required"),
   templateId: z.string().uuid("Invalid template ID"),
@@ -127,7 +124,6 @@ export async function POST(req: Request) {
     reminderDaysBeforeDue,
   } = parsed.data;
 
-  // Verify template exists and belongs to user or is a system template
   const { data: template, error: templateError } = await supabase
     .from("metric_templates")
     .select("id, investor_id, is_system")
@@ -143,7 +139,6 @@ export async function POST(req: Request) {
     return jsonError("Template not accessible.", 403);
   }
 
-  // If companyIds provided, verify all companies are in investor's portfolio
   if (companyIds && companyIds.length > 0) {
     const { data: relationships, error: relError } = await supabase
       .from("investor_company_relationships")
@@ -163,7 +158,6 @@ export async function POST(req: Request) {
     }
   }
 
-  // Create the schedule
   const { data: schedule, error: createError } = await supabase
     .from("metric_request_schedules")
     .insert({

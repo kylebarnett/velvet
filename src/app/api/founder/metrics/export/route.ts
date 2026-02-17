@@ -4,7 +4,6 @@ import { getApiUser, jsonError } from "@/lib/api/auth";
 import { checkRateLimit } from "@/lib/api/rate-limit";
 import { logger } from "@/lib/logger";
 
-// GET - Export founder's metrics as CSV
 export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
@@ -15,11 +14,9 @@ export async function GET(req: Request) {
   const rl = checkRateLimit(`metrics-export:${user.id}`, 10, 60_000);
   if (!rl.allowed) return jsonError("Too many requests.", 429);
 
-  // Parse query params
   const url = new URL(req.url);
   const periodType = url.searchParams.get("periodType");
 
-  // Get founder's company
   const { data: company } = await supabase
     .from("companies")
     .select("id, name")
@@ -28,7 +25,6 @@ export async function GET(req: Request) {
 
   if (!company) return jsonError("No company found.", 404);
 
-  // Fetch all metric values for this company
   let query = supabase
     .from("company_metric_values")
     .select(`
@@ -55,14 +51,11 @@ export async function GET(req: Request) {
     return jsonError("Failed to process request.", 500);
   }
 
-  // Generate CSV
   const csvRows: string[] = [
-    // Header row
     ["Metric", "Period Type", "Period Start", "Period End", "Value", "Notes", "Submitted At"].join(","),
   ];
 
   for (const metric of metrics ?? []) {
-    // Extract numeric value
     let value: string = "";
     if (metric.value != null) {
       if (typeof metric.value === "number") {

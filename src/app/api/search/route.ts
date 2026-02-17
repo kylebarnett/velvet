@@ -7,27 +7,15 @@ import { searchArticles } from "@/lib/help/search";
 import { ALL_ARTICLES } from "@/lib/help/content/index";
 import { getArticlesByRole } from "@/lib/help/types";
 
-/* ------------------------------------------------------------------ */
-/*  ILIKE escape helper                                                */
-/* ------------------------------------------------------------------ */
-
 function escapeIlike(value: string): string {
   const clean = value.replace(/[(),."'\\]/g, "");
   return clean.replace(/[%_]/g, "\\$&");
 }
 
-/* ------------------------------------------------------------------ */
-/*  Validation                                                         */
-/* ------------------------------------------------------------------ */
-
 const querySchema = z.object({
   q: z.string().min(2).max(100),
   limit: z.coerce.number().int().min(1).max(10).default(5),
 });
-
-/* ------------------------------------------------------------------ */
-/*  Result type                                                        */
-/* ------------------------------------------------------------------ */
 
 type SearchResult = {
   type: string;
@@ -37,10 +25,6 @@ type SearchResult = {
   href: string;
   icon: string;
 };
-
-/* ------------------------------------------------------------------ */
-/*  GET /api/search                                                    */
-/* ------------------------------------------------------------------ */
 
 export async function GET(req: NextRequest) {
   const { supabase, user } = await getApiUser();
@@ -72,7 +56,6 @@ export async function GET(req: NextRequest) {
   const results: SearchResult[] = [];
 
   if (role === "investor") {
-    // Get approved company IDs first
     const { data: rels } = await supabase
       .from("investor_company_relationships")
       .select("company_id")
@@ -81,10 +64,8 @@ export async function GET(req: NextRequest) {
 
     const companyIds = (rels ?? []).map((r) => r.company_id).filter(Boolean) as string[];
 
-    // Run investor searches in parallel
     const [companiesRes, contactsRes, docsRes, requestsRes, tearSheetsRes, fundsRes] =
       await Promise.all([
-        // Companies
         companyIds.length > 0
           ? supabase
               .from("companies")
@@ -94,7 +75,6 @@ export async function GET(req: NextRequest) {
               .limit(limit)
           : Promise.resolve({ data: null }),
 
-        // Contacts
         supabase
           .from("portfolio_invitations")
           .select("id, email, first_name, last_name")
@@ -102,7 +82,6 @@ export async function GET(req: NextRequest) {
           .or(`first_name.ilike.${pattern},last_name.ilike.${pattern},email.ilike.${pattern}`)
           .limit(limit),
 
-        // Documents
         companyIds.length > 0
           ? supabase
               .from("documents")
@@ -112,14 +91,12 @@ export async function GET(req: NextRequest) {
               .limit(limit)
           : Promise.resolve({ data: null }),
 
-        // Metric requests — search by metric_name via metric_definitions join
         supabase
           .from("metric_requests")
           .select("id, company_id, metric_definition_id, companies(name)")
           .eq("investor_id", user.id)
           .limit(limit),
 
-        // Tear sheets
         supabase
           .from("tear_sheets")
           .select("id, title, company_id, companies(name)")
@@ -127,7 +104,6 @@ export async function GET(req: NextRequest) {
           .ilike("title", pattern)
           .limit(limit),
 
-        // Funds
         supabase
           .from("funds")
           .select("id, name")
@@ -136,7 +112,6 @@ export async function GET(req: NextRequest) {
           .limit(limit),
       ]);
 
-    // Map companies
     if (companiesRes.data) {
       for (const c of companiesRes.data) {
         const parts = [c.stage, c.industry].filter(Boolean);
@@ -151,7 +126,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Map contacts
     if (contactsRes.data) {
       for (const c of contactsRes.data) {
         const name = [c.first_name, c.last_name].filter(Boolean).join(" ") || c.email;
@@ -166,7 +140,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Map documents
     if (docsRes.data) {
       for (const d of docsRes.data) {
         const company = Array.isArray(d.companies) ? d.companies[0] : d.companies;
@@ -181,7 +154,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Map tear sheets
     if (tearSheetsRes.data) {
       for (const t of tearSheetsRes.data) {
         const company = Array.isArray(t.companies) ? t.companies[0] : t.companies;
@@ -196,7 +168,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Map funds
     if (fundsRes.data) {
       for (const f of fundsRes.data) {
         results.push({
@@ -209,8 +180,6 @@ export async function GET(req: NextRequest) {
       }
     }
   } else {
-    // Founder searches
-    // First get the founder's company
     const { data: company } = await supabase
       .from("companies")
       .select("id, name")
@@ -219,7 +188,6 @@ export async function GET(req: NextRequest) {
 
     if (company) {
       const [docsRes, tearSheetsRes, investorsRes] = await Promise.all([
-        // Documents
         supabase
           .from("documents")
           .select("id, file_name, document_type")
@@ -227,7 +195,6 @@ export async function GET(req: NextRequest) {
           .ilike("file_name", pattern)
           .limit(limit),
 
-        // Tear sheets
         supabase
           .from("tear_sheets")
           .select("id, title")
@@ -235,7 +202,6 @@ export async function GET(req: NextRequest) {
           .ilike("title", pattern)
           .limit(limit),
 
-        // Investors (via relationships → org names)
         supabase
           .from("investor_company_relationships")
           .select("investor_id, users!investor_company_relationships_investor_id_fkey(id, full_name, email)")
@@ -243,7 +209,6 @@ export async function GET(req: NextRequest) {
           .limit(20),
       ]);
 
-      // Map documents
       if (docsRes.data) {
         for (const d of docsRes.data) {
           results.push({
@@ -257,7 +222,6 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      // Map tear sheets
       if (tearSheetsRes.data) {
         for (const t of tearSheetsRes.data) {
           results.push({
@@ -270,7 +234,6 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      // Map investors — client-side filter by name/email
       if (investorsRes.data) {
         const lowerQ = q.toLowerCase();
         for (const rel of investorsRes.data) {
@@ -296,7 +259,6 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Help articles — searched in-memory
   const roleArticles = getArticlesByRole(role, ALL_ARTICLES);
   const helpMatches = searchArticles(q, roleArticles).slice(0, 3);
   for (const article of helpMatches) {
@@ -311,7 +273,6 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // Cap total results at 20
   return NextResponse.json(
     { results: results.slice(0, 20) },
     { headers: { "Cache-Control": "private, no-store" } },

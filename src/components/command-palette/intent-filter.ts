@@ -1,18 +1,3 @@
-/* ------------------------------------------------------------------ */
-/*  Intent-aware filter for cmdk Command Palette                       */
-/*                                                                     */
-/*  Replaces cmdk's default `command-score` fuzzy matching with a      */
-/*  filter that understands natural language intent:                    */
-/*    "create q1 '26 request"  →  Create Metric Request                */
-/*    "go to reports"          →  Reports                              */
-/*    "upload file"            →  Upload Document                      */
-/*    "switch dark mode"       →  Toggle Theme                         */
-/* ------------------------------------------------------------------ */
-
-/* ------------------------------------------------------------------ */
-/*  Stop words & noise                                                 */
-/* ------------------------------------------------------------------ */
-
 const STOP_WORDS = new Set([
   "a", "an", "the", "to", "for", "in", "on", "at", "of", "and", "or",
   "my", "me", "i", "it", "is", "be", "do",
@@ -38,12 +23,7 @@ function detectFirstVerb(search: string): string | null {
   return words[0] ?? null;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Synonym expansion map                                              */
-/* ------------------------------------------------------------------ */
-
 const SYNONYMS: Record<string, string[]> = {
-  // ── Action verbs ──────────────────────────────────────────────────
   create: ["create", "new", "add"],
   new: ["create", "new", "add"],
   add: ["create", "new", "add"],
@@ -57,7 +37,6 @@ const SYNONYMS: Record<string, string[]> = {
   requests: ["metric request", "campaign", "request"],
   ask: ["metric request", "request", "send"],
 
-  // ── Navigation verbs ─────────────────────────────────────────────
   open: ["navigate"],
   view: ["navigate"],
   show: ["navigate"],
@@ -69,21 +48,18 @@ const SYNONYMS: Record<string, string[]> = {
   check: ["navigate"],
   look: ["navigate"],
 
-  // ── Upload / import verbs ────────────────────────────────────────
   upload: ["upload", "import", "document", "file"],
   import: ["import", "upload", "csv", "excel", "historical"],
   ingest: ["import", "upload"],
   load: ["import", "upload"],
   pull: ["import", "request"],
 
-  // ── Toggle verbs ─────────────────────────────────────────────────
   toggle: ["toggle", "theme"],
   switch: ["toggle", "theme"],
   change: ["toggle", "theme"],
   turn: ["toggle", "theme"],
   flip: ["toggle", "theme"],
 
-  // ── Entities: companies ───────────────────────────────────────────
   company: ["companies", "company", "portfolio"],
   companies: ["companies", "company", "portfolio"],
   portfolio: ["companies", "portfolio"],
@@ -93,14 +69,12 @@ const SYNONYMS: Record<string, string[]> = {
   orgs: ["companies", "company"],
   organization: ["companies", "company"],
 
-  // ── Entities: contacts ────────────────────────────────────────────
   contact: ["contacts", "contact", "people"],
   contacts: ["contacts", "contact", "people"],
   people: ["contacts", "people"],
   founders: ["contacts", "people", "founders"],
   founder: ["contacts", "founders", "company profile"],
 
-  // ── Entities: metric requests ─────────────────────────────────────
   metric: ["metric request", "metric", "metrics"],
   metrics: ["metric request", "metric", "metrics"],
   campaign: ["metric request", "campaign"],
@@ -110,7 +84,6 @@ const SYNONYMS: Record<string, string[]> = {
   collection: ["metric request", "campaign", "collect"],
   quarterly: ["metric request", "request"],
 
-  // ── Entities: documents ───────────────────────────────────────────
   doc: ["document", "documents", "file"],
   docs: ["document", "documents", "file"],
   document: ["document", "documents", "file"],
@@ -120,7 +93,6 @@ const SYNONYMS: Record<string, string[]> = {
   pdf: ["document", "pdf", "file"],
   attachment: ["document", "upload", "file"],
 
-  // ── Entities: reports ─────────────────────────────────────────────
   report: ["reports", "report", "analytics"],
   reports: ["reports", "report", "analytics"],
   analytics: ["reports", "analytics"],
@@ -130,55 +102,46 @@ const SYNONYMS: Record<string, string[]> = {
   visualization: ["reports", "charts"],
   graph: ["reports", "charts"],
 
-  // ── Entities: tear sheets ─────────────────────────────────────────
   sheet: ["tear sheet", "tear sheets"],
   sheets: ["tear sheet", "tear sheets"],
   tear: ["tear sheet", "tear sheets"],
   summary: ["tear sheet", "overview"],
   tearsheet: ["tear sheet", "tear sheets"],
 
-  // ── Entities: funds / LP ──────────────────────────────────────────
   fund: ["funds", "fund", "lp"],
   funds: ["funds", "fund", "lp"],
   lp: ["lp", "fund", "limited partner", "lp reports"],
   limited: ["lp", "limited partner"],
   partner: ["lp", "limited partner"],
 
-  // ── Entities: investors ───────────────────────────────────────────
   investor: ["investors", "investor"],
   investors: ["investors", "investor"],
   access: ["investors", "approval", "access"],
   approval: ["investors", "approval"],
 
-  // ── Entities: team ────────────────────────────────────────────────
   team: ["team", "members"],
   member: ["team", "members"],
   members: ["team", "members"],
   invite: ["team", "invite", "members"],
 
-  // ── Entities: activity ────────────────────────────────────────────
   activity: ["activity", "log", "history"],
   history: ["activity", "log", "historical"],
   log: ["activity", "log"],
 
-  // ── Entities: help ────────────────────────────────────────────────
   help: ["help", "guide", "support"],
   guide: ["help", "guide"],
   support: ["help", "support"],
   documentation: ["help", "guide"],
 
-  // ── Entities: dashboard ───────────────────────────────────────────
   dashboard: ["dashboard", "home", "overview"],
   dash: ["dashboard", "home"],
   home: ["dashboard", "home"],
   overview: ["dashboard", "overview"],
 
-  // ── Entities: profile ─────────────────────────────────────────────
   profile: ["company profile", "settings"],
   settings: ["company profile", "settings"],
   info: ["company profile", "settings"],
 
-  // ── Theme-related ─────────────────────────────────────────────────
   theme: ["theme", "dark", "light", "mode", "appearance", "toggle"],
   dark: ["theme", "dark", "mode", "toggle"],
   light: ["theme", "light", "mode", "toggle"],
@@ -188,17 +151,12 @@ const SYNONYMS: Record<string, string[]> = {
   color: ["theme", "appearance", "toggle"],
   colors: ["theme", "appearance", "toggle"],
 
-  // ── Import-related ────────────────────────────────────────────────
   csv: ["csv", "import", "companies"],
   excel: ["excel", "import", "historical"],
   spreadsheet: ["excel", "import", "historical"],
   historical: ["historical", "import"],
   bulk: ["bulk", "import", "csv", "excel"],
 };
-
-/* ------------------------------------------------------------------ */
-/*  Intent classification                                              */
-/* ------------------------------------------------------------------ */
 
 const ACTION_VERBS = new Set([
   "create", "new", "add", "make", "start", "begin", "setup", "set",
@@ -213,10 +171,6 @@ const NAVIGATION_VERBS = new Set([
 ]);
 
 const ACTION_LABEL_PREFIXES = ["create", "upload", "import", "toggle"];
-
-/* ------------------------------------------------------------------ */
-/*  Levenshtein distance (for typo tolerance)                          */
-/* ------------------------------------------------------------------ */
 
 function levenshtein(a: string, b: string): number {
   if (a.length === 0) return b.length;
@@ -242,10 +196,6 @@ function levenshtein(a: string, b: string): number {
   }
   return matrix[a.length][b.length];
 }
-
-/* ------------------------------------------------------------------ */
-/*  Scoring helpers                                                    */
-/* ------------------------------------------------------------------ */
 
 function getWords(text: string): string[] {
   return text.toLowerCase().split(/[\s\-_/]+/).filter(Boolean);
@@ -308,10 +258,6 @@ function scoreToken(token: string, labelWords: string[], keywordWords: string[])
 
   return best;
 }
-
-/* ------------------------------------------------------------------ */
-/*  Main filter function (cmdk CommandFilter signature)                */
-/* ------------------------------------------------------------------ */
 
 export function intentFilter(
   value: string,

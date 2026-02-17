@@ -232,10 +232,7 @@ function BatchTableBody({
     enabled: shouldVirtualize,
   });
 
-  // Column count: metric + periods + notes
   const colCount = 1 + periods.length + 1;
-
-  // Current period start for delta/anomaly lookups
   const currentPeriodStart = periods[0]?.start ?? "";
 
   const renderRow = (row: BatchRow, muted: boolean) => (
@@ -310,7 +307,6 @@ function BatchTableBody({
                   {cellWarning}
                 </div>
               )}
-              {/* Live delta indicator */}
               {userEnteredValue && prevValue !== null && (() => {
                 const num = parseFloat(userEnteredValue);
                 if (isNaN(num)) return null;
@@ -328,7 +324,6 @@ function BatchTableBody({
                   </div>
                 );
               })()}
-              {/* Anomaly warning */}
               {userEnteredValue && (() => {
                 const num = parseFloat(userEnteredValue);
                 if (isNaN(num)) return null;
@@ -342,7 +337,6 @@ function BatchTableBody({
                   </div>
                 );
               })()}
-              {/* Prior value hint (only when no existing and no user value) */}
               {!hasExisting && !userEnteredValue && prevValue !== null && (
                 <div className="mt-0.5 text-center text-[10px] text-text-faint">
                   Prior: {formatPriorValue(row.metricName, String(prevValue))}
@@ -397,7 +391,6 @@ function BatchTableBody({
     </tr>
   );
 
-  // Section header row
   const sectionHeader = (label: string, subtitle?: string) => (
     <tr className="border-b border-border-subtle">
       <td colSpan={colCount} className="px-4 py-2 bg-bg-primary">
@@ -439,7 +432,6 @@ function BatchTableBody({
     );
   }
 
-  // Virtualized rendering — flat list with section awareness
   const virtualItems = virtualizer.getVirtualItems();
 
   return (
@@ -452,7 +444,6 @@ function BatchTableBody({
           {theadContent}
         </thead>
         <tbody>
-          {/* Top spacer */}
           {virtualItems.length > 0 && virtualItems[0].start > 0 && (
             <tr>
               <td
@@ -475,7 +466,6 @@ function BatchTableBody({
               </tr>
             );
           })}
-          {/* Bottom spacer */}
           {virtualItems.length > 0 && (
             <tr>
               <td
@@ -505,7 +495,6 @@ function ReportCardView({
   periodStart: string;
   onBack: () => void;
 }) {
-  // Build period label
   let periodLabel = "";
   if (periodStart) {
     const d = new Date(periodStart);
@@ -543,7 +532,6 @@ function ReportCardView({
             </p>
           </div>
 
-          {/* Metric rows */}
           {card.items.length > 0 && (
             <div className="space-y-1">
               {card.items.map((item) => (
@@ -578,7 +566,6 @@ function ReportCardView({
             </div>
           )}
 
-          {/* Highlights */}
           {(card.biggestGain || card.biggestDecline) && (
             <div className="space-y-1 border-t border-[var(--success-border)] pt-2">
               {card.biggestGain && (
@@ -600,7 +587,6 @@ function ReportCardView({
             </div>
           )}
 
-          {/* Actions */}
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <button
               type="button"
@@ -636,7 +622,6 @@ export function BatchSubmissionTable({
     (prefilterPeriod?.periodType as PeriodTypeValue) ?? "quarterly",
   );
 
-  // Raw API data — fetched once on mount
   const [rawRequests, setRawRequests] = React.useState<GroupedRequest[]>([]);
   const [existingValues, setExistingValues] = React.useState<
     Record<string, Record<string, string>>
@@ -644,7 +629,6 @@ export function BatchSubmissionTable({
   const [rawMetrics, setRawMetrics] = React.useState<RawMetric[]>([]);
   const [loading, setLoading] = React.useState(true);
 
-  // User-entered data — persists across period type changes
   const [userValues, setUserValues] = React.useState<
     Record<string, Record<string, string>>
   >({});
@@ -732,7 +716,6 @@ export function BatchSubmissionTable({
     return generated.reverse();
   }, [periodType, prefilterPeriod]);
 
-  // Fetch data once on mount
   React.useEffect(() => {
     async function load() {
       try {
@@ -788,7 +771,6 @@ export function BatchSubmissionTable({
     load();
   }, []);
 
-  // Derive display rows from raw data + current periods + user edits
   const { requestedRows, otherRows } = React.useMemo(() => {
     // When a specific period is prefiltered, only show metrics requested for
     // that exact period — not metrics from other periods.
@@ -888,7 +870,6 @@ export function BatchSubmissionTable({
     return { requestedRows: requested, otherRows: others };
   }, [rawRequests, prefilterPeriod, periods, periodType, userValues, userNotes, existingValues, rawMetrics]);
 
-  // Combined rows for submission logic
   const allRows = React.useMemo(
     () => [...requestedRows, ...otherRows],
     [requestedRows, otherRows],
@@ -1158,7 +1139,6 @@ export function BatchSubmissionTable({
         </div>
       )}
 
-      {/* Metric Detail Panel */}
       {detailMetric && companyId && (
         <MetricDetailPanel
           companyId={companyId}

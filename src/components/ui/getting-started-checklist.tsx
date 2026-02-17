@@ -48,7 +48,6 @@ function DataCompletenessCard({ data, onDismiss }: { data: DataCompletenessInfo;
       ? "bg-[var(--warning-solid)]"
       : "bg-[var(--error-solid)]";
 
-  // Format last submission date
   const lastSubmitted = data.lastSubmissionDate
     ? (() => {
         const date = new Date(data.lastSubmissionDate);
@@ -90,7 +89,6 @@ function DataCompletenessCard({ data, onDismiss }: { data: DataCompletenessInfo;
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="mx-4 mb-2">
         <div className="h-1.5 w-full rounded-full bg-bg-hover">
           <div
@@ -102,7 +100,6 @@ function DataCompletenessCard({ data, onDismiss }: { data: DataCompletenessInfo;
 
       {!collapsed && (
         <div className="px-4 pb-4 space-y-3">
-          {/* Summary stats */}
           <div className="flex flex-wrap gap-3">
             <div className="rounded-lg bg-bg-elevated px-3 py-2 text-center">
               <span className="block text-lg font-bold tabular-nums text-text-primary">
@@ -132,7 +129,6 @@ function DataCompletenessCard({ data, onDismiss }: { data: DataCompletenessInfo;
             )}
           </div>
 
-          {/* Missing metrics */}
           {data.missingMetrics.length > 0 && (
             <div>
               <p className="mb-1.5 text-xs font-medium text-text-tertiary">Missing metrics:</p>
@@ -155,7 +151,6 @@ function DataCompletenessCard({ data, onDismiss }: { data: DataCompletenessInfo;
             </div>
           )}
 
-          {/* Last submission info */}
           {lastSubmitted && (
             <p className="text-xs text-text-faint">
               Last submission: {lastSubmitted}
@@ -249,7 +244,6 @@ export function GettingStartedChecklist({ role, items, dataCompleteness }: Getti
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="mx-4 mb-2">
         <div className="h-1 w-full rounded-full bg-bg-hover">
           <div

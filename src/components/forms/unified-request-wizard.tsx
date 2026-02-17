@@ -103,21 +103,17 @@ export function UnifiedRequestWizard() {
   const preselectedCompanyId = searchParams.get("companyId");
   const [step, setStep] = React.useState<1 | 2 | 3>(1);
 
-  // Data
   const [templates, setTemplates] = React.useState<Template[]>([]);
   const [companies, setCompanies] = React.useState<Company[]>([]);
   const [hiddenTemplateIds, setHiddenTemplateIds] = React.useState<string[]>([]);
   const [expandedTemplates, setExpandedTemplates] = React.useState<Set<string>>(new Set());
 
-  // Period options
   const availableQuarters = React.useMemo(() => getAvailableQuarters(), []);
   const availableYears = React.useMemo(() => getAvailableYears(), []);
 
-  // Selections
   const [selectedTemplateId, setSelectedTemplateId] = React.useState<string | null>(null);
   const [selectedCompanyIds, setSelectedCompanyIds] = React.useState<Set<string>>(new Set());
 
-  // One-time fields
   const [periodType, setPeriodType] = React.useState<PeriodType>("quarterly");
   const [selectedYear, setSelectedYear] = React.useState<number>(
     availableQuarters[0]?.year ?? new Date().getFullYear()
@@ -131,15 +127,12 @@ export function UnifiedRequestWizard() {
     return d.toISOString().split("T")[0];
   });
 
-  // Custom metric
   const [useCustomMetric, setUseCustomMetric] = React.useState(false);
   const [customMetricName, setCustomMetricName] = React.useState("");
   const [customPeriodType, setCustomPeriodType] = React.useState<PeriodType>("quarterly");
 
-  // Frequency choice
   const [frequency, setFrequency] = React.useState<Frequency>(null);
 
-  // Recurring schedule fields
   const [scheduleName, setScheduleName] = React.useState("");
   const [cadence, setCadence] = React.useState<"quarterly" | "annual">("quarterly");
   const [dayOfMonth, setDayOfMonth] = React.useState(5);
@@ -149,7 +142,6 @@ export function UnifiedRequestWizard() {
   const [allCompanies, setAllCompanies] = React.useState(false);
   const [includeFutureCompanies, setIncludeFutureCompanies] = React.useState(true);
 
-  // UI state
   const [loading, setLoading] = React.useState(true);
   const [submitting, setSubmitting] = React.useState(false);
   const [result, setResult] = React.useState<{
@@ -164,10 +156,8 @@ export function UnifiedRequestWizard() {
     [templates, selectedTemplateId],
   );
 
-  // Last-used template tracking
   const [lastTemplateId, setLastTemplateId] = React.useState<string | null>(null);
 
-  // Filter templates
   const systemTemplates = React.useMemo(
     () => templates.filter((t) => t.isSystem && !hiddenTemplateIds.includes(t.id)),
     [templates, hiddenTemplateIds],
@@ -473,7 +463,6 @@ export function UnifiedRequestWizard() {
     );
   }
 
-  // Success state
   if (result) {
     return (
       <div className="space-y-6">
@@ -540,7 +529,6 @@ export function UnifiedRequestWizard() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Progress indicator */}
       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
         <span className={step === 1 ? "text-text-primary" : "text-text-tertiary"}>
           1. Template
@@ -555,7 +543,6 @@ export function UnifiedRequestWizard() {
         </span>
       </div>
 
-      {/* Step 1: Select Template */}
       {step === 1 && (
         <div className="space-y-6">
           <div className="flex items-center gap-4">
@@ -575,7 +562,6 @@ export function UnifiedRequestWizard() {
             </div>
           </div>
 
-          {/* Custom metric option */}
           <button
             type="button"
             onClick={selectCustomMetric}
@@ -592,7 +578,6 @@ export function UnifiedRequestWizard() {
             </div>
           </button>
 
-          {/* Recently used template */}
           {recentTemplate && (
             <div className="space-y-3">
               <h2 className="text-sm font-medium text-text-secondary">Recently Used</h2>
@@ -602,7 +587,6 @@ export function UnifiedRequestWizard() {
             </div>
           )}
 
-          {/* User templates */}
           {userTemplates.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -620,7 +604,6 @@ export function UnifiedRequestWizard() {
             </div>
           )}
 
-          {/* System templates */}
           {systemTemplates.length > 0 && (
             <div className="space-y-3">
               <h2 className="text-sm font-medium text-text-secondary">Industry Templates</h2>
@@ -632,7 +615,6 @@ export function UnifiedRequestWizard() {
         </div>
       )}
 
-      {/* Step 2: Select Companies */}
       {step === 2 && (
         <div className="space-y-6">
           <div className="flex items-center gap-4">
@@ -655,7 +637,6 @@ export function UnifiedRequestWizard() {
             </div>
           </div>
 
-          {/* Custom metric form */}
           {useCustomMetric && (
             <div className="rounded-xl border border-border-default card-surface p-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -689,7 +670,6 @@ export function UnifiedRequestWizard() {
             </div>
           )}
 
-          {/* Company selection */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-text-secondary">
@@ -764,7 +744,6 @@ export function UnifiedRequestWizard() {
         </div>
       )}
 
-      {/* Step 3: Choose Frequency */}
       {step === 3 && (
         <div className="space-y-6">
           <div className="flex items-center gap-4">
@@ -793,7 +772,6 @@ export function UnifiedRequestWizard() {
             </div>
           </div>
 
-          {/* Frequency selection cards */}
           {frequency === null && (
             <div className="grid gap-4 sm:grid-cols-2">
               <button
@@ -833,12 +811,10 @@ export function UnifiedRequestWizard() {
             </div>
           )}
 
-          {/* One-time: period and due date */}
           {frequency === "one-time" && (
             <>
               <div className="rounded-xl border border-border-default card-surface p-4 sm:p-5">
                 <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {/* Period type selector */}
                   <div className="grid gap-1.5 sm:gap-2">
                     <label className="text-sm text-text-secondary" htmlFor="periodType">
                       Period type
@@ -922,7 +898,6 @@ export function UnifiedRequestWizard() {
                   </div>
                 </div>
 
-                {/* Summary */}
                 <div className="mt-6 rounded-lg border border-border-default bg-bg-input p-4">
                   <h3 className="text-sm font-medium text-text-secondary">Summary</h3>
                   <div className="mt-2 space-y-1 text-sm text-text-tertiary">
@@ -1001,11 +976,9 @@ export function UnifiedRequestWizard() {
             </>
           )}
 
-          {/* Recurring: schedule configuration */}
           {frequency === "recurring" && (
             <>
               <div className="rounded-xl border border-border-default card-surface p-4 sm:p-6 space-y-6">
-                {/* Schedule name */}
                 <div>
                   <label className="text-sm font-medium text-text-secondary">
                     Schedule Name<span className="text-[var(--error-accent)]"> *</span>
@@ -1022,7 +995,6 @@ export function UnifiedRequestWizard() {
                   </p>
                 </div>
 
-                {/* All companies toggle */}
                 <div className="flex items-start gap-3 rounded-xl border border-border-default card-surface p-4">
                   <input
                     type="checkbox"
@@ -1067,7 +1039,6 @@ export function UnifiedRequestWizard() {
                   </div>
                 )}
 
-                {/* Cadence */}
                 <CadenceSelector
                   value={cadence}
                   onChange={setCadence}
@@ -1075,7 +1046,6 @@ export function UnifiedRequestWizard() {
                   onDayOfMonthChange={setDayOfMonth}
                 />
 
-                {/* Due date offset */}
                 <div>
                   <label className="text-sm font-medium text-text-secondary">
                     Days until due date
@@ -1098,7 +1068,6 @@ export function UnifiedRequestWizard() {
                   </Select>
                 </div>
 
-                {/* Reminders */}
                 <div className="flex items-start gap-3 rounded-xl border border-border-default card-surface p-4">
                   <input
                     type="checkbox"
@@ -1153,7 +1122,6 @@ export function UnifiedRequestWizard() {
                   </div>
                 )}
 
-                {/* Summary */}
                 <div className="rounded-xl border border-border-default bg-bg-input p-4">
                   <h3 className="text-sm font-medium text-text-secondary">Summary</h3>
                   <div className="mt-3 space-y-2 text-sm">

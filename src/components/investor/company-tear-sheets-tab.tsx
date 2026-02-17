@@ -117,20 +117,16 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Viewing state
   const [selectedTearSheet, setSelectedTearSheet] = React.useState<TearSheet | null>(null);
   const [selectedMetrics, setSelectedMetrics] = React.useState<TearSheetMetric[]>([]);
   const [loadingMetrics, setLoadingMetrics] = React.useState(false);
 
-  // Create modal state
   const [showCreateModal, setShowCreateModal] = React.useState(false);
 
-  // Filters
   const [filterQuarter, setFilterQuarter] = React.useState<QuarterFilter>("All");
   const [filterYear, setFilterYear] = React.useState("All");
   const [filterSource, setFilterSource] = React.useState<SourceFilter>("all");
 
-  // Fetch tear sheets for this company (both founder + investor)
   React.useEffect(() => {
     async function loadTearSheets() {
       setLoading(true);
@@ -155,15 +151,12 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
     loadTearSheets();
   }, [companyId]);
 
-  // Handle selecting a tear sheet
   async function handleSelectTearSheet(tearSheet: TearSheet) {
-    // Investor's own tear sheets navigate to edit page
     if (tearSheet.creator_role === "investor") {
       window.location.href = `/tear-sheets/${tearSheet.id}`;
       return;
     }
 
-    // Founder tear sheets open in viewer
     setSelectedTearSheet(tearSheet);
     setLoadingMetrics(true);
     setSelectedMetrics([]);
@@ -193,14 +186,12 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
     setSelectedMetrics([]);
   }
 
-  // Available years from data
   const availableYears = React.useMemo(() => {
     const years = Array.from(new Set(tearSheets.map((t) => t.year)));
     years.sort((a, b) => b - a);
     return years;
   }, [tearSheets]);
 
-  // Filter tear sheets
   const filteredTearSheets = React.useMemo(() => {
     let list = tearSheets;
 
@@ -216,7 +207,6 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
       list = list.filter((t) => t.creator_role === "investor");
     }
 
-    // Sort by year and quarter descending
     return [...list].sort((a, b) => {
       const yearDiff = b.year - a.year;
       if (yearDiff !== 0) return yearDiff;
@@ -226,7 +216,6 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
     });
   }, [tearSheets, filterQuarter, filterYear, filterSource]);
 
-  // Show viewer when a tear sheet is selected
   if (selectedTearSheet) {
     return (
       <TearSheetViewer
@@ -242,7 +231,6 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
 
   return (
     <div className="space-y-4">
-      {/* Header with create button */}
       <div className="flex items-center justify-between">
         <div />
         <button
@@ -255,7 +243,6 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
         </button>
       </div>
 
-      {/* Filters */}
       {tearSheets.length > 0 && (
         <div className="flex flex-wrap items-center gap-3">
           <SlidingTabs
@@ -296,14 +283,12 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
         </div>
       )}
 
-      {/* Error */}
       {error && (
         <div className="rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)]">
           {error}
         </div>
       )}
 
-      {/* Loading skeleton */}
       {loading && (
         <div className="grid gap-4 sm:grid-cols-2">
           {[1, 2].map((i) => (
@@ -327,7 +312,6 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
         </div>
       )}
 
-      {/* Empty state */}
       {!loading && tearSheets.length === 0 && (
         <div className="py-12 text-center">
           <FileSpreadsheet className="mx-auto h-10 w-10 text-text-faint" />
@@ -346,7 +330,6 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
         </div>
       )}
 
-      {/* No results after filter */}
       {!loading && filteredTearSheets.length === 0 && tearSheets.length > 0 && (
         <div className="py-12 text-center">
           <p className="text-sm text-text-secondary">
@@ -355,7 +338,6 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
         </div>
       )}
 
-      {/* Tear sheets grid */}
       {!loading && filteredTearSheets.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
           {filteredTearSheets.map((ts) => (

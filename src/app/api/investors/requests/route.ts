@@ -50,7 +50,6 @@ export async function GET(req: Request) {
     query = query.eq("company_id", companyId);
   }
 
-  // Search by metric definition name via joined table
   if (search) {
     const escapedSearch = search
       .replace(/[%_]/g, "\\$&")

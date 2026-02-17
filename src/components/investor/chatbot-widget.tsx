@@ -30,10 +30,6 @@ import {
 import { formatValue, getChartColor } from "@/components/charts/types";
 import { useChartTheme } from "@/hooks/use-chart-theme";
 
-/* ------------------------------------------------------------------ */
-/*  Types                                                               */
-/* ------------------------------------------------------------------ */
-
 type QueryState = "idle" | "loading" | "error";
 
 type ConversationEntry = {
@@ -47,10 +43,6 @@ type ConversationEntry = {
   timestamp: number;
 };
 
-/* ------------------------------------------------------------------ */
-/*  Suggested queries                                                   */
-/* ------------------------------------------------------------------ */
-
 const SUGGESTED_QUERIES = [
   { text: "Top performers this quarter", icon: TrendingUp },
   { text: "Revenue trend over last 4 quarters", icon: TrendingUp },
@@ -59,10 +51,6 @@ const SUGGESTED_QUERIES = [
   { text: "Top 5 companies by revenue", icon: BarChart3 },
   { text: "Which company has the lowest runway?", icon: AlertCircle },
 ];
-
-/* ------------------------------------------------------------------ */
-/*  localStorage helpers for recent queries                             */
-/* ------------------------------------------------------------------ */
 
 const RECENT_KEY = "velvet:recent-queries";
 const MAX_RECENT = 10;
@@ -91,10 +79,6 @@ function saveRecentQuery(query: string): void {
     // localStorage may be unavailable
   }
 }
-
-/* ------------------------------------------------------------------ */
-/*  Inline bar chart for results                                        */
-/* ------------------------------------------------------------------ */
 
 function ResultBarChart({
   chartData,
@@ -166,10 +150,6 @@ function ResultBarChart({
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Inline line chart for time series results                           */
-/* ------------------------------------------------------------------ */
-
 function ResultLineChart({
   chartData,
   metricName,
@@ -237,10 +217,6 @@ function ResultLineChart({
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Inline data table for results                                       */
-/* ------------------------------------------------------------------ */
-
 function ResultTable({ data }: { data: Record<string, unknown>[] }) {
   if (data.length === 0) return null;
   const columns = Object.keys(data[0]);
@@ -279,10 +255,6 @@ function ResultTable({ data }: { data: Record<string, unknown>[] }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Three-dot loading animation                                         */
-/* ------------------------------------------------------------------ */
-
 function LoadingDots() {
   return (
     <div className="flex items-center gap-1.5 px-1">
@@ -297,10 +269,6 @@ function LoadingDots() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  ChatbotWidget                                                       */
-/* ------------------------------------------------------------------ */
-
 export function ChatbotWidget() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [input, setInput] = React.useState("");
@@ -313,26 +281,22 @@ export function ChatbotWidget() {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Load recent queries on mount
   React.useEffect(() => {
     setRecentQueries(loadRecentQueries());
   }, []);
 
-  // Auto-scroll to latest result
   React.useEffect(() => {
     if (scrollRef.current && conversation.length > 0) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [conversation, state]);
 
-  // Focus input when panel opens
   React.useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 200);
     }
   }, [isOpen]);
 
-  // Close on Escape
   React.useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape" && isOpen) setIsOpen(false);
@@ -350,7 +314,6 @@ export function ChatbotWidget() {
     setError(null);
 
     try {
-      // Send last 3 conversation turns for context
       const history = conversation.slice(-3).map((entry) => ({
         query: entry.query,
         answer: entry.answer.slice(0, 2000),
@@ -406,13 +369,8 @@ export function ChatbotWidget() {
   const hasConversation = conversation.length > 0;
   const showEmpty = !hasConversation && state !== "loading";
 
-  /* ---------------------------------------------------------------- */
-  /*  Render                                                           */
-  /* ---------------------------------------------------------------- */
-
   return (
     <>
-      {/* Floating button (visible when panel is closed) */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -424,7 +382,6 @@ export function ChatbotWidget() {
         </button>
       )}
 
-      {/* Mobile backdrop */}
       {isOpen && (
         <div
           className="fixed inset-0 z-[49] bg-bg-sidebar backdrop-blur-sm sm:hidden"
@@ -433,14 +390,12 @@ export function ChatbotWidget() {
         />
       )}
 
-      {/* Chat panel */}
       {isOpen && (
         <div
           className="fixed bottom-0 right-0 z-[50] flex h-[600px] w-full flex-col rounded-t-2xl border border-border-default bg-bg-primary shadow-2xl sm:bottom-5 sm:right-5 sm:max-h-[70vh] sm:w-[420px] sm:rounded-2xl"
           role="dialog"
           aria-label="Ask AI chat"
         >
-          {/* Header */}
           <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
             <div className="flex items-center gap-2">
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--violet-bg-muted)]">
@@ -474,12 +429,10 @@ export function ChatbotWidget() {
             </div>
           </div>
 
-          {/* Scrollable conversation area */}
           <div
             ref={scrollRef}
             className="flex-1 overflow-y-auto px-4 py-3"
           >
-            {/* Empty state: suggested queries */}
             {showEmpty && (
               <div className="space-y-4">
                 <div className="flex flex-col items-center py-6 text-center">
@@ -491,7 +444,6 @@ export function ChatbotWidget() {
                   </p>
                 </div>
 
-                {/* Suggestion chips */}
                 <div className="space-y-1.5">
                   {SUGGESTED_QUERIES.map((suggestion) => {
                     const Icon = suggestion.icon;
@@ -509,7 +461,6 @@ export function ChatbotWidget() {
                   })}
                 </div>
 
-                {/* Recent queries */}
                 {recentQueries.length > 0 && (
                   <div>
                     <h3 className="mb-2 text-[10px] font-medium uppercase tracking-wide text-text-faint">
@@ -533,19 +484,16 @@ export function ChatbotWidget() {
               </div>
             )}
 
-            {/* Conversation messages */}
             {hasConversation && (
               <div className="space-y-3">
                 {conversation.map((entry) => (
                   <div key={entry.id} className="space-y-2">
-                    {/* User message */}
                     <div className="flex justify-end">
                       <div className="max-w-[85%] rounded-xl bg-bg-hover px-3 py-2 text-xs">
                         {entry.query}
                       </div>
                     </div>
 
-                    {/* AI response */}
                     <div className="flex gap-2">
                       <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--violet-bg-muted)]">
                         <Sparkles className="h-3 w-3 text-[var(--violet-accent)]" />
@@ -590,7 +538,6 @@ export function ChatbotWidget() {
               </div>
             )}
 
-            {/* Loading indicator */}
             {state === "loading" && (
               <div className="mt-3 flex gap-2">
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--violet-bg-muted)]">
@@ -603,7 +550,6 @@ export function ChatbotWidget() {
             )}
           </div>
 
-          {/* Error message */}
           {error && (
             <div className="mx-4 mb-2">
               <div
@@ -616,7 +562,6 @@ export function ChatbotWidget() {
             </div>
           )}
 
-          {/* Input bar */}
           <div className="border-t border-border-default bg-bg-secondary px-3 py-3 sm:rounded-b-2xl">
             <div className="relative">
               <input

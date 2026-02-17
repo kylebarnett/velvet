@@ -53,8 +53,6 @@ type ReportPreviewProps = {
   companyMetrics?: Record<string, CompanyMetricsPage>;
 };
 
-/* ---------- Formatting helpers ---------- */
-
 function fmtCurrency(value: number | null, currency: string): string {
   if (value == null) return "-";
   return new Intl.NumberFormat("en-US", {
@@ -127,8 +125,6 @@ function formatMetricValue(value: string | number, metricName: string): string {
   return num.toLocaleString();
 }
 
-/* ---------- Sanitization for quarterly summary ---------- */
-
 const ALLOWED_TAGS = ["p", "br", "strong", "em", "ul", "ol", "li", "a", "span"];
 const ALLOWED_ATTR = ["href", "target", "rel", "class"];
 
@@ -139,8 +135,6 @@ function sanitizeHtml(html: string): string {
     ALLOWED_URI_REGEXP: /^https?:\/\//i,
   });
 }
-
-/* ---------- Sub-components ---------- */
 
 function KPICard({ label, value, colors }: { label: string; value: string; colors: ReportThemeColors }) {
   return (
@@ -228,8 +222,6 @@ function SectionDivider({ colors }: { colors: ReportThemeColors }) {
   );
 }
 
-/* ---------- Company Page Content (rendered inside a page sheet) ---------- */
-
 function CompanyPageContent({
   investment,
   metrics,
@@ -245,7 +237,6 @@ function CompanyPageContent({
     ? ((investment.current + investment.realized) / investment.invested).toFixed(2) + "x"
     : "-";
 
-  // Metrics cross-tab data
   let metricNames: string[] = [];
   let periodKeys: string[] = [];
   let periodType = "quarterly";
@@ -280,7 +271,6 @@ function CompanyPageContent({
 
   return (
     <>
-      {/* Company header */}
       <div
         style={{
           backgroundColor: colors.headerBg,
@@ -314,7 +304,6 @@ function CompanyPageContent({
           borderRadius: "0 0 8px 8px",
         }}
       >
-        {/* Investment KPI row */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" style={{ marginBottom: "16px" }}>
           <CurrencyCard label="Invested" value={fmtCurrency(investment.invested, currency)} colors={colors} />
           <CurrencyCard label="Current Value" value={fmtCurrency(investment.current, currency)} colors={colors} />
@@ -322,7 +311,6 @@ function CompanyPageContent({
           <KPICard label="MOIC" value={moic} colors={colors} />
         </div>
 
-        {/* Metrics table (if available) */}
         {metricNames.length > 0 && (
           <>
             <SectionDivider colors={colors} />
@@ -436,8 +424,6 @@ function CompanyPageContent({
   );
 }
 
-/* ---------- Page footer ---------- */
-
 function PageFooter({ colors }: { colors: ReportThemeColors }) {
   return (
     <div
@@ -473,10 +459,6 @@ function PageFooter({ colors }: { colors: ReportThemeColors }) {
   );
 }
 
-/* ---------- Main component ---------- */
-
-/* ---------- Shared page sheet style ---------- */
-
 const PAGE_GAP = 16; // px between visual pages
 
 function pageSheetStyle(colors: ReportThemeColors, isFirst: boolean): React.CSSProperties {
@@ -489,8 +471,6 @@ function pageSheetStyle(colors: ReportThemeColors, isFirst: boolean): React.CSSP
     overflow: "hidden",
   };
 }
-
-/* ---------- Main component ---------- */
 
 export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
   function ReportPreview(
@@ -536,9 +516,7 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
           padding: `${PAGE_GAP}px`,
         }}
       >
-        {/* ===== PAGE 1: Fund Summary ===== */}
         <div data-pdf-page style={pageSheetStyle(colors, true)}>
-          {/* Navy Header Bar */}
           <div
             style={{
               backgroundColor: colors.headerBg,
@@ -602,9 +580,7 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
             </div>
           </div>
 
-          {/* Summary content */}
           <div style={{ padding: "28px 32px" }}>
-            {/* Performance Summary Section */}
             <div style={{ marginBottom: "28px" }}>
               <h2
                 style={{
@@ -655,7 +631,6 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
 
             <SectionDivider colors={colors} />
 
-            {/* Quarterly Summary */}
             {quarterlySummary && quarterlySummary !== "<p></p>" && (
               <>
                 <div style={{ margin: "24px 0" }}>
@@ -697,7 +672,6 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
               </>
             )}
 
-            {/* Portfolio Overview Table */}
             {investments.length > 0 && (
               <div style={{ marginTop: "24px", overflowX: "auto" }}>
                 <h2
@@ -787,7 +761,6 @@ export const ReportPreview = forwardRef<HTMLDivElement, ReportPreviewProps>(
           </div>
         </div>
 
-        {/* ===== PER-COMPANY PAGES ===== */}
         {investments.map((inv) => {
           const metrics = companyMetrics?.[inv.id];
           return (

@@ -123,7 +123,6 @@ export function HelpPanel({
 
   const portal = createPortal(
     <>
-      {/* Backdrop */}
       <div
         className={cn(
           "fixed inset-0 z-[var(--z-overlay)] bg-bg-backdrop transition-opacity duration-200",
@@ -133,7 +132,6 @@ export function HelpPanel({
         aria-hidden="true"
       />
 
-      {/* Panel */}
       <div
         ref={panelRef}
         role="dialog"
@@ -144,7 +142,6 @@ export function HelpPanel({
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
-        {/* Panel header */}
         <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
           <div className="flex items-center gap-2">
             {view.type !== "home" && (
@@ -177,7 +174,6 @@ export function HelpPanel({
           </button>
         </div>
 
-        {/* Panel body */}
         <div className="flex-1 overflow-y-auto px-4 py-4">
           {view.type === "home" && (
             <HomeView
@@ -209,7 +205,6 @@ export function HelpPanel({
           )}
         </div>
 
-        {/* Panel footer */}
         <div className="border-t border-border-default px-4 py-3">
           <Link
             href={helpBasePath}
@@ -228,10 +223,6 @@ export function HelpPanel({
   return portal;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Sub-views                                                          */
-/* ------------------------------------------------------------------ */
-
 function HomeView({
   articles,
   categories,
@@ -247,10 +238,8 @@ function HomeView({
 }) {
   return (
     <div className="space-y-6">
-      {/* Search */}
       <HelpSearch articles={articles} onSelectArticle={onSelectArticle} />
 
-      {/* Suggested for this page */}
       {suggestedArticles.length > 0 && (
         <div>
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
@@ -268,7 +257,6 @@ function HomeView({
         </div>
       )}
 
-      {/* Categories */}
       <div>
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
           Topics

@@ -52,10 +52,6 @@ export function FounderPortalHeader({
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Hero-style Company Header                                           */
-/* ------------------------------------------------------------------ */
-
 const NONE = "__none__";
 
 function CompanyHeader({
@@ -131,7 +127,6 @@ function CompanyHeader({
     const field = type === "businessModel" ? "business_model" : type;
     const prev = type === "stage" ? stage : type === "industry" ? industry : businessModel;
 
-    // Optimistic update
     if (type === "stage") setStage(value);
     else if (type === "industry") setIndustry(value);
     else setBusinessModel(value);
@@ -144,7 +139,6 @@ function CompanyHeader({
     }
   }
 
-  // Tags config
   const tags: { type: TagType; value: string | null; label: string }[] = [
     { type: "stage", value: stage, label: "Stage" },
     { type: "industry", value: industry, label: "Industry" },
@@ -154,7 +148,6 @@ function CompanyHeader({
   return (
     <div data-onboarding="company-profile">
       <div className="flex items-start gap-4">
-        {/* Logo */}
         <FounderCompanyLogo
           companyId={companyId}
           companyName={name}
@@ -164,9 +157,7 @@ function CompanyHeader({
           onLogoChange={setLogoUrl}
         />
 
-        {/* Name + website + tags */}
         <div className="min-w-0 flex-1 space-y-1.5">
-          {/* Row 1: Company name + toast */}
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight text-text-primary truncate">{name}</h1>
             {toast && (
@@ -176,9 +167,7 @@ function CompanyHeader({
             )}
           </div>
 
-          {/* Row 2: Website + tags (inline) */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            {/* Website — click to edit */}
             {editingWebsite ? (
               <div className="flex items-center gap-2">
                 <input
@@ -249,12 +238,10 @@ function CompanyHeader({
               </button>
             )}
 
-            {/* Dot separator between website and tags */}
             {(website || editingWebsite) && (
               <span className="h-1 w-1 rounded-full bg-border-default" aria-hidden="true" />
             )}
 
-            {/* Tags — inline editable badges */}
             {tags.map((tag) => (
               <InlineTagBadge
                 key={tag.type}
@@ -271,10 +258,6 @@ function CompanyHeader({
     </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/* Inline Tag Badge — click to open Select, auto-closes on change      */
-/* ------------------------------------------------------------------ */
 
 function InlineTagBadge({
   type,

@@ -1,11 +1,9 @@
-// Metric definitions with descriptions and formulas for tooltips
 export type MetricInfo = {
   description: string;
   formula?: string;
 };
 
 export const METRIC_DEFINITIONS: Record<string, MetricInfo> = {
-  // SaaS Metrics
   "MRR": {
     description: "Monthly Recurring Revenue - The predictable revenue a company expects to receive every month from subscriptions.",
     formula: "Sum of all recurring subscription revenue in a month"
@@ -54,7 +52,6 @@ export const METRIC_DEFINITIONS: Record<string, MetricInfo> = {
     description: "The number of users who have engaged with the product within a specified time period."
   },
 
-  // Fintech Metrics
   "Total Transaction Volume": {
     description: "The total dollar value of all transactions processed through the platform.",
     formula: "Sum of all transaction amounts"
@@ -99,7 +96,6 @@ export const METRIC_DEFINITIONS: Record<string, MetricInfo> = {
     formula: "(Interest Income - Interest Expense) / Average Earning Assets × 100"
   },
 
-  // Healthcare Metrics
   "Monthly Active Patients": {
     description: "The number of unique patients who engaged with the platform in a month."
   },
@@ -137,7 +133,6 @@ export const METRIC_DEFINITIONS: Record<string, MetricInfo> = {
     description: "A measure of adherence to healthcare privacy and security regulations."
   },
 
-  // E-commerce Metrics
   "Gross Merchandise Value": {
     description: "The total value of merchandise sold through the platform before deductions.",
     formula: "Sum of all order values (before fees, returns, cancellations)"
@@ -179,7 +174,6 @@ export const METRIC_DEFINITIONS: Record<string, MetricInfo> = {
     formula: "Customers with 2+ Orders / Total Customers × 100"
   },
 
-  // EdTech Metrics
   "Monthly Active Learners": {
     description: "The number of unique learners who engaged with the platform in a month."
   },
@@ -206,7 +200,6 @@ export const METRIC_DEFINITIONS: Record<string, MetricInfo> = {
     formula: "(Post-Assessment Score - Pre-Assessment Score) / Pre-Assessment Score × 100"
   },
 
-  // AI/ML Metrics
   "Monthly Active Users": {
     description: "The number of unique users who engaged with the product in a month."
   },
@@ -232,7 +225,6 @@ export const METRIC_DEFINITIONS: Record<string, MetricInfo> = {
     description: "The amount of data processed by the platform."
   },
 
-  // Common Financial Metrics
   "Cash Balance": {
     description: "Total cash and cash equivalents available to the company.",
   },
@@ -286,7 +278,6 @@ export const METRIC_DEFINITIONS: Record<string, MetricInfo> = {
     formula: "(New MRR + Expansion) / (Churned + Contraction)"
   },
 
-  // General Metrics
   "Operating Expenses": {
     description: "The ongoing costs of running the business, excluding cost of goods sold.",
     formula: "Sum of all operational costs (salaries, rent, utilities, etc.)"
@@ -299,14 +290,11 @@ export const METRIC_DEFINITIONS: Record<string, MetricInfo> = {
   },
 };
 
-// Get definition for a metric, with fallback
 export function getMetricDefinition(metricName: string): MetricInfo | null {
-  // Try exact match first
   if (METRIC_DEFINITIONS[metricName]) {
     return METRIC_DEFINITIONS[metricName];
   }
 
-  // Try case-insensitive match
   const lowerName = metricName.toLowerCase();
   for (const [key, value] of Object.entries(METRIC_DEFINITIONS)) {
     if (key.toLowerCase() === lowerName) {
@@ -317,7 +305,6 @@ export function getMetricDefinition(metricName: string): MetricInfo | null {
   return null;
 }
 
-// Value type classification for display
 export type MetricValueType = "currency" | "percent" | "number" | "ratio" | "time";
 
 /**
@@ -386,7 +373,6 @@ export function inferMetricValueType(metricName: string): MetricValueType {
   return "number";
 }
 
-// Custom definition stored in user preferences
 export type CustomMetricDefinition = {
   description: string;
   formula?: string;
@@ -403,10 +389,8 @@ export function resolveMetricDefinition(
   metricName: string,
   customDefs?: Record<string, CustomMetricDefinition>,
 ): { info: MetricInfo | null; isCustom: boolean } {
-  // Normalize key: lowercase, spaces → underscores
   const normalizedKey = metricName.toLowerCase().replace(/\s+/g, "_");
 
-  // Check custom definitions first
   if (customDefs && customDefs[normalizedKey]) {
     const custom = customDefs[normalizedKey];
     return {
@@ -415,7 +399,6 @@ export function resolveMetricDefinition(
     };
   }
 
-  // Fall back to system definition
   const systemDef = getMetricDefinition(metricName);
   if (systemDef) {
     return { info: systemDef, isCustom: false };

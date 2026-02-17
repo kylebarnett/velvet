@@ -29,8 +29,6 @@ export function getChartColor(index: number): string {
   return CHART_COLORS[index % CHART_COLORS.length];
 }
 
-// Format number with commas for thousands
-// If value is a whole number (no cents), omit decimals
 function formatWithCommas(value: number): string {
   const hasDecimals = value % 1 !== 0;
   return value.toLocaleString("en-US", {
@@ -39,7 +37,6 @@ function formatWithCommas(value: number): string {
   });
 }
 
-// Format values for display - shows full numbers, decimals only when needed
 export function formatValue(value: number | null | undefined, metricName?: string): string {
   if (value == null) return "-";
 
@@ -62,7 +59,6 @@ export function formatValue(value: number | null | undefined, metricName?: strin
     return `$${formatWithCommas(value)}`;
   }
 
-  // Percentage metrics
   if (
     lowerName.includes("rate") ||
     lowerName.includes("margin") ||
@@ -73,11 +69,10 @@ export function formatValue(value: number | null | undefined, metricName?: strin
     return `${formatWithCommas(value)}%`;
   }
 
-  // Default - show with commas, decimals only if needed
   return formatWithCommas(value);
 }
 
-// Infer metric type from name — currency checks BEFORE percentage (Burn Rate rule)
+// Currency checks BEFORE percentage (Burn Rate contains both "burn" and "rate")
 function inferMetricType(metricName?: string): "currency" | "percentage" | "number" {
   const lowerName = metricName?.toLowerCase() ?? "";
 
@@ -110,7 +105,6 @@ function inferMetricType(metricName?: string): "currency" | "percentage" | "numb
   return "number";
 }
 
-// Format compact values for Y-axis ticks: $1.2M, $500K, 45%, 1,234
 export function formatCompactValue(value: number | null | undefined, metricName?: string): string {
   if (value == null) return "-";
 
@@ -130,10 +124,9 @@ export function formatCompactValue(value: number | null | undefined, metricName?
   return `${sign}${compact(abs)}`;
 }
 
-// Format period for display.
-// Uses UTC methods — date-only strings like "2023-10-01" parse as midnight UTC.
-// Local-time getMonth() shifts the result in timezones behind UTC
-// (e.g. Oct 1 UTC → Sep 30 PST → Q3 instead of Q4).
+// Uses UTC methods because date-only strings parse as midnight UTC.
+// Local-time getMonth() would shift in timezones behind UTC
+// (e.g. Oct 1 UTC -> Sep 30 PST -> Q3 instead of Q4).
 export function formatPeriod(periodStart: string, periodType: string): string {
   const date = new Date(periodStart);
 

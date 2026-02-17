@@ -25,10 +25,6 @@ import { unwrapJoin } from "@/lib/api/utils";
 import { formatValue } from "@/components/charts/types";
 import { similarity } from "@/lib/utils/string-similarity";
 
-/* ------------------------------------------------------------------ */
-/*  System prompt                                                       */
-/* ------------------------------------------------------------------ */
-
 export const PORTFOLIO_QUERY_SYSTEM_PROMPT = `You are a portfolio analytics assistant for an investment platform. You help investors answer questions about their portfolio companies and metrics.
 
 Available data:
@@ -93,10 +89,6 @@ Rules:
 
 Respond with valid JSON only.`;
 
-/* ------------------------------------------------------------------ */
-/*  Types                                                               */
-/* ------------------------------------------------------------------ */
-
 export type StructuredQueryType =
   | "metric_lookup"
   | "company_metrics"
@@ -118,10 +110,6 @@ export type QueryResult = {
   chartData?: { label: string; value: number }[];
   chartType?: "bar" | "line";
 };
-
-/* ------------------------------------------------------------------ */
-/*  Zod schema for AI response validation                               */
-/* ------------------------------------------------------------------ */
 
 const periodFields = {
   periodType: z.string().optional(),
@@ -222,7 +210,6 @@ function parseAndValidateAIResponse(text: string): StructuredQuery {
     return { type: "unknown", params: { reason: "I had trouble processing that. Please try rephrasing your question." } };
   }
 
-  // Try strict schema first
   const result = structuredQuerySchema.safeParse(raw);
   if (result.success) {
     return result.data as StructuredQuery;
@@ -239,10 +226,6 @@ function parseAndValidateAIResponse(text: string): StructuredQuery {
 
   return { type: "unknown", params: { reason: "I had trouble processing that. Please try rephrasing your question." } };
 }
-
-/* ------------------------------------------------------------------ */
-/*  Period filter                                                       */
-/* ------------------------------------------------------------------ */
 
 type PeriodFilter = {
   periodStart: string;
@@ -294,20 +277,12 @@ function computePeriodFilter(params: Record<string, unknown>): PeriodFilter | nu
   };
 }
 
-/* ------------------------------------------------------------------ */
-/*  ILIKE escape helper                                                 */
-/* ------------------------------------------------------------------ */
-
 function escapeIlike(value: string): string {
   // Strip special chars first, THEN escape wildcards (order matters — the
   // backslash from escaping %/_ would be stripped if we reversed these).
   const clean = value.replace(/[(),."'\\]/g, "");
   return clean.replace(/[%_]/g, "\\$&");
 }
-
-/* ------------------------------------------------------------------ */
-/*  NL → Structured Query (AI)                                          */
-/* ------------------------------------------------------------------ */
 
 export type ConversationTurn = {
   query: string;
@@ -321,13 +296,11 @@ export async function parseNaturalLanguageQuery(
   const geminiKey = process.env.GOOGLE_AI_API_KEY;
   const openaiKey = process.env.OPENAI_API_KEY;
 
-  // Build conversation context from recent turns (last 3 max)
   const recentHistory = (history ?? []).slice(-3);
 
   if (geminiKey) {
     const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
-    // Build multi-turn contents for Gemini
     const contents: { role: string; parts: { text: string }[] }[] = [];
     for (const turn of recentHistory) {
       contents.push({ role: "user", parts: [{ text: turn.query }] });
@@ -356,7 +329,6 @@ export async function parseNaturalLanguageQuery(
   } else if (openaiKey) {
     const model = process.env.OPENAI_EXTRACTION_MODEL || "gpt-4o-mini";
 
-    // Build message array with conversation history
     const messages: { role: string; content: string }[] = [
       { role: "system", content: PORTFOLIO_QUERY_SYSTEM_PROMPT },
     ];
@@ -390,10 +362,6 @@ export async function parseNaturalLanguageQuery(
   }
 }
 
-/* ------------------------------------------------------------------ */
-/*  DB helpers                                                          */
-/* ------------------------------------------------------------------ */
-
 type CompanyRow = {
   id: string;
   name: string;
@@ -408,10 +376,6 @@ type MetricRow = {
   period_start: string;
   period_end: string;
 };
-
-/* ------------------------------------------------------------------ */
-/*  Fuzzy company matching                                              */
-/* ------------------------------------------------------------------ */
 
 const CHATBOT_SIMILARITY_THRESHOLD = 0.7;
 
@@ -484,10 +448,6 @@ async function findCompanies(
   }
   return result;
 }
-
-/* ------------------------------------------------------------------ */
-/*  Merged metric queries (founder + investor data)                     */
-/* ------------------------------------------------------------------ */
 
 type RawMetricRow = {
   company_id: string;
@@ -885,10 +845,6 @@ async function getMetricAcrossPortfolio(
   return results;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Period formatting helper                                            */
-/* ------------------------------------------------------------------ */
-
 function formatPeriodLabel(
   periodStart: string,
   periodEnd: string,
@@ -912,19 +868,12 @@ function formatPeriodLabel(
   return `${periodStart} - ${periodEnd}`;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Execute structured query                                            */
-/* ------------------------------------------------------------------ */
-
 export async function executeStructuredQuery(
   query: StructuredQuery,
   supabase: SupabaseClient,
   investorId: string,
 ): Promise<QueryResult> {
   switch (query.type) {
-    /* -------------------------------------------------------------- */
-    /*  metric_lookup                                                   */
-    /* -------------------------------------------------------------- */
     case "metric_lookup": {
       const companyName = query.params.companyName as string;
       const metricName = query.params.metricName as string;
@@ -1029,9 +978,6 @@ export async function executeStructuredQuery(
       };
     }
 
-    /* -------------------------------------------------------------- */
-    /*  company_metrics — all metrics for a single company              */
-    /* -------------------------------------------------------------- */
     case "company_metrics": {
       const companyName = query.params.companyName as string;
 
@@ -1051,7 +997,6 @@ export async function executeStructuredQuery(
         };
       }
 
-      // Fetch all metrics (no metric name filter)
       const allRows = await fetchMergedMetrics(
         supabase,
         investorId,
@@ -1071,9 +1016,7 @@ export async function executeStructuredQuery(
       const isYearOnly = period && !period.hasQuarter && !period.hasMonth;
       const year = query.params.year as number | undefined;
 
-      // Year-only: aggregate sub-period data per metric
       if (isYearOnly && year) {
-        // Group rows by metric name
         const metricGroups = new Map<string, RawMetricRow[]>();
         for (const row of allRows) {
           const key = row.metric_name.toLowerCase();
@@ -1141,7 +1084,6 @@ export async function executeStructuredQuery(
         };
       }
 
-      // Prefer matching period_type, then latest period_end
       const preferredType = period?.hasQuarter
         ? "quarterly"
         : period?.hasMonth
@@ -1157,7 +1099,6 @@ export async function executeStructuredQuery(
         return b.period_end.localeCompare(a.period_end);
       });
 
-      // Pick latest value per metric name
       const latestByMetric = new Map<string, RawMetricRow>();
       for (const row of allRows) {
         const key = row.metric_name.toLowerCase();
@@ -1168,7 +1109,6 @@ export async function executeStructuredQuery(
 
       const entries = Array.from(latestByMetric.values());
 
-      // Period type transparency
       const requestedType2 = period?.hasMonth ? "monthly" : period?.hasQuarter ? "quarterly" : null;
       const lines = entries.map((m) => {
         const numValue = extractNumericValue(m.value);
@@ -1197,9 +1137,6 @@ export async function executeStructuredQuery(
       };
     }
 
-    /* -------------------------------------------------------------- */
-    /*  comparison                                                      */
-    /* -------------------------------------------------------------- */
     case "comparison": {
       const companyNames = query.params.companyNames as string[];
       const metricName = query.params.metricName as string;
@@ -1214,14 +1151,12 @@ export async function executeStructuredQuery(
 
       const period = computePeriodFilter(query.params);
 
-      // Batch fetch: single portfolio query for all names
       const companyMap = await findCompanies(
         supabase,
         investorId,
         companyNames,
       );
 
-      // Collect found company IDs for batched metric query
       const foundCompanies = new Map<string, { requestedName: string; company: CompanyRow }>();
       for (const name of companyNames) {
         const company = companyMap.get(name);
@@ -1230,7 +1165,6 @@ export async function executeStructuredQuery(
         }
       }
 
-      // Batched metric query — merge founder + investor data
       const metricsByCompanyId = new Map<string, MetricRow>();
       if (foundCompanies.size > 0) {
         const ids = Array.from(foundCompanies.keys());
@@ -1270,7 +1204,6 @@ export async function executeStructuredQuery(
         }
       }
 
-      // Build rows in original order
       const rows: {
         name: string;
         value: number | null;
@@ -1311,7 +1244,6 @@ export async function executeStructuredQuery(
         return `- ${r.name}: ${val}${r.period !== "N/A" ? ` (${r.period})` : ""}`;
       });
 
-      // Period type transparency
       const requestedType3 = period?.hasMonth ? "monthly" : period?.hasQuarter ? "quarterly" : null;
       let compFallbackNote = "";
       if (requestedType3) {
@@ -1338,9 +1270,6 @@ export async function executeStructuredQuery(
       };
     }
 
-    /* -------------------------------------------------------------- */
-    /*  aggregation                                                     */
-    /* -------------------------------------------------------------- */
     case "aggregation": {
       const metricName = query.params.metricName as string;
       const aggregation = (query.params.aggregation as string) || "average";
@@ -1431,9 +1360,6 @@ export async function executeStructuredQuery(
       };
     }
 
-    /* -------------------------------------------------------------- */
-    /*  ranking                                                         */
-    /* -------------------------------------------------------------- */
     case "ranking": {
       const metricName = query.params.metricName as string;
       const order = (query.params.order as string) || "top";
@@ -1465,7 +1391,6 @@ export async function executeStructuredQuery(
         };
       }
 
-      // Build sorted list
       const ranked = entries
         .map((e) => ({
           name: e.company.name,
@@ -1513,9 +1438,6 @@ export async function executeStructuredQuery(
       };
     }
 
-    /* -------------------------------------------------------------- */
-    /*  time_series                                                     */
-    /* -------------------------------------------------------------- */
     case "time_series": {
       const companyName = query.params.companyName as string;
       const metricName = query.params.metricName as string;
@@ -1588,9 +1510,6 @@ export async function executeStructuredQuery(
       };
     }
 
-    /* -------------------------------------------------------------- */
-    /*  unknown                                                         */
-    /* -------------------------------------------------------------- */
     case "unknown":
     default: {
       const reason =
@@ -1603,10 +1522,6 @@ export async function executeStructuredQuery(
     }
   }
 }
-
-/* ------------------------------------------------------------------ */
-/*  Format query result as plain text                                   */
-/* ------------------------------------------------------------------ */
 
 export function formatQueryResult(result: QueryResult): string {
   return result.answer;

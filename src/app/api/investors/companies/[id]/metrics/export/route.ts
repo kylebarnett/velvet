@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { logger } from "@/lib/logger";
 
-// GET - Export metrics as CSV
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -16,11 +15,9 @@ export async function GET(
 
   const { id: companyId } = await params;
 
-  // Parse query params
   const url = new URL(req.url);
   const periodType = url.searchParams.get("periodType");
 
-  // Verify investor has an approved relationship with this company
   const { data: relationship } = await supabase
     .from("investor_company_relationships")
     .select("id, approval_status")
@@ -34,14 +31,12 @@ export async function GET(
     return jsonError("Access pending approval.", 403);
   }
 
-  // Get company name for filename
   const { data: company } = await supabase
     .from("companies")
     .select("name")
     .eq("id", companyId)
     .single();
 
-  // Fetch all metric values for this company
   let query = supabase
     .from("company_metric_values")
     .select(`
@@ -68,14 +63,11 @@ export async function GET(
     return jsonError("Failed to process request.", 500);
   }
 
-  // Generate CSV
   const csvRows: string[] = [
-    // Header row
     ["Metric", "Period Type", "Period Start", "Period End", "Value", "Notes", "Submitted At"].join(","),
   ];
 
   for (const metric of metrics ?? []) {
-    // Extract numeric value
     let value: string = "";
     if (metric.value != null) {
       if (typeof metric.value === "number") {

@@ -48,8 +48,6 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils/cn";
 
-/* ---------- Types ---------- */
-
 type CompanyMetricValue = {
   metric_name: string;
   period_type: string;
@@ -110,8 +108,6 @@ const EDITOR_TABS: TabItem<EditorTab>[] = [
   { value: "edit", label: "Edit" },
   { value: "preview", label: "Preview" },
 ];
-
-/* ---------- Helpers ---------- */
 
 function toDateInputValue(dateStr: string): string {
   const d = new Date(dateStr);
@@ -183,16 +179,12 @@ function filterMetricsByQuarters(metrics: CompanyMetricValue[], quarters: string
   });
 }
 
-/* ---------- Component ---------- */
-
 export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   const router = useRouter();
   const previewRef = useRef<HTMLDivElement>(null);
 
-  // Parse existing content for backward compatibility
   const existingContent = report.content as ReportContent | null;
 
-  // Form state
   const [title, setTitle] = useState(report.title);
   const [reportDate, setReportDate] = useState(toDateInputValue(report.report_date));
   const [reportType, setReportType] = useState(report.report_type);
@@ -204,7 +196,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     (existingContent?.theme as ReportThemeId) ?? DEFAULT_THEME_ID,
   );
 
-  // Investment selection — default to all if no prior selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
     const saved = existingContent?.selectedInvestmentIds;
     if (saved && Array.isArray(saved) && saved.length > 0) {
@@ -213,7 +204,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     return new Set(investments.map((inv) => inv.id));
   });
 
-  // Per-company metrics state
   const [metricPageIds, setMetricPageIds] = useState<Set<string>>(() => {
     const saved = existingContent?.companyMetricPageIds;
     if (saved && Array.isArray(saved) && saved.length > 0) {
@@ -229,7 +219,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     return {};
   });
   const [fetchingMetrics, setFetchingMetrics] = useState<Set<string>>(new Set());
-  // Per-company selected quarters (companyId → quarter labels like ["Q4 2025", "Q3 2025"])
   const [metricQuarters, setMetricQuarters] = useState<Record<string, string[]>>(() => {
     const saved = (existingContent as ReportContent | null)?.metricQuarters;
     if (saved && typeof saved === "object") {
@@ -237,7 +226,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     }
     return {};
   });
-  // Per-company metric display order (companyId → ordered metric names)
   const [metricOrder, setMetricOrder] = useState<Record<string, string[]>>(() => {
     const saved = (existingContent as ReportContent | null)?.metricOrder;
     if (saved && typeof saved === "object") {
@@ -246,7 +234,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     return {};
   });
 
-  // UI state
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -256,7 +243,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   const [mobileTab, setMobileTab] = useState<EditorTab>("edit");
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
-  // Dirty tracking
   const [isDirty, setIsDirty] = useState(false);
   const initialRef = useRef({
     title: report.title,
@@ -278,7 +264,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     metricOrder: (existingContent as ReportContent | null)?.metricOrder ?? {},
   });
 
-  // Check dirty whenever form changes
   useEffect(() => {
     const init = initialRef.current;
     const quartersChanged = JSON.stringify(metricQuarters) !== JSON.stringify(init.metricQuarters);
@@ -296,7 +281,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     setIsDirty(dirty);
   }, [title, reportDate, reportType, quarterlySummary, themeId, selectedIds, metricPageIds, metricQuarters, metricOrder]);
 
-  // beforeunload warning
   useEffect(() => {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
       if (isDirty) {
@@ -307,7 +291,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
-  // Escape key closes preview modal
   useEffect(() => {
     if (!showPreviewModal) return;
     function handleKey(e: KeyboardEvent) {
@@ -317,13 +300,11 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     return () => document.removeEventListener("keydown", handleKey);
   }, [showPreviewModal]);
 
-  // Selected investments
   const selectedInvestments = useMemo(
     () => investments.filter((inv) => selectedIds.has(inv.id)),
     [investments, selectedIds],
   );
 
-  // Live-calculated KPIs from selected investments
   const performance = useMemo(() => {
     const invData: Investment[] = selectedInvestments.map((inv) => ({
       invested_amount: inv.invested_amount,
@@ -352,7 +333,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     };
   }, [selectedInvestments]);
 
-  // Toggle investment selection
   const toggleInvestment = useCallback((id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -373,7 +353,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     }
   }, [selectedIds.size, investments]);
 
-  // Toggle per-company metrics page
   const toggleMetricPage = useCallback(async (companyId: string) => {
     const wasEnabled = metricPageIds.has(companyId);
     setMetricPageIds((prev) => {
@@ -436,7 +415,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     }
   }, [companyMetricsCache, fetchingMetrics, metricPageIds, metricQuarters, metricOrder]);
 
-  // Build content payload (shared by save + publish)
   const buildContentPayload = useCallback((): Record<string, unknown> => {
     return {
       quarterlySummary,
@@ -477,7 +455,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     };
   }, [quarterlySummary, selectedIds, themeId, performance, selectedInvestments, metricPageIds, companyMetricsCache, metricQuarters, metricOrder]);
 
-  // Reset initial ref after successful save/publish/unpublish
   function resetInitialRef() {
     initialRef.current = {
       title: title.trim(),
@@ -493,7 +470,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     setIsDirty(false);
   }
 
-  // Save (preserves current status)
   async function handleSave() {
     setSaving(true);
 
@@ -523,7 +499,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     }
   }
 
-  // Publish
   async function handlePublish() {
     setPublishing(true);
     setShowPublishConfirm(false);
@@ -557,7 +532,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     }
   }
 
-  // Unpublish
   async function handleUnpublish() {
     setPublishing(true);
     setShowUnpublishConfirm(false);
@@ -587,7 +561,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     }
   }
 
-  // Delete
   async function handleDelete() {
     setDeleting(true);
 
@@ -609,7 +582,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     }
   }
 
-  // PDF export
   async function handleExportPdf() {
     if (!previewRef.current) return;
     try {
@@ -621,7 +593,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     }
   }
 
-  // Preview data for ReportPreview
   const previewInvestments = useMemo(
     () =>
       selectedInvestments.map((inv) => ({
@@ -634,7 +605,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     [selectedInvestments],
   );
 
-  // Build company metrics map for preview (filtered by selected quarters, with order)
   const previewCompanyMetrics = useMemo(() => {
     const result: Record<string, {
       companyName: string;
@@ -666,12 +636,10 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
     return Object.keys(result).length > 0 ? result : undefined;
   }, [selectedInvestments, metricPageIds, companyMetricsCache, metricQuarters, metricOrder]);
 
-  // Memoize theme colors to avoid new object reference on each render
   const themeColors = useMemo(() => getReportTheme(themeId).colors, [themeId]);
 
   return (
     <div className="space-y-4">
-      {/* Back link */}
       <button
         type="button"
         onClick={() => router.push(`/funds/${fund.id}?tab=reports`)}
@@ -681,7 +649,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         Back to {fund.name}
       </button>
 
-      {/* Header bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-semibold tracking-tight">{title || "Untitled Report"}</h1>
@@ -752,14 +719,11 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         </div>
       </div>
 
-      {/* Mobile tab toggle */}
       <div className="lg:hidden" data-no-print>
         <SlidingTabs tabs={EDITOR_TABS} value={mobileTab} onChange={setMobileTab} size="sm" />
       </div>
 
-      {/* Two-column layout */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Editor column */}
         <div
           className={cn(
             "space-y-4",
@@ -767,7 +731,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           )}
           data-no-print
         >
-          {/* Metadata */}
           <div className="rounded-xl border border-border-default card-surface p-4">
             <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
               Report Details
@@ -809,7 +772,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             </div>
           </div>
 
-          {/* Report Theme */}
           <div className="rounded-xl border border-border-default card-surface p-4">
             <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
               Report Theme
@@ -817,7 +779,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             <ThemeSelector value={themeId} onChange={setThemeId} />
           </div>
 
-          {/* Investment Selection */}
           <div className="rounded-xl border border-border-default card-surface p-4">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-xs font-medium uppercase tracking-wide text-text-muted">
@@ -921,7 +882,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             )}
           </div>
 
-          {/* Live Performance KPIs */}
           <div className="rounded-xl border border-border-default card-surface p-4">
             <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
               Live Performance
@@ -939,7 +899,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             </div>
           </div>
 
-          {/* Quarterly Summary - Rich Text */}
           <div className="rounded-xl border border-border-default card-surface p-4">
             <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
               Quarterly Summary
@@ -952,7 +911,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           </div>
         </div>
 
-        {/* Preview column */}
         <div
           className={cn(
             "lg:sticky lg:top-4 lg:self-start overflow-visible",
@@ -980,7 +938,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         </div>
       </div>
 
-      {/* Delete confirmation modal */}
       <ConfirmModal
         open={showDeleteConfirm}
         title="Delete Report"
@@ -991,7 +948,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         onCancel={() => setShowDeleteConfirm(false)}
       />
 
-      {/* Publish confirmation modal */}
       <ConfirmModal
         open={showPublishConfirm}
         title="Publish Report"
@@ -1002,7 +958,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         onCancel={() => setShowPublishConfirm(false)}
       />
 
-      {/* Unpublish confirmation modal */}
       <ConfirmModal
         open={showUnpublishConfirm}
         title="Unpublish Report"
@@ -1013,10 +968,8 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         onCancel={() => setShowUnpublishConfirm(false)}
       />
 
-      {/* Full-screen preview modal */}
       {showPreviewModal && (
         <div className="fixed inset-0 z-50 flex flex-col bg-bg-backdrop backdrop-blur-sm">
-          {/* Modal header */}
           <div className="flex items-center justify-between border-b border-border-default bg-bg-secondary px-6 py-3">
             <h2 className="text-sm font-medium text-text-secondary">Report Preview</h2>
             <div className="flex items-center gap-2">
@@ -1036,7 +989,6 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
               </button>
             </div>
           </div>
-          {/* Scrollable preview body */}
           <div className="flex-1 overflow-y-auto p-6">
             <div className="mx-auto max-w-[794px]">
               <ReportPreview

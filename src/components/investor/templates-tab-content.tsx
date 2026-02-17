@@ -460,7 +460,6 @@ export function TemplatesTabContent() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header with new template button */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-text-tertiary">
           Use industry templates or create your own custom metric sets.
@@ -650,7 +649,6 @@ export function TemplatesTabContent() {
         </>
       )}
 
-      {/* Assign modal */}
       {assignModal.template && (
         <TemplateAssignModal
           open={assignModal.open}
@@ -661,7 +659,6 @@ export function TemplatesTabContent() {
         />
       )}
 
-      {/* Template form modal */}
       <TemplateFormModal
         open={formModal.open}
         mode={formModal.mode}
@@ -683,7 +680,6 @@ export function TemplatesTabContent() {
         }}
       />
 
-      {/* Delete confirmation */}
       <ConfirmModal
         open={deleteModal.open}
         title={deleteModal.templateIds.length > 1 ? "Delete Templates" : "Delete Template"}
@@ -699,7 +695,6 @@ export function TemplatesTabContent() {
         onCancel={() => setDeleteModal({ open: false, templateIds: [], label: "" })}
       />
 
-      {/* Hide confirmation */}
       <ConfirmModal
         open={hideModal.open}
         title="Hide Template"

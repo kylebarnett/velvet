@@ -62,7 +62,6 @@ export async function GET(req: Request) {
   const industryFilters = industriesParam?.split(",").filter(Boolean) ?? [];
   const stageFilters = stagesParam?.split(",").filter(Boolean) ?? [];
 
-  // Fetch approved companies
   const { data: relationships, error: relError } = await supabase
     .from("investor_company_relationships")
     .select(`
@@ -132,7 +131,6 @@ export async function GET(req: Request) {
     );
   }
 
-  // Fetch metric values — apply date filter for time ranges
   let query = supabase
     .from("company_metric_values")
     .select("id, company_id, metric_name, period_type, period_start, period_end, value")
@@ -168,7 +166,6 @@ export async function GET(req: Request) {
 
   const values = (metricValues ?? []) as MetricValue[];
 
-  // Deduplicate: keep only the latest value per company per metric
   const latestByMetric = new Map<string, Map<string, { value: number; periodStart: string }>>();
   const companiesWithMetrics = new Set<string>();
 
@@ -210,7 +207,6 @@ export async function GET(req: Request) {
     }
   }
 
-  // Aggregates
   const aggregates: Record<string, {
     sum: number | null;
     average: number;
@@ -235,7 +231,6 @@ export async function GET(req: Request) {
     };
   }
 
-  // Data freshness
   const companyLatestDate = new Map<string, string>();
   for (const companyMap of latestByMetric.values()) {
     for (const [companyId, entry] of companyMap) {
@@ -263,7 +258,6 @@ export async function GET(req: Request) {
 
   const freshness = { recent: freshnessRecent, aging: freshnessAging, stale: freshnessStale, noData: freshnessNoData };
 
-  // Drilldown data
   const drilldownData: Record<string, Array<{
     companyId: string;
     companyName: string;
@@ -346,7 +340,6 @@ export async function GET(req: Request) {
   }> = [];
 
   for (const company of companies) {
-    // Values are already sorted by period_start DESC from DB query
     const companyValues = valuesByCompany.get(company.id) ?? [];
 
     const metricLatest = new Map<string, { latest: number; previous: number | null }>();
@@ -391,7 +384,6 @@ export async function GET(req: Request) {
     return b.revenueGrowth - a.revenueGrowth;
   });
 
-  // Distribution data
   const byIndustry = [...industryCounts.entries()]
     .map(([key, value]) => ({
       name: INDUSTRY_LABELS[key] ?? key.charAt(0).toUpperCase() + key.slice(1),

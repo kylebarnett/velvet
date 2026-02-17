@@ -98,7 +98,6 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
         </p>
       </div>
 
-      {/* Hero section — Logo + Name + Website + Tags */}
       <div className="rounded-xl border border-border-default card-surface px-6 py-5">
         <div className="flex items-start gap-5">
           <FounderCompanyLogo
@@ -111,7 +110,6 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
           />
 
           <div className="min-w-0 flex-1">
-            {/* Name (locked) */}
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold tracking-tight truncate">{data.name}</h2>
               <span className="rounded-full bg-bg-elevated px-2 py-0.5 text-[10px] font-medium text-text-muted">
@@ -119,7 +117,6 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
               </span>
             </div>
 
-            {/* Website — click to edit */}
             <div className="mt-1">
               {editingWebsite ? (
                 <div className="flex items-center gap-2">
@@ -193,7 +190,6 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
               )}
             </div>
 
-            {/* Tags — inline editable badges */}
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
               {tags.map((tag) => (
                 <InlineTagBadge
@@ -210,9 +206,7 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
         </div>
       </div>
 
-      {/* Details — two-column grid */}
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Left: Company Details */}
         <div className="space-y-1">
           <h2 className="text-base font-medium">Company Details</h2>
           <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
@@ -271,7 +265,6 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
           </div>
         </div>
 
-        {/* Right: Funding */}
         <div className="space-y-1">
           <h2 className="text-base font-medium">Funding</h2>
           <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
@@ -336,10 +329,6 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
     </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/* EditableTextField — cleaner label-above, value-below layout          */
-/* ------------------------------------------------------------------ */
 
 function EditableTextField({
   label,
@@ -451,10 +440,6 @@ function EditableTextField({
     </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/* Inline Tag Badge — same pattern as portal tabs                      */
-/* ------------------------------------------------------------------ */
 
 function InlineTagBadge({
   type,
