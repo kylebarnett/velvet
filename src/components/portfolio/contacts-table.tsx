@@ -791,7 +791,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                 setSearch(e.target.value);
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
-              className="h-9 w-full rounded-md border border-border-default bg-bg-input pl-8 pr-8 text-sm outline-none placeholder:text-text-faint focus:border-accent focus:ring-2 focus:ring-[var(--ring-focus)]"
+              className="h-8 w-full rounded-md border border-border-default bg-bg-input pl-8 pr-8 text-sm outline-none placeholder:text-text-faint focus:border-accent focus:ring-2 focus:ring-[var(--ring-focus)]"
             />
             {search && (
               <button
@@ -815,7 +815,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
             >
-              <SelectTrigger className="w-auto min-w-[130px] flex-1 sm:flex-none">
+              <SelectTrigger className="h-8 w-auto min-w-[130px] flex-1 sm:flex-none">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
