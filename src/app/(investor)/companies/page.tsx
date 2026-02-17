@@ -56,7 +56,7 @@ function getNumericValue(value: unknown): number | null {
   if (value == null) return null;
   if (typeof value === "number") return value;
   if (typeof value === "object" && value !== null) {
-    const v = (value as Record<string, unknown>).value;
+    const v = (value as Record<string, unknown>).value ?? (value as Record<string, unknown>).raw;
     if (typeof v === "number") return v;
     if (typeof v === "string") return parseFloat(v) || null;
   }
