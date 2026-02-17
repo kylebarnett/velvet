@@ -256,28 +256,31 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
       loop
       filter={intentFilter}
       overlayClassName="fixed inset-0 z-[var(--z-modal)] bg-black/60 backdrop-blur-sm"
-      contentClassName="fixed inset-0 z-[var(--z-modal)] flex items-start justify-center pt-[20vh]"
+      contentClassName="fixed inset-0 z-[var(--z-modal)] flex items-start justify-center pt-[10vh]"
     >
+      {/* Backdrop click-to-close */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+      <div className="fixed inset-0" onClick={close} />
       <VisuallyHidden.Root asChild>
         <DialogPrimitive.Title>Command palette</DialogPrimitive.Title>
       </VisuallyHidden.Root>
-      <div className="mx-4 w-full max-w-xl overflow-hidden rounded-xl border border-border-default bg-bg-secondary shadow-xl">
+      <div className="relative mx-4 w-full max-w-[1080px] overflow-hidden rounded-2xl border border-border-default bg-bg-secondary shadow-2xl">
         {/* Search input */}
-        <div className="flex items-center gap-2 border-b border-border-default px-4">
-          <Search className="h-4 w-4 shrink-0 text-text-muted" />
+        <div className="flex items-center gap-3 border-b border-border-default px-6">
+          <Search className="h-5 w-5 shrink-0 text-text-muted" />
           <Command.Input
             value={search}
             onValueChange={setSearch}
             placeholder="Search or type a command..."
-            className="h-12 w-full bg-transparent text-sm text-text-primary placeholder:text-text-faint outline-none"
+            className="h-16 w-full bg-transparent text-base text-text-primary placeholder:text-text-faint outline-none"
           />
-          <kbd className="hidden shrink-0 rounded-md border border-border-default bg-bg-primary px-1.5 py-0.5 text-[10px] font-medium text-text-muted sm:inline-block">
+          <kbd className="hidden shrink-0 rounded-md border border-border-default bg-bg-primary px-2 py-1 text-[11px] font-medium text-text-muted sm:inline-block">
             ESC
           </kbd>
         </div>
 
         {/* Results list */}
-        <Command.List className="max-h-[min(400px,50vh)] overflow-y-auto p-1">
+        <Command.List className="max-h-[min(520px,60vh)] overflow-y-auto px-3 py-2">
           {/* Loading indicator */}
           {isSearching && (
             <Command.Loading className="px-3 py-2 text-xs text-text-muted">
@@ -286,7 +289,7 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
           )}
 
           {/* Empty state */}
-          <Command.Empty className="px-3 py-6 text-center text-sm text-text-muted">
+          <Command.Empty className="px-4 py-8 text-center text-sm text-text-muted">
             No results found.
           </Command.Empty>
 
@@ -307,13 +310,13 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
                     key={`ai-${cmd.id}`}
                     value={`ai-${cmd.label}`}
                     onSelect={() => handleSelect(cmd)}
-                    className="mx-1 flex cursor-default items-center gap-3 rounded-md px-3 py-2.5 text-sm text-text-secondary aria-selected:bg-bg-elevated aria-selected:text-text-primary"
+                    className="flex cursor-default items-center gap-3.5 rounded-lg px-4 py-3 text-[15px] text-text-secondary transition-colors aria-selected:bg-bg-elevated aria-selected:text-text-primary"
                     forceMount
                   >
                     {Icon ? (
-                      <Icon className="h-4 w-4 shrink-0 text-text-muted" />
+                      <Icon className="h-[18px] w-[18px] shrink-0 text-text-muted" />
                     ) : (
-                      <Sparkles className="h-4 w-4 shrink-0 text-text-muted" />
+                      <Sparkles className="h-[18px] w-[18px] shrink-0 text-text-muted" />
                     )}
                     <span className="flex-1 truncate">{cmd.label}</span>
                     <span className="shrink-0 rounded bg-bg-elevated px-1.5 py-0.5 text-[10px] font-medium text-text-muted">
@@ -335,12 +338,12 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
 
           {/* AI answer inline */}
           {aiAnswer && (
-            <div className="mx-2 mb-2 rounded-lg border border-border-default bg-bg-primary p-3">
-              <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-text-muted">
-                <Sparkles className="h-3 w-3" />
+            <div className="mx-1 mb-2 rounded-lg border border-border-default bg-bg-primary p-4">
+              <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-text-muted">
+                <Sparkles className="h-3.5 w-3.5" />
                 AI Answer
               </div>
-              <p className="text-sm text-text-secondary whitespace-pre-wrap">{aiAnswer}</p>
+              <p className="text-[15px] leading-relaxed text-text-secondary whitespace-pre-wrap">{aiAnswer}</p>
             </div>
           )}
 
@@ -354,9 +357,9 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
                     key={`result-${result.id}`}
                     value={`result-${result.type}-${result.title}`}
                     onSelect={() => handleSearchResultSelect(result)}
-                    className="mx-1 flex cursor-default items-center gap-3 rounded-md px-3 py-2.5 text-sm text-text-secondary aria-selected:bg-bg-elevated aria-selected:text-text-primary"
+                    className="flex cursor-default items-center gap-3.5 rounded-lg px-4 py-3 text-[15px] text-text-secondary transition-colors aria-selected:bg-bg-elevated aria-selected:text-text-primary"
                   >
-                    {Icon && <Icon className="h-4 w-4 shrink-0 text-text-muted" />}
+                    {Icon && <Icon className="h-[18px] w-[18px] shrink-0 text-text-muted" />}
                     <div className="min-w-0 flex-1">
                       <span className="truncate">{result.title}</span>
                       {result.subtitle && (
@@ -379,9 +382,9 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
                     key={`recent-${item.id}`}
                     value={`recent-${item.label}`}
                     onSelect={() => handleRecentSelect(item)}
-                    className="mx-1 flex cursor-default items-center gap-3 rounded-md px-3 py-2.5 text-sm text-text-secondary aria-selected:bg-bg-elevated aria-selected:text-text-primary"
+                    className="flex cursor-default items-center gap-3.5 rounded-lg px-4 py-3 text-[15px] text-text-secondary transition-colors aria-selected:bg-bg-elevated aria-selected:text-text-primary"
                   >
-                    <Clock className="h-4 w-4 shrink-0 text-text-muted" />
+                    <Clock className="h-[18px] w-[18px] shrink-0 text-text-muted" />
                     <span className="truncate">{item.label}</span>
                   </Command.Item>
                 );
@@ -399,12 +402,12 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
                   value={cmd.label}
                   keywords={cmd.keywords}
                   onSelect={() => handleSelect(cmd)}
-                  className="mx-1 flex cursor-default items-center gap-3 rounded-md px-3 py-2.5 text-sm text-text-secondary aria-selected:bg-bg-elevated aria-selected:text-text-primary"
+                  className="flex cursor-default items-center gap-3.5 rounded-lg px-4 py-3 text-[15px] text-text-secondary transition-colors aria-selected:bg-bg-elevated aria-selected:text-text-primary"
                 >
                   {Icon ? (
-                    <Icon className="h-4 w-4 shrink-0 text-text-muted" />
+                    <Icon className="h-[18px] w-[18px] shrink-0 text-text-muted" />
                   ) : (
-                    <ArrowRight className="h-4 w-4 shrink-0 text-text-muted" />
+                    <ArrowRight className="h-[18px] w-[18px] shrink-0 text-text-muted" />
                   )}
                   <span className="truncate">{cmd.label}</span>
                 </Command.Item>
@@ -422,12 +425,12 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
                   value={cmd.label}
                   keywords={cmd.keywords}
                   onSelect={() => handleSelect(cmd)}
-                  className="mx-1 flex cursor-default items-center gap-3 rounded-md px-3 py-2.5 text-sm text-text-secondary aria-selected:bg-bg-elevated aria-selected:text-text-primary"
+                  className="flex cursor-default items-center gap-3.5 rounded-lg px-4 py-3 text-[15px] text-text-secondary transition-colors aria-selected:bg-bg-elevated aria-selected:text-text-primary"
                 >
                   {Icon ? (
-                    <Icon className="h-4 w-4 shrink-0 text-text-muted" />
+                    <Icon className="h-[18px] w-[18px] shrink-0 text-text-muted" />
                   ) : (
-                    <Zap className="h-4 w-4 shrink-0 text-text-muted" />
+                    <Zap className="h-[18px] w-[18px] shrink-0 text-text-muted" />
                   )}
                   <span className="truncate">{cmd.label}</span>
                 </Command.Item>
@@ -441,10 +444,10 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
               <Command.Item
                 value={`ask-ai-${search}`}
                 onSelect={handleAskAI}
-                className="mx-1 flex cursor-default items-center gap-3 rounded-md px-3 py-2.5 text-sm text-text-secondary aria-selected:bg-bg-elevated aria-selected:text-text-primary"
+                className="flex cursor-default items-center gap-3.5 rounded-lg px-4 py-3 text-[15px] text-text-secondary transition-colors aria-selected:bg-bg-elevated aria-selected:text-text-primary"
                 forceMount
               >
-                <Sparkles className={cn("h-4 w-4 shrink-0", isAiLoading ? "animate-pulse text-accent" : "text-text-muted")} />
+                <Sparkles className={cn("h-[18px] w-[18px] shrink-0", isAiLoading ? "animate-pulse text-accent" : "text-text-muted")} />
                 <span className="truncate">
                   {isAiLoading ? "Thinking..." : `Ask: "${search}"`}
                 </span>
@@ -454,17 +457,17 @@ export function CommandPalette({ role }: { role: "investor" | "founder" }) {
         </Command.List>
 
         {/* Footer with keyboard hints */}
-        <div className="flex items-center gap-3 border-t border-border-default px-4 py-2">
-          <div className="flex items-center gap-1 text-[10px] text-text-muted">
-            <kbd className="rounded border border-border-default bg-bg-primary px-1 py-0.5 font-medium">↑↓</kbd>
+        <div className="flex items-center gap-5 border-t border-border-default px-6 py-3">
+          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+            <kbd className="rounded border border-border-default bg-bg-primary px-1.5 py-0.5 font-medium">↑↓</kbd>
             <span>navigate</span>
           </div>
-          <div className="flex items-center gap-1 text-[10px] text-text-muted">
-            <kbd className="rounded border border-border-default bg-bg-primary px-1 py-0.5 font-medium">↵</kbd>
+          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+            <kbd className="rounded border border-border-default bg-bg-primary px-1.5 py-0.5 font-medium">↵</kbd>
             <span>select</span>
           </div>
-          <div className="flex items-center gap-1 text-[10px] text-text-muted">
-            <kbd className="rounded border border-border-default bg-bg-primary px-1 py-0.5 font-medium">esc</kbd>
+          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+            <kbd className="rounded border border-border-default bg-bg-primary px-1.5 py-0.5 font-medium">esc</kbd>
             <span>close</span>
           </div>
         </div>
