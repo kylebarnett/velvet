@@ -26,9 +26,11 @@ import {
   Eye,
   ChevronDown,
   HelpCircle,
+  BookOpen,
   LogOut,
   Menu,
   X,
+  Search,
   PanelLeftClose,
   PanelLeftOpen,
   type LucideIcon,
@@ -85,6 +87,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   upload: Upload,
   "trending-up": TrendingUp,
   eye: Eye,
+  "help-circle": HelpCircle,
+  search: Search,
 };
 
 function NavIcon({ name, className }: { name?: string; className?: string }) {
@@ -153,6 +157,8 @@ export function AppShell({
   children,
   showTakeTour,
   onTakeTour,
+  onOpenHelp,
+  onOpenCommandPalette,
   profileLinks,
 }: {
   title: string;
@@ -164,6 +170,8 @@ export function AppShell({
   children: React.ReactNode;
   showTakeTour?: boolean;
   onTakeTour?: () => void;
+  onOpenHelp?: () => void;
+  onOpenCommandPalette?: () => void;
   profileLinks?: NavItem[];
 }) {
   const [logoError, setLogoError] = React.useState(false);
@@ -306,6 +314,34 @@ export function AppShell({
         </div>
       )}
       <div className="mx-0 mt-4 border-t border-border-subtle" />
+
+      {/* Search trigger */}
+      {onOpenCommandPalette && (
+        <div className={cn("pt-3", sidebarCollapsed ? "px-1.5" : "px-2")}>
+          {sidebarCollapsed ? (
+            <SidebarTooltip label="Search (⌘K)">
+              <button
+                onClick={onOpenCommandPalette}
+                className="flex h-9 w-full items-center justify-center rounded-md text-text-tertiary hover:bg-bg-raised hover:text-text-primary transition-colors"
+                type="button"
+                aria-label="Search"
+              >
+                <Search className="h-[18px] w-[18px]" />
+              </button>
+            </SidebarTooltip>
+          ) : (
+            <button
+              onClick={onOpenCommandPalette}
+              className="flex w-full items-center gap-2.5 rounded-md border border-border-default bg-bg-input px-3 h-9 text-sm text-text-muted hover:text-text-secondary hover:border-border-hover transition-colors"
+              type="button"
+            >
+              <Search className="h-4 w-4 shrink-0" />
+              <span className="flex-1 text-left">Search...</span>
+              <kbd className="rounded border border-border-default bg-bg-primary px-1.5 py-0.5 text-[10px] font-medium text-text-muted">⌘K</kbd>
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 
@@ -410,6 +446,25 @@ export function AppShell({
                 >
                   <HelpCircle className="h-[18px] w-[18px] shrink-0" />
                   <span>Take tour</span>
+                </button>
+              )}
+
+              {/* Help guide */}
+              {onOpenHelp && (
+                <button
+                  onClick={() => {
+                    setSettingsPanelOpen(false);
+                    if (mobile) setMobileMenuOpen(false);
+                    onOpenHelp();
+                  }}
+                  className={cn(
+                    "flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm text-text-tertiary transition-colors hover:bg-bg-raised hover:text-text-primary",
+                    mobile ? "h-11" : "h-9",
+                  )}
+                  type="button"
+                >
+                  <BookOpen className="h-[18px] w-[18px] shrink-0" />
+                  <span>Help guide</span>
                 </button>
               )}
 
@@ -625,8 +680,18 @@ export function AppShell({
           <Menu className="h-5 w-5" />
         </button>
         <span className="text-sm font-medium">{currentPageTitle}</span>
-        {/* Spacer to keep title centered */}
-        <div className="h-10 w-10" />
+        {onOpenCommandPalette ? (
+          <button
+            onClick={onOpenCommandPalette}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-bg-elevated"
+            type="button"
+            aria-label="Search"
+          >
+            <Search className="h-5 w-5" />
+          </button>
+        ) : (
+          <div className="h-10 w-10" />
+        )}
       </header>
 
       {/* Mobile Menu Overlay */}

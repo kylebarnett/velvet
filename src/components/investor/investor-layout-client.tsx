@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation";
 
 import { OnboardingProvider } from "@/contexts/onboarding-context";
 import { MetricDefinitionsProvider } from "@/contexts/metric-definitions-context";
+import { HelpProvider } from "@/contexts/help-context";
 import { OnboardingOverlay } from "@/components/onboarding/onboarding-provider";
 import { ChatbotWidget } from "@/components/investor/chatbot-widget";
+import { CommandPaletteProvider } from "@/components/command-palette/command-palette-provider";
+import { CommandPalette } from "@/components/command-palette/command-palette";
 
 type InvestorLayoutClientProps = {
   children: React.ReactNode;
@@ -24,14 +27,19 @@ export function InvestorLayoutClient({
 
   return (
     <MetricDefinitionsProvider>
-      <OnboardingProvider
-        initialStep={initialOnboardingStep}
-        isOnboardingComplete={isOnboardingComplete}
-      >
-        {children}
-        <OnboardingOverlay />
-        {!hideChatbot && <ChatbotWidget />}
-      </OnboardingProvider>
+      <HelpProvider role="investor">
+        <CommandPaletteProvider>
+          <OnboardingProvider
+            initialStep={initialOnboardingStep}
+            isOnboardingComplete={isOnboardingComplete}
+          >
+            {children}
+            <OnboardingOverlay />
+            {!hideChatbot && <ChatbotWidget />}
+            <CommandPalette role="investor" />
+          </OnboardingProvider>
+        </CommandPaletteProvider>
+      </HelpProvider>
     </MetricDefinitionsProvider>
   );
 }

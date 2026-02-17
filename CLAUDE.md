@@ -97,6 +97,18 @@ When using `createSupabaseAdminClient()` (bypasses RLS):
 - [ ] No sensitive data in client-side code
 - [ ] Error messages don't leak system info
 
+### Help Guide Maintenance (Required for ALL new features)
+
+When adding or modifying any user-facing feature:
+
+1. **Add or update help article** in `src/lib/help/content/` for the relevant role
+2. **Update `relatedPages`** array if new routes are added
+3. **Add keywords** for searchability
+4. **Cross-reference** related articles in `relatedArticles`
+5. **Update categories** in `src/lib/help/categories.ts` if adding a new feature area
+
+Help content lives in `src/lib/help/content/` as typed TypeScript objects. See `src/lib/help/types.ts` for the schema. Every page in the app should have at least one help article linked to it via `relatedPages`.
+
 ### Cron Route Security
 
 Cron endpoints require `CRON_SECRET` via Bearer token. Endpoints reject all requests when the secret is not configured.

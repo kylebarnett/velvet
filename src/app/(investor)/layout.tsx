@@ -74,6 +74,7 @@ export default async function InvestorLayout({
               { href: "/funds/lp-reports", label: "LP Reports", icon: "file-text" },
             ],
           },
+          { href: "/help", label: "Help", icon: "help-circle", divider: true },
         ]}
         profileLinks={[
           { href: "/historical-upload", label: "Import Data", icon: "upload" },

@@ -97,6 +97,7 @@ export default async function FounderLayout({
             },
             { href: "/portal/investors", label: "Investors", icon: "shield", divider: true },
             { href: "/portal/activity", label: "Activity", icon: "activity" },
+            { href: "/portal/help", label: "Help", icon: "help-circle", divider: true },
           ]}
           profileLinks={[
             { href: "/portal/historical-upload", label: "Import Data", icon: "upload" },
