@@ -19,6 +19,7 @@ type Props = {
 };
 
 export function TemplateAssignModal({ open, templateId, templateName, onClose, onAssigned }: Props) {
+  const titleId = React.useId();
   const [companies, setCompanies] = React.useState<Company[]>([]);
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [periodStart, setPeriodStart] = React.useState("");
@@ -110,8 +111,8 @@ export function TemplateAssignModal({ open, templateId, templateName, onClose, o
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter">
-      <div className="w-full max-w-lg rounded-xl border border-border-default bg-bg-secondary p-6 shadow-xl modal-dialog-enter">
-        <h2 className="text-lg font-semibold">Assign template</h2>
+      <div className="w-full max-w-lg rounded-xl border border-border-default bg-bg-secondary p-6 shadow-xl modal-dialog-enter" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+        <h2 id={titleId} className="text-lg font-semibold">Assign template</h2>
         <p className="mt-1 text-sm text-text-tertiary">
           Assign &ldquo;{templateName}&rdquo; to portfolio companies.
         </p>

@@ -483,7 +483,6 @@ function InlineTagBadge({
       onOpenChange={setOpen}
     >
       <SelectTrigger
-        size="sm"
         className={cn(
           "h-auto w-auto border-0 bg-transparent p-0 shadow-none [&>svg]:hidden",
           value

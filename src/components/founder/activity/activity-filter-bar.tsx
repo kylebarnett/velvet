@@ -44,7 +44,7 @@ export function ActivityFilterBar({
           value={selectedActorId ?? "__all__"}
           onValueChange={(v) => onActorChange(v === "__all__" ? null : v)}
         >
-          <SelectTrigger size="sm" className="w-[200px]">
+          <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="All investors" />
           </SelectTrigger>
           <SelectContent>

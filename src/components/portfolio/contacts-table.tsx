@@ -805,7 +805,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
             >
-              <SelectTrigger size="sm" className="w-auto min-w-[130px] flex-1 sm:flex-none">
+              <SelectTrigger className="w-auto min-w-[130px] flex-1 sm:flex-none">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

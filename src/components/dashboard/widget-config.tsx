@@ -84,7 +84,7 @@ export function WidgetConfig({
             <div>
               <label className="block text-xs text-text-tertiary mb-1">Chart Type</label>
               <Select value={config.chartType} onValueChange={(v) => updateConfig({ chartType: v as ChartConfig["chartType"] })}>
-                <SelectTrigger size="sm">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -131,7 +131,7 @@ export function WidgetConfig({
             <div>
               <label className="block text-xs text-text-tertiary mb-1">Period</label>
               <Select value={config.periodType} onValueChange={(v) => updateConfig({ periodType: v as ChartConfig["periodType"] })}>
-                <SelectTrigger size="sm">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -160,7 +160,7 @@ export function WidgetConfig({
             <div>
               <label className="block text-xs text-text-tertiary mb-1">Metric</label>
               <Select value={config.metric || "__none__"} onValueChange={(v) => updateConfig({ metric: v === "__none__" ? "" : v })}>
-                <SelectTrigger size="sm">
+                <SelectTrigger>
                   <SelectValue placeholder="Select a metric..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -230,7 +230,7 @@ export function WidgetConfig({
             <div>
               <label className="block text-xs text-text-tertiary mb-1">Period</label>
               <Select value={config.periodType} onValueChange={(v) => updateConfig({ periodType: v as TableConfig["periodType"] })}>
-                <SelectTrigger size="sm">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

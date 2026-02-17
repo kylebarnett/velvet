@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireRole } from "@/lib/auth/require-role";
 import { UploadWizard } from "@/components/historical-upload/upload-wizard";
 import { UploadHistory } from "@/components/historical-upload/upload-history";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
+export const metadata: Metadata = { title: "Import Data | Velvet" };
 export const dynamic = "force-dynamic";
 
 export default async function FounderHistoricalUploadPage() {

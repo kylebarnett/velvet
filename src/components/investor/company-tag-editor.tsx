@@ -88,7 +88,7 @@ export function CompanyTagEditor({
             value={currentStage || "__none__"}
             onValueChange={(v) => setCurrentStage(v === "__none__" ? "" : v)}
           >
-            <SelectTrigger size="sm">
+            <SelectTrigger>
               <SelectValue placeholder="None" />
             </SelectTrigger>
             <SelectContent>
@@ -107,7 +107,7 @@ export function CompanyTagEditor({
             value={currentIndustry || "__none__"}
             onValueChange={(v) => setCurrentIndustry(v === "__none__" ? "" : v)}
           >
-            <SelectTrigger size="sm">
+            <SelectTrigger>
               <SelectValue placeholder="None" />
             </SelectTrigger>
             <SelectContent>
@@ -126,7 +126,7 @@ export function CompanyTagEditor({
             value={currentModel || "__none__"}
             onValueChange={(v) => setCurrentModel(v === "__none__" ? "" : v)}
           >
-            <SelectTrigger size="sm">
+            <SelectTrigger>
               <SelectValue placeholder="None" />
             </SelectTrigger>
             <SelectContent>

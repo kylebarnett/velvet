@@ -28,6 +28,7 @@ export function DocumentUploadModal({
   onClose,
   onSuccess,
 }: DocumentUploadModalProps) {
+  const titleId = React.useId();
   const [error, setError] = React.useState<string | null>(null);
   const [isUploading, setIsUploading] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState(0);
@@ -130,9 +131,9 @@ export function DocumentUploadModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm modal-backdrop-enter">
-      <div className="w-full max-w-lg rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter">
+      <div className="w-full max-w-lg rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium">Upload document</h3>
+          <h3 id={titleId} className="text-lg font-medium">Upload document</h3>
           <button
             type="button"
             onClick={onClose}

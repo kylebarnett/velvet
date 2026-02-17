@@ -1,7 +1,9 @@
+import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { AllReportsClient } from "@/components/lp/all-reports-client";
 
+export const metadata: Metadata = { title: "All LP Reports | Velvet" };
 export const dynamic = "force-dynamic";
 
 export default async function AllLPReportsPage() {

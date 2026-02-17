@@ -301,7 +301,7 @@ export async function POST(
 
   // Send notification emails
   const apiKey = process.env.RESEND_API_KEY;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001";
   const isDev = process.env.NODE_ENV === "development";
   const fromDomain = process.env.RESEND_FROM_DOMAIN;
   const fromAddr = fromDomain

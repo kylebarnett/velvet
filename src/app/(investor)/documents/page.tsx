@@ -327,7 +327,7 @@ export default function DocumentsPage() {
             value={companyFilter || "__all__"}
             onValueChange={(v) => setCompanyFilter(v === "__all__" ? "" : v)}
           >
-            <SelectTrigger className="w-full sm:w-[200px]" size="sm">
+            <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="All companies" />
             </SelectTrigger>
             <SelectContent>
@@ -345,7 +345,7 @@ export default function DocumentsPage() {
             value={typeFilter || "__all__"}
             onValueChange={(v) => setTypeFilter(v === "__all__" ? "" : v)}
           >
-            <SelectTrigger className="w-full sm:w-[200px]" size="sm">
+            <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent>

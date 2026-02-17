@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireRole } from "@/lib/auth/require-role";
@@ -5,6 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CsvImportForm } from "@/components/portfolio/csv-import-form";
 import { DownloadCsvButton } from "@/components/portfolio/download-csv-button";
 
+export const metadata: Metadata = { title: "Import Contacts | Velvet" };
 export const dynamic = "force-dynamic";
 
 export default async function ImportPage() {

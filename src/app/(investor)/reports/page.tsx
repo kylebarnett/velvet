@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ReportsPageClient } from "@/components/reports/reports-page-client";
 import type { SavedReport } from "@/components/reports/reports-context";
 
+export const metadata: Metadata = { title: "Reports | Velvet" };
 export const dynamic = "force-dynamic";
 
 export default async function ReportsPage() {

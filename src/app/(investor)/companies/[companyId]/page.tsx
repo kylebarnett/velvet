@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/require-role";
+
+export const metadata: Metadata = { title: "Company Dashboard | Velvet" };
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CompanySwitcher } from "@/components/investor/company-switcher";
 import { InlineTags } from "@/components/investor/inline-tag";

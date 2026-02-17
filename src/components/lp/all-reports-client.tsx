@@ -117,7 +117,7 @@ export function AllReportsClient({ funds }: { funds: FundOption[] }) {
           value={fundFilter || NONE}
           onValueChange={(v) => setFundFilter(v === NONE ? "" : v)}
         >
-          <SelectTrigger size="sm" className="w-auto min-w-[160px]">
+          <SelectTrigger className="w-auto min-w-[160px]">
             <SelectValue placeholder="All Funds" />
           </SelectTrigger>
           <SelectContent>
@@ -134,7 +134,7 @@ export function AllReportsClient({ funds }: { funds: FundOption[] }) {
           value={periodFilter || NONE}
           onValueChange={(v) => setPeriodFilter(v === NONE ? "" : v)}
         >
-          <SelectTrigger size="sm" className="w-auto min-w-[140px]">
+          <SelectTrigger className="w-auto min-w-[140px]">
             <SelectValue placeholder="All Periods" />
           </SelectTrigger>
           <SelectContent>

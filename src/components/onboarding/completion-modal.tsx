@@ -72,7 +72,7 @@ export function CompletionModal({ onClose, onRestart, role = "investor" }: Compl
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 shadow-xl">
+      <div className="relative w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 shadow-xl" role="dialog" aria-modal="true" aria-labelledby="completion-modal-title">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -89,7 +89,7 @@ export function CompletionModal({ onClose, onRestart, role = "investor" }: Compl
             <CheckCircle2 className="h-8 w-8 text-[var(--success-accent)]" />
           </div>
 
-          <h2 className="mt-4 text-xl font-semibold text-text-primary">
+          <h2 id="completion-modal-title" className="mt-4 text-xl font-semibold text-text-primary">
             You&apos;re all set!
           </h2>
 

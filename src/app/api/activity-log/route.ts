@@ -64,7 +64,8 @@ export async function GET(req: NextRequest) {
     const { data: rows, error: actorsError } = await supabase
       .from("activity_log")
       .select("actor_id, actor_role, created_at")
-      .eq("company_id", company.id);
+      .eq("company_id", company.id)
+      .limit(10000);
 
     if (actorsError) {
       logger.error("Failed to fetch actors:", actorsError.message);

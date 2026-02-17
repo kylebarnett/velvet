@@ -14,6 +14,7 @@ type Props = {
 };
 
 export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
+  const titleId = React.useId();
   const [email, setEmail] = React.useState("");
   const [role, setRole] = React.useState("member");
   const [submitting, setSubmitting] = React.useState(false);
@@ -81,9 +82,12 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
         <div
           className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter"
           onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
         >
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold">Invite Team Member</h3>
+            <h3 id={titleId} className="text-base font-semibold">Invite Team Member</h3>
             <button
               onClick={onClose}
               className="rounded-md p-1 text-text-muted hover:bg-bg-elevated hover:text-text-tertiary"
@@ -106,7 +110,7 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
                     type="text"
                     readOnly
                     value={inviteUrl}
-                    className="h-9 flex-1 rounded-md border border-border-default bg-bg-input px-3 text-xs font-mono outline-none"
+                    className="h-11 flex-1 rounded-md border border-border-default bg-bg-input px-3 text-xs font-mono outline-none"
                   />
                   <Button
                     variant="secondary"

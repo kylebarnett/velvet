@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import nextDynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
+
+export const metadata: Metadata = { title: "LP Report Editor | Velvet" };
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";

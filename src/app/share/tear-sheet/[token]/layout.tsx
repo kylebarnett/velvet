@@ -1,3 +1,7 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Shared Tear Sheet | Velvet" };
+
 export default function ShareTearSheetLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {

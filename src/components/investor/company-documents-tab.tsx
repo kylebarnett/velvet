@@ -262,7 +262,7 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
             value={typeFilter || "__all__"}
             onValueChange={(v) => setTypeFilter(v === "__all__" ? "" : v)}
           >
-            <SelectTrigger className="w-full sm:w-[180px]" size="sm">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent>

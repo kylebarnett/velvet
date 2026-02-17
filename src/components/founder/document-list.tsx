@@ -494,7 +494,7 @@ export function FounderDocumentList() {
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4" />
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger size="sm" className="w-auto min-w-[150px]">
+              <SelectTrigger className="w-auto min-w-[150px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

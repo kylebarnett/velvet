@@ -33,6 +33,8 @@ export function TemplateFormModal({
   onClose,
   onSaved,
 }: Props) {
+  const titleId = React.useId();
+
   React.useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -47,9 +49,9 @@ export function TemplateFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border-default bg-bg-secondary p-6 shadow-xl">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border-default bg-bg-secondary p-6 shadow-xl" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">
+          <h2 id={titleId} className="text-lg font-semibold">
             {mode === "create" ? "New template" : "Edit template"}
           </h2>
           <button

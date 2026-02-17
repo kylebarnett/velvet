@@ -611,6 +611,7 @@ export function AppShell({
                               "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-accent",
                           )}
                           href={child.href}
+                          aria-current={childActive ? "page" : undefined}
                           onClick={mobile ? () => setMobileMenuOpen(false) : undefined}
                         >
                           <NavIcon name={child.icon} className="h-4 w-4 shrink-0" />
@@ -640,6 +641,7 @@ export function AppShell({
                   "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-accent",
               )}
               href={item.href}
+              aria-current={active ? "page" : undefined}
               onClick={mobile ? () => setMobileMenuOpen(false) : collapsed ? () => setSidebarCollapsed(false) : undefined}
             >
               <NavIcon name={item.icon} className="h-[18px] w-[18px] shrink-0" />
@@ -669,6 +671,14 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
+      {/* Skip to main content link — visible on focus for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-bg-elevated focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-text-primary focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+      >
+        Skip to main content
+      </a>
+
       {/* Mobile Header */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border-default bg-bg-primary/95 px-4 backdrop-blur-sm md:hidden">
         <button
@@ -748,7 +758,7 @@ export function AppShell({
         )}
         <div className="mx-4 mt-4 border-t border-border-subtle" />
 
-        <nav className="flex-1 overflow-y-auto px-2 py-3">
+        <nav aria-label="Main navigation" className="flex-1 overflow-y-auto px-2 py-3">
           {renderNavItems(true)}
         </nav>
 
@@ -763,7 +773,7 @@ export function AppShell({
         {/* Desktop Sidebar */}
         <aside className="sticky top-0 flex h-screen flex-col border-r border-border-default bg-bg-sidebar overflow-hidden">
           {brandHeader}
-          <nav className={cn("flex-1 overflow-y-auto", sidebarCollapsed ? "px-1.5" : "px-2")}>
+          <nav aria-label="Main navigation" className={cn("flex-1 overflow-y-auto", sidebarCollapsed ? "px-1.5" : "px-2")}>
             {renderNavItems(false)}
           </nav>
           {settingsPanel(false)}
@@ -771,12 +781,12 @@ export function AppShell({
 
         {/* Desktop Main Content */}
         <div className="min-w-0">
-          <main className="p-4 md:p-6">{children}</main>
+          <main id="main-content" className="p-4 md:p-6">{children}</main>
         </div>
       </div>
 
       {/* Mobile Main Content */}
-      <main className="p-4 md:hidden">{children}</main>
+      <main id="main-content-mobile" className="p-4 md:hidden">{children}</main>
     </div>
   );
 }

@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { HelpArticlePage } from "@/components/help/help-article-page";
+
+export const metadata: Metadata = { title: "Help | Velvet" };
 
 export default async function FounderHelpArticlePage({
   params,

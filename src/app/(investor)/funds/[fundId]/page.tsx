@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -5,6 +6,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { FundDetailClient } from "@/components/lp/fund-detail-client";
 
+export const metadata: Metadata = { title: "Fund Detail | Velvet" };
 export const dynamic = "force-dynamic";
 
 export default async function FundDetailPage({

@@ -165,7 +165,7 @@ export function TemplateForm({
                   required
                 />
                 <Select value={item.period_type} onValueChange={(v) => updateItem(index, "period_type", v)}>
-                  <SelectTrigger size="md">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent portal={false}>

@@ -111,7 +111,7 @@ export async function POST(req: Request) {
   }[] = [];
 
   const apiKey = process.env.RESEND_API_KEY;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001";
 
   // Type-assert Supabase join result once to avoid repeated casts in the loop.
   // `as unknown` is needed because Supabase returns arrays for joined relations

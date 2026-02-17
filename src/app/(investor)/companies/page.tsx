@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Building2, CheckCircle2 } from "lucide-react";
+
+export const metadata: Metadata = { title: "Portfolio | Velvet" };
 
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";

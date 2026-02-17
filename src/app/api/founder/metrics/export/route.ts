@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { logger } from "@/lib/logger";
 
 // GET - Export founder's metrics as CSV
@@ -10,6 +11,9 @@ export async function GET(req: Request) {
 
   const role = user.user_metadata?.role;
   if (role !== "founder") return jsonError("Founders only.", 403);
+
+  const rl = checkRateLimit(`metrics-export:${user.id}`, 10, 60_000);
+  if (!rl.allowed) return jsonError("Too many requests.", 429);
 
   // Parse query params
   const url = new URL(req.url);

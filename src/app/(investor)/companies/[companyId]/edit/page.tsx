@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { requireRole } from "@/lib/auth/require-role";
+
+export const metadata: Metadata = { title: "Edit Dashboard | Velvet" };
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DashboardBuilder } from "@/components/dashboard/dashboard-builder";
 

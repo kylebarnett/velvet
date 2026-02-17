@@ -87,7 +87,7 @@ export async function POST(req: Request) {
 
   const isDev = process.env.NODE_ENV === "development";
   const apiKey = process.env.RESEND_API_KEY;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001";
 
   // Prepare email data for all invitations
   type EmailData = {

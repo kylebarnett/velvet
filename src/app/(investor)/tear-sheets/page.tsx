@@ -401,7 +401,7 @@ export default function InvestorTearSheetsPage() {
 
             {companiesWithSheets.length > 1 && (
               <Select value={filterCompany} onValueChange={setFilterCompany}>
-                <SelectTrigger size="sm" className="w-[200px]">
+                <SelectTrigger className="w-[200px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -417,7 +417,7 @@ export default function InvestorTearSheetsPage() {
 
             {availableYears.length > 1 && (
               <Select value={filterYear} onValueChange={setFilterYear}>
-                <SelectTrigger size="sm" className="w-[120px]">
+                <SelectTrigger className="w-[120px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+
+export const metadata: Metadata = { title: "New Metric Request | Velvet" };
 
 const UnifiedRequestWizard = dynamic(
   () =>

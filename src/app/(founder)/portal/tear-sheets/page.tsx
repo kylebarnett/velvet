@@ -213,7 +213,7 @@ export default function TearSheetsPage() {
           {/* Year filter */}
           {availableYears.length > 1 && (
             <Select value={filterYear} onValueChange={setFilterYear}>
-              <SelectTrigger size="sm">
+              <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

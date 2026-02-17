@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { getCompanyPercentile } from "@/lib/benchmarks/calculate";
 import { formatValue } from "@/components/charts/types";
 import { logger } from "@/lib/logger";
@@ -19,6 +20,9 @@ export async function GET(req: Request) {
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
+
+  const rl = checkRateLimit(`benchmarks:${user.id}`, 10, 60_000);
+  if (!rl.allowed) return jsonError("Too many requests.", 429);
 
   // Parse and validate query params
   const url = new URL(req.url);

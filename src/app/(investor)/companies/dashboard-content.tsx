@@ -319,7 +319,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
         <div className="flex items-center justify-between gap-3 sm:justify-end">
           {showStatusFilter && (
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger size="sm" className="w-[140px]">
+              <SelectTrigger className="w-[140px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

@@ -385,7 +385,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 }
               }}
             >
-              <SelectTrigger size="sm" className="mt-1">
+              <SelectTrigger className="mt-1">
                 <SelectValue>
                   {periodOptions.find((p) => p.periodStart === editPeriodStart)?.label ?? "Select period"}
                 </SelectValue>

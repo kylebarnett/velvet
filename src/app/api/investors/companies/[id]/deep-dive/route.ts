@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { logger } from "@/lib/logger";
 import { extractNumericValue } from "@/lib/reports/aggregation";
 import { formatValue } from "@/components/charts/types";
@@ -14,6 +15,9 @@ export async function GET(
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
+
+  const rl = checkRateLimit(`deep-dive:${user.id}`, 10, 60_000);
+  if (!rl.allowed) return jsonError("Too many requests.", 429);
 
   const { id: companyId } = await params;
   const url = new URL(req.url);

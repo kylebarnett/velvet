@@ -25,6 +25,7 @@ export async function GET(
     return jsonError("Tear sheet not found.", 404);
   }
 
+  // Admin client needed: public endpoint requires bypassing RLS to read tear sheet by share_token
   const supabase = createSupabaseAdminClient();
 
   // Query tear sheet by share token - must be published and sharing enabled

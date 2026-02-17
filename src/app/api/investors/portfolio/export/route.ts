@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { logger } from "@/lib/logger";
 
 export async function GET() {
@@ -9,6 +10,9 @@ export async function GET() {
 
   const role = user.user_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
+
+  const rl = checkRateLimit(`portfolio-export:${user.id}`, 10, 60_000);
+  if (!rl.allowed) return jsonError("Too many requests.", 429);
 
   // Fetch all portfolio contacts with company info
   const { data: contacts, error } = await supabase
