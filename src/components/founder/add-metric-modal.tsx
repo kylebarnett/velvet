@@ -496,14 +496,15 @@ export function AddMetricModal({
           >
             Add Metric
           </h3>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="rounded-md p-1.5 text-text-muted transition-colors hover:bg-bg-hover hover:text-text-primary"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         <form
@@ -665,28 +666,32 @@ export function AddMetricModal({
                           )}
                         </div>
                         {rows.length > 1 && (
-                          <button
+                          <Button
                             type="button"
+                            variant="ghost"
+                            size="icon-sm"
                             onClick={() => removeRow(row.id)}
-                            className="mt-1.5 shrink-0 rounded-md p-1.5 text-text-faint transition-colors hover:bg-bg-hover hover:text-text-secondary"
+                            className="mt-1.5 shrink-0"
                             aria-label="Remove period"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          </Button>
                         )}
                       </div>
                     );
                   })}
                 </div>
                 {hasAvailablePeriods && (
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={addRow}
-                    className="mt-2.5 flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-bg-hover hover:text-text-secondary"
+                    className="mt-2.5"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     Add another period
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>

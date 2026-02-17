@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { FileSpreadsheet, ChevronRight, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { TearSheetViewer } from "@/components/investor/tear-sheet-viewer";
 import type { TearSheetMetric } from "@/components/investor/tear-sheet-viewer";
 import { NewTearSheetModal } from "@/components/investor/new-tear-sheet-modal";
@@ -233,14 +234,14 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div />
-        <button
+        <Button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+          size="sm"
         >
           <Plus className="h-3.5 w-3.5" />
           Create Tear Sheet
-        </button>
+        </Button>
       </div>
 
       {tearSheets.length > 0 && (
@@ -319,14 +320,14 @@ export function CompanyTearSheetsTab({ companyId, companyName }: CompanyTearShee
           <p className="mt-1 text-xs text-text-muted">
             Create your own or wait for the founder to publish one.
           </p>
-          <button
+          <Button
             type="button"
             onClick={() => setShowCreateModal(true)}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+            className="mt-4"
           >
             <Plus className="h-4 w-4" />
             Create Tear Sheet
-          </button>
+          </Button>
         </div>
       )}
 

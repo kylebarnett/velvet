@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Download, ChevronDown, FileSpreadsheet, FileText, FileDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type ExportFormat = "csv" | "excel" | "pdf";
 
@@ -56,14 +57,14 @@ export function ExportButton({ onClick, label, onExport, formats }: ExportButton
   // Simple mode: just a button (backwards compatible)
   if (!onExport) {
     return (
-      <button
-        type="button"
+      <Button
+        variant="secondary"
+        size="sm"
         onClick={onClick}
-        className="inline-flex items-center gap-1.5 rounded-md border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary transition-colors hover:bg-bg-hover"
       >
         <Download className="h-3.5 w-3.5" aria-hidden="true" />
         {label ?? "Export CSV"}
-      </button>
+      </Button>
     );
   }
 
@@ -74,17 +75,17 @@ export function ExportButton({ onClick, label, onExport, formats }: ExportButton
 
   return (
     <div ref={ref} className="relative">
-      <button
-        type="button"
+      <Button
+        variant="secondary"
+        size="sm"
         onClick={() => setOpen(!open)}
-        className="inline-flex items-center gap-1.5 rounded-md border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary transition-colors hover:bg-bg-hover"
         aria-expanded={open}
         aria-haspopup="true"
       >
         <Download className="h-3.5 w-3.5" aria-hidden="true" />
         {label ?? "Export"}
         <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
-      </button>
+      </Button>
 
       {open && (
         <div

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { MessageSquare, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Comment = {
   id: string;
@@ -175,14 +176,14 @@ export function MetricCommentThread({ companyId, metricName, periodStart, period
           maxLength={2000}
           className="h-8 flex-1 rounded-md border border-border-default bg-bg-input px-2.5 text-xs text-text-primary placeholder:text-text-faint focus:border-border-default focus:outline-none"
         />
-        <button
+        <Button
           type="submit"
+          size="icon"
           disabled={!newComment.trim() || posting}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-btn-primary-bg text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-40"
           aria-label="Send comment"
         >
           <Send className="h-3.5 w-3.5" />
-        </button>
+        </Button>
       </form>
     </div>
   );

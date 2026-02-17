@@ -10,6 +10,7 @@ import {
   List,
   Trash2,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -359,13 +360,13 @@ export default function InvestorTearSheetsPage() {
           </p>
         </div>
         {tearSheets.length > 0 && (
-          <button
+          <Button
             type="button"
+            size="sm"
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
           >
             New Tear Sheet
-          </button>
+          </Button>
         )}
       </div>
 
@@ -480,13 +481,12 @@ export default function InvestorTearSheetsPage() {
           title="No tear sheets yet"
           description="View founder-published tear sheets or create your own investment memos. Tear sheets help you track metrics, notes, and action items for each company."
           action={
-            <button
+            <Button
               type="button"
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
             >
               Create Tear Sheet
-            </button>
+            </Button>
           }
         />
       )}
@@ -537,17 +537,19 @@ export default function InvestorTearSheetsPage() {
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     {isInvestor && (
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeleteId(ts.id);
                         }}
-                        className="rounded-md p-1.5 text-text-faint hover:bg-bg-elevated hover:text-[var(--status-error-text)] opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="text-text-faint hover:text-[var(--status-error-text)] opacity-0 group-hover:opacity-100 transition-opacity"
                         aria-label="Delete tear sheet"
                       >
                         <Trash2 className="h-4 w-4" />
-                      </button>
+                      </Button>
                     )}
                     <ChevronRight className="h-5 w-5 text-text-faint group-hover:text-text-muted transition-colors" />
                   </div>
@@ -607,17 +609,19 @@ export default function InvestorTearSheetsPage() {
                     </td>
                     <td className="px-4 py-3">
                       {isInvestor && (
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
                             setDeleteId(ts.id);
                           }}
-                          className="shrink-0 rounded-md p-1.5 text-text-faint hover:bg-bg-elevated hover:text-[var(--status-error-text)]"
+                          className="shrink-0 text-text-faint hover:text-[var(--status-error-text)]"
                           aria-label="Delete tear sheet"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </button>
+                        </Button>
                       )}
                     </td>
                   </tr>

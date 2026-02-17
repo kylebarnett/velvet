@@ -1065,7 +1065,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
               <button
                 onClick={() => goToPage(pagination.page - 1)}
                 disabled={pagination.page === 1 || fetching}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-60 disabled:cursor-not-allowed"
                 aria-label="Previous page"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -1101,7 +1101,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
               <button
                 onClick={() => goToPage(pagination.page + 1)}
                 disabled={pagination.page === pagination.totalPages || fetching}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-60 disabled:cursor-not-allowed"
                 aria-label="Next page"
               >
                 <ChevronRight className="h-4 w-4" />

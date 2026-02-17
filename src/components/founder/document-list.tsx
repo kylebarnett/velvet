@@ -20,6 +20,7 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -160,13 +161,15 @@ function PreviewPane({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-border-default px-4 py-3">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={onClose}
-          className="rounded-md p-1 text-text-muted hover:bg-bg-elevated hover:text-text-tertiary sm:hidden"
+          className="text-text-muted hover:bg-bg-elevated hover:text-text-tertiary sm:hidden"
         >
           <ArrowLeft className="h-5 w-5" />
-        </button>
+        </Button>
 
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium truncate">{doc.file_name}</div>
@@ -191,32 +194,37 @@ function PreviewPane({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={() => onDownload(doc)}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs text-text-secondary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             <Download className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Download</span>
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={() => onDelete(doc)}
             disabled={deleting}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--error-accent)] hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+            className="text-[var(--error-accent)]"
             title="Delete"
             aria-label="Delete document"
           >
             <Trash2 className="h-3.5 w-3.5" />
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+            className="hidden sm:inline-flex text-text-muted hover:bg-bg-elevated hover:text-text-tertiary"
             aria-label="Close preview"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -594,24 +602,27 @@ export function FounderDocumentList() {
                                       </span>
                                       <span className="text-xs text-text-muted">{formatFileSize(doc.file_size)}</span>
                                       <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                                        <button
+                                        <Button
                                           type="button"
+                                          variant="ghost"
+                                          size="icon-lg"
                                           onClick={() => downloadDocument(doc)}
-                                          className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover"
                                           title="Download"
                                           aria-label="Download"
                                         >
                                           <Download className="h-3.5 w-3.5 text-text-tertiary" />
-                                        </button>
-                                        <button
+                                        </Button>
+                                        <Button
                                           type="button"
+                                          variant="ghost"
+                                          size="icon-lg"
                                           onClick={() => openDeleteModal(doc)}
-                                          className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover"
+                                          className="text-[var(--error-accent)]"
                                           title="Delete"
                                           aria-label="Delete"
                                         >
-                                          <Trash2 className="h-3.5 w-3.5 text-[var(--error-accent)]" />
-                                        </button>
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
                                       </div>
                                     </div>
                                   ))}
@@ -833,23 +844,26 @@ export function FounderDocumentList() {
                           </td>
                           <td className="p-3">
                             <div className="flex items-center gap-1">
-                              <button
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={(e) => { e.stopPropagation(); downloadDocument(doc); }}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                                 title="Download"
                                 aria-label="Download document"
                               >
                                 <Download className="h-4 w-4 text-text-tertiary" />
-                              </button>
-                              <button
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={(e) => { e.stopPropagation(); openDeleteModal(doc); }}
                                 disabled={deleting}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                                className="text-[var(--error-accent)]"
                                 title="Delete"
                                 aria-label="Delete document"
                               >
-                                <Trash2 className="h-4 w-4 text-[var(--error-accent)]" />
-                              </button>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </td>
                         </tr>

@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { X, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { REPORT_TEMPLATES, getDefaultSections, type ReportType } from "@/lib/reports/templates";
 
 import { KPICards } from "./portfolio-summary/kpi-cards";
@@ -164,15 +165,16 @@ export function ReportPreviewPanel({ reportType, onClose, onCreated, triggerRef 
             </h2>
             <p className="mt-0.5 text-sm text-text-tertiary">{template.description}</p>
           </div>
-          <button
+          <Button
             ref={closeRef}
-            type="button"
+            variant="ghost"
+            size="icon"
             onClick={handleClose}
-            className="ml-4 mt-0.5 rounded-md p-1.5 text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-primary"
+            className="ml-4 mt-0.5"
             aria-label="Close preview"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Sample data banner */}
@@ -193,22 +195,19 @@ export function ReportPreviewPanel({ reportType, onClose, onCreated, triggerRef 
         <div className="flex shrink-0 items-center justify-between border-t border-border-subtle bg-bg-secondary px-6 py-4">
           <p className="text-xs text-text-muted">Preview only. Create to save and customize.</p>
           <div className="flex items-center gap-3">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
               onClick={handleClose}
-              className="rounded-lg border border-border-default px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-bg-elevated"
             >
               Cancel
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
               onClick={handleCreate}
               disabled={creating}
-              className="inline-flex items-center gap-2 rounded-lg bg-text-primary px-4 py-2 text-sm font-medium text-bg-primary transition-colors hover:opacity-90 disabled:opacity-60"
+              loading={creating}
             >
-              {creating && <Loader2 className="h-4 w-4 animate-spin" />}
               Create Report
-            </button>
+            </Button>
           </div>
         </div>
       </div>

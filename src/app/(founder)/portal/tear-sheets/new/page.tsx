@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 const QUARTERS = ["Q1", "Q2", "Q3", "Q4"] as const;
@@ -130,14 +131,14 @@ export default function NewTearSheetPage() {
             </div>
           )}
 
-          <button
+          <Button
             type="button"
+            className="w-full"
             onClick={handleCreate}
             disabled={creating}
-            className="w-full rounded-md bg-btn-primary-bg py-2.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
           >
             {creating ? "Creating..." : "Create Tear Sheet"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

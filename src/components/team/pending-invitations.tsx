@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Mail, X, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 type Invitation = {
@@ -96,15 +97,15 @@ export function PendingInvitations({
                 </div>
               </div>
               {isAdmin && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => setCancelModal({ open: true, invitation: inv })}
                   disabled={cancelling === inv.id}
-                  className="rounded-md p-1.5 text-text-faint hover:bg-bg-elevated hover:text-text-tertiary disabled:opacity-40"
                   title="Cancel invitation"
                 >
                   <X className="h-4 w-4" />
-                </button>
+                </Button>
               )}
             </div>
           );

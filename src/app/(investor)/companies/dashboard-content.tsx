@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LayoutGrid, List, TrendingUp, TrendingDown, Minus, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { CompanyCard } from "@/components/investor/company-card";
 import { CompanySearch } from "@/components/investor/company-search";
 import { TileSettingsMenu } from "@/components/investor/tile-settings-menu";
@@ -376,17 +377,19 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
       {/* Hidden companies collapsible section */}
       {hiddenCompanies.length > 0 && (
         <div className="rounded-xl border border-border-subtle bg-bg-elevated/50 px-4 py-3">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => setHiddenExpanded((v) => !v)}
-            className="flex w-full items-center gap-2 text-sm text-text-tertiary transition-colors hover:text-text-secondary"
+            className="w-full justify-start text-text-tertiary hover:text-text-secondary"
           >
             <ChevronRight
               className={`h-4 w-4 transition-transform ${hiddenExpanded ? "rotate-90" : ""}`}
               aria-hidden="true"
             />
             Hidden companies ({hiddenCompanies.length})
-          </button>
+          </Button>
 
           {hiddenExpanded && (
             <div className="mt-4 opacity-70">

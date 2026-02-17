@@ -131,14 +131,15 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
           <h2 id={titleId} className="text-lg font-semibold">
             {mode === "create" ? "Create Fund" : "Edit Fund"}
           </h2>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-primary"
             type="button"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
 
         <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">

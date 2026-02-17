@@ -4,6 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectTrigger,
@@ -165,14 +166,16 @@ export function NewTearSheetModal({
     >
       <div className="relative mx-4 w-full max-w-lg rounded-xl border border-border-default bg-bg-secondary p-6 shadow-2xl">
         {/* Close button */}
-        <button
+        <Button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-md p-1 text-text-muted hover:text-text-primary transition-colors"
+          variant="ghost"
+          size="icon"
+          className="absolute right-4 top-4 text-text-muted hover:text-text-primary"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
-        </button>
+        </Button>
 
         <h2 className="text-lg font-semibold text-text-primary">New Tear Sheet</h2>
         <p className="mt-1 text-sm text-text-tertiary">
@@ -268,21 +271,20 @@ export function NewTearSheetModal({
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="rounded-md border border-border-default px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-elevated transition-colors"
+              variant="secondary"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={handleCreate}
               disabled={creating || !companyId}
-              className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
             >
               {creating ? "Creating..." : "Create Tear Sheet"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

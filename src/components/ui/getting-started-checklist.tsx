@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { CheckCircle2, Circle, X, ChevronDown, BarChart3, AlertTriangle, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type ChecklistItem = {
   id: string;
@@ -70,22 +71,22 @@ function DataCompletenessCard({ data, onDismiss }: { data: DataCompletenessInfo;
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => setCollapsed(!collapsed)}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
             aria-label={collapsed ? "Expand" : "Collapse"}
           >
             <ChevronDown className={`h-4 w-4 transition-transform ${collapsed ? "" : "rotate-180"}`} />
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onDismiss}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
             aria-label="Dismiss"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -225,22 +226,22 @@ export function GettingStartedChecklist({ role, items, dataCompleteness }: Getti
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => setCollapsed(!collapsed)}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
             aria-label={collapsed ? "Expand checklist" : "Collapse checklist"}
           >
             <ChevronDown className={`h-4 w-4 transition-transform ${collapsed ? "" : "rotate-180"}`} />
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={handleDismiss}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
             aria-label="Dismiss checklist"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { createPortal } from "react-dom";
 import { formatValue, formatPeriod } from "@/components/charts/types";
 import { Sparkles, RotateCcw, Info, GripVertical, ArrowUpDown, Plus, Pencil, Layers } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DndContext,
   closestCenter,
@@ -216,16 +217,17 @@ function CellTooltip({
           </div>
         )}
 
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={(e) => {
             e.stopPropagation();
             onViewDetails();
           }}
-          className="mt-1 w-full rounded-md border border-border-default bg-bg-elevated px-2 py-1.5 text-center text-xs font-medium text-text-secondary hover:bg-bg-hover"
+          className="mt-1 w-full"
         >
           View details
-        </button>
+        </Button>
       </div>
     </div>,
     document.body
@@ -1326,19 +1328,19 @@ export function MetricsTable({
         </div>
         <div className="flex items-center gap-2">
           {allowReorder && (
-            <button
-            type="button"
+            <Button
+            variant={isReorderMode ? "secondary" : "ghost"}
+            size="sm"
             onClick={() => setIsReorderMode(!isReorderMode)}
-            className={`flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs transition-colors ${
-              isReorderMode
-                ? "border-[var(--tag-blue-text)] bg-[var(--tag-blue-bg)] text-[var(--tag-blue-text)]"
-                : "border-border-subtle text-text-muted hover:border-border-default hover:text-text-tertiary"
-            }`}
+            className={isReorderMode
+              ? "border-[var(--tag-blue-text)] bg-[var(--tag-blue-bg)] text-[var(--tag-blue-text)]"
+              : "border border-border-subtle text-text-muted hover:border-border-default hover:text-text-tertiary"
+            }
             title={isReorderMode ? "Exit reorder mode" : "Reorder metrics"}
           >
             <ArrowUpDown className="h-3 w-3" />
             {isReorderMode ? "Done" : "Reorder"}
-          </button>
+          </Button>
           )}
           {headerActions}
         </div>
@@ -1385,15 +1387,15 @@ export function MetricsTable({
       </DndContext>
 
       {onAddMetric && (
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           data-no-print
           onClick={onAddMetric}
-          className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-secondary"
+          className="mt-1 w-full justify-start"
         >
           <Plus className="h-4 w-4" />
           Add Metric
-        </button>
+        </Button>
       )}
 
       {mounted && hoveredCell && hoveredPeriodData && (

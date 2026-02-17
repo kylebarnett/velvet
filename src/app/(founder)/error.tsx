@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function Error({
   reset,
 }: {
@@ -13,12 +15,9 @@ export default function Error({
         <p className="mt-2 text-sm text-text-tertiary">
           An unexpected error occurred.
         </p>
-        <button
-          onClick={reset}
-          className="mt-4 h-10 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
-        >
+        <Button onClick={reset} className="mt-4">
           Try again
-        </button>
+        </Button>
       </div>
     </div>
   );

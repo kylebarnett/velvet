@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 type TearSheet = {
@@ -32,17 +33,19 @@ export function TearSheetCard({
   const [showConfirm, setShowConfirm] = React.useState(false);
 
   const deleteButton = (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon-sm"
       onClick={(e) => {
         e.preventDefault();
         setShowConfirm(true);
       }}
-      className="shrink-0 rounded-md p-1.5 text-text-faint hover:bg-bg-elevated hover:text-[var(--status-error-text)]"
+      className="shrink-0 text-text-faint hover:bg-bg-elevated hover:text-[var(--status-error-text)]"
       aria-label="Delete tear sheet"
     >
       <Trash2 className="h-4 w-4" />
-    </button>
+    </Button>
   );
 
   const confirmModal = (

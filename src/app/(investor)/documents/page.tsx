@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Download, Eye, FileText, Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
   Select,
@@ -309,14 +310,16 @@ export default function DocumentsPage() {
             aria-label="Search by filename"
           />
           {search && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-text-muted hover:text-text-secondary"
+              className="absolute right-3 top-1/2 -translate-y-1/2"
               type="button"
               aria-label="Clear search"
             >
               <X className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           )}
         </div>
 
@@ -371,29 +374,28 @@ export default function DocumentsPage() {
         {/* Bulk actions */}
         <div className="flex flex-wrap items-center gap-2">
           {companyFilter && filteredDocuments.length > 0 && (
-            <button
+            <Button
+              variant="secondary"
               onClick={downloadAllForCompany}
               disabled={downloading}
-              className="inline-flex h-10 items-center gap-2 rounded-md border border-border-default bg-bg-elevated px-4 text-sm font-medium text-text-primary hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Download all</span>
               <span className="sm:hidden">All</span>
-            </button>
+            </Button>
           )}
           {someSelected && (
-            <button
+            <Button
               onClick={downloadSelected}
               disabled={downloading}
-              className="inline-flex h-10 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               <Download className="h-4 w-4" />
               {downloading
                 ? "..."
                 : `${selectedIds.size} selected`}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -433,18 +435,19 @@ export default function DocumentsPage() {
               Showing {filteredDocuments.length} of {documents.length} results
             </p>
           )}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => {
               setSearch("");
               setCompanyFilter("");
               setTypeFilter("");
               setDateFilter("all");
             }}
-            className="text-xs text-text-tertiary hover:text-text-secondary"
           >
             Reset filters
-          </button>
+          </Button>
         </div>
       )}
 
@@ -526,24 +529,26 @@ export default function DocumentsPage() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-lg"
                       onClick={() => setPreviewDoc(doc)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                       type="button"
                       title="Preview"
                       aria-label={`Preview ${doc.file_name}`}
                     >
                       <Eye className="h-4 w-4 text-text-muted" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-lg"
                       onClick={() => downloadSingle(doc)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                       type="button"
                       title="Download"
                       aria-label={`Download ${doc.file_name}`}
                     >
                       <Download className="h-4 w-4 text-text-muted" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -608,24 +613,26 @@ export default function DocumentsPage() {
                     {formatDate(doc.uploaded_at)}
                   </div>
                   <div className="flex w-20 items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-lg"
                       onClick={() => setPreviewDoc(doc)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                       type="button"
                       title="Preview"
                       aria-label={`Preview ${doc.file_name}`}
                     >
                       <Eye className="h-4 w-4 text-text-muted" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-lg"
                       onClick={() => downloadSingle(doc)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                       type="button"
                       title="Download"
                       aria-label={`Download ${doc.file_name}`}
                     >
                       <Download className="h-4 w-4 text-text-muted" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}

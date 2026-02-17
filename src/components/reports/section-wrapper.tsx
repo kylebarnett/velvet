@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ChevronDown, Eye, EyeOff, Download, Image } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 
 type SectionWrapperProps = {
@@ -79,39 +80,39 @@ export function SectionWrapper({
           {exportable && !collapsed && (
             <>
               {onExportPng && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => {
                     if (sectionRef.current) onExportPng();
                   }}
-                  className="rounded p-1.5 text-text-faint transition-colors hover:bg-bg-elevated hover:text-text-secondary"
                   title="Export as PNG"
                 >
                   <Image className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               )}
               {onExportCsv && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={onExportCsv}
-                  className="rounded p-1.5 text-text-faint transition-colors hover:bg-bg-elevated hover:text-text-secondary"
                   title="Export as CSV"
                 >
                   <Download className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               )}
             </>
           )}
 
           {/* Visibility toggle */}
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onToggle}
-            className="rounded p-1.5 text-text-faint transition-colors hover:bg-bg-elevated hover:text-text-secondary"
             title="Hide section"
           >
             <Eye className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
       </div>
 

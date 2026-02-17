@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { X, RotateCcw, Loader2 } from "lucide-react";
+import { X, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -131,13 +132,14 @@ export function TileMetricConfig({
               Choose which metrics appear on the {companyName} tile in your dashboard.
             </p>
           </div>
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-text-muted hover:bg-bg-hover hover:text-text-primary"
+            variant="ghost"
+            size="icon"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         <div className="mt-6 space-y-4">
@@ -199,14 +201,16 @@ export function TileMetricConfig({
 
           {/* Reset button */}
           {(primaryMetric || secondaryMetric) && (
-            <button
+            <Button
               type="button"
               onClick={handleReset}
-              className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary"
+              variant="ghost"
+              size="sm"
+              className="text-text-muted hover:text-text-primary"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Reset to default
-            </button>
+            </Button>
           )}
 
           {error && (
@@ -217,22 +221,21 @@ export function TileMetricConfig({
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-3">
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-4 text-sm font-medium text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+            variant="secondary"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={handleSave}
-            disabled={saving || !hasChanges}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+            disabled={!hasChanges}
+            loading={saving}
           >
-            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             Save
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Plus, X, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { RichTextEditor } from "@/components/founder/rich-text-editor";
+import { Button } from "@/components/ui/button";
 import { formatValue } from "@/components/charts/types";
 
 type TearSheet = {
@@ -240,14 +241,14 @@ export function TearSheetEditor({
               Notable achievements and progress markers.
             </p>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={addMilestone}
-            className="flex items-center gap-1 rounded-md border border-border-default bg-bg-input px-2 py-1 text-xs text-text-secondary hover:border-border-default"
           >
             <Plus className="h-3 w-3" />
             Add
-          </button>
+          </Button>
         </div>
 
         {milestones.length === 0 && (
@@ -277,13 +278,14 @@ export function TearSheetEditor({
                     placeholder="Description (optional)"
                   />
                 </div>
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => removeMilestone(i)}
-                  className="shrink-0 rounded-md p-1 text-text-faint hover:bg-bg-elevated hover:text-[var(--status-error-text)]"
+                  className="shrink-0 text-text-faint hover:text-[var(--status-error-text)]"
                 >
                   <X className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
           ))}
@@ -363,14 +365,12 @@ export function TearSheetEditor({
         {isDirty && (
           <span className="text-xs text-[var(--status-warning-text)]/70">Unsaved changes</span>
         )}
-        <button
-          type="button"
+        <Button
           onClick={handleSave}
           disabled={saving}
-          className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save Draft"}
-        </button>
+        </Button>
       </div>
     </div>
   );

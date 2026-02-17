@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Download, Eye, FileText, Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -247,13 +248,15 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
               className="h-10 w-full rounded-md border border-border-default bg-bg-input pl-9 pr-3 text-sm outline-none placeholder:text-text-faint focus:border-border-default"
             />
             {search && (
-              <button
+              <Button
                 onClick={() => setSearch("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-bg-hover rounded"
+                variant="ghost"
+                size="icon-sm"
+                className="absolute right-2 top-1/2 -translate-y-1/2"
                 type="button"
               >
                 <X className="h-3 w-3 text-text-muted" />
-              </button>
+              </Button>
             )}
           </div>
 
@@ -288,26 +291,28 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
         {/* Bulk actions */}
         <div className="flex flex-wrap items-center gap-2">
           {filteredDocuments.length > 0 && (
-            <button
+            <Button
               onClick={downloadAll}
               disabled={downloading}
-              className="inline-flex h-9 items-center gap-2 rounded-md border border-border-default bg-bg-elevated px-3 text-sm font-medium text-text-primary hover:bg-bg-hover disabled:opacity-60"
+              variant="secondary"
+              size="sm"
               type="button"
             >
               <Download className="h-3.5 w-3.5" />
               Download all
-            </button>
+            </Button>
           )}
           {someSelected && (
-            <button
+            <Button
               onClick={downloadSelected}
               disabled={downloading}
-              className="inline-flex h-9 items-center gap-2 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+              variant="primary"
+              size="sm"
               type="button"
             >
               <Download className="h-3.5 w-3.5" />
               {downloading ? "..." : `${selectedIds.size} selected`}
-            </button>
+            </Button>
           )}
           <span className="text-sm text-text-tertiary">
             {filteredDocuments.length} document{filteredDocuments.length !== 1 ? "s" : ""}
@@ -402,24 +407,26 @@ export function CompanyDocumentsTab({ companyId, companyName }: CompanyDocuments
                 {formatDate(doc.uploaded_at)}
               </span>
               <div className="flex shrink-0 items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
-                <button
+                <Button
                   onClick={() => setPreviewDoc(doc)}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                  variant="ghost"
+                  size="icon"
                   type="button"
                   title="Preview"
                   aria-label={`Preview ${doc.file_name}`}
                 >
                   <Eye className="h-4 w-4 text-text-muted" />
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => downloadSingle(doc)}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                  variant="ghost"
+                  size="icon"
                   type="button"
                   title="Download"
                   aria-label={`Download ${doc.file_name}`}
                 >
                   <Download className="h-4 w-4 text-text-muted" />
-                </button>
+                </Button>
               </div>
             </div>
           ))}

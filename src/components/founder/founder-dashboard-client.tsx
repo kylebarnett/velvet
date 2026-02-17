@@ -15,6 +15,7 @@ import {
 } from "@/components/dashboard";
 import { DateRange } from "@/components/dashboard/date-range-selector";
 import { Download, Settings, Mail, TrendingDown, TrendingUp, Fuel, ChevronDown, FileSpreadsheet, FileDown, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 import { EmailPasteModal } from "@/components/founder/email-paste-modal";
@@ -300,18 +301,19 @@ function ExportDropdown({ isExporting, onExport }: { isExporting: boolean; onExp
 
   return (
     <div ref={ref} className="relative">
-      <button
+      <Button
         type="button"
+        variant="secondary"
+        size="sm"
         onClick={() => setOpen(!open)}
         disabled={isExporting}
-        className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default disabled:opacity-50"
         aria-expanded={open}
         aria-haspopup="true"
       >
         <Download className="h-3.5 w-3.5" />
         {isExporting ? "Exporting..." : "Export"}
         <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
+      </Button>
       {open && (
         <div className="absolute right-0 z-50 mt-1 w-44 overflow-hidden rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm" role="menu">
           <div>
@@ -390,14 +392,16 @@ function RunwayCard({
 
   if (hidden) {
     return (
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={handleShow}
-        className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-text-muted hover:text-text-secondary hover:bg-bg-hover transition-colors"
+        className="text-text-muted hover:text-text-secondary"
       >
         <Fuel className="h-3.5 w-3.5" />
         Show runway
-      </button>
+      </Button>
     );
   }
 
@@ -489,14 +493,16 @@ function RunwayCard({
             <Fuel className="h-4 w-4" aria-hidden="true" />
             <span className="text-xs font-medium uppercase tracking-wide">Runway</span>
           </div>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={handleHide}
-            className="rounded-md p-1 text-text-faint hover:text-text-secondary hover:bg-bg-hover transition-colors"
+            className="text-text-faint hover:text-text-secondary hover:bg-bg-hover"
             aria-label="Hide runway card"
           >
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
         <p className="mt-2 text-sm text-text-tertiary">
           Submit {missing.map((name, i) => (
@@ -543,13 +549,15 @@ function RunwayCard({
           {error && (
             <p className="text-xs text-[var(--error-accent)]" role="alert">{error}</p>
           )}
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="sm"
             disabled={submitting}
-            className="mt-1 inline-flex h-8 items-center rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+            className="mt-1"
           >
             {submitting ? "Submitting..." : "Submit"}
-          </button>
+          </Button>
         </form>
       </div>
     );
@@ -599,14 +607,16 @@ function RunwayCard({
             <StatusIcon className="h-3 w-3" aria-hidden="true" />
             {style.label}
           </span>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={handleHide}
-            className="rounded-md p-1 text-text-faint hover:text-text-secondary hover:bg-bg-hover transition-colors"
+            className="text-text-faint hover:text-text-secondary hover:bg-bg-hover"
             aria-label="Hide runway card"
           >
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
       </div>
       <div className="mt-2 flex items-baseline gap-1">
@@ -809,14 +819,15 @@ export function FounderDashboardClient({
           <DateRangeSelector value={dateRange} onChange={setDateRange} />
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={() => setShowEmailModal(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-border-default bg-bg-elevated px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-bg-hover"
           >
             <Mail className="h-3 w-3" />
             Import from Email
-          </button>
+          </Button>
           <Link
             href="/portal/dashboard/edit"
             className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"

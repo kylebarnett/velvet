@@ -14,6 +14,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { FounderCompanyLogo } from "@/components/founder/company-logo";
 import { TAG_OPTIONS, TAG_COLORS, getTagLabel, type TagType } from "@/lib/company/constants";
@@ -185,24 +186,26 @@ function CompanyHeader({
                     }
                   }}
                 />
-                <button
+                <Button
                   type="button"
+                  variant="primary"
+                  size="icon-sm"
                   onClick={handleWebsiteSave}
                   disabled={saving}
-                  className="flex h-7 items-center rounded-md bg-btn-primary-bg px-2 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
                 >
                   <Check className="h-3 w-3" />
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="icon-sm"
                   onClick={() => {
                     setEditingWebsite(false);
                     setWebsiteInput(website ?? "");
                   }}
-                  className="flex h-7 items-center rounded-md border border-border-default px-2 text-xs text-text-tertiary hover:bg-bg-hover"
                 >
                   <X className="h-3 w-3" />
-                </button>
+                </Button>
               </div>
             ) : website ? (
               <div className="flex items-center gap-1.5">
@@ -216,26 +219,30 @@ function CompanyHeader({
                   <span className="truncate max-w-[200px]">{website.replace(/^https?:\/\//, "")}</span>
                   <ExternalLink className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                 </a>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => {
                     setWebsiteInput(website ?? "");
                     setEditingWebsite(true);
                   }}
-                  className="rounded-md p-1 text-text-muted hover:text-text-secondary hover:bg-bg-elevated transition-colors"
+                  className="text-text-muted hover:text-text-secondary hover:bg-bg-elevated"
                   title="Edit website"
                 >
                   <Pencil className="h-3 w-3" />
-                </button>
+                </Button>
               </div>
             ) : (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setEditingWebsite(true)}
-                className="text-sm text-text-faint hover:text-text-tertiary transition-colors italic"
+                className="text-text-faint hover:text-text-tertiary italic"
               >
                 + Add website
-              </button>
+              </Button>
             )}
 
             {(website || editingWebsite) && (

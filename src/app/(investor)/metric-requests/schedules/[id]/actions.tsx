@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Play, Pause, Trash2, RefreshCw } from "lucide-react";
-
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 
@@ -106,11 +106,12 @@ export function ScheduleDetailActions({
     <>
       {/* Action buttons */}
       <div className="flex items-center gap-2">
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="sm"
           onClick={handleRunNow}
           disabled={loading !== null}
-          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-text-secondary hover:bg-bg-hover disabled:opacity-50"
         >
           {loading === "run" ? (
             <RefreshCw className="h-4 w-4 animate-spin" />
@@ -118,14 +119,15 @@ export function ScheduleDetailActions({
             <Play className="h-4 w-4" />
           )}
           <span className="hidden sm:inline">Run now</span>
-        </button>
+        </Button>
 
         {active ? (
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={handlePause}
             disabled={loading !== null}
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-text-secondary hover:bg-bg-hover disabled:opacity-50"
           >
             {loading === "pause" ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -133,13 +135,13 @@ export function ScheduleDetailActions({
               <Pause className="h-4 w-4" />
             )}
             <span className="hidden sm:inline">Pause</span>
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             type="button"
+            size="sm"
             onClick={handleResume}
             disabled={loading !== null}
-            className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
           >
             {loading === "resume" ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
@@ -147,18 +149,19 @@ export function ScheduleDetailActions({
               <Play className="h-4 w-4" />
             )}
             <span className="hidden sm:inline">Resume</span>
-          </button>
+          </Button>
         )}
 
-        <button
+        <Button
           type="button"
+          variant="danger"
+          size="icon-lg"
           onClick={() => setDeleteModal(true)}
           disabled={loading !== null}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border-default bg-bg-elevated text-[var(--error-accent)] hover:bg-[var(--error-bg-subtle)] disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[var(--error-ring)]"
           aria-label="Delete schedule"
         >
           <Trash2 className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
 
       {/* Delete confirmation modal */}

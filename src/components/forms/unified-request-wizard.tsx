@@ -487,14 +487,14 @@ export function UnifiedRequestWizard() {
             </>
           )}
           <div className="mt-6 flex items-center justify-center gap-3">
-            <button
+            <Button
               onClick={() => router.push("/metric-requests")}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               View Requests
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() => {
                 setResult(null);
                 setStep(1);
@@ -516,11 +516,10 @@ export function UnifiedRequestWizard() {
                 setReminderDays([3, 1]);
                 setAllCompanies(false);
               }}
-              className="inline-flex h-10 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-4 text-sm text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               Create More
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -618,13 +617,14 @@ export function UnifiedRequestWizard() {
       {step === 2 && (
         <div className="space-y-6">
           <div className="flex items-center gap-4">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setStep(1)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               <ArrowLeft className="h-4 w-4" />
-            </button>
+            </Button>
             <div className="space-y-1">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 Select companies
@@ -732,14 +732,13 @@ export function UnifiedRequestWizard() {
           </div>
 
           <div className="flex items-center justify-end">
-            <button
+            <Button
               onClick={() => setStep(3)}
               disabled={selectedCompanyIds.size === 0 || (useCustomMetric && !customMetricName.trim())}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               Continue
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -747,13 +746,14 @@ export function UnifiedRequestWizard() {
       {step === 3 && (
         <div className="space-y-6">
           <div className="flex items-center gap-4">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => { setStep(2); setFrequency(null); }}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               type="button"
             >
               <ArrowLeft className="h-4 w-4" />
-            </button>
+            </Button>
             <div className="space-y-1">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 {frequency === null
@@ -958,13 +958,13 @@ export function UnifiedRequestWizard() {
               </div>
 
               <div className="flex items-center justify-end gap-3">
-                <button
+                <Button
+                  variant="secondary"
                   onClick={() => setFrequency(null)}
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-4 text-sm text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                   type="button"
                 >
                   Back
-                </button>
+                </Button>
                 <Button
                   onClick={handleSubmitOneTime}
                   loading={submitting}
@@ -1160,13 +1160,13 @@ export function UnifiedRequestWizard() {
               </div>
 
               <div className="flex items-center justify-end gap-3">
-                <button
+                <Button
+                  variant="secondary"
                   onClick={() => setFrequency(null)}
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-4 text-sm text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                   type="button"
                 >
                   Back
-                </button>
+                </Button>
                 <Button
                   onClick={handleSubmitRecurring}
                   disabled={!scheduleName.trim()}

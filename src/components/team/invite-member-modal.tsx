@@ -88,12 +88,14 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 id={titleId} className="text-base font-semibold">Invite Team Member</h3>
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={onClose}
-              className="rounded-md p-1 text-text-muted hover:bg-bg-elevated hover:text-text-tertiary"
+              aria-label="Close"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
 
           {inviteUrl ? (

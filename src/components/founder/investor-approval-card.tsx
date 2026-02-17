@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 
@@ -158,45 +159,53 @@ export function InvestorApprovalCard({
 
           {status === "pending" && (
             <div className="flex shrink-0 gap-2">
-              <button
-                className="inline-flex h-9 sm:h-8 flex-1 sm:flex-none items-center justify-center rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => requestApproval("approved")}
                 disabled={loading}
                 type="button"
+                className="flex-1 sm:flex-none"
               >
                 Approve
-              </button>
-              <button
-                className="inline-flex h-9 sm:h-8 flex-1 sm:flex-none items-center justify-center rounded-md border border-border-default bg-bg-elevated px-3 text-xs font-medium text-text-primary hover:bg-bg-hover disabled:opacity-60"
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => requestApproval("denied")}
                 disabled={loading}
                 type="button"
+                className="flex-1 sm:flex-none"
               >
                 Deny
-              </button>
+              </Button>
             </div>
           )}
 
           {status === "approved" && (
-            <button
-              className="inline-flex h-9 sm:h-8 shrink-0 items-center justify-center rounded-md border border-border-default bg-bg-elevated px-3 text-xs font-medium text-text-primary hover:bg-bg-hover disabled:opacity-60"
+            <Button
+              variant="secondary"
+              size="sm"
+              className="shrink-0"
               onClick={() => requestApproval("denied")}
               disabled={loading}
               type="button"
             >
               Deny access
-            </button>
+            </Button>
           )}
 
           {status === "denied" && (
-            <button
-              className="inline-flex h-9 sm:h-8 shrink-0 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+            <Button
+              variant="primary"
+              size="sm"
+              className="shrink-0"
               onClick={() => requestApproval("approved")}
               disabled={loading}
               type="button"
             >
               Approve
-            </button>
+            </Button>
           )}
         </div>
 

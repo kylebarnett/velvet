@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { X, Sparkles, Loader2, CheckCircle2, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ExtractedMetricRow } from "./extracted-metric-row";
 import { logger } from "@/lib/logger";
 
@@ -251,13 +252,15 @@ export function ExtractionReviewPanel({
               <span className="truncate">{documentName}</span>
             </div>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleClose}
-            className="rounded-lg p-2 text-text-tertiary transition-colors hover:bg-bg-hover hover:text-text-primary"
+            className="text-text-tertiary hover:bg-bg-hover hover:text-text-primary"
             aria-label="Close panel"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Status bar */}
@@ -276,22 +279,24 @@ export function ExtractionReviewPanel({
             </div>
             {pendingCount > 0 && (
               <div className="flex gap-1">
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   onClick={handleRejectAll}
                   disabled={processing}
-                  className="h-7 rounded-md border border-border-default bg-bg-elevated px-2.5 text-xs text-text-tertiary hover:bg-bg-hover disabled:opacity-40"
                 >
                   Reject all
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  size="sm"
                   onClick={handleAcceptAll}
                   disabled={processing}
-                  className="h-7 rounded-md bg-[var(--success-bg-muted)] px-2.5 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-40"
+                  className="bg-[var(--success-bg-muted)] text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)]"
                 >
                   Accept all
-                </button>
+                </Button>
               </div>
             )}
           </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Search, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { Search, CheckCircle2, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -209,32 +210,27 @@ export default function FounderInvestorsPage() {
 
       {pendingInvestors.length >= 2 && (
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
             onClick={handleBulkApprove}
-            disabled={bulkApproving || bulkDenying}
-            className="inline-flex items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+            disabled={bulkDenying}
+            loading={bulkApproving}
+            size="sm"
           >
-            {bulkApproving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <CheckCircle2 className="h-4 w-4" />
-            )}
+            {!bulkApproving && <CheckCircle2 className="h-4 w-4" />}
             Approve all ({pendingInvestors.length})
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="secondary"
             onClick={() => setShowBulkDenyConfirm(true)}
-            disabled={bulkApproving || bulkDenying}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border-default px-3 py-2 text-sm font-medium text-text-secondary hover:bg-bg-hover disabled:opacity-60"
+            disabled={bulkApproving}
+            loading={bulkDenying}
+            size="sm"
           >
-            {bulkDenying ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <XCircle className="h-4 w-4" />
-            )}
+            {!bulkDenying && <XCircle className="h-4 w-4" />}
             Deny all ({pendingInvestors.length})
-          </button>
+          </Button>
         </div>
       )}
 

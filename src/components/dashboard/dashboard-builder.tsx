@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Save, ChevronDown, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Widget,
   ChartConfig,
@@ -320,14 +321,14 @@ export function DashboardBuilder({
           <div className="flex items-center gap-3">
             {/* View selector */}
             <div className="relative" ref={dropdownRef}>
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setShowViewDropdown(!showViewDropdown)}
-                className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
               >
                 <span>{currentView?.name ?? "New View"}</span>
                 <ChevronDown className="h-3 w-3" />
-              </button>
+              </Button>
               {showViewDropdown && (
                 <div className="absolute left-0 top-full z-50 mt-1 min-w-[160px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm">
                   {views.map((view) => (
@@ -353,14 +354,14 @@ export function DashboardBuilder({
 
             {/* Template selector */}
             <div className="relative" ref={templateDropdownRef}>
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setShowTemplateDropdown(!showTemplateDropdown)}
-                className="flex items-center gap-2 rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
               >
                 <span>Use Template</span>
                 <ChevronDown className="h-3 w-3" />
-              </button>
+              </Button>
               {showTemplateDropdown && (
                 <div className="absolute left-0 top-full z-50 mt-1 min-w-[200px] max-h-[300px] overflow-y-auto rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm">
                   {templates.map((template) => (
@@ -386,29 +387,29 @@ export function DashboardBuilder({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={handleCancel}
-              className="rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
             >
               Cancel
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setShowSaveAs(true)}
-              className="rounded-lg border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default"
             >
               Save As
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-2 rounded-lg bg-btn-primary-bg px-3 py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
             >
               <Save className="h-3.5 w-3.5" />
               {isSaving ? "Saving..." : "Save"}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -453,18 +454,18 @@ export function DashboardBuilder({
           <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium">Save View As</h3>
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => {
                   setShowSaveAs(false);
                   setSaveAsName("");
                   setSaveAsError(null);
                 }}
-                className="text-text-muted hover:text-text-tertiary"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
             <p className="mt-1 text-sm text-text-tertiary">
               Enter a name for your new dashboard view.
@@ -490,24 +491,22 @@ export function DashboardBuilder({
                 {saveAsName.length}/100
               </div>
               <div className="mt-3 flex justify-end gap-3">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
                   onClick={() => {
                     setShowSaveAs(false);
                     setSaveAsName("");
                     setSaveAsError(null);
                   }}
-                  className="rounded-lg border border-border-default bg-bg-elevated px-4 py-2 text-sm hover:bg-bg-hover"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={!saveAsName.trim() || isSaving}
-                  className="rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
                 >
                   {isSaving ? "Saving..." : "Save"}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

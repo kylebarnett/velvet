@@ -282,14 +282,16 @@ export function OnboardingTooltip({
       <div className="absolute h-0 w-0" style={arrowStyle} />
 
       {/* Close button */}
-      <button
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={onSkip}
-        className="absolute right-2 top-2 rounded-md p-1 text-text-muted hover:bg-bg-hover hover:text-text-tertiary"
+        className="absolute right-2 top-2"
         type="button"
         aria-label="Skip tour"
       >
         <X className="h-4 w-4" />
-      </button>
+      </Button>
 
       {/* Content */}
       <div className="pr-6">
@@ -303,13 +305,15 @@ export function OnboardingTooltip({
           {currentStep + 1}/{totalSteps}
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onSkip}
-            className="shrink-0 text-xs text-text-muted hover:text-text-secondary"
+            className="shrink-0"
             type="button"
           >
             Skip
-          </button>
+          </Button>
           <Button
             size="sm"
             onClick={onNext}

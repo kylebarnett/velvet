@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Check, X, ChevronDown, ChevronUp, AlertTriangle, Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -240,21 +241,25 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
               {mapping.status === "accepted" ? "Accepted" : "Rejected"}
             </span>
             {isAccepted && onUpdate && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => setEditMode(true)}
                 disabled={disabled}
-                className="h-6 w-6 inline-flex items-center justify-center rounded-md text-text-muted hover:bg-bg-hover hover:text-text-tertiary disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                className="text-text-muted hover:bg-bg-hover hover:text-text-tertiary"
                 title="Edit metric"
               >
                 <Pencil className="h-3 w-3" />
-              </button>
+              </Button>
             )}
           </div>
         ) : editMode ? (
           <div className="flex items-center gap-1">
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 setEditMode(false);
                 // Reset to original values
@@ -264,12 +269,12 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 setEditPeriodEnd(mapping.extracted_period_end);
               }}
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-border-default text-text-tertiary text-xs hover:bg-bg-hover disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              size="sm"
               onClick={() => {
                 onUpdate?.(mapping.id, {
                   metricName: editName,
@@ -280,19 +285,21 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 setEditMode(false);
               }}
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)] text-xs font-medium hover:opacity-80 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--tag-violet-bg)]"
+              className="bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)] hover:opacity-80"
             >
               <Check className="h-3.5 w-3.5" />
               Save
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="flex items-center gap-1">
             {/* Expand/edit toggle */}
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setExpanded((p) => !p)}
-              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-text-muted hover:bg-bg-hover hover:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+              className="text-text-muted hover:bg-bg-hover hover:text-text-tertiary"
               title="Edit before accepting"
             >
               {expanded ? (
@@ -300,18 +307,21 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
               ) : (
                 <ChevronDown className="h-3.5 w-3.5" />
               )}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => onReject(mapping.id)}
               disabled={disabled}
-              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-[var(--error-accent)] hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)] disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--error-ring)]"
+              className="text-[var(--error-accent)] hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)]"
               title="Reject"
             >
               <X className="h-4 w-4" />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              size="sm"
               onClick={() =>
                 onAccept(
                   mapping.id,
@@ -326,12 +336,12 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 )
               }
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-[var(--status-success-bg)] text-[var(--status-success-text)] text-xs font-medium hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--success-ring)]"
+              className="bg-[var(--status-success-bg)] text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)]"
               title="Accept"
             >
               <Check className="h-3.5 w-3.5" />
               Accept
-            </button>
+            </Button>
           </div>
         )}
       </div>

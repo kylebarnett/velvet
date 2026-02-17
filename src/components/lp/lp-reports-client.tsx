@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Landmark } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import { FundCard } from "./fund-card";
 import { FundFormModal } from "./fund-form-modal";
@@ -34,13 +35,12 @@ export function LPReportsClient({ funds: initialFunds }: LPReportsClientProps) {
             Manage funds, track portfolio performance, and generate LP reports for your limited partners.
           </p>
         </div>
-        <button
+        <Button
           onClick={() => setShowCreate(true)}
-          className="flex h-10 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
         >
           <Plus className="h-4 w-4" />
           Create Fund
-        </button>
+        </Button>
       </div>
 
       {/* Fund list */}
@@ -51,13 +51,13 @@ export function LPReportsClient({ funds: initialFunds }: LPReportsClientProps) {
           <p className="mt-1 max-w-sm text-sm text-text-muted">
             Create your first fund to start tracking portfolio performance and generating LP reports.
           </p>
-          <button
+          <Button
             onClick={() => setShowCreate(true)}
-            className="mt-4 flex h-9 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+            className="mt-4"
           >
             <Plus className="h-4 w-4" />
             Create Fund
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

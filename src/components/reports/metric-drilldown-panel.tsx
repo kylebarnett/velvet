@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { X, ArrowUpRight, ArrowDownRight, TrendingUp, Building2, ArrowUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { formatValue } from "@/components/charts/types";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
 import { INDUSTRY_LABELS, STAGE_LABELS_SHORT } from "@/lib/constants/industries";
@@ -160,13 +161,14 @@ export function MetricDrilldownPanel({
               }}
               formats={["csv", "excel"]}
             />
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={handleClose}
-              className="rounded-lg p-2 text-text-tertiary transition-colors hover:bg-bg-hover hover:text-text-primary"
               aria-label="Close panel"
             >
               <X className="h-5 w-5" />
-            </button>
+            </Button>
           </div>
         </div>
 

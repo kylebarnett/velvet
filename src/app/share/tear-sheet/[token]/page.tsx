@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useParams } from "next/navigation";
 import { TearSheetPreview } from "@/components/founder/tear-sheet-preview";
+import { Button } from "@/components/ui/button";
 import { logger } from "@/lib/logger";
 
 type TearSheet = {
@@ -102,14 +103,13 @@ export default function PublicTearSheetPage() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end" data-no-print>
-        <button
-          type="button"
+        <Button
+          size="sm"
           onClick={handleExportPdf}
           disabled={exportingPdf}
-          className="rounded-md bg-btn-primary-bg px-3 py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
         >
           {exportingPdf ? "Generating..." : "Download PDF"}
-        </button>
+        </Button>
       </div>
       <div ref={previewRef}>
         <TearSheetPreview tearSheet={previewTearSheet} metrics={metrics} />

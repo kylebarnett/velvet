@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Pencil, FileText, Calendar, Plus, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -154,13 +155,14 @@ export function FundDetailClient({
       <div>
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-semibold tracking-tight">{fund.name}</h1>
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => setShowEdit(true)}
-            className="rounded-md p-1 text-text-faint transition-colors hover:bg-bg-hover hover:text-text-secondary"
             aria-label="Edit fund"
           >
             <Pencil className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
         <p className="mt-0.5 text-sm text-text-tertiary">
           Vintage {fund.vintage_year}
@@ -179,13 +181,14 @@ export function FundDetailClient({
           <div className="rounded-xl border border-border-default card-surface">
             <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
               <h3 className="text-sm font-medium text-text-secondary">LP Reports</h3>
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setShowReport(true)}
-                className="flex h-8 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Generate Report
-              </button>
+              </Button>
             </div>
             {reports.length === 0 ? (
               <div className="px-4 py-8 text-center text-sm text-text-muted">

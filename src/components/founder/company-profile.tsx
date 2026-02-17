@@ -8,6 +8,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils/cn";
 import { FounderCompanyLogo } from "@/components/founder/company-logo";
@@ -135,25 +136,27 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
                       }
                     }}
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="primary"
+                    size="sm"
                     onClick={handleWebsiteSave}
                     disabled={saving}
-                    className="flex h-8 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
                   >
                     <Check className="h-3.5 w-3.5" />
                     Save
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="secondary"
+                    size="sm"
                     onClick={() => {
                       setEditingWebsite(false);
                       setWebsiteInput(data.website ?? "");
                     }}
-                    className="flex h-8 items-center rounded-md border border-border-default px-3 text-sm text-text-tertiary hover:bg-bg-hover"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               ) : data.website ? (
                 <div className="flex items-center gap-1.5">
@@ -167,26 +170,30 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
                     <span className="truncate max-w-[240px]">{data.website.replace(/^https?:\/\//, "")}</span>
                     <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                   </a>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => {
                       setWebsiteInput(data.website ?? "");
                       setEditingWebsite(true);
                     }}
-                    className="rounded-md p-1 text-text-muted hover:text-text-secondary hover:bg-bg-elevated transition-colors"
+                    className="text-text-muted hover:text-text-secondary hover:bg-bg-elevated"
                     title="Edit website"
                   >
                     <Pencil className="h-3 w-3" />
-                  </button>
+                  </Button>
                 </div>
               ) : (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setEditingWebsite(true)}
-                  className="text-sm text-text-faint hover:text-text-tertiary transition-colors italic"
+                  className="text-text-faint hover:text-text-tertiary italic"
                 >
                   + Add website
-                </button>
+                </Button>
               )}
             </div>
 
@@ -399,24 +406,26 @@ function EditableTextField({
                   }}
                 />
               )}
-              <button
+              <Button
                 type="button"
+                variant="primary"
+                size="icon"
                 onClick={handleSave}
                 disabled={saving}
-                className="flex h-8 items-center gap-1 rounded-md bg-btn-primary-bg px-2.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
               >
                 <Check className="h-3 w-3" />
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="secondary"
+                size="icon"
                 onClick={() => {
                   setEditing(false);
                   setInput(value);
                 }}
-                className="flex h-8 items-center rounded-md border border-border-default px-2.5 text-xs text-text-tertiary hover:bg-bg-hover"
               >
                 <X className="h-3 w-3" />
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="mt-0.5 text-sm text-text-secondary">
@@ -425,16 +434,18 @@ function EditableTextField({
           )}
         </div>
         {!editing && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={() => {
               setInput(value);
               setEditing(true);
             }}
-            className="shrink-0 rounded-md p-1.5 text-text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:text-text-secondary hover:bg-bg-elevated"
+            className="shrink-0 text-text-muted opacity-0 group-hover:opacity-100 hover:text-text-secondary hover:bg-bg-elevated"
           >
             <Pencil className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         )}
       </div>
     </div>

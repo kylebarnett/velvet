@@ -4,6 +4,7 @@ import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { TearSheetEditor } from "@/components/founder/tear-sheet-editor";
 import { TearSheetPreview } from "@/components/founder/tear-sheet-preview";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
@@ -264,14 +265,15 @@ export default function EditTearSheetPage() {
             />
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={handleExportPdf}
             disabled={exportingPdf}
-            className="rounded-md border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default disabled:opacity-50"
           >
             {exportingPdf ? "Generating..." : "Download PDF"}
-          </button>
+          </Button>
 
           {tearSheet.status === "published" && (
             <>
@@ -286,25 +288,26 @@ export default function EditTearSheetPage() {
               >
                 {tearSheet.share_enabled ? "Sharing On" : "Enable Sharing"}
               </button>
-              <button
+              <Button
                 type="button"
+                variant="warning"
+                size="sm"
                 onClick={handleUnpublish}
                 disabled={saving}
-                className="rounded-md border border-[var(--status-warning-bg)] bg-[var(--status-warning-bg)] px-3 py-1.5 text-xs font-medium text-[var(--status-warning-text)] hover:bg-[var(--warning-bg-subtle)] disabled:opacity-50"
               >
                 Unpublish
-              </button>
+              </Button>
             </>
           )}
           {tearSheet.status === "draft" && (
-            <button
+            <Button
               type="button"
+              size="sm"
               onClick={handlePublish}
               disabled={saving}
-              className="rounded-md bg-btn-primary-bg px-3 py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
             >
               {saving ? "Publishing..." : "Publish"}
-            </button>
+            </Button>
           )}
         </div>
       </div>

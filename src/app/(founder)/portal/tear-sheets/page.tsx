@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { ArrowUpDown, FileSpreadsheet, LayoutGrid, List } from "lucide-react";
+import { ButtonLink } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { TearSheetCard } from "@/components/founder/tear-sheet-card";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -182,12 +183,12 @@ export default function TearSheetsPage() {
             Create quarterly summaries to share with investors.
           </p>
         </div>
-        <Link
+        <ButtonLink
           href="/portal/tear-sheets/new"
-          className="inline-flex h-9 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+          size="sm"
         >
           New Tear Sheet
-        </Link>
+        </ButtonLink>
       </div>
 
       {loading && <LoadingSkeleton />}
@@ -273,12 +274,9 @@ export default function TearSheetsPage() {
           title="No tear sheets yet"
           description="Create your first quarterly summary to share with investors. Tear sheets give investors a snapshot of your company's key metrics and highlights for a given period."
           action={
-            <Link
-              href="/portal/tear-sheets/new"
-              className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
-            >
+            <ButtonLink href="/portal/tear-sheets/new">
               Create Tear Sheet
-            </Link>
+            </ButtonLink>
           }
         />
       )}

@@ -110,15 +110,16 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           </span>
           <span className="text-lg font-semibold">Velvet</span>
         </Link>
-        <button
+        <Button
           ref={closeRef}
+          variant="ghost"
+          size="icon"
           onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary"
           aria-label="Close menu"
           type="button"
         >
           <X className="h-5 w-5" />
-        </button>
+        </Button>
       </div>
 
       {/* Nav links */}

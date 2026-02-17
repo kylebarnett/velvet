@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Download, X, ArrowLeft } from "lucide-react";
 import { TearSheetPreview } from "@/components/founder/tear-sheet-preview";
+import { Button } from "@/components/ui/button";
 import { logActivity } from "@/lib/activity/log-activity";
 import { logger } from "@/lib/logger";
 
@@ -91,32 +92,34 @@ export function TearSheetViewer({
     <div className="fixed inset-0 z-50 flex flex-col bg-bg-primary">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border-default px-4 py-3 sm:px-6">
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onClose}
-          className="flex items-center gap-2 text-sm text-text-tertiary hover:text-text-primary transition-colors"
+          className="text-text-tertiary"
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Back to tear sheets</span>
           <span className="sm:hidden">Back</span>
-        </button>
+        </Button>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleExportPdf}
             disabled={exporting || metricsLoading}
-            className="inline-flex items-center gap-2 rounded-md border border-border-default bg-bg-input px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-default disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" />
             {exporting ? "Generating..." : "Download PDF"}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="rounded-md p-2 text-text-muted hover:bg-bg-hover hover:text-text-primary sm:hidden"
+            className="sm:hidden"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
       </div>
 

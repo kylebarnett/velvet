@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, Copy, Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { SavedReport } from "./reports-context";
 import { REPORT_TYPE_LABELS, REPORT_TYPE_COLORS, type ReportType } from "@/lib/reports/templates";
 
@@ -105,14 +106,15 @@ export function ReportCard({ report, onDuplicate, onRename, onDelete }: ReportCa
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={() => setMenuOpen(!menuOpen)}
-          className="rounded-md p-1 text-text-faint opacity-0 transition-all hover:bg-bg-elevated hover:text-text-secondary group-hover:opacity-100"
+          className="text-text-faint opacity-0 group-hover:opacity-100"
           aria-label="Report actions"
         >
           <MoreHorizontal className="h-4 w-4" />
-        </button>
+        </Button>
 
         {menuOpen && (
           <div

@@ -104,14 +104,16 @@ export function MarketingNav() {
           </div>
 
           {/* Mobile hamburger */}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={handleOpenMobileMenu}
-            className="flex h-10 w-10 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary md:hidden"
+            className="md:hidden"
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
       </header>
 

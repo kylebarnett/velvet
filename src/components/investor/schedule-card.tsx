@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 
+import { Button } from "@/components/ui/button";
 import { getCadenceDescription } from "@/lib/schedules";
 
 export type Schedule = {
@@ -140,18 +141,19 @@ export function ScheduleCard({
 
           {/* Menu */}
           <div className="relative" ref={menuRef}>
-            <button
+            <Button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
               disabled={loading}
-              className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-50"
+              variant="ghost"
+              size="icon"
             >
               {loading ? (
                 <RefreshCw className="h-4 w-4 animate-spin text-text-muted" />
               ) : (
                 <MoreVertical className="h-4 w-4 text-text-muted" />
               )}
-            </button>
+            </Button>
 
             {menuOpen && (
               <div className="absolute right-0 top-full z-20 mt-1 w-40 rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl">
@@ -220,10 +222,12 @@ export function ScheduleCard({
                 )
               )}
               {hasMoreMetrics && (
-                <button
+                <Button
                   type="button"
                   onClick={() => setExpanded(!expanded)}
-                  className="flex items-center gap-0.5 rounded-full bg-bg-elevated px-2 py-0.5 text-xs text-text-muted hover:bg-bg-hover hover:text-text-secondary"
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full bg-bg-elevated text-text-muted hover:bg-bg-hover hover:text-text-secondary"
                 >
                   {expanded ? (
                     <>
@@ -235,7 +239,7 @@ export function ScheduleCard({
                       <ChevronDown className="h-3 w-3" />
                     </>
                   )}
-                </button>
+                </Button>
               )}
             </div>
           )}

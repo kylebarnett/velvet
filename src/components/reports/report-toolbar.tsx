@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ExportButton } from "@/components/ui/export-button";
 
 type ReportToolbarProps = {
@@ -50,14 +51,14 @@ export function ReportToolbar({
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border-default bg-bg-primary px-4 py-2.5">
       {/* Back button */}
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => router.push("/reports")}
-        className="rounded-md p-1.5 text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-primary"
         aria-label="Back to reports"
       >
         <ArrowLeft className="h-4 w-4" />
-      </button>
+      </Button>
 
       {/* Report name */}
       {editing ? (
@@ -103,14 +104,14 @@ export function ReportToolbar({
       </span>
 
       {/* Save button */}
-      <button
-        type="button"
+      <Button
+        size="sm"
         onClick={onSave}
         disabled={!isDirty || saving}
-        className="shrink-0 rounded-lg bg-text-primary px-3 py-1.5 text-xs font-medium text-bg-primary transition-colors hover:opacity-90 disabled:opacity-60"
+        className="shrink-0"
       >
         Save
-      </button>
+      </Button>
 
       {/* Export */}
       <ExportButton onExport={onExport} label="Export" />

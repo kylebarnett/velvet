@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ReportCard } from "./report-card";
 import type { SavedReport } from "./reports-context";
 import { REPORT_TYPE_LABELS, type ReportType } from "@/lib/reports/templates";
@@ -165,21 +166,20 @@ export function ReportGallery({ initialReports, onReportsChange }: ReportGallery
               }}
             />
             <div className="mt-4 flex justify-end gap-3">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setRenaming(null)}
-                className="rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-bg-elevated"
               >
                 Cancel
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                size="sm"
                 onClick={handleRenameSubmit}
                 disabled={!renameValue.trim()}
-                className="rounded-lg bg-text-primary px-3 py-1.5 text-xs font-medium text-bg-primary transition-colors hover:opacity-90 disabled:opacity-60"
               >
                 Save
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X, ArrowLeft, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { ALL_ARTICLES, getArticlesForRoute } from "@/lib/help/content";
 import { getCategoriesForRole } from "@/lib/help/categories";
@@ -145,14 +146,14 @@ export function HelpPanel({
         <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
           <div className="flex items-center gap-2">
             {view.type !== "home" && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={goBack}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-primary transition-colors"
                 aria-label="Go back"
               >
                 <ArrowLeft className="h-4 w-4" />
-              </button>
+              </Button>
             )}
             <h2 className="text-sm font-semibold text-text-primary">
               {view.type === "home" && "Help Guide"}
@@ -164,14 +165,14 @@ export function HelpPanel({
                   "Article")}
             </h2>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-primary transition-colors"
             aria-label="Close help panel"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4">

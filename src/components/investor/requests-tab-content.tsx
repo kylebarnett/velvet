@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Loader2,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
@@ -673,18 +674,20 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
         {/* Collapsed remind + expand icon */}
         <div className="mt-1 flex shrink-0 items-center gap-2">
           {!expanded && pendingCompanyCount > 0 && (
-            <button
+            <Button
               type="button"
               onClick={handleRemindFromCollapsed}
               disabled={reminding !== null}
-              className="shrink-0 rounded-md border border-border-default px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:bg-bg-hover disabled:opacity-60"
+              variant="secondary"
+              size="sm"
+              className="shrink-0"
             >
               {reminding === "all" ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
                 "Remind"
               )}
-            </button>
+            </Button>
           )}
           <div className="text-text-faint">
             <ChevronDown
@@ -720,25 +723,27 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
                 </span>
                 <div className="flex items-center gap-1">
                   {remindResult.failed > 0 && remindResult.sent === 0 && lastRemindAction && (
-                    <button
+                    <Button
                       type="button"
                       onClick={() => {
                         setRemindResult(null);
                         handleRemind(lastRemindAction.requestIds, lastRemindAction.sourceId);
                       }}
-                      className="rounded px-2 py-0.5 text-xs font-medium hover:bg-bg-hover"
+                      variant="ghost"
+                      size="sm"
                     >
                       Retry
-                    </button>
+                    </Button>
                   )}
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setRemindResult(null)}
-                    className="rounded p-0.5 hover:bg-bg-hover"
+                    variant="ghost"
+                    size="icon-sm"
                     aria-label="Dismiss"
                   >
                     <X className="h-3 w-3" aria-hidden="true" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -815,7 +820,7 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
                         {/* Remind button */}
                         {company.status !== "submitted" &&
                           company.pendingRequestIds.length > 0 && (
-                            <button
+                            <Button
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -825,14 +830,16 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
                                 );
                               }}
                               disabled={reminding !== null}
-                              className="shrink-0 rounded-md border border-border-default px-2 py-1 text-[11px] font-medium text-text-secondary transition-colors hover:bg-bg-hover disabled:opacity-60"
+                              variant="secondary"
+                              size="sm"
+                              className="shrink-0"
                             >
                               {reminding === company.companyId ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
                               ) : (
                                 "Remind"
                               )}
-                            </button>
+                            </Button>
                           )}
                       </div>
                     );
@@ -842,17 +849,18 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
                 {/* Bulk remind all pending */}
                 {pendingCompanyCount > 0 && (
                   <div className="mt-3 flex justify-center border-t border-border-subtle pt-3">
-                    <button
+                    <Button
                       type="button"
                       onClick={handleRemindAll}
                       disabled={reminding !== null}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-bg-hover disabled:opacity-60"
+                      variant="secondary"
+                      size="sm"
                     >
                       <Bell className="h-3 w-3" aria-hidden="true" />
                       {reminding === "all"
                         ? "Sending..."
                         : `Remind all pending (${pendingCompanyCount})`}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </>
@@ -1044,27 +1052,31 @@ export function CampaignsTabContent() {
                 {Math.min((page + 1) * PAGE_SIZE, total)} of {total}
               </span>
               <div className="flex items-center gap-1">
-                <button
+                <Button
                   type="button"
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-hover disabled:opacity-30 disabled:cursor-not-allowed"
+                  variant="secondary"
+                  size="icon"
+                  className="text-text-tertiary"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                </button>
+                </Button>
                 <span className="px-2 text-sm text-text-tertiary">
                   {page + 1} / {totalPages}
                 </span>
-                <button
+                <Button
                   type="button"
                   onClick={() =>
                     setPage((p) => Math.min(totalPages - 1, p + 1))
                   }
                   disabled={page >= totalPages - 1}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border-default text-text-tertiary hover:bg-bg-hover disabled:opacity-30 disabled:cursor-not-allowed"
+                  variant="secondary"
+                  size="icon"
+                  className="text-text-tertiary"
                 >
                   <ChevronRight className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
           )}

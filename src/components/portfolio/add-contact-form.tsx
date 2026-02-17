@@ -158,14 +158,15 @@ export function AddContactModal({ open, onClose, onSuccess }: Props) {
               Add a portfolio company and founder contact.
             </p>
           </div>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-text-tertiary hover:bg-bg-elevated hover:text-text-primary"
             aria-label="Close"
           >
             <X className="h-4 w-4" aria-hidden="true" />
-          </button>
+          </Button>
         </div>
 
         <form className="mt-5" onSubmit={form.handleSubmit(onSubmit)}>

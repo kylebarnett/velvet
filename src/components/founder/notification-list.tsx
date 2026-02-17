@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Info, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatPeriod } from "@/components/charts/types";
 import { getMetricDefinition, inferMetricValueType } from "@/lib/metric-definitions";
@@ -505,8 +506,11 @@ export function NotificationList({
                 </div>
               </div>
               {onSubmitGroup && (
-                <button
+                <Button
                   type="button"
+                  variant="primary"
+                  size="sm"
+                  className="shrink-0"
                   onClick={() =>
                     onSubmitGroup({
                       periodType: group.periodType,
@@ -514,10 +518,9 @@ export function NotificationList({
                       periodEnd: group.periodEnd,
                     })
                   }
-                  className="inline-flex h-9 shrink-0 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover"
                 >
                   Submit
-                </button>
+                </Button>
               )}
             </div>
           </div>

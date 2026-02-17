@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils/cn";
 import { InvestmentFormModal } from "./investment-form-modal";
@@ -77,13 +78,13 @@ export function InvestmentTable({
     <div className="rounded-xl border border-border-default card-surface">
       <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
         <h3 className="text-sm font-medium text-text-primary">Investments</h3>
-        <button
+        <Button
+          size="sm"
           onClick={() => setShowAdd(true)}
-          className="flex h-8 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover"
         >
           <Plus className="h-3.5 w-3.5" />
           Add Investment
-        </button>
+        </Button>
       </div>
 
       {investments.length === 0 ? (
@@ -143,23 +144,24 @@ export function InvestmentTable({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => setEditingInvestment(inv)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded text-text-muted hover:bg-bg-elevated hover:text-text-primary"
                           title="Edit"
-                          type="button"
                         >
                           <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => handleDelete(inv.id)}
                           disabled={deletingId === inv.id}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded text-text-muted hover:bg-[var(--error-bg-subtle)] hover:text-[var(--error-accent)] disabled:opacity-50"
+                          className="hover:bg-[var(--error-bg-subtle)] hover:text-[var(--error-accent)]"
                           title="Delete"
-                          type="button"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>

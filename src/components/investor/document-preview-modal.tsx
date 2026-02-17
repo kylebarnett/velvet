@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Download, ExternalLink, FileText, X, Tag } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DOCUMENT_TYPE_LABELS,
   getDocumentTypeColor,
@@ -156,14 +157,15 @@ export function DocumentPreviewModal({
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-            <button
+            <Button
               type="button"
               onClick={() => onDownload(doc)}
-              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs text-text-secondary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+              variant="secondary"
+              size="sm"
             >
               <Download className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Download</span>
-            </button>
+            </Button>
             {previewUrl && (
               <a
                 href={previewUrl}
@@ -176,14 +178,15 @@ export function DocumentPreviewModal({
                 <span className="hidden sm:inline">Open</span>
               </a>
             )}
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+              variant="ghost"
+              size="icon"
               aria-label="Close preview"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -222,14 +225,14 @@ export function DocumentPreviewModal({
               <p className="text-sm text-text-tertiary">
                 Preview not available for this file type.
               </p>
-              <button
+              <Button
                 type="button"
                 onClick={() => onDownload(doc)}
-                className="inline-flex h-9 items-center gap-2 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+                size="sm"
               >
                 <Download className="h-4 w-4" />
                 Download to view
-              </button>
+              </Button>
             </div>
           )}
         </div>

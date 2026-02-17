@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { FounderDocumentList } from "@/components/founder/document-list";
 import { DocumentUploadModal } from "@/components/founder/document-upload-modal";
@@ -36,13 +37,13 @@ export default function DocumentsPage() {
           <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Documents" }]} />
           <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight" data-onboarding="documents-title">Documents</h1>
         </div>
-        <button
+        <Button
           type="button"
+          size="sm"
           onClick={() => setShowUpload(true)}
-          className="inline-flex h-9 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
         >
           Upload
-        </button>
+        </Button>
       </div>
 
       <FounderDocumentList key={refreshKey} />

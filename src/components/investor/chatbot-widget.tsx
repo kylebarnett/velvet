@@ -14,6 +14,7 @@ import {
   Target,
   Zap,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   BarChart as RechartsBarChart,
   Bar,
@@ -405,27 +406,29 @@ export function ChatbotWidget() {
             </div>
             <div className="flex items-center gap-1">
               {conversation.length > 0 && (
-                <button
+                <Button
                   onClick={() => {
                     setConversation([]);
                     setError(null);
                     setState("idle");
                   }}
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-hover hover:text-text-secondary"
+                  variant="ghost"
+                  size="icon-sm"
                   aria-label="Clear chat"
                   type="button"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               )}
-              <button
+              <Button
                 onClick={() => setIsOpen(false)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-hover hover:text-text-secondary"
+                variant="ghost"
+                size="icon-sm"
                 aria-label="Close chat"
                 type="button"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -574,10 +577,12 @@ export function ChatbotWidget() {
                 className="h-10 w-full rounded-lg border border-border-default bg-bg-elevated pl-3 pr-10 text-xs text-text-primary placeholder:text-text-faint focus:border-border-default focus:outline-none focus:ring-1 focus:ring-ring-focus"
                 disabled={state === "loading"}
               />
-              <button
+              <Button
                 onClick={() => handleSubmit()}
                 disabled={!input.trim() || state === "loading"}
-                className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md bg-btn-primary-bg text-btn-primary-text transition-colors hover:bg-btn-primary-hover disabled:opacity-40 disabled:hover:bg-btn-primary-bg"
+                variant="primary"
+                size="icon-sm"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2"
                 type="button"
                 aria-label="Send query"
               >
@@ -586,7 +591,7 @@ export function ChatbotWidget() {
                 ) : (
                   <ArrowUp className="h-3.5 w-3.5" />
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

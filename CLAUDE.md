@@ -128,8 +128,11 @@ Cron endpoints require `CRON_SECRET` via Bearer token. Endpoints reject all requ
 - **Inputs/Selects**: `h-11 rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary outline-none placeholder:text-text-faint focus:border-[var(--ring-focus)]`
 - **Never** use `h-9` for inputs/selects — always `h-11`
 - **Never** use hardcoded `border-white/10 bg-black/30 text-white` for form elements — always use semantic variables for theme compatibility
-- **Buttons (primary)**: `bg-white text-black hover:bg-white/90`
-- **Buttons (secondary)**: `border border-white/10 bg-white/5 hover:bg-white/10`
+- **Buttons**: Use the shared `<Button>` component from `@/components/ui/button` with variants (`primary`, `secondary`, `danger`, `warning`, `ghost`) and sizes (`sm`, `md`, `lg`, `icon-sm`, `icon`, `icon-lg`). For link-styled buttons, use `<ButtonLink>` from the same module. Do **not** create inline-styled `<button>` elements — always use the component.
+  - Icon-only buttons: `<Button variant="ghost" size="icon-sm">` (or `icon` / `icon-lg`)
+  - Destructive actions: `<Button variant="danger">`
+  - Cancel/dismiss: `<Button variant="ghost">`
+  - Exceptions (keep inline): dropdown menu items, sidebar nav items, tab/toggle groups, filter chips, rich text toolbar toggles
 - **Cards**: `rounded-xl border border-white/10 bg-white/5 p-4`
 - **Modals**: Backdrop `bg-black/60 backdrop-blur-sm`, modal `rounded-xl border border-white/10 bg-zinc-900 p-6`
 - **Skeletons**: `animate-pulse` with `bg-white/5` or `bg-white/10`

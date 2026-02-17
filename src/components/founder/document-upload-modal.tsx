@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { X, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useDropzone } from "react-dropzone";
 import {
   Select,
@@ -134,13 +135,15 @@ export function DocumentUploadModal({
       <div className="w-full max-w-lg rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="flex items-center justify-between">
           <h3 id={titleId} className="text-lg font-medium">Upload document</h3>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="rounded-md p-1 text-text-muted hover:bg-bg-elevated hover:text-text-tertiary"
+            className="text-text-muted hover:bg-bg-elevated hover:text-text-tertiary"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         <form className="mt-4 space-y-4" onSubmit={onSubmit}>
@@ -236,16 +239,18 @@ export function DocumentUploadModal({
                       {formatFileSize(selectedFile.size)}
                     </div>
                   </div>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedFile(null);
                     }}
-                    className="rounded p-1 text-text-muted hover:text-text-tertiary"
+                    className="text-text-muted hover:text-text-tertiary"
                   >
                     <X className="h-4 w-4" />
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 <div>
@@ -284,20 +289,20 @@ export function DocumentUploadModal({
           )}
 
           <div className="flex justify-end gap-3">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="rounded-lg border border-border-default bg-bg-elevated px-4 py-2 text-sm hover:bg-bg-hover"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              variant="primary"
               disabled={isUploading || !documentType || !selectedFile}
-              className="rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
             >
               {isUploading ? "Uploading..." : "Upload"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

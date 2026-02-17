@@ -143,14 +143,15 @@ export function TemplateForm({
       <div className="rounded-xl border border-border-default card-surface p-5 space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">Metrics</span>
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={addItem}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs font-medium text-text-primary hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             <Plus className="h-3.5 w-3.5" />
             Add metric
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-3">
@@ -174,15 +175,17 @@ export function TemplateForm({
                   </SelectContent>
                 </Select>
               </div>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => removeItem(index)}
                 disabled={items.length <= 1}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-30"
+                className="shrink-0"
                 title="Remove metric"
               >
                 <Trash2 className="h-4 w-4 text-[var(--error-accent)]" />
-              </button>
+              </Button>
             </div>
           ))}
         </div>

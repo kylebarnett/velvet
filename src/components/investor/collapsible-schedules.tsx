@@ -16,6 +16,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 
 import { getCadenceDescription } from "@/lib/schedules";
+import { Button } from "@/components/ui/button";
 import type { Schedule } from "@/components/investor/schedule-card";
 
 const STORAGE_KEY = "velvet:schedules-collapsed";
@@ -199,15 +200,16 @@ export function CollapsibleSchedules() {
                       )}
                     </div>
                   </div>
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
+                    size="icon-sm"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       handleToggleActive(schedule);
                     }}
                     disabled={togglingId === schedule.id}
-                    className="mt-0.5 shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-md border border-border-default bg-bg-elevated text-text-muted hover:bg-bg-hover hover:text-text-secondary disabled:opacity-50"
+                    className="mt-0.5 shrink-0"
                     title={schedule.isActive ? "Pause" : "Resume"}
                     aria-label={
                       schedule.isActive
@@ -222,7 +224,7 @@ export function CollapsibleSchedules() {
                     ) : (
                       <Play className="h-3 w-3" />
                     )}
-                  </button>
+                  </Button>
                 </Link>
               ))}
             </div>

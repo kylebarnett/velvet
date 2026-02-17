@@ -185,14 +185,15 @@ export function ManualMetricEntryModal({ open, onClose, companyId, companyName }
               Add metrics for {companyName}
             </p>
           </div>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-text-tertiary hover:bg-bg-elevated hover:text-text-primary"
             aria-label="Close"
           >
             <X className="h-4 w-4" aria-hidden="true" />
-          </button>
+          </Button>
         </div>
 
         <form className="mt-5" onSubmit={form.handleSubmit(onSubmit)}>
@@ -202,14 +203,15 @@ export function ManualMetricEntryModal({ open, onClose, companyId, companyName }
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-medium text-text-tertiary">Metric {index + 1}</span>
                   {fields.length > 1 && (
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => remove(index)}
-                      className="flex h-7 w-7 items-center justify-center rounded-md text-text-tertiary hover:bg-bg-elevated hover:text-[var(--error-accent)]"
                       aria-label={`Remove metric ${index + 1}`}
                     >
                       <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    </button>
+                    </Button>
                   )}
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -334,14 +336,16 @@ export function ManualMetricEntryModal({ open, onClose, companyId, companyName }
           </div>
 
           {fields.length < 5 && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => append({ metric_name: "", value: "", period_type: "quarterly", period_start: "" })}
-              className="mt-3 flex items-center gap-1.5 text-sm text-text-tertiary hover:text-text-secondary"
+              className="mt-3"
             >
               <Plus className="h-3.5 w-3.5" aria-hidden="true" />
               Add another metric
-            </button>
+            </Button>
           )}
 
           <div className="mt-5 flex items-center justify-end gap-3">

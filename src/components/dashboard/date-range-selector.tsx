@@ -2,6 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import * as React from "react";
+import { Button } from "@/components/ui/button";
 
 export type DateRange = "1y" | "2y" | "all" | "custom";
 
@@ -36,14 +37,15 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-1.5 text-xs font-medium text-text-tertiary hover:border-border-default hover:text-text-secondary transition-colors"
+        className="border border-border-subtle bg-bg-raised text-text-tertiary hover:border-border-default hover:text-text-secondary"
       >
         {selectedLabel}
         <ChevronDown className="h-3 w-3" />
-      </button>
+      </Button>
       {isOpen && (
         <div className="dropdown-enter absolute right-0 top-full z-50 mt-1 min-w-[120px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary shadow-xl">
           {options.map((option) => (

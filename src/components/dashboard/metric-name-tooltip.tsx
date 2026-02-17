@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Pencil, X, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   resolveMetricDefinition,
   inferMetricValueType,
@@ -169,13 +170,13 @@ export function MetricNameTooltip({
             <span className="text-xs font-medium text-text-primary truncate">
               Edit: {metricName}
             </span>
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setIsEditing(false)}
-              className="text-text-muted hover:text-text-secondary transition-colors"
             >
               <X className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           </div>
 
           <div>
@@ -210,7 +211,7 @@ export function MetricNameTooltip({
                 type="button"
                 onClick={handleReset}
                 disabled={isSaving}
-                className="text-[10px] text-text-muted underline underline-offset-2 hover:text-text-tertiary disabled:opacity-50"
+                className="text-[10px] text-text-muted underline underline-offset-2 hover:text-text-tertiary disabled:opacity-60"
               >
                 Reset to default
               </button>
@@ -218,21 +219,22 @@ export function MetricNameTooltip({
               <span />
             )}
             <div className="flex items-center gap-2">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setIsEditing(false)}
-                className="rounded-md border border-border-default bg-bg-elevated px-2.5 py-1 text-[11px] text-text-secondary hover:bg-bg-hover"
+                className="text-[11px]"
               >
                 Cancel
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                size="sm"
                 onClick={handleSave}
                 disabled={!description.trim() || isSaving}
-                className="rounded-md bg-btn-primary-bg px-2.5 py-1 text-[11px] font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
+                className="text-[11px]"
               >
                 {isSaving ? "Saving..." : "Save"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -251,14 +253,14 @@ export function MetricNameTooltip({
                 </span>
               )}
             </div>
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={startEditing}
-              className="shrink-0 rounded p-1 text-text-faint hover:bg-bg-hover hover:text-text-tertiary transition-colors"
               title="Edit definition"
             >
               <Pencil className="h-3 w-3" />
-            </button>
+            </Button>
           </div>
 
           {/* Description */}
@@ -268,19 +270,17 @@ export function MetricNameTooltip({
             </p>
           ) : (
             <div className="space-y-1.5">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={handleGenerateAI}
                 disabled={isGenerating}
-                className="flex w-full items-center gap-1.5 rounded-md bg-bg-elevated px-2 py-1.5 text-[11px] font-medium text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary disabled:opacity-60"
+                loading={isGenerating}
+                className="w-full text-[11px]"
               >
-                {isGenerating ? (
-                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-text-faint border-t-text-secondary" />
-                ) : (
-                  <Sparkles className="h-3 w-3" />
-                )}
+                {!isGenerating && <Sparkles className="h-3 w-3" />}
                 {isGenerating ? "Generating..." : "Generate with AI"}
-              </button>
+              </Button>
               <p
                 className="cursor-pointer text-center text-[10px] text-text-faint underline underline-offset-2 hover:text-text-muted"
                 onClick={startEditing}

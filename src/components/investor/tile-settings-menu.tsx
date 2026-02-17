@@ -131,7 +131,7 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
                     type="button"
                     onClick={() => handleSelectCompany(company)}
                     disabled={loading && selectedCompany?.id === company.id}
-                    className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-bg-elevated transition-colors disabled:opacity-50"
+                    className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-bg-elevated transition-colors disabled:opacity-60"
                   >
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded border border-border-default bg-bg-elevated">
                       {logoUrl ? (

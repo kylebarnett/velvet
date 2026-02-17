@@ -16,6 +16,7 @@ import {
   Pencil,
   Calendar,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -371,13 +372,15 @@ export function MetricDetailPanel({
         <div className="absolute left-0 top-0 bottom-0 w-px bg-border-default" />
 
         <div className="relative px-8 pt-9 pb-8">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleClose}
-            className="absolute right-7 top-7 flex h-8 w-8 items-center justify-center rounded-lg border border-border-subtle bg-bg-raised text-text-muted transition-all duration-200 hover:border-border-default hover:bg-bg-hover hover:text-text-primary active:scale-95"
+            className="absolute right-7 top-7 border border-border-subtle bg-bg-raised hover:border-border-default hover:bg-bg-hover"
             aria-label="Close panel"
           >
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
 
           <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-text-faint">
             Metric Detail
@@ -667,8 +670,8 @@ export function MetricDetailPanel({
                         </div>
                       </div>
                       <div className="mt-4 flex gap-2">
-                        <button
-                          type="button"
+                        <Button
+                          size="sm"
                           onClick={async () => {
                             setConfirming(true);
                             setError(null);
@@ -710,23 +713,24 @@ export function MetricDetailPanel({
                             }
                           }}
                           disabled={confirming || submitting}
-                          className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[var(--success-solid)] px-4 text-xs font-medium text-white shadow-sm shadow-emerald-900/30 transition-all duration-200 hover:bg-[var(--success-solid)] hover:shadow-emerald-900/40 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[var(--success-ring)] focus:ring-offset-1 focus:ring-offset-bg-primary"
+                          className="bg-[var(--success-solid)] text-white shadow-sm shadow-emerald-900/30 hover:bg-[var(--success-solid)] hover:shadow-emerald-900/40 focus:ring-[var(--success-ring)] focus:ring-offset-1 focus:ring-offset-bg-primary"
                         >
                           <Check className="h-3.5 w-3.5" />
                           {confirming ? "Confirming..." : "Confirm value"}
-                        </button>
-                        <button
-                          type="button"
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           onClick={() => {
                             setEditValue(getValueString(current.value));
                             setEditing(true);
                           }}
                           disabled={confirming || submitting}
-                          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border-subtle bg-bg-raised px-3.5 text-xs text-text-tertiary transition-colors hover:bg-bg-elevated hover:text-text-secondary disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-ring-focus focus:ring-offset-1 focus:ring-offset-bg-primary"
+                          className="border-border-subtle bg-bg-raised text-text-tertiary hover:bg-bg-elevated hover:text-text-secondary"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                           Correct value
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -739,17 +743,18 @@ export function MetricDetailPanel({
                     Edit Value
                   </h3>
                   {!editing ? (
-                    <button
-                      type="button"
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={() => {
                         setEditValue(getValueString(current.value));
                         setEditing(true);
                       }}
-                      className="inline-flex h-9 items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-4 text-sm text-text-tertiary transition-all duration-200 hover:border-border-default hover:bg-bg-hover hover:text-text-secondary"
+                      className="border-border-subtle bg-bg-raised text-text-tertiary hover:border-border-default hover:bg-bg-hover hover:text-text-secondary"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                       Override current value
-                    </button>
+                    </Button>
                   ) : (
                     <div className="overflow-hidden rounded-xl border border-border-subtle bg-bg-raised">
                       <div className="space-y-4 p-5">
@@ -777,21 +782,21 @@ export function MetricDetailPanel({
                           />
                         </div>
                         <div className="flex gap-2 pt-1">
-                          <button
-                            type="button"
+                          <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={() => setEditing(false)}
-                            className="h-8 rounded-lg border border-border-subtle bg-bg-raised px-3.5 text-xs text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-secondary"
+                            className="border-border-subtle bg-bg-raised text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
                           >
                             Cancel
-                          </button>
-                          <button
-                            type="button"
+                          </Button>
+                          <Button
+                            size="sm"
                             onClick={handleSubmitOverride}
                             disabled={submitting || !editValue.trim()}
-                            className="h-9 rounded-lg bg-btn-primary-bg px-4 text-xs font-medium text-btn-primary-text shadow-sm transition-all duration-200 hover:bg-btn-primary-hover hover:shadow-md disabled:opacity-50"
                           >
                             {submitting ? "Saving..." : "Save override"}
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>

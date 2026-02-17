@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { X, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -47,14 +48,14 @@ export function WidgetConfig({
     <div className="rounded-xl border border-border-default card-surface p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-medium text-text-secondary">Configure Widget</h3>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={onClose}
-          className="text-text-muted hover:text-text-tertiary"
           aria-label="Close widget configuration"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
 
       <div className="space-y-4">
@@ -245,14 +246,14 @@ export function WidgetConfig({
 
         {/* Delete button — hidden for the All Metrics table */}
         {!(isTableConfig(config) && config.showAllMetrics) && (
-          <button
-            type="button"
+          <Button
+            variant="danger"
             onClick={onDelete}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-3 py-2 text-sm text-[var(--status-error-text)] hover:bg-[var(--error-bg-subtle)]"
+            className="w-full"
           >
             <Trash2 className="h-4 w-4" />
             Delete Widget
-          </button>
+          </Button>
         )}
       </div>
     </div>

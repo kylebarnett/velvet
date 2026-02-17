@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { ReportType } from "@/lib/reports/templates";
 
 const INDUSTRIES = [
@@ -171,14 +172,15 @@ function SummaryFilters({
         </div>
 
         {hasFilters && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={clearFilters}
-            className="ml-auto flex items-center gap-1 text-xs text-text-muted transition-colors hover:text-text-primary"
+            className="ml-auto"
           >
             <X className="h-3 w-3" />
             Clear filters
-          </button>
+          </Button>
         )}
       </div>
     </div>

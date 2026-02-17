@@ -4,6 +4,7 @@ import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import Link from "next/link";
 import { AlertTriangle, ArrowLeft, CheckCircle2, Info, Layers, Star, TrendingDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
@@ -588,13 +589,14 @@ function ReportCardView({
           )}
 
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            <button
+            <Button
               type="button"
+              size="sm"
               onClick={onBack}
-              className="inline-flex h-8 items-center rounded-md bg-[var(--success-bg-muted)] px-3 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] transition-colors"
+              className="bg-[var(--success-bg-muted)] text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)]"
             >
               Back to requests
-            </button>
+            </Button>
             {tearSheetPeriod && (
               <Link
                 href={`/portal/tear-sheets/new?period=${encodeURIComponent(tearSheetPeriod)}`}
@@ -1049,14 +1051,16 @@ export function BatchSubmissionTable({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={onBack}
-          className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
+          className="text-text-muted hover:text-text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to requests
-        </button>
+        </Button>
 
         {/* Only show period type toggle when there's no prefilter (no specific request) */}
         {!prefilterPeriod && (
@@ -1123,19 +1127,19 @@ export function BatchSubmissionTable({
 
       {allRows.length > 0 && !reportCard && (
         <div className="flex justify-end">
-          <button
+          <Button
             type="button"
+            variant="primary"
             onClick={prepareSubmissions}
             disabled={submitting || cellErrors.size > 0}
             title={cellErrors.size > 0 ? `Fix ${cellErrors.size} invalid value${cellErrors.size !== 1 ? "s" : ""} before submitting` : undefined}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
           >
             {submitting
               ? "Submitting..."
               : cellErrors.size > 0
                 ? `Submit all (${cellErrors.size} error${cellErrors.size !== 1 ? "s" : ""})`
                 : "Submit all"}
-          </button>
+          </Button>
         </div>
       )}
 

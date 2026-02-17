@@ -4,6 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { Loader2, Mail, CheckCircle2, X, Sparkles, Pencil, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { formatValue } from "@/components/charts/types";
 
@@ -247,25 +248,29 @@ export function EmailPasteModal({
               metrics.
             </p>
           </div>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={handleClose}
             disabled={state === "extracting" || state === "saving"}
-            className="rounded-md p-1 text-text-muted hover:text-text-secondary disabled:opacity-50"
+            className="text-text-muted hover:text-text-secondary"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Idle: Textarea for pasting email */}
         {state === "idle" && (
           <div className="space-y-4">
             <div>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowExample((prev) => !prev)}
-                className="mb-3 flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary transition-colors"
+                className="mb-3 text-text-muted hover:text-text-secondary"
               >
                 <ChevronDown
                   className={cn(
@@ -274,7 +279,7 @@ export function EmailPasteModal({
                   )}
                 />
                 What should I paste?
-              </button>
+              </Button>
               {showExample && (
                 <div className="mb-3 rounded-lg bg-bg-elevated p-3 text-xs text-text-muted font-mono whitespace-pre-line">
                   {`Paste the body of an investor update email. For example:\n\nQ4 2025 Update:\nRevenue: $1.2M (+15% QoQ)\nMRR: $100K\nBurn Rate: $85K/month\nRunway: 14 months`}
@@ -293,22 +298,22 @@ export function EmailPasteModal({
               </p>
             </div>
             <div className="flex justify-end gap-3">
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={handleClose}
-                className="rounded-lg border border-border-default bg-bg-elevated px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-hover"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="primary"
                 onClick={handleExtract}
                 disabled={!emailContent.trim()}
-                className="flex items-center gap-2 rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
               >
                 <Sparkles className="h-4 w-4" />
                 Extract Metrics
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -342,15 +347,17 @@ export function EmailPasteModal({
                   </span>
                 )}
               </p>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={toggleAll}
-                className="text-xs text-text-muted hover:text-text-secondary"
+                className="text-text-muted hover:text-text-secondary"
               >
                 {selected.size === metrics.length
                   ? "Deselect all"
                   : "Select all"}
-              </button>
+              </Button>
             </div>
 
             {/* Confidence legend */}
@@ -438,18 +445,20 @@ export function EmailPasteModal({
                                     metric.name,
                                   )}
                             </span>
-                            <button
+                            <Button
                               type="button"
+                              variant="ghost"
+                              size="icon-sm"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 setEditingIndex(index);
                               }}
-                              className="rounded p-0.5 text-text-faint hover:text-text-tertiary transition-colors"
+                              className="text-text-faint hover:text-text-tertiary"
                               aria-label={`Edit ${metric.name} value`}
                             >
                               <Pencil className="h-3 w-3" />
-                            </button>
+                            </Button>
                           </>
                         )}
                       </div>
@@ -477,8 +486,9 @@ export function EmailPasteModal({
             </div>
 
             <div className="flex justify-between gap-3">
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={() => {
                   setState("idle");
                   setMetrics([]);
@@ -486,26 +496,25 @@ export function EmailPasteModal({
                   setEditingIndex(null);
                   setEditedValues({});
                 }}
-                className="rounded-lg border border-border-default bg-bg-elevated px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-hover"
               >
                 Back
-              </button>
+              </Button>
               <div className="flex gap-3">
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={handleClose}
-                  className="rounded-lg border border-border-default bg-bg-elevated px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-hover"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="primary"
                   onClick={handleSave}
                   disabled={selected.size === 0}
-                  className="flex items-center gap-2 rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-50"
                 >
                   Save {selected.size} Metric{selected.size !== 1 ? "s" : ""}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -534,13 +543,14 @@ export function EmailPasteModal({
             <p className="mt-1 text-xs text-text-muted">
               Your dashboard will update to reflect the new data.
             </p>
-            <button
+            <Button
               type="button"
+              variant="primary"
               onClick={handleClose}
-              className="mt-6 rounded-lg bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+              className="mt-6"
             >
               Done
-            </button>
+            </Button>
           </div>
         )}
       </div>
