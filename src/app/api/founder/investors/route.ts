@@ -51,30 +51,32 @@ export async function GET() {
     })
     .filter(Boolean) as string[];
 
-  const orgMap: Record<string, string> = {};
+  const orgMap: Record<string, { name: string; logoUrl: string | null }> = {};
 
   if (investorIds.length > 0) {
     const { data: memberships } = await supabase
       .from("organization_members")
-      .select("user_id, organizations(name)")
+      .select("user_id, organizations(name, logo_url)")
       .in("user_id", investorIds);
 
     if (memberships) {
       for (const m of memberships) {
         const org = Array.isArray(m.organizations) ? m.organizations[0] : m.organizations;
         if (org?.name) {
-          orgMap[m.user_id] = org.name;
+          orgMap[m.user_id] = { name: org.name, logoUrl: org.logo_url ?? null };
         }
       }
     }
   }
 
-  // Attach org_name to each relationship
+  // Attach org_name and org_logo_url to each relationship
   const enriched = (relationships ?? []).map((r) => {
     const u = Array.isArray(r.users) ? r.users[0] : r.users;
+    const orgInfo = u?.id ? orgMap[u.id] : null;
     return {
       ...r,
-      org_name: u?.id ? orgMap[u.id] ?? null : null,
+      org_name: orgInfo?.name ?? null,
+      org_logo_url: orgInfo?.logoUrl ?? null,
     };
   });
 

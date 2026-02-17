@@ -4,6 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { Building2 } from "lucide-react";
 
 type Investor = {
   id: string;
@@ -12,6 +13,7 @@ type Investor = {
   is_inviting_investor: boolean;
   created_at: string;
   org_name?: string | null;
+  org_logo_url?: string | null;
   users: {
     id: string;
     email: string;
@@ -47,8 +49,10 @@ export function InvestorApprovalCard({
 
   const investorUser = investor.users;
   const displayName = investorUser?.full_name || investorUser?.email || "Unknown";
-  const initial = (investorUser?.full_name?.[0] || investorUser?.email?.[0] || "?").toUpperCase();
   const orgLabel = investor.org_name || "Individual investor";
+  const orgLogoUrl = investor.org_logo_url;
+  const avatarInitial = (investor.org_name?.[0] || investorUser?.full_name?.[0] || investorUser?.email?.[0] || "?").toUpperCase();
+  const [avatarError, setAvatarError] = React.useState(false);
 
   async function handleApproval(newStatus: "approved" | "denied") {
     setLoading(true);
@@ -115,21 +119,32 @@ export function InvestorApprovalCard({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="flex min-w-0 gap-3">
             <div
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bg-elevated text-sm font-medium text-text-secondary"
+              className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-default bg-bg-elevated text-sm font-medium text-text-secondary"
               aria-hidden="true"
             >
-              {initial}
+              {orgLogoUrl && !avatarError ? (
+                <img
+                  src={orgLogoUrl}
+                  alt={orgLabel}
+                  className="h-full w-full object-cover"
+                  onError={() => setAvatarError(true)}
+                />
+              ) : investor.org_name ? (
+                <span>{avatarInitial}</span>
+              ) : (
+                <Building2 className="h-4 w-4 text-text-muted" />
+              )}
             </div>
             <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium text-text-primary">{displayName}</span>
+              <span className="text-sm font-medium text-text-primary">{orgLabel}</span>
               {investor.is_inviting_investor && (
                 <span className="rounded-full bg-[var(--status-info-bg)] px-2 py-0.5 text-xs text-[var(--status-info-text)]">
                   Invited you
                 </span>
               )}
             </div>
-            <div className="mt-0.5 text-xs text-text-tertiary">{orgLabel}</div>
+            <div className="mt-0.5 text-xs text-text-tertiary">{displayName}</div>
             {investorUser?.email && investorUser.full_name && (
               <div className="mt-0.5 text-xs text-text-muted">{investorUser.email}</div>
             )}
@@ -141,7 +156,7 @@ export function InvestorApprovalCard({
                 {statusLabel}
               </span>
               {status === "auto_approved" && (
-                <HelpTooltip text="This investor invited you to Velvet and was automatically approved. They can see all your submitted metrics and documents." />
+                <HelpTooltip text="This investor invited you to Velvet and was automatically approved. Their access is permanent and cannot be revoked." />
               )}
               {status === "pending" && (
                 <HelpTooltip text="This investor added your company to their portfolio and is waiting for your approval. They cannot see any of your data until you approve access." />

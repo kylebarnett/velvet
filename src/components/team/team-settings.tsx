@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Users, Plus, Loader2, Settings } from "lucide-react";
+import { Plus, Loader2, Camera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MemberList } from "./member-list";
 import { PendingInvitations } from "./pending-invitations";
@@ -31,6 +31,7 @@ type Org = {
   name: string;
   orgType: string;
   ownerId: string;
+  logoUrl: string | null;
   myRole: string;
 };
 
@@ -47,6 +48,32 @@ export function TeamSettings({ currentUserId }: Props) {
   const [showInviteModal, setShowInviteModal] = React.useState(false);
   const [creating, setCreating] = React.useState(false);
   const [orgName, setOrgName] = React.useState("");
+  const [logoUploading, setLogoUploading] = React.useState(false);
+  const [logoError, setLogoError] = React.useState<string | null>(null);
+  const [imgError, setImgError] = React.useState(false);
+  const [showLogoMenu, setShowLogoMenu] = React.useState(false);
+  const logoInputRef = React.useRef<HTMLInputElement>(null);
+  const logoMenuRef = React.useRef<HTMLDivElement>(null);
+
+  // Close logo menu on outside click
+  React.useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (logoMenuRef.current && !logoMenuRef.current.contains(e.target as Node)) {
+        setShowLogoMenu(false);
+      }
+    }
+    if (showLogoMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showLogoMenu]);
+
+  React.useEffect(() => {
+    if (logoError) {
+      const timer = setTimeout(() => setLogoError(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [logoError]);
 
   async function loadData() {
     try {
@@ -110,6 +137,7 @@ export function TeamSettings({ currentUserId }: Props) {
         name: orgName.trim(),
         orgType: json.orgType ?? "investor", // Will be set by server based on user role
         ownerId: currentUserId,
+        logoUrl: null,
         myRole: "admin",
       });
 
@@ -185,14 +213,147 @@ export function TeamSettings({ currentUserId }: Props) {
   }
 
   const isAdmin = org.myRole === "admin";
+  const orgInitial = org.name.charAt(0).toUpperCase();
+
+  async function handleLogoUpload(file: File) {
+    if (!org) return;
+    setLogoUploading(true);
+    setLogoError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`/api/organizations/${org.id}/logo`, {
+        method: "POST",
+        body: formData,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? "Failed to upload logo.");
+      setImgError(false);
+      setOrg((prev) => prev ? { ...prev, logoUrl: json.logoUrl } : prev);
+    } catch (err: unknown) {
+      setLogoError(err instanceof Error ? err.message : "Upload failed.");
+    } finally {
+      setLogoUploading(false);
+    }
+  }
+
+  async function handleLogoRemove() {
+    if (!org) return;
+    setLogoUploading(true);
+    setLogoError(null);
+    setShowLogoMenu(false);
+    try {
+      const res = await fetch(`/api/organizations/${org.id}/logo`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? "Failed to remove logo.");
+      setImgError(false);
+      setOrg((prev) => prev ? { ...prev, logoUrl: null } : prev);
+    } catch (err: unknown) {
+      setLogoError(err instanceof Error ? err.message : "Remove failed.");
+    } finally {
+      setLogoUploading(false);
+    }
+  }
+
+  function handleLogoClick() {
+    if (!org || !isAdmin || logoUploading) return;
+    if (org.logoUrl) {
+      setShowLogoMenu(true);
+    } else {
+      logoInputRef.current?.click();
+    }
+  }
 
   return (
     <div className="space-y-6">
       {/* Org header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border-default bg-bg-elevated">
-            <Settings className="h-5 w-5 text-text-muted" />
+          <div className="relative">
+            <div
+              role={isAdmin ? "button" : undefined}
+              tabIndex={isAdmin ? 0 : undefined}
+              onClick={handleLogoClick}
+              onKeyDown={(e) => {
+                if (isAdmin && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault();
+                  handleLogoClick();
+                }
+              }}
+              className={`
+                relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg
+                border border-border-default bg-bg-elevated
+                ${isAdmin ? "cursor-pointer group" : ""}
+                ${logoUploading ? "opacity-60" : ""}
+              `}
+              title={isAdmin ? (org.logoUrl ? "Click to change logo" : "Click to upload fund logo") : org.name}
+            >
+              {org.logoUrl && !imgError ? (
+                <img
+                  src={org.logoUrl}
+                  alt={org.name}
+                  className="h-full w-full object-cover"
+                  onError={() => setImgError(true)}
+                />
+              ) : (
+                <span className="text-sm font-semibold text-text-tertiary">{orgInitial}</span>
+              )}
+              {isAdmin && !logoUploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-bg-backdrop opacity-0 transition-opacity group-hover:opacity-100">
+                  <Camera className="h-4 w-4 text-text-primary" />
+                </div>
+              )}
+              {logoUploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-bg-backdrop">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-default border-t-white/80" />
+                </div>
+              )}
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleLogoUpload(file);
+                  e.target.value = "";
+                }}
+                className="hidden"
+              />
+            </div>
+
+            {showLogoMenu && (
+              <div
+                ref={logoMenuRef}
+                className="absolute left-0 top-full z-50 mt-2 min-w-[140px] overflow-hidden rounded-lg border border-border-default bg-bg-secondary py-1 shadow-xl backdrop-blur-sm"
+              >
+                <button
+                  onClick={() => {
+                    setShowLogoMenu(false);
+                    logoInputRef.current?.click();
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary"
+                >
+                  <Camera className="h-4 w-4" />
+                  Change
+                </button>
+                <div className="mx-2 border-t border-border-default" />
+                <button
+                  onClick={handleLogoRemove}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--status-error-text)] transition-colors hover:bg-bg-elevated"
+                >
+                  <X className="h-4 w-4" />
+                  Remove
+                </button>
+              </div>
+            )}
+
+            {logoError && (
+              <div className="absolute left-0 top-full z-50 mt-1 whitespace-nowrap rounded-md border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] px-2 py-1 text-xs text-[var(--status-error-text)]">
+                {logoError}
+              </div>
+            )}
           </div>
           <div>
             <h2 className="font-semibold">{org.name}</h2>

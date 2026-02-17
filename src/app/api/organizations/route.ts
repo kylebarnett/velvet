@@ -17,7 +17,7 @@ export async function GET() {
   // Get organizations the user is a member of
   const { data: memberships, error: membershipError } = await supabase
     .from("organization_members")
-    .select("organization_id, role, organizations(id, name, org_type, owner_id, created_at)")
+    .select("organization_id, role, organizations(id, name, org_type, owner_id, logo_url, created_at)")
     .eq("user_id", user.id);
 
   const orgs = (memberships ?? []).map((m) => {
@@ -27,6 +27,7 @@ export async function GET() {
       name: org?.name,
       orgType: org?.org_type,
       ownerId: org?.owner_id,
+      logoUrl: org?.logo_url ?? null,
       myRole: m.role,
       createdAt: org?.created_at,
     };

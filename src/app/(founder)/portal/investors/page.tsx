@@ -15,6 +15,7 @@ type Investor = {
   is_inviting_investor: boolean;
   created_at: string;
   org_name?: string | null;
+  org_logo_url?: string | null;
   users: {
     id: string;
     email: string;
@@ -203,7 +204,7 @@ export default function FounderInvestorsPage() {
           Control which investors can access your data. Approved investors can see all your submitted metrics and uploaded documents.
         </p>
         <p className="text-xs text-text-muted">
-          Access is all-or-nothing — approved investors see everything you submit. You can change access at any time.
+          Access is all-or-nothing — approved investors see everything you submit. You can approve or deny access for any investor except the one who originally invited you.
         </p>
       </div>
 
