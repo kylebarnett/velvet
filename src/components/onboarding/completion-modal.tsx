@@ -3,6 +3,7 @@
 import * as React from "react";
 import { CheckCircle2, RotateCcw, X } from "lucide-react";
 import type { UserRole } from "@/lib/onboarding/steps";
+import { Button } from "@/components/ui/button";
 
 type CompletionModalProps = {
   onClose: () => void;
@@ -74,14 +75,16 @@ export function CompletionModal({ onClose, onRestart, role = "investor" }: Compl
       {/* Modal */}
       <div className="relative w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 shadow-xl" role="dialog" aria-modal="true" aria-labelledby="completion-modal-title">
         {/* Close button */}
-        <button
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-md p-1 text-text-muted hover:bg-bg-hover hover:text-text-tertiary"
+          className="absolute right-4 top-4"
           type="button"
           aria-label="Close"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
 
         {/* Content */}
         <div className="flex flex-col items-center text-center">
@@ -109,21 +112,22 @@ export function CompletionModal({ onClose, onRestart, role = "investor" }: Compl
           </ul>
 
           <div className="mt-6 flex w-full flex-col gap-2">
-            <button
+            <Button
               onClick={onClose}
-              className="w-full rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+              className="w-full"
               type="button"
             >
               Get started
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               onClick={onRestart}
-              className="flex w-full items-center justify-center gap-2 rounded-md border border-border-default bg-bg-elevated px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-hover"
+              className="w-full"
               type="button"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Take the tour again
-            </button>
+            </Button>
           </div>
         </div>
       </div>

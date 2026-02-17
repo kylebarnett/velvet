@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type UploadValue = {
   id: string;
@@ -68,13 +69,14 @@ export function ValueEditModal({
       <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-medium text-text-primary">Edit Value</h3>
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
-            className="rounded-md p-1 text-text-tertiary hover:bg-bg-elevated hover:text-text-secondary"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -137,19 +139,16 @@ export function ValueEditModal({
           </p>
 
           <div className="flex justify-end gap-3 pt-2">
-            <button
+            <Button
+              variant="secondary"
               type="button"
               onClick={onClose}
-              className="rounded-md border border-border-default px-4 py-2 text-sm text-text-secondary hover:bg-bg-secondary"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
-            >
+            </Button>
+            <Button type="submit">
               Save & Approve
-            </button>
+            </Button>
           </div>
         </form>
       </div>

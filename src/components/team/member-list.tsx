@@ -4,6 +4,7 @@ import * as React from "react";
 import { Crown, UserMinus, Loader2 } from "lucide-react";
 import { MemberRoleSelector } from "./member-role-selector";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { Button } from "@/components/ui/button";
 
 type Member = {
   id: string;
@@ -148,17 +149,18 @@ export function MemberList({
                         value={member.role}
                         onChange={(r) => handleRoleChange(member.userId, r)}
                       />
-                      <button
-                        type="button"
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() =>
                           setRemoveModal({ open: true, member })
                         }
-                        className="rounded-md p-1.5 text-[var(--error-accent)] hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)] focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                        className="text-[var(--error-accent)] hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)]"
                         title="Remove member"
                         aria-label={`Remove ${member.name || member.email}`}
                       >
                         <UserMinus className="h-4 w-4" />
-                      </button>
+                      </Button>
                     </>
                   )}
                 </div>

@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -316,20 +317,18 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
           </div>
         )}
 
-        <button
-          className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-btn-primary-bg px-4 text-sm font-semibold text-btn-primary-text hover:bg-btn-primary-hover disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
-          disabled={isSubmitting}
+        <Button
+          size="lg"
+          className="w-full rounded-lg font-semibold"
+          loading={isSubmitting}
           type="submit"
         >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Please wait…
-            </>
-          ) : mode === "login"
+          {isSubmitting
+            ? "Please wait\u2026"
+            : mode === "login"
               ? "Login"
               : "Create account"}
-        </button>
+        </Button>
 
         <p className="text-center text-sm text-text-tertiary">
           {mode === "login" ? (

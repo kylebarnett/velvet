@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { FileSpreadsheet, PenLine, ArrowRight, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   open: boolean;
@@ -87,14 +88,14 @@ export function AddMetricsPromptModal({
           <h2 id={titleId} className="text-lg font-semibold text-text-primary">
             Add metrics for {companyName}?
           </h2>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-text-tertiary hover:bg-bg-elevated hover:text-text-primary"
             aria-label="Close"
           >
             <X className="h-4 w-4" aria-hidden="true" />
-          </button>
+          </Button>
         </div>
         <p className="mt-2 text-sm text-text-secondary">
           You can add historical metrics now or do this later from the company page.
@@ -133,13 +134,13 @@ export function AddMetricsPromptModal({
           </button>
         </div>
 
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           onClick={onSkip}
-          className="mt-4 w-full text-center text-sm text-text-tertiary hover:text-text-secondary"
+          className="mt-4 w-full text-text-tertiary hover:text-text-secondary"
         >
           Skip for now
-        </button>
+        </Button>
       </div>
     </div>,
     document.body,

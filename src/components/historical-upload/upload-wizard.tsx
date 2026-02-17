@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Upload, FileSpreadsheet, CheckCircle2, XCircle, Loader2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { Button } from "@/components/ui/button";
 import { MAX_FILE_SIZE } from "@/lib/excel/types";
 import { CompanyMappingStep } from "./company-mapping-step";
 import { ReviewTable } from "./review-table";
@@ -331,20 +332,20 @@ export function UploadWizard({ role, preSelectedCompany }: UploadWizardProps) {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setResumableUpload(null)}
-                  className="rounded-md px-2 py-1 text-xs text-[var(--status-info-text)]/70 hover:bg-bg-hover"
+                  className="text-[var(--status-info-text)]/70"
                 >
                   Dismiss
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  size="sm"
                   onClick={() => handleResume(resumableUpload)}
-                  className="rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
                 >
                   Resume
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -430,20 +431,20 @@ export function UploadWizard({ role, preSelectedCompany }: UploadWizardProps) {
 
           {/* Upload button */}
           <div className="flex gap-3">
-            <button
+            <Button
               onClick={handleUpload}
               disabled={!file || uploading}
-              className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+              loading={uploading}
             >
               {uploading ? "Processing..." : "Upload & Analyze"}
-            </button>
+            </Button>
             {file && !uploading && (
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => { setFile(null); setError(null); }}
-                className="rounded-md border border-border-default px-4 py-2 text-sm text-text-secondary hover:bg-bg-secondary"
               >
                 Clear
-              </button>
+              </Button>
             )}
           </div>
 
@@ -499,33 +500,30 @@ export function UploadWizard({ role, preSelectedCompany }: UploadWizardProps) {
 
           <div className="mt-8 flex gap-3">
             {preSelectedCompany ? (
-              <button
+              <Button
                 onClick={() => router.push(`/companies/${preSelectedCompany.id}`)}
-                className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
               >
                 View {preSelectedCompany.name}
-              </button>
+              </Button>
             ) : role === "investor" ? (
-              <button
+              <Button
                 onClick={() => router.push("/reports")}
-                className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
               >
                 View Reports
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 onClick={() => router.push("/portal")}
-                className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
               >
                 Go to Dashboard
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              variant="secondary"
               onClick={handleReset}
-              className="rounded-md border border-border-default px-4 py-2 text-sm text-text-secondary hover:bg-bg-secondary"
             >
               Upload Another File
-            </button>
+            </Button>
           </div>
         </div>
       )}

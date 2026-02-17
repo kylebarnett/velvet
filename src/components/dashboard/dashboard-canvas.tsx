@@ -5,6 +5,7 @@ import { GridLayout, Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { GripVertical, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Widget, MetricValue, PeriodType, isChartConfig, isMetricCardConfig, isTableConfig } from "./types";
 import { DashboardWidget } from "./dashboard-widget";
 
@@ -151,16 +152,17 @@ export function DashboardCanvas({
                   {getWidgetLabel(widget)}
                 </span>
               </div>
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSelectWidget(selectedWidgetId === widget.id ? null : widget.id);
                 }}
-                className="p-1 text-text-muted hover:text-text-tertiary"
+                aria-label="Widget settings"
               >
                 <Settings className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
 
             {/* Widget preview — live preview if metrics available, text fallback otherwise */}

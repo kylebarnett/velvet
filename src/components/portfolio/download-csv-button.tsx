@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Download } from "lucide-react";
 import { logger } from "@/lib/logger";
+import { Button } from "@/components/ui/button";
 
 export function DownloadCsvButton() {
   const [downloading, setDownloading] = React.useState(false);
@@ -32,14 +33,14 @@ export function DownloadCsvButton() {
   }
 
   return (
-    <button
+    <Button
+      variant="secondary"
+      size="sm"
       onClick={handleDownload}
-      disabled={downloading}
-      className="inline-flex items-center gap-2 rounded-md border border-border-default bg-bg-elevated px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary disabled:opacity-60"
-      type="button"
+      loading={downloading}
     >
       <Download className="h-4 w-4" />
       {downloading ? "Downloading..." : "Export CSV"}
-    </button>
+    </Button>
   );
 }

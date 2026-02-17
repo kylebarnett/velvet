@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Building2, CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { Button } from "@/components/ui/button";
 
 type DetectedCompany = {
   name: string;
@@ -212,25 +213,23 @@ export function CompanyMappingStep({
           {mappedCount} mapped, {unmappedCount} skipped
         </p>
         <div className="flex gap-3">
-          <button
+          <Button
+            variant="secondary"
             onClick={onBack}
             disabled={saving}
-            className="rounded-md border border-border-default px-4 py-2 text-sm text-text-secondary hover:bg-bg-secondary disabled:opacity-60"
           >
             Back
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleConfirm}
             disabled={saving || mappedCount === 0}
+            loading={saving}
             className={cn(
-              "rounded-md px-4 py-2 text-sm font-medium disabled:opacity-60",
-              mappedCount > 0
-                ? "bg-btn-primary-bg text-btn-primary-text hover:bg-btn-primary-hover"
-                : "bg-bg-tertiary text-text-tertiary",
+              mappedCount === 0 && "bg-bg-tertiary text-text-tertiary hover:bg-bg-tertiary",
             )}
           >
             {saving ? "Saving..." : "Confirm Mapping"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

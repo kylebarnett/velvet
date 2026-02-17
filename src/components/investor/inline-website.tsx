@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ExternalLink, Plus, Check, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   companyId: string;
@@ -105,20 +106,25 @@ export function InlineWebsite({ companyId, website: initialWebsite }: Props) {
           placeholder="example.com"
           className="h-7 w-48 rounded-md border border-border-default bg-bg-input px-2 text-sm text-text-primary placeholder:text-text-faint focus:border-border-default focus:outline-none"
         />
-        <button
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onMouseDown={(e) => e.preventDefault()}
           onClick={handleSave}
-          className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--success-bg-muted)] text-[var(--success-accent)] hover:bg-[var(--success-bg-muted-hover)]"
+          className="bg-[var(--success-bg-muted)] text-[var(--success-accent)] hover:bg-[var(--success-bg-muted-hover)]"
+          aria-label="Save"
         >
           <Check className="h-3.5 w-3.5" />
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onMouseDown={(e) => e.preventDefault()}
           onClick={handleCancel}
-          className="flex h-7 w-7 items-center justify-center rounded-md bg-bg-elevated text-text-muted hover:bg-bg-hover hover:text-text-secondary"
+          aria-label="Cancel"
         >
           <X className="h-3.5 w-3.5" />
-        </button>
+        </Button>
       </div>
     );
   }
@@ -135,25 +141,29 @@ export function InlineWebsite({ companyId, website: initialWebsite }: Props) {
           {getDisplayUrl(website)}
           <ExternalLink className="h-3 w-3" />
         </a>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleStartEdit}
           disabled={saving}
-          className="text-xs text-text-faint hover:text-text-tertiary"
+          className="px-1 text-xs text-text-faint hover:text-text-tertiary"
         >
           edit
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={handleStartEdit}
       disabled={saving}
-      className="flex items-center gap-1 text-sm text-text-muted hover:text-text-tertiary"
+      className="gap-1 text-text-muted hover:text-text-tertiary"
     >
       <Plus className="h-3.5 w-3.5" />
       Add website
-    </button>
+    </Button>
   );
 }

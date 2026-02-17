@@ -22,6 +22,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+import { Button } from "@/components/ui/button";
 import { SlidingTabs, type TabItem } from "@/components/ui/sliding-tabs";
 import { RichTextEditor } from "@/components/founder/rich-text-editor";
 import { ReportPreview } from "./report-preview";
@@ -640,14 +641,15 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
 
   return (
     <div className="space-y-4">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => router.push(`/funds/${fund.id}?tab=reports`)}
-        className="flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
+        className="text-text-muted hover:text-text-primary"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to {fund.name}
-      </button>
+      </Button>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
@@ -662,60 +664,60 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           )}
         </div>
         <div className="flex items-center gap-2" data-no-print>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setShowPreviewModal(true)}
-            className="flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
           >
             <Eye className="h-3.5 w-3.5" />
             Preview
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setShowDeleteConfirm(true)}
             disabled={deleting}
-            className="flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-[var(--status-error-text)] hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)] disabled:opacity-60"
+            className="text-[var(--status-error-text)] hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)]"
           >
             <Trash2 className="h-3.5 w-3.5" />
             Delete
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleExportPdf}
-            className="flex h-9 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary"
           >
             <Download className="h-3.5 w-3.5" />
             PDF
-          </button>
+          </Button>
           {status === "draft" ? (
-            <button
+            <Button
+              size="sm"
               onClick={() => setShowPublishConfirm(true)}
               disabled={publishing}
-              className="flex h-9 items-center gap-1.5 rounded-md bg-[var(--success-solid)] px-3 text-sm font-medium text-text-primary hover:bg-[var(--success-solid)] disabled:opacity-60"
+              className="bg-[var(--success-solid)] hover:bg-[var(--success-solid)]"
             >
               <Send className="h-3.5 w-3.5" />
               Publish
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
+              variant="warning"
+              size="sm"
               onClick={() => setShowUnpublishConfirm(true)}
               disabled={publishing}
-              className="flex h-9 items-center gap-1.5 rounded-md border border-[var(--warning-border)] bg-[var(--warning-bg-subtle)] px-3 text-sm font-medium text-[var(--status-warning-text)] hover:bg-[var(--status-warning-bg)] disabled:opacity-60"
             >
               Unpublish
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            size="sm"
             onClick={handleSave}
-            disabled={saving}
-            className="flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+            loading={saving}
           >
-            {saving ? (
-              "Saving..."
-            ) : (
-              <>
-                <Save className="h-3.5 w-3.5" />
-                Save
-              </>
-            )}
-          </button>
+            <Save className="h-3.5 w-3.5" />
+            Save
+          </Button>
         </div>
       </div>
 
@@ -973,20 +975,22 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
           <div className="flex items-center justify-between border-b border-border-default bg-bg-secondary px-6 py-3">
             <h2 className="text-sm font-medium text-text-secondary">Report Preview</h2>
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={handleExportPdf}
-                className="flex h-8 items-center gap-1.5 rounded-md border border-border-default bg-bg-elevated px-3 text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary"
               >
                 <Download className="h-3.5 w-3.5" />
                 Export PDF
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setShowPreviewModal(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-primary"
                 aria-label="Close preview"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-6">

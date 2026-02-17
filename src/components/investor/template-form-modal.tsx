@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
-
+import { Button } from "@/components/ui/button";
 import { TemplateForm } from "@/components/investor/template-form";
 
 type TemplateItem = {
@@ -54,13 +54,14 @@ export function TemplateFormModal({
           <h2 id={titleId} className="text-lg font-semibold">
             {mode === "create" ? "New template" : "Edit template"}
           </h2>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover"
+            aria-label="Close"
           >
-            <X className="h-4 w-4 text-text-muted" />
-          </button>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
         <TemplateForm

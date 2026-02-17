@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
+import { Button } from "@/components/ui/button";
 import { SourceBadge } from "@/components/metrics/source-badge";
 
 type MetricValue = {
@@ -75,19 +76,19 @@ export function CompanyMetricsClient({
               {metricValues.map((mv) => (
                 <tr key={mv.id} className="border-b border-border-subtle">
                   <td className="px-4 py-3">
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
                       onClick={() =>
                         setMetricSelection({
                           metricName: mv.metric_name,
                           periodStart: mv.period_start,
                         })
                       }
-                      className="text-left hover:underline underline-offset-2"
+                      className="h-auto p-0 text-left hover:underline underline-offset-2 items-start flex-col"
                     >
                       <div className="font-medium">{mv.metric_name}</div>
                       <div className="text-xs text-text-tertiary">{mv.period_type}</div>
-                    </button>
+                    </Button>
                   </td>
                   <td className="px-4 py-3 text-text-secondary">
                     {mv.period_start} to {mv.period_end}

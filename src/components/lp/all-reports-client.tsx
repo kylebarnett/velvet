@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Calendar, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectTrigger,
@@ -171,13 +172,13 @@ export function AllReportsClient({ funds }: { funds: FundOption[] }) {
       ) : (
         <div className="rounded-xl border border-border-default card-surface divide-y divide-border-subtle">
           {filtered.map((report) => (
-            <button
+            <Button
               key={report.id}
-              type="button"
+              variant="ghost"
               onClick={() =>
                 router.push(`/funds/${report.fund_id}/reports/${report.id}`)
               }
-              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-bg-raised"
+              className="flex w-full items-center gap-3 rounded-none px-4 py-3 text-left h-auto justify-start"
             >
               <FileText className="h-4 w-4 shrink-0 text-text-faint" />
               <div className="min-w-0 flex-1">
@@ -205,7 +206,7 @@ export function AllReportsClient({ funds }: { funds: FundOption[] }) {
                 {report.status}
               </span>
               <ChevronRight className="h-4 w-4 shrink-0 text-text-faint" />
-            </button>
+            </Button>
           ))}
         </div>
       )}

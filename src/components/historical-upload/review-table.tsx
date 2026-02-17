@@ -14,6 +14,7 @@ import {
   Search,
   Filter,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ValueEditModal } from "./value-edit-modal";
@@ -364,14 +365,15 @@ export function ReviewTable({
   return (
     <div className="space-y-4">
       {onBack && (
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary"
+          className="text-text-secondary hover:text-text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
-        </button>
+        </Button>
       )}
       {/* Header with search/filters */}
       <div className="flex flex-wrap items-center gap-3">
@@ -423,50 +425,58 @@ export function ReviewTable({
         {selected.size > 0 ? (
           <>
             <span className="text-sm text-text-secondary">{selected.size} selected</span>
-            <button
+            <Button
+              size="sm"
               onClick={() => handleAction(Array.from(selected), "approve")}
               disabled={processing}
-              className="rounded-md bg-[var(--success-bg-muted)] px-3 py-1.5 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-60"
+              className="bg-[var(--success-bg-muted)] text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)]"
             >
               Approve Selected
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
               onClick={() => handleAction(Array.from(selected), "reject")}
               disabled={processing}
-              className="rounded-md bg-[var(--status-error-bg)] px-3 py-1.5 text-xs font-medium text-[var(--status-error-text)] hover:bg-[var(--error-bg-subtle)] disabled:opacity-60"
+              className="bg-[var(--status-error-bg)] text-[var(--status-error-text)] hover:bg-[var(--error-bg-subtle)]"
             >
               Reject Selected
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setSelected(new Set())}
-              className="text-xs text-text-tertiary hover:text-text-secondary"
+              className="text-text-tertiary hover:text-text-secondary"
             >
               Clear selection
-            </button>
+            </Button>
           </>
         ) : (
           <>
-            <button
+            <Button
+              size="sm"
               onClick={() => handleBulkAction("approve_all", 0.9)}
               disabled={processing || pendingCount === 0}
-              className="rounded-md bg-[var(--success-bg-muted)] px-3 py-1.5 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-60"
+              className="bg-[var(--success-bg-muted)] text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)]"
             >
               Approve High Confidence (&gt;90%)
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => handleBulkAction("approve_all")}
               disabled={processing || pendingCount === 0}
-              className="rounded-md border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-secondary disabled:opacity-60"
             >
               Approve All
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => handleBulkAction("reject_all")}
               disabled={processing || pendingCount === 0}
-              className="rounded-md border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-secondary disabled:opacity-60"
             >
               Reject All
-            </button>
+            </Button>
           </>
         )}
 
@@ -481,17 +491,18 @@ export function ReviewTable({
               Showing {total} of {totalValues} results
             </p>
           )}
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => {
               setSearch("");
               setStatusFilter("");
               setOffset(0);
             }}
-            className="text-xs text-text-tertiary hover:text-text-secondary"
+            className="text-text-tertiary hover:text-text-secondary"
           >
             Reset filters
-          </button>
+          </Button>
         </div>
       )}
 
@@ -635,29 +646,34 @@ export function ReviewTable({
                               {/* Actions */}
                               {(v.status === "pending" || v.status === "conflict") && (
                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
-                                  <button
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-sm"
                                     onClick={() => handleAction([v.id], "approve")}
                                     disabled={processing}
                                     title="Approve"
-                                    className="rounded p-1 text-[var(--success-accent)] hover:bg-[var(--success-bg-muted)] disabled:opacity-60"
+                                    className="text-[var(--success-accent)] hover:bg-[var(--success-bg-muted)]"
                                   >
                                     <Check className="h-4 w-4" />
-                                  </button>
-                                  <button
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-sm"
                                     onClick={() => handleAction([v.id], "reject")}
                                     disabled={processing}
                                     title="Reject"
-                                    className="rounded p-1 text-[var(--error-accent)] hover:bg-[var(--status-error-bg)] disabled:opacity-60"
+                                    className="text-[var(--error-accent)] hover:bg-[var(--status-error-bg)]"
                                   >
                                     <X className="h-4 w-4" />
-                                  </button>
-                                  <button
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-sm"
                                     onClick={() => setEditingValue(v)}
                                     title="Edit"
-                                    className="rounded p-1 text-text-tertiary hover:bg-bg-elevated hover:text-text-secondary"
                                   >
                                     <Pencil className="h-3.5 w-3.5" />
-                                  </button>
+                                  </Button>
                                 </div>
                               )}
 
@@ -700,32 +716,31 @@ export function ReviewTable({
             Showing {offset + 1}–{Math.min(offset + 100, total)} of {total}
           </span>
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setOffset(Math.max(0, offset - 100))}
               disabled={offset === 0}
-              className="rounded-md border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-secondary disabled:opacity-60"
             >
               Previous
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setOffset(offset + 100)}
               disabled={offset + 100 >= total}
-              className="rounded-md border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-secondary disabled:opacity-60"
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {/* Finish button */}
       <div className="flex justify-end border-t border-border-default pt-4">
-        <button
-          onClick={handleFinish}
-          className="rounded-md bg-btn-primary-bg px-4 py-2 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
-        >
+        <Button onClick={handleFinish}>
           {pendingCount > 0 ? `Finish (${pendingCount} skipped)` : "Finish"}
-        </button>
+        </Button>
       </div>
 
       {/* Edit modal */}

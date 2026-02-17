@@ -4,6 +4,7 @@ import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Mail, Pencil, Trash2, Send, Search, ChevronLeft, ChevronRight, X, Check, ArrowUp, ArrowDown, ArrowUpDown, Users, CheckCircle2, Clock } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "sonner";
@@ -182,50 +183,57 @@ function ContactsDesktopTable({
       <td className="p-3">
         {editingId === contact.id ? (
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={saveEdit}
               disabled={loading}
-              className="text-sm text-[var(--success-accent)] hover:text-[var(--status-success-text)]"
+              className="text-[var(--success-accent)] hover:text-[var(--status-success-text)]"
             >
               Save
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setEditingId(null)}
-              className="text-sm text-text-muted hover:text-text-tertiary"
+              className="text-text-muted hover:text-text-tertiary"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="flex items-center gap-1">
             {contact.status !== "accepted" && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => onRequestInvite(contact)}
                 disabled={loading}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                 title={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
                 aria-label={contact.status === "sent" ? "Resend invitation" : "Send invitation"}
               >
                 <Mail className="h-4 w-4 text-text-tertiary" />
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => startEdit(contact)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               title="Edit contact"
               aria-label="Edit contact"
             >
               <Pencil className="h-4 w-4 text-text-tertiary" />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => openDeleteModal(contact)}
               disabled={loading}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               title="Delete contact"
               aria-label="Delete contact"
             >
               <Trash2 className="h-4 w-4 text-[var(--error-accent)]" />
-            </button>
+            </Button>
           </div>
         )}
       </td>
@@ -754,12 +762,14 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                     className="flex-1 min-w-0 rounded border border-border-default bg-bg-input px-2 py-1 text-xs text-text-primary"
                     onClick={(e) => (e.target as HTMLInputElement).select()}
                   />
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => navigator.clipboard.writeText(link.url)}
-                    className="shrink-0 rounded bg-bg-hover px-2 py-1 text-xs hover:bg-bg-hover"
+                    className="shrink-0 px-2 py-1"
                   >
                     Copy
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}
@@ -817,14 +827,15 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
             </Select>
             <DownloadCsvButton />
             {pendingCount > 0 && (
-              <button
+              <Button
+                size="sm"
                 onClick={() => setInviteConfirm({ type: "all" })}
                 disabled={loading}
-                className="hidden sm:inline-flex h-9 items-center gap-2 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
+                className="hidden sm:inline-flex"
               >
                 <Send className="h-4 w-4" />
                 Send All ({pendingCount})
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -832,14 +843,14 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
         {/* Mobile send all button */}
         {pendingCount > 0 && (
           <div className="border-b border-border-subtle px-4 py-2 sm:hidden">
-            <button
+            <Button
               onClick={() => setInviteConfirm({ type: "all" })}
               disabled={loading}
-              className="flex w-full h-10 items-center justify-center gap-2 rounded-md bg-btn-primary-bg text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+              className="w-full"
             >
               <Send className="h-4 w-4" />
               Send All Pending ({pendingCount})
-            </button>
+            </Button>
           </div>
         )}
 
@@ -848,29 +859,33 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 border-b border-border-subtle bg-[var(--accent-subtle)] px-4 py-2">
             <span className="text-sm text-text-secondary font-medium">{selectedIds.size} selected</span>
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setInviteConfirm({ type: "selected", ids: Array.from(selectedIds) })}
                 disabled={loading}
-                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-bg-hover px-3 text-sm hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
               >
                 <Mail className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Send Invitations</span>
                 <span className="sm:hidden">Send</span>
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={bulkDelete}
                 disabled={loading}
-                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-[var(--status-error-bg)] px-3 text-sm text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--error-border)]"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Delete</span>
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setSelectedIds(new Set())}
-                className="text-sm text-text-muted hover:text-text-tertiary"
+                className="text-text-muted hover:text-text-tertiary"
               >
                 Clear
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -948,21 +963,22 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                         placeholder="Position (optional)"
                       />
                       <div className="flex items-center justify-end gap-2">
-                        <button
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           onClick={() => setEditingId(null)}
-                          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border-default px-3 text-sm text-text-tertiary"
                         >
                           <X className="h-4 w-4" />
                           Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          size="sm"
                           onClick={saveEdit}
                           disabled={loading}
-                          className="inline-flex h-9 items-center gap-1.5 rounded-md bg-btn-primary-bg px-3 text-sm font-medium text-btn-primary-text disabled:opacity-60"
                         >
                           <Check className="h-4 w-4" />
                           Save
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -995,33 +1011,36 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                       </div>
                       <div className="mt-2 flex items-center justify-end gap-1 pt-2">
                         {contact.status !== "accepted" && (
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => setInviteConfirm({ type: "single", contact })}
                             disabled={loading}
-                            className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm hover:bg-bg-hover disabled:opacity-60"
                             title={contact.status === "sent" ? "Resend" : "Send"}
                           >
                             <Mail className="h-4 w-4 text-text-tertiary" />
                             <span className="text-text-tertiary">{contact.status === "sent" ? "Resend" : "Send"}</span>
-                          </button>
+                          </Button>
                         )}
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon-lg"
                           onClick={() => startEdit(contact)}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                           title="Edit"
                           aria-label="Edit contact"
                         >
                           <Pencil className="h-4 w-4 text-text-tertiary" />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-lg"
                           onClick={() => openDeleteModal(contact)}
                           disabled={loading}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                           title="Delete"
                           aria-label="Delete contact"
                         >
                           <Trash2 className="h-4 w-4 text-[var(--error-accent)]" />
-                        </button>
+                        </Button>
                       </div>
                     </>
                   )}
@@ -1062,14 +1081,15 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
               {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
             </div>
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                variant="secondary"
+                size="icon"
                 onClick={() => goToPage(pagination.page - 1)}
                 disabled={pagination.page === 1 || fetching}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-60 disabled:cursor-not-allowed"
                 aria-label="Previous page"
               >
                 <ChevronLeft className="h-4 w-4" />
-              </button>
+              </Button>
               <div className="flex items-center gap-1">
                 {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                   let pageNum: number;
@@ -1083,29 +1103,27 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                     pageNum = pagination.page - 2 + i;
                   }
                   return (
-                    <button
+                    <Button
                       key={pageNum}
+                      variant={pageNum === pagination.page ? "primary" : "ghost"}
+                      size="icon"
                       onClick={() => goToPage(pageNum)}
                       disabled={fetching}
-                      className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-sm ${
-                        pageNum === pagination.page
-                          ? "bg-btn-primary-bg text-btn-primary-text"
-                          : "hover:bg-bg-hover text-text-secondary"
-                      }`}
                     >
                       {pageNum}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
-              <button
+              <Button
+                variant="secondary"
+                size="icon"
                 onClick={() => goToPage(pagination.page + 1)}
                 disabled={pagination.page === pagination.totalPages || fetching}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-60 disabled:cursor-not-allowed"
                 aria-label="Next page"
               >
                 <ChevronRight className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           </div>
         )}

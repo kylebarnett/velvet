@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, EyeOff, Eye, Trash2 } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   companyId: string;
@@ -76,21 +77,21 @@ export function CompanyCardMenu({ companyId, companyName, isHidden }: Props) {
 
   return (
     <div ref={menuRef} className="relative">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon"
         disabled={loading}
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
           setOpen((v) => !v);
         }}
-        className="rounded-md p-1.5 text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-primary disabled:opacity-60"
         aria-label={`Actions for ${companyName}`}
         aria-haspopup="true"
         aria-expanded={open}
       >
         <MoreHorizontal className="h-4 w-4" />
-      </button>
+      </Button>
 
       {open && (
         <div
