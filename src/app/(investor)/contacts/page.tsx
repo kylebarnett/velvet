@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { ButtonLink } from "@/components/ui/button";
 import { requireRole } from "@/lib/auth/require-role";
 
 export const metadata: Metadata = { title: "Contacts | Velvet" };
@@ -92,13 +91,13 @@ export default async function PortfolioPage() {
         </div>
         <div className="flex items-center gap-2">
           <AddContactButton />
-          <Link
+          <ButtonLink
             href="/contacts/import"
-            className="inline-flex items-center gap-2 rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+            size="sm"
             data-onboarding="import-csv"
           >
             Import CSV
-          </Link>
+          </ButtonLink>
         </div>
       </div>
 

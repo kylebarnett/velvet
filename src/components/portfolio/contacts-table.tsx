@@ -1024,7 +1024,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                         )}
                         <Button
                           variant="ghost"
-                          size="icon-lg"
+                          size="icon"
                           onClick={() => startEdit(contact)}
                           title="Edit"
                           aria-label="Edit contact"
@@ -1033,7 +1033,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                         </Button>
                         <Button
                           variant="ghost"
-                          size="icon-lg"
+                          size="icon"
                           onClick={() => openDeleteModal(contact)}
                           disabled={loading}
                           title="Delete"

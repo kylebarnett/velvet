@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ButtonLink } from "@/components/ui/button";
 
 export default function AuthLayout({
   children,
@@ -15,12 +16,9 @@ export default function AuthLayout({
           <Link className="hidden sm:block hover:text-text-primary" href="/signup">
             Sign up for free
           </Link>
-          <Link
-            className="rounded-lg bg-btn-primary-bg px-3 py-1.5 text-btn-primary-text hover:bg-btn-primary-hover"
-            href="/login"
-          >
+          <ButtonLink href="/login" size="sm">
             Login
-          </Link>
+          </ButtonLink>
         </div>
       </header>
       <main className="mx-auto flex max-w-6xl px-4 py-6 sm:px-6 sm:py-10">

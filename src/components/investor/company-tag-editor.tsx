@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -142,14 +143,14 @@ export function CompanyTagEditor({
       </div>
 
       <div className="flex items-center gap-3">
-        <button
-          className="inline-flex h-8 items-center justify-center rounded-md bg-btn-primary-bg px-3 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+        <Button
+          size="sm"
           onClick={handleSave}
-          disabled={saving}
+          loading={saving}
           type="button"
         >
-          {saving ? "Saving..." : "Save tags"}
-        </button>
+          Save tags
+        </Button>
         {saved && (
           <span className="text-xs text-[var(--status-success-text)]">Saved</span>
         )}

@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Settings, Send } from "lucide-react";
+import { ButtonLink } from "@/components/ui/button";
 import {
   DashboardWidget,
   ViewSelector,
@@ -341,20 +341,21 @@ function MetricsTabContent({
         </div>
         {!readOnly && (
           <div className="flex items-center gap-2">
-            <Link
+            <ButtonLink
               href={`/metric-requests/new?companyId=${companyId}`}
-              className="flex items-center justify-center gap-2 rounded-lg bg-btn-primary-bg px-3 py-2 sm:py-1.5 text-xs font-medium text-btn-primary-text hover:bg-btn-primary-hover transition-colors"
+              size="sm"
             >
               <Send className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Request Metrics</span>
-            </Link>
-            <Link
+            </ButtonLink>
+            <ButtonLink
               href={`/companies/${companyId}/edit`}
-              className="flex items-center justify-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-2 sm:py-1.5 text-xs font-medium text-text-tertiary hover:border-border-default hover:text-text-secondary transition-colors"
+              variant="secondary"
+              size="sm"
             >
               <Settings className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Edit Dashboard</span>
-            </Link>
+            </ButtonLink>
           </div>
         )}
       </div>

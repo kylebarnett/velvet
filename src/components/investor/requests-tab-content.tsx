@@ -14,7 +14,7 @@ import {
   AlertTriangle,
   Loader2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
@@ -1020,12 +1020,12 @@ export function CampaignsTabContent() {
           }
           action={
             periodFilter === "all" ? (
-              <Link
+              <ButtonLink
                 href="/metric-requests/new"
-                className="inline-flex items-center gap-2 rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
+                size="sm"
               >
                 Send your first request
-              </Link>
+              </ButtonLink>
             ) : undefined
           }
           variant={periodFilter !== "all" ? "inline" : "first-use"}

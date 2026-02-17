@@ -155,7 +155,7 @@ export function ScheduleDetailActions({
         <Button
           type="button"
           variant="danger"
-          size="icon-lg"
+          size="icon"
           onClick={() => setDeleteModal(true)}
           disabled={loading !== null}
           aria-label="Delete schedule"

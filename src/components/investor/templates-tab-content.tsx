@@ -345,7 +345,7 @@ export function TemplatesTabContent() {
                 <Button
                   onClick={() => setHideModal({ open: true, template: tmpl })}
                   variant="ghost"
-                  size="icon-lg"
+                  size="icon"
                   type="button"
                   title="Hide from view"
                   aria-label={`Hide ${tmpl.name} template`}
@@ -384,7 +384,7 @@ export function TemplatesTabContent() {
                 type="button"
                 onClick={() => toggleSelected(tmpl.id)}
                 variant="ghost"
-                size="icon-sm"
+                size="icon"
                 className="shrink-0 text-text-muted hover:text-text-secondary"
                 title={isSelected ? "Deselect" : "Select"}
               >
@@ -461,7 +461,7 @@ export function TemplatesTabContent() {
                 })
               }
               variant="ghost"
-              size="icon-lg"
+              size="icon"
               type="button"
               title="Delete template"
               aria-label={`Delete ${tmpl.name} template`}
@@ -482,6 +482,7 @@ export function TemplatesTabContent() {
         </p>
         <Button
           type="button"
+          size="sm"
           onClick={() => setFormModal({ open: true, mode: "create", template: null })}
           data-onboarding="new-template"
         >
