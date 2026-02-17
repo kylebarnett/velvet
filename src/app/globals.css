@@ -341,6 +341,14 @@ body {
   font-family: var(--font-geist-sans, system-ui, -apple-system, sans-serif);
 }
 
+/* Override browser default cursor:default on buttons */
+@layer base {
+  button, [role="button"] {
+    cursor: pointer;
+  }
+}
+
+
 /* Tab content fade-in animation */
 @keyframes fadeIn {
   from {
