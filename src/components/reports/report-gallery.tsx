@@ -5,8 +5,9 @@ import { FileText } from "lucide-react";
 import { ReportCard } from "./report-card";
 import type { SavedReport } from "./reports-context";
 import { REPORT_TYPE_LABELS, type ReportType } from "@/lib/reports/templates";
+import { SlidingTabs, type TabItem } from "@/components/ui/sliding-tabs";
 
-const TYPE_TABS: Array<{ value: ReportType | "all"; label: string }> = [
+const TYPE_TABS: TabItem<ReportType | "all">[] = [
   { value: "all", label: "All" },
   { value: "summary", label: "Summary" },
   { value: "comparison", label: "Comparison" },
@@ -106,22 +107,14 @@ export function ReportGallery({ initialReports, onReportsChange }: ReportGallery
   return (
     <div className="space-y-4">
       {/* Type filter tabs */}
-      <div className="flex items-center gap-1 rounded-lg border border-border-subtle bg-bg-elevated p-1">
-        {TYPE_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => setActiveTab(tab.value)}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              activeTab === tab.value
-                ? "bg-bg-primary text-text-primary shadow-sm"
-                : "text-text-tertiary hover:text-text-secondary"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <SlidingTabs
+        tabs={TYPE_TABS}
+        value={activeTab}
+        onChange={setActiveTab}
+        variant="pill"
+        size="sm"
+        showIcons={false}
+      />
 
       {/* Gallery grid */}
       {filtered.length === 0 ? (

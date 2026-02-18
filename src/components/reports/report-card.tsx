@@ -65,7 +65,7 @@ export function ReportCard({ report, onDuplicate, onRename, onDelete }: ReportCa
           router.push(`/reports/${report.id}`);
         }
       }}
-      className="group relative flex cursor-pointer flex-col rounded-xl border border-border-default bg-bg-primary p-4 transition-all hover:border-border-hover hover:shadow-md"
+      className="card-hover-lift group relative flex cursor-pointer flex-col rounded-xl card-surface p-4"
     >
       {/* Type badge */}
       <span

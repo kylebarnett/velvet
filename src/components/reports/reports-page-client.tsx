@@ -103,7 +103,7 @@ export function ReportsPageClient({ initialReports }: ReportsPageClientProps) {
                 }}
                 type="button"
                 onClick={() => handleTemplateClick(type)}
-                className="group flex flex-col items-start rounded-xl border border-border-default bg-bg-primary p-6 text-left transition-all hover:border-border-hover hover:shadow-md"
+                className="card-hover-lift group flex flex-col items-start rounded-xl card-surface p-6 text-left"
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${colors.bg}`}>
                   <Icon className={`h-5 w-5 ${colors.icon}`} />
