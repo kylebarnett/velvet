@@ -138,8 +138,6 @@ export function AppShell({
   role,
   initialTheme,
   children,
-  showTakeTour,
-  onTakeTour,
   onOpenHelp,
   onOpenCommandPalette,
   profileLinks,
@@ -151,8 +149,6 @@ export function AppShell({
   role?: "investor" | "founder";
   initialTheme?: string;
   children: React.ReactNode;
-  showTakeTour?: boolean;
-  onTakeTour?: () => void;
   onOpenHelp?: () => void;
   onOpenCommandPalette?: () => void;
   profileLinks?: NavItem[];
@@ -323,9 +319,6 @@ export function AppShell({
     </div>
   );
 
-  const teamHref = role === "founder" ? "/portal/team" : "/team";
-  const teamActive = pathname === teamHref || pathname?.startsWith(teamHref + "/");
-
   const settingsPanel = (mobile = false) => {
     if (sidebarCollapsed && !mobile) {
       // Collapsed desktop: avatar only — click to expand + open panel
@@ -389,38 +382,6 @@ export function AppShell({
                   </Link>
                 );
               })}
-
-              <Link
-                href={teamHref}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors",
-                  mobile ? "h-11" : "h-9",
-                  "text-text-tertiary hover:bg-bg-raised hover:text-text-primary",
-                  teamActive && "bg-bg-elevated text-text-primary",
-                )}
-                onClick={mobile ? () => setMobileMenuOpen(false) : undefined}
-              >
-                <UserPlus className="h-[18px] w-[18px] shrink-0" />
-                <span>Team</span>
-              </Link>
-
-              {showTakeTour && onTakeTour && (
-                <button
-                  onClick={() => {
-                    setSettingsPanelOpen(false);
-                    if (mobile) setMobileMenuOpen(false);
-                    onTakeTour();
-                  }}
-                  className={cn(
-                    "flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm text-text-tertiary transition-colors hover:bg-bg-raised hover:text-text-primary",
-                    mobile ? "h-11" : "h-9",
-                  )}
-                  type="button"
-                >
-                  <HelpCircle className="h-[18px] w-[18px] shrink-0" />
-                  <span>Take tour</span>
-                </button>
-              )}
 
               {onOpenHelp && (
                 <button

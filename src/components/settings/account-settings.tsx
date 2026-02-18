@@ -2,13 +2,33 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Loader2 } from "lucide-react";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import {
+  Camera,
+  Eye,
+  EyeOff,
+  Lock,
+  User,
+  Users,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
+import { SlidingTabs, type TabItem } from "@/components/ui/sliding-tabs";
+import { Button } from "@/components/ui/button";
+import { TeamSettings } from "@/components/team/team-settings";
 
 type AccountSettingsProps = {
   user: { fullName: string | null; email: string; avatarUrl: string | null };
   role: "investor" | "founder";
+  currentUserId: string;
 };
+
+type SettingsTab = "profile" | "security" | "team";
+
+const SETTINGS_TABS: TabItem<SettingsTab>[] = [
+  { value: "profile", label: "Profile", icon: User },
+  { value: "team", label: "Team", icon: Users },
+  { value: "security", label: "Security", icon: Lock },
+];
 
 function getInitials(name: string | null, email: string): string {
   if (name) {
@@ -26,14 +46,6 @@ const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const inputClasses =
   "h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary outline-none placeholder:text-text-faint focus:border-[var(--ring-focus)]";
 
-const primaryButtonClasses =
-  "bg-white text-black hover:bg-white/90 rounded-md px-4 h-11 text-sm font-medium disabled:opacity-60 transition-colors";
-
-const secondaryButtonClasses =
-  "border border-border-default text-text-secondary hover:bg-bg-elevated rounded-md px-4 h-11 text-sm font-medium disabled:opacity-60 transition-colors";
-
-const cardClasses = "rounded-xl border border-border-default bg-bg-secondary p-6";
-
 function StatusMessage({
   success,
   error,
@@ -50,7 +62,10 @@ function StatusMessage({
   return null;
 }
 
-export function AccountSettings({ user, role }: AccountSettingsProps) {
+export function AccountSettings({ user, role, currentUserId }: AccountSettingsProps) {
+  // --- Tab state ---
+  const [activeTab, setActiveTab] = React.useState<SettingsTab>("profile");
+
   // --- Profile Picture state ---
   const [avatarUrl, setAvatarUrl] = React.useState(user.avatarUrl);
   const [avatarUploading, setAvatarUploading] = React.useState(false);
@@ -74,6 +89,8 @@ export function AccountSettings({ user, role }: AccountSettingsProps) {
   // --- Password state ---
   const [newPassword, setNewPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [showNewPassword, setShowNewPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [passwordSaving, setPasswordSaving] = React.useState(false);
   const [passwordError, setPasswordError] = React.useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = React.useState<string | null>(
@@ -307,32 +324,11 @@ export function AccountSettings({ user, role }: AccountSettingsProps) {
         </p>
       </div>
 
-      {/* Section 1: Profile Picture */}
-      <div className={cardClasses}>
-        <h2 className="text-base font-medium text-text-primary">
-          Profile Picture
-        </h2>
-        <div className="mt-4 space-y-4">
-          <div className="flex items-center gap-4">
-            {avatarUrl ? (
-              <Image
-                src={avatarUrl}
-                alt="Profile picture"
-                width={96}
-                height={96}
-                className="h-24 w-24 rounded-full object-cover"
-                unoptimized
-              />
-            ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-bg-hover">
-                <span className="text-2xl font-medium text-text-secondary">
-                  {getInitials(user.fullName, user.email)}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3">
+      {/* Profile Hero */}
+      <div className="card-surface rounded-xl border border-border-default p-6">
+        <div className="flex items-center gap-5">
+          {/* Avatar with hover overlay */}
+          <div className="relative shrink-0">
             <input
               ref={fileInputRef}
               type="file"
@@ -343,266 +339,324 @@ export function AccountSettings({ user, role }: AccountSettingsProps) {
             />
             <button
               type="button"
-              className={primaryButtonClasses}
+              className="group relative h-20 w-20 overflow-hidden rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
               onClick={() => fileInputRef.current?.click()}
               disabled={avatarUploading || avatarRemoving}
+              aria-label="Change profile picture"
             >
-              {avatarUploading ? (
-                <span className="inline-flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  Uploading...
-                </span>
+              {avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt="Profile picture"
+                  width={80}
+                  height={80}
+                  className="h-20 w-20 rounded-full object-cover"
+                  unoptimized
+                />
               ) : (
-                "Upload photo"
-              )}
-            </button>
-            {avatarUrl && (
-              <button
-                type="button"
-                className={secondaryButtonClasses}
-                onClick={handleAvatarRemove}
-                disabled={avatarUploading || avatarRemoving}
-              >
-                {avatarRemoving ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Loader2
-                      className="h-4 w-4 animate-spin"
-                      aria-hidden="true"
-                    />
-                    Removing...
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-bg-elevated">
+                  <span className="text-xl font-medium text-text-secondary">
+                    {getInitials(user.fullName, user.email)}
                   </span>
+                </div>
+              )}
+              {/* Hover overlay */}
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                {avatarUploading ? (
+                  <Loader2
+                    className="h-5 w-5 animate-spin text-white"
+                    aria-hidden="true"
+                  />
                 ) : (
-                  "Remove"
+                  <Camera
+                    className="h-5 w-5 text-white"
+                    aria-hidden="true"
+                  />
                 )}
-              </button>
-            )}
-          </div>
-
-          <StatusMessage success={avatarSuccess} error={avatarError} />
-        </div>
-      </div>
-
-      {/* Section 2: Display Name */}
-      <div className={cardClasses}>
-        <h2 className="text-base font-medium text-text-primary">
-          Display Name
-        </h2>
-        <div className="mt-4 space-y-4">
-          <input
-            type="text"
-            className={inputClasses}
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Your name"
-            aria-label="Display name"
-          />
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className={primaryButtonClasses}
-              onClick={handleNameSave}
-              disabled={nameSaving}
-            >
-              {nameSaving ? (
-                <span className="inline-flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  Saving...
-                </span>
-              ) : (
-                "Save"
-              )}
-            </button>
-          </div>
-          <StatusMessage success={nameSuccess} error={nameError} />
-        </div>
-      </div>
-
-      {/* Section 3: Email Address */}
-      <div className={cardClasses}>
-        <h2 className="text-base font-medium text-text-primary">
-          Email Address
-        </h2>
-        <div className="mt-4 space-y-4">
-          <input
-            type="email"
-            className={inputClasses}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            aria-label="Email address"
-          />
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className={primaryButtonClasses}
-              onClick={handleEmailSave}
-              disabled={emailSaving}
-            >
-              {emailSaving ? (
-                <span className="inline-flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  Updating...
-                </span>
-              ) : (
-                "Update email"
-              )}
-            </button>
-          </div>
-          <p className="text-xs text-text-muted">
-            A confirmation link will be sent to your new email address.
-          </p>
-          <StatusMessage success={emailSuccess} error={emailError} />
-        </div>
-      </div>
-
-      {/* Section 4: Password */}
-      <div className={cardClasses}>
-        <h2 className="text-base font-medium text-text-primary">
-          Change Password
-        </h2>
-        <div className="mt-4 space-y-4">
-          <div className="space-y-3">
-            <div>
-              <label
-                htmlFor="new-password"
-                className="mb-1.5 block text-sm text-text-secondary"
-              >
-                New password
-              </label>
-              <input
-                id="new-password"
-                type="password"
-                className={inputClasses}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Min. 8 characters"
-                autoComplete="new-password"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="confirm-password"
-                className="mb-1.5 block text-sm text-text-secondary"
-              >
-                Confirm password
-              </label>
-              <input
-                id="confirm-password"
-                type="password"
-                className={inputClasses}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter new password"
-                autoComplete="new-password"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className={primaryButtonClasses}
-              onClick={handlePasswordSave}
-              disabled={passwordSaving}
-            >
-              {passwordSaving ? (
-                <span className="inline-flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  Updating...
-                </span>
-              ) : (
-                "Update password"
-              )}
-            </button>
-          </div>
-          <StatusMessage success={passwordSuccess} error={passwordError} />
-        </div>
-      </div>
-
-      {/* Section 5: Appearance */}
-      <div className={cardClasses}>
-        <h2 className="text-base font-medium text-text-primary">Appearance</h2>
-        <div className="mt-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-text-secondary">
-              Choose your preferred theme
-            </p>
-            <ThemeToggle />
-          </div>
-        </div>
-      </div>
-
-      {/* Section 6: Danger Zone */}
-      <div className="rounded-xl border border-red-500/20 bg-bg-secondary p-6">
-        <h2 className="text-base font-medium text-red-400">Delete Account</h2>
-        <p className="mt-2 text-sm text-text-secondary">
-          Permanently delete your account and all associated data. This action
-          cannot be undone.
-        </p>
-        <div className="mt-4 space-y-4">
-          {!showDeleteConfirm ? (
-            <button
-              type="button"
-              className="rounded-md bg-red-500/20 px-4 h-11 text-sm font-medium text-red-200 transition-colors hover:bg-red-500/30 disabled:opacity-60"
-              onClick={() => setShowDeleteConfirm(true)}
-            >
-              Delete account
-            </button>
-          ) : (
-            <div className="space-y-3">
-              <p className="text-sm text-text-secondary">
-                Type{" "}
-                <span className="font-mono font-medium text-red-300">
-                  DELETE MY ACCOUNT
-                </span>{" "}
-                to confirm:
-              </p>
-              <input
-                type="text"
-                className={inputClasses}
-                value={deleteConfirmText}
-                onChange={(e) => setDeleteConfirmText(e.target.value)}
-                placeholder="DELETE MY ACCOUNT"
-                aria-label="Type DELETE MY ACCOUNT to confirm"
-                autoComplete="off"
-              />
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  className="rounded-md bg-red-500/20 px-4 h-11 text-sm font-medium text-red-200 transition-colors hover:bg-red-500/30 disabled:opacity-60"
-                  onClick={handleDeleteAccount}
-                  disabled={
-                    deleteLoading ||
-                    deleteConfirmText !== "DELETE MY ACCOUNT"
-                  }
-                >
-                  {deleteLoading ? (
-                    <span className="inline-flex items-center gap-2">
-                      <Loader2
-                        className="h-4 w-4 animate-spin"
-                        aria-hidden="true"
-                      />
-                      Deleting...
-                    </span>
-                  ) : (
-                    "Confirm deletion"
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className={secondaryButtonClasses}
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setDeleteConfirmText("");
-                    setDeleteError(null);
-                  }}
-                  disabled={deleteLoading}
-                >
-                  Cancel
-                </button>
               </div>
-              <StatusMessage success={null} error={deleteError} />
+            </button>
+          </div>
+
+          {/* Name + email + role */}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2.5">
+              <h2 className="truncate text-lg font-semibold text-text-primary">
+                {user.fullName || "Unnamed"}
+              </h2>
+              <span className="shrink-0 rounded-full bg-bg-elevated px-2.5 py-0.5 text-xs font-medium capitalize text-text-secondary">
+                {role}
+              </span>
             </div>
-          )}
+            <p className="mt-0.5 truncate text-sm text-text-muted">
+              {user.email}
+            </p>
+
+            {/* Photo action buttons (mobile-friendly) */}
+            <div className="mt-3 flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={avatarUploading || avatarRemoving}
+                loading={avatarUploading}
+              >
+                {avatarUploading ? "Uploading..." : "Change photo"}
+              </Button>
+              {avatarUrl && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleAvatarRemove}
+                  disabled={avatarUploading || avatarRemoving}
+                  loading={avatarRemoving}
+                >
+                  {avatarRemoving ? "Removing..." : "Remove"}
+                </Button>
+              )}
+            </div>
+            <StatusMessage success={avatarSuccess} error={avatarError} />
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <SlidingTabs
+        tabs={SETTINGS_TABS}
+        value={activeTab}
+        onChange={setActiveTab}
+        variant="underline"
+      />
+
+      {/* Tab content */}
+      <div key={activeTab} className="animate-fade-in">
+        {activeTab === "profile" && (
+          <div className="card-surface rounded-xl border border-border-default divide-y divide-border-subtle">
+            {/* Display Name */}
+            <div className="p-6">
+              <h3 className="text-sm font-medium text-text-primary">
+                Display Name
+              </h3>
+              <div className="mt-3 flex items-end gap-3">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    className={inputClasses}
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Your name"
+                    aria-label="Display name"
+                  />
+                </div>
+                <Button
+                  size="lg"
+                  onClick={handleNameSave}
+                  loading={nameSaving}
+                >
+                  {nameSaving ? "Saving..." : "Save"}
+                </Button>
+              </div>
+              <div className="mt-2">
+                <StatusMessage success={nameSuccess} error={nameError} />
+              </div>
+            </div>
+
+            {/* Email Address */}
+            <div className="p-6">
+              <h3 className="text-sm font-medium text-text-primary">
+                Email Address
+              </h3>
+              <div className="mt-3 flex items-end gap-3">
+                <div className="flex-1">
+                  <input
+                    type="email"
+                    className={inputClasses}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    aria-label="Email address"
+                  />
+                </div>
+                <Button
+                  size="lg"
+                  onClick={handleEmailSave}
+                  loading={emailSaving}
+                >
+                  {emailSaving ? "Updating..." : "Update"}
+                </Button>
+              </div>
+              <p className="mt-2 text-xs text-text-muted">
+                A confirmation link will be sent to your new email address.
+              </p>
+              <StatusMessage success={emailSuccess} error={emailError} />
+            </div>
+          </div>
+        )}
+
+        {activeTab === "security" && (
+          <div className="card-surface rounded-xl border border-border-default p-6">
+            <h3 className="text-sm font-medium text-text-primary">
+              Change Password
+            </h3>
+            <div className="mt-4 space-y-3">
+              <div>
+                <label
+                  htmlFor="new-password"
+                  className="mb-1.5 block text-sm text-text-secondary"
+                >
+                  New password
+                </label>
+                <div className="relative">
+                  <input
+                    id="new-password"
+                    type={showNewPassword ? "text" : "password"}
+                    className={`${inputClasses} pr-10`}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Min. 8 characters"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-0 top-0 flex h-11 w-10 items-center justify-center text-text-muted transition-colors hover:text-text-secondary"
+                    onClick={() => setShowNewPassword((v) => !v)}
+                    aria-label={showNewPassword ? "Hide password" : "Show password"}
+                  >
+                    {showNewPassword ? (
+                      <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <Eye className="h-4 w-4" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label
+                  htmlFor="confirm-password"
+                  className="mb-1.5 block text-sm text-text-secondary"
+                >
+                  Confirm password
+                </label>
+                <div className="relative">
+                  <input
+                    id="confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    className={`${inputClasses} pr-10`}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter new password"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-0 top-0 flex h-11 w-10 items-center justify-center text-text-muted transition-colors hover:text-text-secondary"
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <Eye className="h-4 w-4" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-end">
+              <Button
+                size="lg"
+                onClick={handlePasswordSave}
+                loading={passwordSaving}
+              >
+                {passwordSaving ? "Updating..." : "Update password"}
+              </Button>
+            </div>
+            <div className="mt-2">
+              <StatusMessage
+                success={passwordSuccess}
+                error={passwordError}
+              />
+            </div>
+          </div>
+        )}
+
+        {activeTab === "team" && (
+          <TeamSettings currentUserId={currentUserId} />
+        )}
+      </div>
+
+      {/* Danger Zone — always visible */}
+      <div className="rounded-xl border border-[var(--error-border)] bg-[var(--error-bg-subtle)] p-6">
+        <div className="flex items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--error-border)]">
+            <AlertTriangle
+              className="h-4 w-4 text-[var(--error-accent)]"
+              aria-hidden="true"
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-medium text-[var(--error-accent)]">
+              Delete Account
+            </h3>
+            <p className="mt-1 text-sm text-text-secondary">
+              Permanently delete your account and all associated data. This
+              action cannot be undone.
+            </p>
+
+            <div className="mt-4">
+              {!showDeleteConfirm ? (
+                <Button
+                  variant="danger"
+                  size="md"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  Delete account
+                </Button>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-text-secondary">
+                    Type{" "}
+                    <span className="font-mono font-medium text-[var(--error-accent)]">
+                      DELETE MY ACCOUNT
+                    </span>{" "}
+                    to confirm:
+                  </p>
+                  <input
+                    type="text"
+                    className={inputClasses}
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    placeholder="DELETE MY ACCOUNT"
+                    aria-label="Type DELETE MY ACCOUNT to confirm"
+                    autoComplete="off"
+                  />
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="danger"
+                      size="md"
+                      onClick={handleDeleteAccount}
+                      disabled={deleteConfirmText !== "DELETE MY ACCOUNT"}
+                      loading={deleteLoading}
+                    >
+                      {deleteLoading ? "Deleting..." : "Confirm deletion"}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={() => {
+                        setShowDeleteConfirm(false);
+                        setDeleteConfirmText("");
+                        setDeleteError(null);
+                      }}
+                      disabled={deleteLoading}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                  <StatusMessage success={null} error={deleteError} />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -23,6 +23,7 @@ export default async function InvestorSettingsPage() {
         avatarUrl: (userData?.avatar_url as string | null) ?? null,
       }}
       role="investor"
+      currentUserId={freshUser!.id}
     />
   );
 }

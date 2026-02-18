@@ -23,6 +23,7 @@ export default async function FounderSettingsPage() {
         avatarUrl: (userData?.avatar_url as string | null) ?? null,
       }}
       role="founder"
+      currentUserId={freshUser!.id}
     />
   );
 }
