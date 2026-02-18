@@ -28,7 +28,8 @@ import {
 import { formatValue, formatPeriod } from "@/components/charts/types";
 import { getNumericValue } from "@/components/dashboard/types";
 import { useChartTheme } from "@/hooks/use-chart-theme";
-import { computeRollups } from "@/lib/metrics/rollup";
+import { computeRollups, monthToQuarterStart, toAnnualStart, type RolledUpValue } from "@/lib/metrics/rollup";
+import { getDefaultAggregationType, getAggregationIndicator } from "@/lib/metrics/temporal-aggregation";
 import { SourceBadge } from "./source-badge";
 import { MetricHistoryTimeline } from "./metric-history-timeline";
 import { MetricCommentThread } from "./metric-comment-thread";
@@ -123,21 +124,32 @@ export function MetricDetailPanel({
   // Derive filtered values from allValues + periodType.
   // When the requested period type (e.g. quarterly) has no native DB rows,
   // use computeRollups to aggregate from finer-grained data (e.g. monthly → quarterly).
-  const values = React.useMemo(() => {
-    if (!periodType || allValues.length === 0) return allValues;
+  // Also preserve the raw RolledUpValue objects so we can display breakdown info.
+  const { values, rollupMap } = React.useMemo(() => {
+    if (!periodType || allValues.length === 0)
+      return { values: allValues, rollupMap: new Map<string, RolledUpValue>() };
     const dbPt = periodType === "yearly" ? "annual" : periodType;
 
     // Check for native values at the requested granularity
     const native = allValues.filter((v) => v.period_type === dbPt);
-    if (native.length > 0) return native;
+    if (native.length > 0)
+      return { values: native, rollupMap: new Map<string, RolledUpValue>() };
 
     // No native values — compute rollups from finer-grained data
-    if (periodType === "monthly") return allValues; // can't roll up to monthly
+    if (periodType === "monthly")
+      return { values: allValues, rollupMap: new Map<string, RolledUpValue>() };
     const rollups = computeRollups(allValues, periodType as "monthly" | "quarterly" | "yearly");
-    if (rollups.length === 0) return allValues; // fallback to all data
+    if (rollups.length === 0)
+      return { values: allValues, rollupMap: new Map<string, RolledUpValue>() };
+
+    // Build a map from rollup id → RolledUpValue for breakdown display
+    const rMap = new Map<string, RolledUpValue>();
+    for (const r of rollups) {
+      rMap.set(`rollup-${r.period_start}`, r);
+    }
 
     // Convert rollup results into MetricValue shape for display
-    return rollups
+    const converted: MetricValue[] = rollups
       .map((r) => ({
         id: `rollup-${r.period_start}`,
         metric_name: r.metric_name,
@@ -153,6 +165,8 @@ export function MetricDetailPanel({
         submitted_by_name: null,
       }))
       .sort((a, b) => a.period_start.localeCompare(b.period_start));
+
+    return { values: converted, rollupMap: rMap };
   }, [allValues, periodType]);
 
   const contentRef = React.useRef<HTMLDivElement>(null);
@@ -338,6 +352,52 @@ export function MetricDetailPanel({
       setSubmitting(false);
     }
   }
+
+  // Find child values that contributed to a rollup
+  const rollupBreakdown = React.useMemo(() => {
+    if (!current || current.source !== "rollup") return null;
+
+    const rollupMeta = rollupMap.get(current.id);
+    if (!rollupMeta) return null;
+
+    const aggType = getDefaultAggregationType(current.metric_name);
+    const indicator = getAggregationIndicator(aggType);
+
+    // Determine which source period type was used
+    const sourceType: "monthly" | "quarterly" =
+      rollupMeta.period_type === "quarterly"
+        ? "monthly"
+        : rollupMeta.expectedChildCount === 4
+          ? "quarterly"
+          : "monthly";
+
+    const dbSourceType = sourceType;
+
+    // Find all child values that fall within this rollup's target period
+    const children = allValues
+      .filter((v) => {
+        if (v.period_type !== dbSourceType) return false;
+        if (v.metric_name !== current.metric_name) return false;
+        const targetStart =
+          rollupMeta.period_type === "quarterly"
+            ? monthToQuarterStart(v.period_start)
+            : toAnnualStart(v.period_start);
+        return targetStart === rollupMeta.period_start;
+      })
+      .sort((a, b) => a.period_start.localeCompare(b.period_start));
+
+    // For "latest", the last child is the one that was used
+    const lastChildIndex = children.length - 1;
+
+    return {
+      aggType,
+      indicator,
+      sourceType,
+      children,
+      lastChildIndex,
+      totalValue: rollupMeta.value,
+    };
+  }, [current, rollupMap, allValues]);
 
   const changeBadgeColor =
     percentChange != null && percentChange > 0
@@ -601,6 +661,91 @@ export function MetricDetailPanel({
                           </span>
                         </div>
                       )}
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {current && current.source === "rollup" && rollupBreakdown && (
+                <section>
+                  <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-text-faint">
+                    Rollup Breakdown
+                  </h3>
+                  <div className="overflow-hidden rounded-xl border border-border-subtle bg-bg-raised">
+                    <div className="p-4">
+                      <div className="mb-3 flex items-center gap-2 text-xs text-text-muted">
+                        <span className="text-sm font-medium text-[var(--tag-blue-text)]">
+                          {rollupBreakdown.indicator.symbol}
+                        </span>
+                        <span>
+                          {rollupBreakdown.aggType === "sum"
+                            ? `Sum of ${rollupBreakdown.children.length} ${rollupBreakdown.sourceType} values`
+                            : `Latest ${rollupBreakdown.sourceType} value`}
+                        </span>
+                      </div>
+
+                      <div className="space-y-0">
+                        {rollupBreakdown.children.map((child, idx) => {
+                          const childNum = getNumericValue(child.value);
+                          const isLatestSource =
+                            rollupBreakdown.aggType === "latest" &&
+                            idx === rollupBreakdown.lastChildIndex;
+                          const isDimmed =
+                            rollupBreakdown.aggType === "latest" &&
+                            idx !== rollupBreakdown.lastChildIndex;
+
+                          return (
+                            <div
+                              key={child.id}
+                              className={`flex items-center justify-between rounded-md px-3 py-2 text-sm transition-colors ${
+                                isLatestSource
+                                  ? "bg-[var(--tag-blue-bg)]"
+                                  : ""
+                              } ${isDimmed ? "opacity-40" : ""}`}
+                            >
+                              <span
+                                className={`tabular-nums ${
+                                  isLatestSource
+                                    ? "font-medium text-[var(--tag-blue-text)]"
+                                    : "text-text-secondary"
+                                }`}
+                              >
+                                {formatPeriod(child.period_start, child.period_type)}
+                                {isLatestSource && (
+                                  <span className="ml-2 text-[10px] font-normal uppercase tracking-wide text-[var(--tag-blue-text)] opacity-70">
+                                    Used
+                                  </span>
+                                )}
+                              </span>
+                              <span
+                                className={`font-mono tabular-nums ${
+                                  isLatestSource
+                                    ? "font-medium text-[var(--tag-blue-text)]"
+                                    : "text-text-secondary"
+                                }`}
+                              >
+                                {childNum != null
+                                  ? formatValue(childNum, current.metric_name)
+                                  : "—"}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="mt-2 border-t border-border-subtle pt-3">
+                        <div className="flex items-center justify-between px-3">
+                          <span className="text-sm font-medium text-text-primary">
+                            {formatPeriod(current.period_start, current.period_type)}{" "}
+                            {rollupBreakdown.aggType === "sum" ? "Total" : "Value"}
+                          </span>
+                          <span className="font-mono text-sm font-semibold tabular-nums text-text-primary">
+                            {currentNum != null
+                              ? formatValue(currentNum, current.metric_name)
+                              : "—"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </section>

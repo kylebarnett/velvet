@@ -52,14 +52,14 @@ function isoDate(year: number, month: number, day: number): string {
 }
 
 /** Map a monthly period_start to its quarter's period_start */
-function monthToQuarterStart(periodStart: string): string {
+export function monthToQuarterStart(periodStart: string): string {
   const d = new Date(periodStart);
   const qMonth = Math.floor(utcMonth(d) / 3) * 3;
   return isoDate(utcYear(d), qMonth, 1);
 }
 
 /** Map a period_start to its year's annual period_start */
-function toAnnualStart(periodStart: string): string {
+export function toAnnualStart(periodStart: string): string {
   const d = new Date(periodStart);
   return isoDate(utcYear(d), 0, 1);
 }
