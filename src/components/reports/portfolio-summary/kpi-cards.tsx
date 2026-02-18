@@ -117,7 +117,7 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border-subtle p-5 min-h-[120px]">
+          <div key={i} className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border-subtle p-4 min-h-[120px]">
             <span className="text-2xl font-bold text-text-faint">--</span>
             <span className="mt-1 text-xs text-text-muted">No data</span>
           </div>
@@ -144,7 +144,7 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
                 onMetricClick(kpi.metric);
               }
             }}
-            className={`group card-surface relative overflow-hidden rounded-2xl p-5 transition-all duration-300 ${
+            className={`group card-surface relative overflow-hidden rounded-2xl p-4 transition-all duration-300 ${
               kpi.clickable && onMetricClick ? "cursor-pointer card-hover-lift" : ""
             }`}
             style={{ animationDelay: `${index * 50}ms` }}
@@ -177,8 +177,8 @@ export function KPICards({ aggregates, totalCompanies, companiesWithData, onMetr
               </div>
 
               {/* Value */}
-              <div className="mt-4">
-                <div className="text-4xl font-bold tabular-nums tracking-tighter text-text-primary">
+              <div className="mt-3">
+                <div className="text-2xl font-bold tabular-nums tracking-tighter text-text-primary">
                   {kpi.value}
                 </div>
                 <div className="mt-1 text-xs font-medium uppercase tracking-wide text-text-muted">{kpi.label}</div>
