@@ -216,4 +216,61 @@ export const investorPortfolioArticles: HelpArticle[] = [
       },
     ],
   },
+  {
+    slug: "inline-add-metrics",
+    title: "Adding Metrics Inline",
+    description:
+      "Add metrics directly within the company metrics table using the inline editor. Includes smart similarity detection to prevent duplicate metrics.",
+    role: "investor",
+    category: "portfolio",
+    icon: "plus-circle",
+    relatedPages: ["/companies/"],
+    relatedArticles: [
+      "viewing-company-detail",
+      "creating-metric-requests",
+      "importing-historical-data",
+    ],
+    keywords: [
+      "add",
+      "metric",
+      "inline",
+      "table",
+      "duplicate",
+      "similar",
+      "synonym",
+      "manual",
+      "enter",
+      "value",
+    ],
+    steps: [
+      {
+        title: "Open a company detail page",
+        content:
+          "Navigate to a company in your portfolio and open its detail page. The Metrics tab shows the metrics table with all submitted and uploaded data.",
+      },
+      {
+        title: "Click + Add Metric",
+        content:
+          'Below the last row of the metrics table, click the "+ Add Metric" button. A new inline row will appear at the bottom of the table with a search input for the metric name and empty cells for each period.',
+      },
+      {
+        title: "Search and select a metric name",
+        content:
+          "Type in the metric name search box to filter from the list of predefined metrics. You can also type a custom name and select \"Add custom\" to create a new metric. The dropdown shows similarity warnings to help you avoid duplicates.",
+        tip: "Metrics already tracked for this company are shown grayed out with an \"Already tracked\" badge. Synonyms (e.g. \"Net Burn Rate\" when \"Burn Rate\" exists) show an amber warning. Fuzzy matches show a lighter warning.",
+      },
+      {
+        title: "Enter values for each period",
+        content:
+          "After selecting a metric name, focus automatically moves to the most recent period cell. Enter numeric values for each period. Use Tab or Arrow keys to navigate between cells. Placeholder hints show the expected format (e.g. currency vs percentage).",
+      },
+      {
+        title: "Save your entries",
+        content:
+          "Click the checkmark button or press Cmd+Enter (Ctrl+Enter on Windows) to save. The new metric row will appear in the table. Press Escape or the X button to cancel without saving.",
+        warning:
+          "These values are stored as investor-private data. Founder-submitted values always take priority when both exist for the same metric and period.",
+      },
+    ],
+  },
 ];

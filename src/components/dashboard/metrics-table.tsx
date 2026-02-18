@@ -5,6 +5,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { createPortal } from "react-dom";
 import { formatValue, formatPeriod } from "@/components/charts/types";
 import { Sparkles, RotateCcw, Info, GripVertical, ArrowUpDown, Plus, Pencil, Layers } from "lucide-react";
+import { InlineAddMetricRow } from "./inline-add-metric-row";
 import {
   DndContext,
   closestCenter,
@@ -63,8 +64,13 @@ type MetricsTableProps = {
   allowReorder?: boolean;
   /** Storage key for persisting metric order (e.g., "metrics-order-{companyId}") */
   storageKey?: string;
-  /** Callback to add a new metric (renders + Add Metric button below table) */
+  /** Callback to add a new metric via modal (renders + Add Metric button below table) */
   onAddMetric?: () => void;
+  /** Callback to add a metric inline within the table (investor dashboard) */
+  onAddMetricInline?: (
+    metricName: string,
+    values: { periodStart: string; value: string }[],
+  ) => Promise<boolean>;
   /** Enable click-to-edit on cells (founder dashboard) */
   editable?: boolean;
   /** Submit a single value edit — returns true on success */
@@ -583,6 +589,14 @@ type MetricsTableBodyProps = {
   onEditChange?: (value: string) => void;
   onEditSave?: () => void;
   onEditCancel?: () => void;
+  /** Inline add metric row state */
+  isAddingMetric?: boolean;
+  existingMetricNames?: string[];
+  onAddMetricInline?: (
+    metricName: string,
+    values: { periodStart: string; value: string }[],
+  ) => Promise<boolean>;
+  onCancelAddMetric?: () => void;
 };
 
 function MetricsTableBody({
@@ -612,6 +626,10 @@ function MetricsTableBody({
   onEditChange,
   onEditSave,
   onEditCancel,
+  isAddingMetric,
+  existingMetricNames,
+  onAddMetricInline,
+  onCancelAddMetric,
 }: MetricsTableBodyProps) {
   const shouldVirtualize = displayData.length > VIRTUALIZE_THRESHOLD && !isReorderMode;
 
@@ -731,6 +749,21 @@ function MetricsTableBody({
                 onEditCancel={onEditCancel}
               />
             ))}
+            {isAddingMetric && onAddMetricInline && onCancelAddMetric && (
+              <InlineAddMetricRow
+                displayPeriods={displayPeriods}
+
+                existingMetricNames={existingMetricNames ?? []}
+                showTotals={showTotals}
+                isReorderMode={isReorderMode}
+                periodColWidth={periodColWidth}
+                metricColWidth={METRIC_COL_WIDTH}
+                gripColWidth={GRIP_COL_WIDTH}
+                totalColWidth={TOTAL_COL_WIDTH}
+                onSave={onAddMetricInline}
+                onCancel={onCancelAddMetric}
+              />
+            )}
           </tbody>
         </table>
       </div>
@@ -804,6 +837,20 @@ function MetricsTableBody({
               />
             </tr>
           )}
+          {isAddingMetric && onAddMetricInline && onCancelAddMetric && (
+            <InlineAddMetricRow
+              displayPeriods={displayPeriods}
+              existingMetricNames={existingMetricNames ?? []}
+              showTotals={showTotals}
+              isReorderMode={isReorderMode}
+              periodColWidth={periodColWidth}
+              metricColWidth={METRIC_COL_WIDTH}
+              gripColWidth={GRIP_COL_WIDTH}
+              totalColWidth={TOTAL_COL_WIDTH}
+              onSave={onAddMetricInline}
+              onCancel={onCancelAddMetric}
+            />
+          )}
         </tbody>
       </table>
     </div>
@@ -819,6 +866,7 @@ export function MetricsTable({
   allowReorder = true,
   storageKey,
   onAddMetric,
+  onAddMetricInline,
   editable,
   onValueSubmit,
   headerActions,
@@ -829,6 +877,7 @@ export function MetricsTable({
   const [editingCell, setEditingCell] = useState<EditingCell>(null);
   const [editInputValue, setEditInputValue] = useState("");
   const [editSaving, setEditSaving] = useState(false);
+  const [isAddingMetric, setIsAddingMetric] = useState(false);
   const [mounted, setMounted] = useState(false);
   const metricInfoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isOverMetricInfoRef = useRef(false);
@@ -1254,12 +1303,12 @@ export function MetricsTable({
     );
   }, [displayData]);
 
-  // Pad to minimum columns: monthly=12, yearly=5
+  // Pad to minimum columns: quarterly=4, monthly=12, yearly=5
   const displayPeriods = useMemo(() => {
     const pType = displayData[0]?.periodType ?? "quarterly";
-    const minPeriods = pType === "monthly" ? 12 : pType === "yearly" ? 5 : 0;
+    const minPeriods = pType === "monthly" ? 12 : pType === "yearly" ? 5 : 4;
 
-    if (minPeriods > 0 && sortedPeriods.length < minPeriods) {
+    if (sortedPeriods.length < minPeriods) {
       // Use latest data period or current date as anchor
       const anchor = sortedPeriods.length > 0
         ? new Date(sortedPeriods[sortedPeriods.length - 1])
@@ -1267,9 +1316,15 @@ export function MetricsTable({
       const periodsSet = new Set(sortedPeriods);
       // Fill backwards from anchor until we reach minPeriods
       for (let i = 0; periodsSet.size < minPeriods; i++) {
-        const d = pType === "monthly"
-          ? new Date(anchor.getFullYear(), anchor.getMonth() - i, 1)
-          : new Date(anchor.getFullYear() - i, 0, 1);
+        let d: Date;
+        if (pType === "monthly") {
+          d = new Date(anchor.getFullYear(), anchor.getMonth() - i, 1);
+        } else if (pType === "yearly") {
+          d = new Date(anchor.getFullYear() - i, 0, 1);
+        } else {
+          // quarterly — step back by 3 months
+          d = new Date(anchor.getFullYear(), anchor.getMonth() - i * 3, 1);
+        }
         const iso = d.toISOString().slice(0, 10);
         periodsSet.add(iso);
       }
@@ -1299,6 +1354,28 @@ export function MetricsTable({
     [hoveredCell, displayData],
   );
 
+  // Compute existing metric names for similarity detection
+  const existingMetricNames = useMemo(
+    () => displayData.map((m) => m.metricName),
+    [displayData],
+  );
+
+  // Handle inline add metric save — wraps the callback to also close the inline row
+  const handleInlineAddSave = useCallback(
+    async (
+      metricName: string,
+      values: { periodStart: string; value: string }[],
+    ) => {
+      if (!onAddMetricInline) return false;
+      const success = await onAddMetricInline(metricName, values);
+      if (success) {
+        setIsAddingMetric(false);
+      }
+      return success;
+    },
+    [onAddMetricInline],
+  );
+
   // Prevent flash of unsorted content while preferences load
   if ((savedOrder === null || !metricColLoaded) && storageKey) {
     return (
@@ -1308,7 +1385,7 @@ export function MetricsTable({
     );
   }
 
-  if (!displayData.length) {
+  if (!displayData.length && !onAddMetricInline) {
     return (
       <div className="flex h-full items-center justify-center text-text-tertiary">
         No data available
@@ -1382,15 +1459,25 @@ export function MetricsTable({
             onEditChange={handleEditChange}
             onEditSave={handleEditSave}
             onEditCancel={handleEditCancel}
+            isAddingMetric={isAddingMetric}
+            existingMetricNames={existingMetricNames}
+            onAddMetricInline={handleInlineAddSave}
+            onCancelAddMetric={() => setIsAddingMetric(false)}
           />
         </SortableContext>
       </DndContext>
 
-      {onAddMetric && (
+      {!isAddingMetric && (onAddMetric || onAddMetricInline) && (
         <button
           type="button"
           data-no-print
-          onClick={onAddMetric}
+          onClick={() => {
+            if (onAddMetricInline) {
+              setIsAddingMetric(true);
+            } else {
+              onAddMetric?.();
+            }
+          }}
           className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-secondary"
         >
           <Plus className="h-4 w-4" />

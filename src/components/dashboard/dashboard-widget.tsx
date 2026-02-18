@@ -25,8 +25,13 @@ type DashboardWidgetProps = {
   onMetricClick?: (metricName: string, periodStart?: string) => void;
   /** Company ID for persisting metric order in tables */
   companyId?: string;
-  /** Callback to add a new metric (passed to table widgets) */
+  /** Callback to add a new metric via modal (passed to table widgets) */
   onAddMetric?: () => void;
+  /** Callback to add a metric inline within the table (investor dashboard) */
+  onAddMetricInline?: (
+    metricName: string,
+    values: { periodStart: string; value: string }[],
+  ) => Promise<boolean>;
   /** Enable click-to-edit on table cells */
   editable?: boolean;
   /** Submit a single value edit — returns true on success */
@@ -42,6 +47,7 @@ export function DashboardWidget({
   onMetricClick,
   companyId,
   onAddMetric,
+  onAddMetricInline,
   editable,
   onValueSubmit,
   headerActions,
@@ -118,6 +124,7 @@ export function DashboardWidget({
         storageKey={storageKey}
         showTotals={config.showTotals !== false}
         onAddMetric={onAddMetric}
+        onAddMetricInline={onAddMetricInline}
         editable={editable}
         onValueSubmit={onValueSubmit}
         headerActions={headerActions}

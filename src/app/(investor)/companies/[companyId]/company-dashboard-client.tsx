@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Settings, Send } from "lucide-react";
+import { toast } from "sonner";
 import {
   DashboardWidget,
   ViewSelector,
@@ -263,6 +264,51 @@ function MetricsTabContent({
     periodType?: string;
   } | null>(null);
 
+  /** Inline add metric handler — POSTs to investor metrics endpoint */
+  const handleInlineMetricSave = React.useCallback(
+    async (
+      metricName: string,
+      values: { periodStart: string; value: string }[],
+    ): Promise<boolean> => {
+      // Map period type from display format ("yearly") to DB format ("annual")
+      const dbPeriodType =
+        periodType === "yearly" ? "annual" : periodType;
+
+      const metricsPayload = values.map((v) => ({
+        metric_name: metricName,
+        value: v.value,
+        period_type: dbPeriodType,
+        period_start: v.periodStart,
+      }));
+
+      try {
+        const res = await fetch(
+          `/api/investors/companies/${companyId}/metrics`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ metrics: metricsPayload }),
+          },
+        );
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(json?.error ?? "Failed to save metrics.");
+        }
+        toast.success(
+          `${json.count} metric value${json.count === 1 ? "" : "s"} saved.`,
+        );
+        router.refresh();
+        return true;
+      } catch (err: unknown) {
+        toast.error(
+          err instanceof Error ? err.message : "Something went wrong.",
+        );
+        return false;
+      }
+    },
+    [companyId, periodType, router],
+  );
+
   async function handleDeleteView(viewId: string) {
     try {
       const res = await fetch(`/api/investors/dashboard-views/${viewId}`, {
@@ -307,17 +353,6 @@ function MetricsTabContent({
 
   // Filter metrics by date range
   const filteredMetrics = filterMetricsByDateRange(metrics, dateRange);
-
-  // Check if we have any metrics
-  const hasMetrics = metrics.length > 0;
-
-  if (!hasMetrics) {
-    return (
-      <div className="py-12 text-center">
-        <p className="text-sm text-text-secondary">No metrics have been submitted for this company yet.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">
@@ -384,6 +419,11 @@ function MetricsTabContent({
                 companyId={companyId}
                 onMetricClick={(name, period) =>
                   setDetailSelection({ metricName: name, periodStart: period, periodType })
+                }
+                onAddMetricInline={
+                  widget.type === "table" && !readOnly
+                    ? handleInlineMetricSave
+                    : undefined
                 }
                 headerActions={
                   widget.type === "table" && !readOnly ? (
