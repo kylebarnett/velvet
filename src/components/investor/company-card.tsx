@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
+import { getTagLabel } from "@/lib/company/constants";
 import { CompanyCardMenu } from "@/components/investor/company-card-menu";
 
 type MetricSnapshot = {
@@ -27,6 +28,7 @@ type CompanyCardProps = {
   latestMetric?: MetricSnapshot | null;
   secondaryMetric?: MetricSnapshot | null;
   lastSubmittedAt?: string | null;
+  onDeleted?: () => void;
 };
 
 function formatFreshness(dateStr: string): { label: string; isStale: boolean } {
@@ -160,6 +162,7 @@ export function CompanyCard({
   latestMetric,
   secondaryMetric,
   lastSubmittedAt,
+  onDeleted,
 }: CompanyCardProps) {
   const router = useRouter();
   const isApproved = ["auto_approved", "approved"].includes(approvalStatus);
@@ -184,15 +187,15 @@ export function CompanyCard({
               Access denied
             </span>
           )}
-          <CompanyCardMenu companyId={id} companyName={name} isHidden={isHidden} />
+          <CompanyCardMenu companyId={id} companyName={name} isHidden={isHidden} onDeleted={onDeleted} />
         </div>
       </div>
 
       <div className="mt-3 mb-2">
         <h3 className="font-medium text-text-primary">{name}</h3>
         <div className="mt-1.5 flex items-center gap-1.5">
-          {industry && <span className="rounded-full bg-bg-elevated px-2.5 py-0.5 text-[11px] font-medium capitalize text-text-secondary">{industry.replace(/_/g, " ")}</span>}
-          {stage && <span className="rounded-full bg-bg-elevated px-2.5 py-0.5 text-[11px] font-medium capitalize text-text-secondary">{stage.replace(/_/g, " ")}</span>}
+          {industry && <span className="rounded-full bg-bg-elevated px-2.5 py-0.5 text-[11px] font-medium text-text-secondary">{getTagLabel("industry", industry)}</span>}
+          {stage && <span className="rounded-full bg-bg-elevated px-2.5 py-0.5 text-[11px] font-medium text-text-secondary">{getTagLabel("stage", stage)}</span>}
         </div>
       </div>
 

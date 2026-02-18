@@ -10,6 +10,7 @@ import { TileSettingsMenu } from "@/components/investor/tile-settings-menu";
 import { CompanyCardMenu } from "@/components/investor/company-card-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
+import { getTagLabel } from "@/lib/company/constants";
 
 type Company = {
   id: string;
@@ -147,10 +148,12 @@ function CompanyListRow({
   company,
   latestMetric,
   secondaryMetric,
+  onDeleted,
 }: {
   company: Company;
   latestMetric: MetricSnapshot | null;
   secondaryMetric: MetricSnapshot | null;
+  onDeleted?: () => void;
 }) {
   const router = useRouter();
   const isApproved = ["auto_approved", "approved"].includes(company.approvalStatus);
@@ -174,10 +177,10 @@ function CompanyListRow({
         </div>
         <div className="mt-0.5 flex items-center gap-1.5">
           {company.industry && (
-            <span className="rounded-full bg-bg-elevated px-2 py-0.5 text-[11px] capitalize text-text-secondary">{company.industry.replace(/_/g, " ")}</span>
+            <span className="rounded-full bg-bg-elevated px-2 py-0.5 text-[11px] text-text-secondary">{getTagLabel("industry", company.industry)}</span>
           )}
           {company.stage && (
-            <span className="rounded-full bg-bg-elevated px-2 py-0.5 text-[11px] capitalize text-text-secondary">{company.stage.replace(/_/g, " ")}</span>
+            <span className="rounded-full bg-bg-elevated px-2 py-0.5 text-[11px] text-text-secondary">{getTagLabel("stage", company.stage)}</span>
           )}
         </div>
       </div>
@@ -244,7 +247,7 @@ function CompanyListRow({
         ) : isApproved ? (
           <span className="text-xs text-text-tertiary">No metrics yet</span>
         ) : null}
-        <CompanyCardMenu companyId={company.id} companyName={company.name} isHidden={company.isHidden} />
+        <CompanyCardMenu companyId={company.id} companyName={company.name} isHidden={company.isHidden} onDeleted={onDeleted} />
       </div>
     </Link>
   );
@@ -252,6 +255,7 @@ function CompanyListRow({
 
 export function DashboardContent({ companies, latestMetrics, secondaryMetrics = {}, lastSubmittedAt = {} }: DashboardContentProps) {
   const router = useRouter();
+  const [deletedIds, setDeletedIds] = React.useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = React.useState("");
   const [viewMode, setViewMode] = React.useState<ViewMode>(() => {
     if (typeof window !== "undefined") {
@@ -272,9 +276,10 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
     }).catch(() => {});
   }
 
-  // Split into visible and hidden companies
-  const visibleCompanies = React.useMemo(() => companies.filter(c => !c.isHidden), [companies]);
-  const hiddenCompanies = React.useMemo(() => companies.filter(c => c.isHidden), [companies]);
+  // Filter out optimistically deleted companies, then split into visible and hidden
+  const activeCompanies = React.useMemo(() => companies.filter(c => !deletedIds.has(c.id)), [companies, deletedIds]);
+  const visibleCompanies = React.useMemo(() => activeCompanies.filter(c => !c.isHidden), [activeCompanies]);
+  const hiddenCompanies = React.useMemo(() => activeCompanies.filter(c => c.isHidden), [activeCompanies]);
 
   const statusGroups = React.useMemo(() => {
     const groups = new Set<string>();
@@ -319,7 +324,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
         <div className="flex items-center justify-between gap-3 sm:justify-end">
           {showStatusFilter && (
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="h-9 w-[140px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -330,9 +335,9 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
               </SelectContent>
             </Select>
           )}
-          <div className="rounded-full bg-bg-elevated px-2.5 py-1 text-xs text-text-tertiary">
+          <span className="text-sm text-text-muted tabular-nums">
             {filteredCompanies.length} of {visibleCompanies.length}
-          </div>
+          </span>
           <TileSettingsMenu
             companies={visibleCompanies
               .filter(c => ["auto_approved", "approved"].includes(c.approvalStatus))
@@ -406,6 +411,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
                       latestMetric={latestMetrics[company.id] ?? null}
                       secondaryMetric={secondaryMetrics[company.id] ?? null}
                       lastSubmittedAt={lastSubmittedAt[company.id] ?? null}
+                      onDeleted={() => setDeletedIds(prev => new Set(prev).add(company.id))}
                     />
                   ))}
                 </div>
@@ -417,6 +423,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
                       company={company}
                       latestMetric={latestMetrics[company.id] ?? null}
                       secondaryMetric={secondaryMetrics[company.id] ?? null}
+                      onDeleted={() => setDeletedIds(prev => new Set(prev).add(company.id))}
                     />
                   ))}
                 </div>
@@ -450,6 +457,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
                 latestMetric={latestMetrics[company.id] ?? null}
                 secondaryMetric={secondaryMetrics[company.id] ?? null}
                 lastSubmittedAt={lastSubmittedAt[company.id] ?? null}
+                onDeleted={() => setDeletedIds(prev => new Set(prev).add(company.id))}
               />
             </div>
           ))}
@@ -462,6 +470,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
               company={company}
               latestMetric={latestMetrics[company.id] ?? null}
               secondaryMetric={secondaryMetrics[company.id] ?? null}
+              onDeleted={() => setDeletedIds(prev => new Set(prev).add(company.id))}
             />
           ))}
         </div>

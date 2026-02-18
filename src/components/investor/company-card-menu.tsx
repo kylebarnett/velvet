@@ -9,9 +9,10 @@ type Props = {
   companyId: string;
   companyName: string;
   isHidden: boolean;
+  onDeleted?: () => void;
 };
 
-export function CompanyCardMenu({ companyId, companyName, isHidden }: Props) {
+export function CompanyCardMenu({ companyId, companyName, isHidden, onDeleted }: Props) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
@@ -66,8 +67,14 @@ export function CompanyCardMenu({ companyId, companyName, isHidden }: Props) {
         method: "DELETE",
       });
       if (res.ok) {
-        router.push("/companies");
-        router.refresh();
+        if (onDeleted) {
+          // Optimistically remove from parent list, then refresh data in background
+          onDeleted();
+          router.refresh();
+        } else {
+          // No parent handler (e.g. company detail page) — navigate away cleanly
+          router.replace("/companies");
+        }
       }
     } finally {
       setLoading(false);
