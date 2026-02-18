@@ -62,6 +62,7 @@ export function AddCompanyFlow() {
         open={step === "add-company"}
         onClose={handleClose}
         onSuccess={handleCompanyCreated}
+        mode="company"
       />
 
       <AddMetricsPromptModal

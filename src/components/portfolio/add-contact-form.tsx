@@ -25,9 +25,10 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onSuccess?: (company: { id: string; name: string }) => void;
+  mode?: "company" | "contact";
 };
 
-export function AddContactModal({ open, onClose, onSuccess }: Props) {
+export function AddContactModal({ open, onClose, onSuccess, mode = "contact" }: Props) {
   const router = useRouter();
   const dialogRef = React.useRef<HTMLDivElement>(null);
   const titleId = React.useId();
@@ -106,7 +107,7 @@ export function AddContactModal({ open, onClose, onSuccess }: Props) {
       const json = await res.json();
 
       if (!res.ok) {
-        throw new Error(json?.error ?? "Failed to add contact.");
+        throw new Error(json?.error ?? (mode === "company" ? "Failed to add company." : "Failed to add contact."));
       }
 
       if (json.errors && json.errors.length > 0) {
@@ -118,7 +119,7 @@ export function AddContactModal({ open, onClose, onSuccess }: Props) {
         return;
       }
 
-      toast.success("Contact added successfully.");
+      toast.success(mode === "company" ? "Company added successfully." : "Contact added successfully.");
       onClose();
       router.refresh();
     } catch (err: unknown) {
@@ -153,9 +154,9 @@ export function AddContactModal({ open, onClose, onSuccess }: Props) {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h2 id={titleId} className="text-lg font-semibold text-text-primary">Add Contact</h2>
+            <h2 id={titleId} className="text-lg font-semibold text-text-primary">{mode === "company" ? "Add Company" : "Add Contact"}</h2>
             <p className="text-sm text-text-tertiary">
-              Add a portfolio company and founder contact.
+              {mode === "company" ? "Add a company and its founder contact to your portfolio." : "Add a portfolio company and founder contact."}
             </p>
           </div>
           <button
@@ -255,7 +256,7 @@ export function AddContactModal({ open, onClose, onSuccess }: Props) {
               Cancel
             </Button>
             <Button loading={form.formState.isSubmitting} type="submit">
-              Add Contact
+              {mode === "company" ? "Add Company" : "Add Contact"}
             </Button>
           </div>
         </form>
