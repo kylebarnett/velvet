@@ -16,6 +16,7 @@ import { founderInvestorsArticles } from "./founder-investors";
 import { sharedImportDataArticles } from "./shared-import-data";
 import { sharedTeamArticles } from "./shared-team";
 import { sharedAccountArticles } from "./shared-account";
+import { sharedSettingsArticles } from "./shared-settings";
 import { sharedCommandPaletteArticles } from "./shared-command-palette";
 
 export const ALL_ARTICLES: HelpArticle[] = [
@@ -35,6 +36,7 @@ export const ALL_ARTICLES: HelpArticle[] = [
   ...sharedImportDataArticles,
   ...sharedTeamArticles,
   ...sharedAccountArticles,
+  ...sharedSettingsArticles,
   ...sharedCommandPaletteArticles,
 ];
 
