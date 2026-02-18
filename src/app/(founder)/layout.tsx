@@ -102,6 +102,7 @@ export default async function FounderLayout({
             { href: "/portal/help", label: "Help", icon: "help-circle", divider: true },
           ]}
           profileLinks={[
+            { href: "/portal/settings", label: "Settings", icon: "settings" },
             { href: "/portal/historical-upload", label: "Import Data", icon: "upload" },
           ]}
           company={company}
