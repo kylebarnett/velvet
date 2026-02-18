@@ -45,6 +45,8 @@ export async function GET(
         period_end,
         value,
         notes,
+        source,
+        source_upload_id,
         submitted_at,
         updated_at
       `)
@@ -60,6 +62,8 @@ export async function GET(
         period_end,
         value,
         notes,
+        source,
+        source_upload_id,
         submitted_at,
         updated_at
       `)

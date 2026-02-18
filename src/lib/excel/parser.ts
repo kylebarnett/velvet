@@ -116,7 +116,7 @@ export function parseExcelBuffer(
  */
 export function getSampleData(
   workbook: ParsedWorkbook,
-  maxRows: number = 50,
+  maxRows: number = 200,
   maxSheets: number = 5,
 ): ParsedSheet[] {
   return workbook.sheets.slice(0, maxSheets).map((sheet) => ({

@@ -5,6 +5,7 @@ import { processExcelUpload } from "@/lib/excel";
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from "@/lib/excel/types";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 // POST - Upload an Excel/CSV file and initiate AI parsing
 export async function POST(req: Request) {

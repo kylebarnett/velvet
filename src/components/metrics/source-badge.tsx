@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, PenLine, RotateCcw } from "lucide-react";
+import { Sparkles, PenLine, RotateCcw, FileSpreadsheet } from "lucide-react";
 
 type Props = {
   source: string;
@@ -26,6 +26,11 @@ const sourceConfig: Record<
     label: "Override",
     className: "bg-[var(--tag-amber-bg)] text-[var(--tag-amber-text)] ring-[var(--tag-amber-bg)]",
     icon: RotateCcw,
+  },
+  historical_upload: {
+    label: "Historical Upload",
+    className: "bg-[var(--tag-emerald-bg)] text-[var(--tag-emerald-text)] ring-[var(--tag-emerald-bg)]",
+    icon: FileSpreadsheet,
   },
 };
 

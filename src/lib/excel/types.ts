@@ -10,7 +10,7 @@ export const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"] as const;
 export const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 export const MAX_SHEETS = 50;
 export const MAX_TOTAL_ROWS = 100_000;
-export const MAX_SAMPLE_ROWS = 50;
+export const MAX_SAMPLE_ROWS = 200;
 export const MAX_SAMPLE_SHEETS = 5;
 
 // --- Parsed workbook types ---
@@ -35,7 +35,16 @@ export type ParsedWorkbook = {
 export type LayoutType =
   | "metrics_as_rows"
   | "metrics_as_columns"
-  | "single_metric_per_sheet";
+  | "single_metric_per_sheet"
+  | "tabular";
+
+export type TabularColumnMapping = {
+  companyColIndex: number;
+  metricColIndex: number;
+  periodColIndex: number;
+  valueColIndex: number;
+  headerRowIndex: number;
+};
 
 export type DetectedCompany = {
   name: string;
@@ -82,6 +91,7 @@ export type AIAnalysisResult = {
   values: DetectedValue[];
   provider: string;
   model: string;
+  tabularMapping?: TabularColumnMapping;
 };
 
 // --- Company mapping types ---

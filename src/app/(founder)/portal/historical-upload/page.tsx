@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireRole } from "@/lib/auth/require-role";
-import { UploadWizard } from "@/components/historical-upload/upload-wizard";
-import { UploadHistory } from "@/components/historical-upload/upload-history";
+import { UploadPageClient } from "@/components/historical-upload/upload-page-client";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata: Metadata = { title: "Import Data | Velvet" };
@@ -32,11 +31,7 @@ export default async function FounderHistoricalUploadPage() {
       </div>
 
       <Suspense>
-        <UploadWizard role="founder" />
-      </Suspense>
-
-      <Suspense>
-        <UploadHistory role="founder" />
+        <UploadPageClient role="founder" />
       </Suspense>
     </div>
   );

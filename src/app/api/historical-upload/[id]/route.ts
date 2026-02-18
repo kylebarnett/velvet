@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { parsePagination } from "@/lib/api/pagination";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 // GET - Get upload details + paginated parsed values
 export async function GET(
@@ -94,4 +95,55 @@ export async function GET(
     limit,
     offset,
   });
+}
+
+// DELETE - Delete a completed or failed upload
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { supabase, user } = await getApiUser();
+  if (!user) return jsonError("Unauthorized.", 401);
+
+  const role = user.user_metadata?.role;
+  if (role !== "investor" && role !== "founder") {
+    return jsonError("Forbidden.", 403);
+  }
+
+  const { id: uploadId } = await params;
+
+  // Verify ownership
+  const { data: upload } = await supabase
+    .from("historical_uploads")
+    .select("id, status, file_path")
+    .eq("id", uploadId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!upload) return jsonError("Upload not found.", 404);
+
+  // Only allow deleting completed or failed uploads
+  if (upload.status !== "completed" && upload.status !== "failed") {
+    return jsonError("Only completed or failed uploads can be deleted.", 400);
+  }
+
+  // Admin client needed to delete from storage (private bucket) and cascade delete
+  const admin = createSupabaseAdminClient();
+
+  // Remove file from storage — non-fatal if missing
+  if (upload.file_path) {
+    await admin.storage.from("historical-uploads").remove([upload.file_path]);
+  }
+
+  // Delete upload record (FK cascade handles historical_upload_values)
+  const { error } = await admin
+    .from("historical_uploads")
+    .delete()
+    .eq("id", uploadId);
+
+  if (error) {
+    return jsonError("Failed to delete upload.", 500);
+  }
+
+  return NextResponse.json({ ok: true });
 }

@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { UploadWizard } from "@/components/historical-upload/upload-wizard";
-import { UploadHistory } from "@/components/historical-upload/upload-history";
+import { UploadPageClient } from "@/components/historical-upload/upload-page-client";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata: Metadata = { title: "Import Data | Velvet" };
@@ -56,14 +55,10 @@ export default async function HistoricalUploadPage({
       </div>
 
       <Suspense>
-        <UploadWizard
+        <UploadPageClient
           role="investor"
           preSelectedCompany={preSelectedCompany ?? undefined}
         />
-      </Suspense>
-
-      <Suspense>
-        <UploadHistory role="investor" />
       </Suspense>
     </div>
   );

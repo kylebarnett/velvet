@@ -3,6 +3,7 @@
 import * as React from "react";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { SourceBadge } from "@/components/metrics/source-badge";
+import Link from "next/link";
 
 type MetricValue = {
   id: string;
@@ -13,6 +14,7 @@ type MetricValue = {
   value: { raw?: string } | null;
   notes: string | null;
   source: string;
+  source_upload_id: string | null;
   ai_confidence: number | null;
   submitted_at: string;
 };
@@ -96,10 +98,21 @@ export function CompanyMetricsClient({
                     {mv.value?.raw ?? "\u2014"}
                   </td>
                   <td className="px-4 py-3">
-                    <SourceBadge
-                      source={mv.source}
-                      confidence={mv.ai_confidence}
-                    />
+                    <div className="flex items-center gap-2">
+                      <SourceBadge
+                        source={mv.source}
+                        confidence={mv.ai_confidence}
+                      />
+                      {mv.source === "historical_upload" && mv.source_upload_id && (
+                        <Link
+                          href={`/historical-upload?id=${mv.source_upload_id}`}
+                          className="text-text-tertiary hover:text-text-secondary"
+                          title="View source upload"
+                        >
+                          <span className="text-xs underline underline-offset-2">View source</span>
+                        </Link>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-text-tertiary">
                     {mv.notes ?? "\u2014"}

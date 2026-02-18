@@ -53,13 +53,14 @@ export default async function CompanyMetricsPage({
     value: { raw?: string } | null;
     notes: string | null;
     source: string;
+    source_upload_id: string | null;
     ai_confidence: number | null;
     submitted_at: string;
   }> = [];
   if (isApproved) {
     const { data } = await supabase
       .from("company_metric_values")
-      .select("id, metric_name, period_type, period_start, period_end, value, notes, source, ai_confidence, submitted_at")
+      .select("id, metric_name, period_type, period_start, period_end, value, notes, source, source_upload_id, ai_confidence, submitted_at")
       .eq("company_id", companyId)
       .order("metric_name")
       .order("period_start", { ascending: false });

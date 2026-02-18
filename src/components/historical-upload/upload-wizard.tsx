@@ -42,9 +42,11 @@ type ResumableUpload = {
 type UploadWizardProps = {
   role: "investor" | "founder";
   preSelectedCompany?: { id: string; name: string };
+  resumeUploadOverride?: ResumableUpload;
+  onResumeHandled?: () => void;
 };
 
-export function UploadWizard({ role, preSelectedCompany }: UploadWizardProps) {
+export function UploadWizard({ role, preSelectedCompany, resumeUploadOverride, onResumeHandled }: UploadWizardProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<WizardStep>("upload");
@@ -84,6 +86,15 @@ export function UploadWizard({ role, preSelectedCompany }: UploadWizardProps) {
     }
     checkResumable();
   }, []);
+
+  // Resume from parent component (e.g. clicking a row in upload history)
+  useEffect(() => {
+    if (resumeUploadOverride) {
+      handleResume(resumeUploadOverride);
+      onResumeHandled?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resumeUploadOverride]);
 
   function handleResume(upload: ResumableUpload) {
     setUploadResult({

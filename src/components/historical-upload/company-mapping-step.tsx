@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Building2, CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
+import { Building2, CheckCircle2, Loader2, AlertTriangle, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 type DetectedCompany = {
@@ -21,6 +21,7 @@ type Mapping = {
   companyName: string | null;
   confidence: number;
   autoMatched: boolean;
+  createNew: boolean;
 };
 
 export function CompanyMappingStep({
@@ -77,6 +78,7 @@ export function CompanyMappingStep({
             companyName: matchedPortfolio?.name ?? null,
             confidence: existing?.companyId ? 0.9 : 0,
             autoMatched: !!existing?.companyId,
+            createNew: false,
           };
         });
 
@@ -91,15 +93,17 @@ export function CompanyMappingStep({
   }, [uploadId, companiesDetected]);
 
   const handleMappingChange = useCallback(
-    (detectedName: string, companyId: string | null) => {
+    (detectedName: string, value: string) => {
+      const isCreateNew = value === "__create_new__";
       setMappings((prev) =>
         prev.map((m) =>
           m.detectedName === detectedName
             ? {
                 ...m,
-                companyId,
-                companyName: portfolioCompanies.find((p) => p.id === companyId)?.name ?? null,
+                companyId: isCreateNew ? null : (value || null),
+                companyName: isCreateNew ? null : (portfolioCompanies.find((p) => p.id === value)?.name ?? null),
                 autoMatched: false,
+                createNew: isCreateNew,
               }
             : m,
         ),
@@ -120,6 +124,7 @@ export function CompanyMappingStep({
           mappings: mappings.map((m) => ({
             detectedName: m.detectedName,
             companyId: m.companyId,
+            createNew: m.createNew,
           })),
         }),
       });
@@ -137,7 +142,7 @@ export function CompanyMappingStep({
     }
   };
 
-  const mappedCount = mappings.filter((m) => m.companyId).length;
+  const mappedCount = mappings.filter((m) => m.companyId || m.createNew).length;
   const unmappedCount = mappings.length - mappedCount;
 
   if (loading) {
@@ -183,20 +188,27 @@ export function CompanyMappingStep({
                     Auto-matched
                   </span>
                 )}
+                {mapping.createNew && (
+                  <span className="inline-flex items-center gap-1 text-xs text-[var(--tag-blue-text)]">
+                    <PlusCircle className="h-3 w-3" />
+                    Will create new company
+                  </span>
+                )}
               </div>
             </div>
 
             <select
-              value={mapping.companyId ?? ""}
+              value={mapping.createNew ? "__create_new__" : (mapping.companyId ?? "")}
               onChange={(e) =>
                 handleMappingChange(
                   mapping.detectedName,
-                  e.target.value || null,
+                  e.target.value,
                 )
               }
               className="h-11 min-w-[200px] rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary transition-colors hover:border-border-default focus:border-border-default focus:outline-none"
             >
               <option value="">Skip (exclude)</option>
+              <option value="__create_new__">+ Create as new company</option>
               {portfolioCompanies.map((pc) => (
                 <option key={pc.id} value={pc.id}>
                   {pc.name}

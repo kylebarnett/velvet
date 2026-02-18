@@ -90,6 +90,8 @@ function formatSourceLabel(source?: string): string {
       return "Manual";
     case "rollup":
       return "Rolled Up";
+    case "historical_upload":
+      return "Historical Upload";
     default:
       return source.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }

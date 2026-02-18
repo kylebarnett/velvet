@@ -3,12 +3,14 @@ import { z } from "zod";
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { detectFounderConflicts, detectInvestorConflicts } from "@/lib/excel/conflict-detector";
+import { logger } from "@/lib/logger";
 
 const mappingSchema = z.object({
   mappings: z.array(
     z.object({
       detectedName: z.string().min(1),
       companyId: z.string().uuid().nullable(),
+      createNew: z.boolean().optional().default(false),
     }),
   ).min(1).max(500),
 });
@@ -49,6 +51,45 @@ export async function PATCH(
 
   // Admin client used after ownership verification above
   const admin = createSupabaseAdminClient();
+
+  // Process createNew entries first: create companies + investor relationships
+  for (const mapping of parsed.data.mappings) {
+    if (!mapping.createNew) continue;
+
+    // Create a new company record with the detected name
+    const { data: newCompany, error: createErr } = await admin
+      .from("companies")
+      .insert({ name: mapping.detectedName })
+      .select("id")
+      .single();
+
+    if (createErr || !newCompany) {
+      logger.error(`[company-mapping] Failed to create company "${mapping.detectedName}":`, createErr?.message);
+      return jsonError(`Failed to create company "${mapping.detectedName}".`, 500);
+    }
+
+    // Create investor-company relationship (auto-approved since investor is creating it)
+    if (role === "investor") {
+      const { error: relErr } = await admin
+        .from("investor_company_relationships")
+        .insert({
+          investor_id: user.id,
+          company_id: newCompany.id,
+          approval_status: "auto_approved",
+        });
+
+      if (relErr) {
+        // Rollback: delete the company we just created
+        await admin.from("companies").delete().eq("id", newCompany.id);
+        logger.error(`[company-mapping] Failed to create relationship for "${mapping.detectedName}":`, relErr.message);
+        return jsonError(`Failed to create company relationship for "${mapping.detectedName}".`, 500);
+      }
+    }
+
+    // Update the mapping object with the new company ID so the loop below works
+    mapping.companyId = newCompany.id;
+    logger.info(`[company-mapping] Created new company "${mapping.detectedName}" with id ${newCompany.id}`);
+  }
 
   // Apply each mapping
   for (const mapping of parsed.data.mappings) {
