@@ -19,10 +19,11 @@ export default async function InvestorLayout({
   // Fetch user's saved theme preference for per-user theme sync
   const { data: userData } = await supabase
     .from("users")
-    .select("preferences")
+    .select("preferences, avatar_url")
     .eq("id", freshUser!.id)
     .single();
   const savedTheme = (userData?.preferences as Record<string, unknown> | null)?.theme as string | undefined;
+  const avatarUrl = (userData?.avatar_url as string | null) ?? null;
 
   const onboardingStep = freshUser?.user_metadata?.onboarding_step ?? null;
   const onboardingComplete =
@@ -36,6 +37,7 @@ export default async function InvestorLayout({
   const userInfo = {
     fullName: freshUser?.user_metadata?.full_name ?? null,
     email: freshUser?.email ?? "",
+    avatarUrl,
   };
 
   return (

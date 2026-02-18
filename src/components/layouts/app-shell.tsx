@@ -27,6 +27,7 @@ import {
   ChevronDown,
   HelpCircle,
   BookOpen,
+  Settings,
   LogOut,
   Menu,
   X,
@@ -58,6 +59,7 @@ export type CompanyInfo = {
 export type UserInfo = {
   fullName: string | null;
   email: string;
+  avatarUrl?: string | null;
 };
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -81,6 +83,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   eye: Eye,
   "help-circle": HelpCircle,
   search: Search,
+  settings: Settings,
 };
 
 function NavIcon({ name, className }: { name?: string; className?: string }) {
@@ -336,7 +339,11 @@ export function AppShell({
                 onClick={() => { setSidebarCollapsed(false); setSettingsPanelOpen(true); }}
                 aria-label="Open settings"
               >
-                {user ? getInitials(user.fullName, user.email) : (
+                {user?.avatarUrl ? (
+                  <Image src={user.avatarUrl} alt="" width={32} height={32} className="h-8 w-8 rounded-full object-cover" unoptimized />
+                ) : user ? (
+                  getInitials(user.fullName, user.email)
+                ) : (
                   <LogOut className="h-4 w-4 text-text-muted" />
                 )}
               </button>
@@ -455,9 +462,13 @@ export function AppShell({
           aria-expanded={settingsPanelOpen}
           aria-label="Toggle settings"
         >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-hover text-xs font-medium">
-            {user ? getInitials(user.fullName, user.email) : "?"}
-          </span>
+          {user?.avatarUrl ? (
+            <Image src={user.avatarUrl} alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded-full object-cover" unoptimized />
+          ) : (
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-hover text-xs font-medium">
+              {user ? getInitials(user.fullName, user.email) : "?"}
+            </span>
+          )}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-text-primary">
               {user?.fullName || user?.email?.split("@")[0] || "User"}
