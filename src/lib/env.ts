@@ -19,6 +19,10 @@ const serverEnvSchema = z.object({
   GEMINI_MODEL: z.string().optional(),
   CRON_SECRET: z.string().optional(),
 
+  // Upstash Redis - optional, falls back to in-memory rate limiting
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+
   // Sentry - optional, only needed in production
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
   SENTRY_AUTH_TOKEN: z.string().optional(),

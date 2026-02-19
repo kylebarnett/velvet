@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   FileText,
   Trash2,
@@ -54,6 +55,13 @@ type Document = {
 const documentTypeLabels = DOCUMENT_TYPE_LABELS;
 const documentTypeShortLabels = DOCUMENT_TYPE_SHORT_LABELS;
 const documentTypeColors = DOCUMENT_TYPE_COLORS;
+
+/** Virtualization threshold — only virtualize when row count exceeds this */
+const DOC_VIRTUALIZE_THRESHOLD = 30;
+/** Estimated row height for the document table */
+const DOC_ESTIMATED_ROW_HEIGHT = 52;
+/** Number of columns in the document table */
+const DOC_COL_COUNT = 7;
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -293,6 +301,7 @@ export function FounderDocumentList() {
   const [sortDir, setSortDir] = React.useState<"asc" | "desc">("desc");
   // Track per-type counts from the unfiltered document set
   const [typeCounts, setTypeCounts] = React.useState<Record<string, number>>({});
+  const tableScrollRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     async function fetchDocuments() {
@@ -354,6 +363,15 @@ export function FounderDocumentList() {
     });
     return sorted;
   }, [filteredDocuments, sortField, sortDir]);
+
+  const shouldVirtualize = sortedDocuments.length > DOC_VIRTUALIZE_THRESHOLD;
+  const tableVirtualizer = useVirtualizer({
+    count: sortedDocuments.length,
+    getScrollElement: () => tableScrollRef.current,
+    estimateSize: () => DOC_ESTIMATED_ROW_HEIGHT,
+    overscan: 10,
+    enabled: shouldVirtualize,
+  });
 
   function handleSort(field: "name" | "type" | "size" | "date") {
     if (sortField === field) {
@@ -690,7 +708,7 @@ export function FounderDocumentList() {
                 hasPreview ? "w-80" : "flex-1"
               }`}
             >
-              <div className="h-full overflow-y-auto">
+              <div ref={!hasPreview ? tableScrollRef : undefined} className="h-full overflow-y-auto">
                 {hasPreview ? (
                   <div className="p-1.5 space-y-0.5">
                     {filteredDocuments.map((doc) => {
@@ -784,9 +802,32 @@ export function FounderDocumentList() {
                       </tr>
                     </thead>
                     <tbody>
-                      {sortedDocuments.map((doc) => (
+                      {shouldVirtualize && (
+                        <tr>
+                          <td
+                            colSpan={DOC_COL_COUNT}
+                            style={{ height: tableVirtualizer.getVirtualItems()[0]?.start ?? 0, padding: 0, border: 0 }}
+                          />
+                        </tr>
+                      )}
+                      {(shouldVirtualize
+                        ? tableVirtualizer.getVirtualItems().map((virtualRow) => ({
+                            doc: sortedDocuments[virtualRow.index],
+                            key: virtualRow.key,
+                            index: virtualRow.index,
+                            ref: tableVirtualizer.measureElement,
+                          }))
+                        : sortedDocuments.map((doc, i) => ({
+                            doc,
+                            key: doc.id,
+                            index: i,
+                            ref: undefined,
+                          }))
+                      ).map(({ doc, key, index, ref }) => (
                         <tr
-                          key={doc.id}
+                          key={key}
+                          data-index={index}
+                          ref={ref}
                           className="cursor-pointer border-b border-border-subtle hover:bg-bg-elevated"
                           onClick={() => setPreviewDoc(doc)}
                         >
@@ -854,6 +895,18 @@ export function FounderDocumentList() {
                           </td>
                         </tr>
                       ))}
+                      {shouldVirtualize && (
+                        <tr>
+                          <td
+                            colSpan={DOC_COL_COUNT}
+                            style={{
+                              height: tableVirtualizer.getTotalSize() - (tableVirtualizer.getVirtualItems().at(-1)?.end ?? 0),
+                              padding: 0,
+                              border: 0,
+                            }}
+                          />
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 )}
