@@ -10,6 +10,7 @@ import { computeRollups } from "@/lib/metrics/rollup";
 import { GettingStartedChecklist } from "@/components/ui/getting-started-checklist";
 import { AddCompanyFlow } from "@/components/investor/add-company-flow";
 import { DashboardContent } from "./dashboard-content";
+import { DashboardTabs } from "./dashboard-tabs";
 
 export const dynamic = "force-dynamic";
 
@@ -409,25 +410,12 @@ export default async function InvestorDashboardPage() {
         ]}
       />
 
-      {companies.length === 0 ? (
-        <div className="py-8">
-          <h3 className="text-base font-medium text-text-primary">No companies in your portfolio yet</h3>
-          <p className="mt-1 max-w-lg text-sm text-text-secondary">
-            Add a company to start tracking metrics, or import your portfolio in bulk. Once added, invite founders to connect and begin submitting data.
-          </p>
-          <div className="mt-4 flex items-center gap-3">
-            <AddCompanyFlow />
-            <Link
-              href="/contacts/import"
-              className="text-sm text-text-tertiary hover:text-text-secondary underline underline-offset-2"
-            >
-              Or import in bulk
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <DashboardContent companies={companies} latestMetrics={latestMetrics} secondaryMetrics={secondaryMetrics} lastSubmittedAt={lastSubmittedAt} />
-      )}
+      <DashboardTabs
+        companies={companies}
+        latestMetrics={latestMetrics}
+        secondaryMetrics={secondaryMetrics}
+        lastSubmittedAt={lastSubmittedAt}
+      />
     </div>
   );
 }

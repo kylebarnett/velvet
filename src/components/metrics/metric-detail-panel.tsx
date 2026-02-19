@@ -109,6 +109,7 @@ export function MetricDetailPanel({
   const [documents, setDocuments] = React.useState<LinkedDocument[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [isVisible, setIsVisible] = React.useState(false);
+  const closingRef = React.useRef(false);
   const [historyExpanded, setHistoryExpanded] = React.useState(true);
   const [confirming, setConfirming] = React.useState(false);
   const [periodDropdownOpen, setPeriodDropdownOpen] = React.useState(false);
@@ -192,18 +193,19 @@ export function MetricDetailPanel({
     panelRef.current?.focus({ preventScroll: true });
   }, [metricName, initialPeriod]);
 
+  const handleClose = React.useCallback(() => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    onClose();
+  }, [onClose]);
+
   React.useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") handleClose();
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  function handleClose() {
-    setIsVisible(false);
-    setTimeout(onClose, 200);
-  }
+  }, [handleClose]);
 
   React.useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -408,11 +410,16 @@ export function MetricDetailPanel({
 
   return createPortal(
     <>
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         className={`fixed inset-0 z-40 bg-bg-backdrop backdrop-blur-sm transition-opacity duration-300 ${
           isVisible ? "opacity-100" : "opacity-0"
         }`}
-        onClick={handleClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleClose();
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
         aria-hidden="true"
       />
 

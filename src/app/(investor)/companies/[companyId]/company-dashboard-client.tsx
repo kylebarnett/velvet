@@ -20,6 +20,7 @@ import {
 import { DateRange } from "@/components/dashboard/date-range-selector";
 import { CompanyDocumentsTab } from "@/components/investor/company-documents-tab";
 import { CompanyTearSheetsTab } from "@/components/investor/company-tear-sheets-tab";
+import { ActivityPanel } from "@/components/investor/activity-panel";
 import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 import { logActivity } from "@/lib/activity/log-activity";
@@ -51,7 +52,7 @@ type CompanyDashboardClientProps = {
   readOnly?: boolean;
 };
 
-type TabValue = "metrics" | "documents" | "tear-sheets";
+type TabValue = "metrics" | "documents" | "tear-sheets" | "activity";
 
 // Reorder widgets: 3 metric cards at top, then table, then other widgets
 function reorderWidgetsWithCardsFirst(widgets: Widget[]): Widget[] {
@@ -247,6 +248,7 @@ function MetricsTabContent({
   readOnly,
 }: CompanyDashboardClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [views, setViews] = React.useState(initialViews);
   const [selectedViewId, setSelectedViewId] = React.useState<string | null>(
     initialViews.find((v) => v.is_default)?.id ?? initialViews[0]?.id ?? null
@@ -263,6 +265,27 @@ function MetricsTabContent({
     periodStart?: string;
     periodType?: string;
   } | null>(null);
+
+  // Auto-open detail panel from URL query params (e.g., from activity feed click)
+  const initializedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    const metric = searchParams.get("metric");
+    if (metric) {
+      setDetailSelection({
+        metricName: metric,
+        periodStart: searchParams.get("period") ?? undefined,
+        periodType,
+      });
+      // Clean up URL params so they don't interfere with future interactions
+      const url = new URL(window.location.href);
+      url.searchParams.delete("metric");
+      url.searchParams.delete("period");
+      window.history.replaceState({}, "", url.pathname + (url.search || ""));
+    }
+  }, [searchParams, periodType]);
 
   /** Inline add metric handler — POSTs to investor metrics endpoint */
   const handleInlineMetricSave = React.useCallback(
@@ -482,6 +505,9 @@ export function CompanyDashboardClient(props: CompanyDashboardClientProps) {
           companyId={props.companyId}
           companyName={props.companyName}
         />
+      )}
+      {activeTab === "activity" && (
+        <ActivityPanel companyId={props.companyId} />
       )}
     </>
   );

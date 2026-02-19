@@ -273,4 +273,58 @@ export const investorPortfolioArticles: HelpArticle[] = [
       },
     ],
   },
+  {
+    slug: "activity-panel",
+    title: "Portfolio Activity Feed",
+    description:
+      "Stay up to date with real-time updates from your portfolio companies. See when founders submit metrics, upload documents, change access status, or fulfill metric requests.",
+    role: "investor",
+    category: "portfolio",
+    icon: "activity",
+    relatedPages: ["/companies"],
+    relatedArticles: [
+      "company-cards-approval",
+      "viewing-company-detail",
+      "creating-metric-requests",
+    ],
+    keywords: [
+      "activity",
+      "feed",
+      "updates",
+      "events",
+      "latest",
+      "notifications",
+      "metrics submitted",
+      "document uploaded",
+      "access",
+      "fulfilled",
+    ],
+    steps: [
+      {
+        title: "View the activity panel",
+        content:
+          "The Latest Updates panel appears on the right side of your Dashboard (Companies page) on desktop screens. On smaller screens, it appears below your portfolio grid. It shows a chronological list of founder actions across your approved portfolio companies.",
+      },
+      {
+        title: "Filter by time period",
+        content:
+          'Use the time filter tabs at the top of the panel to narrow the view. Choose "Today" to see only today\'s activity, "Yesterday" for the previous day, or "This week" (default) for the past 7 days.',
+      },
+      {
+        title: "Search for specific updates",
+        content:
+          "Use the search bar to find updates by company name or event description. Results filter as you type with a short delay for better performance.",
+      },
+      {
+        title: "Understand event types",
+        content:
+          'The panel shows five types of events: Metric submitted (green chart icon) when a founder submits metric data, Document uploaded (blue file icon) when a document is shared, Access approved (green shield) when a founder approves your access, Access denied (pink shield) when access is denied, and Request fulfilled (purple checkmark) when a metric request is completed.',
+      },
+      {
+        title: "Today count badge",
+        content:
+          "A blue badge next to the panel title shows how many events occurred today, giving you a quick sense of daily activity without switching to the Today filter.",
+      },
+    ],
+  },
 ];

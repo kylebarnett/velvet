@@ -2,15 +2,16 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BarChart3, FileText, FileSpreadsheet } from "lucide-react";
+import { BarChart3, FileText, FileSpreadsheet, Activity } from "lucide-react";
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 
-export type CompanyTabValue = "metrics" | "documents" | "tear-sheets";
+export type CompanyTabValue = "metrics" | "documents" | "tear-sheets" | "activity";
 
 const COMPANY_TABS: TabItem<CompanyTabValue>[] = [
   { value: "metrics", label: "Metrics", icon: BarChart3 },
   { value: "documents", label: "Documents", icon: FileText },
   { value: "tear-sheets", label: "Tear Sheets", icon: FileSpreadsheet },
+  { value: "activity", label: "Activity", icon: Activity },
 ];
 
 type CompanyDashboardTabsProps = {
