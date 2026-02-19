@@ -4,27 +4,31 @@ import { useEffect, useState, useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Check } from "lucide-react";
 
-const FIELDS = [
+const DEFAULT_FIELDS = [
   { label: "Company Name", value: "Acme Corp" },
   { label: "Email", value: "hello@acme.co" },
   { label: "Revenue", value: "$2,100,000" },
 ];
 
-export function FormFillScene() {
+export function FormFillScene({
+  fields = DEFAULT_FIELDS,
+}: {
+  fields?: Array<{ label: string; value: string }>;
+} = {}) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
   const prefersReducedMotion = useReducedMotion();
   const [activeField, setActiveField] = useState(-1);
   const [displayedValues, setDisplayedValues] = useState<string[]>(
-    FIELDS.map(() => ""),
+    fields.map(() => ""),
   );
 
   useEffect(() => {
     if (!isInView) return;
 
     if (prefersReducedMotion) {
-      setActiveField(FIELDS.length);
-      setDisplayedValues(FIELDS.map((f) => f.value));
+      setActiveField(fields.length);
+      setDisplayedValues(fields.map((f) => f.value));
       return;
     }
 
@@ -32,12 +36,12 @@ export function FormFillScene() {
     const timers: ReturnType<typeof setTimeout>[] = [];
 
     function typeField(fieldIndex: number) {
-      if (cancelled || fieldIndex >= FIELDS.length) {
-        if (!cancelled) setActiveField(FIELDS.length);
+      if (cancelled || fieldIndex >= fields.length) {
+        if (!cancelled) setActiveField(fields.length);
         return;
       }
       setActiveField(fieldIndex);
-      const text = FIELDS[fieldIndex].value;
+      const text = fields[fieldIndex].value;
       let charIndex = 0;
 
       const startDelay = setTimeout(() => {
@@ -72,12 +76,12 @@ export function FormFillScene() {
       cancelled = true;
       timers.forEach(clearTimeout);
     };
-  }, [isInView, prefersReducedMotion]);
+  }, [isInView, prefersReducedMotion, fields]);
 
   return (
     <div ref={ref} className="p-4">
       <div className="space-y-3">
-        {FIELDS.map((field, i) => {
+        {fields.map((field, i) => {
           const isActive = activeField === i;
           const isComplete =
             displayedValues[i] === field.value && activeField > i;

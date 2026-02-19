@@ -8,9 +8,14 @@ import { getVisualComponent } from "@/components/help/visuals";
 import { HelpVisualWrapper } from "@/components/help/visuals/help-visual-wrapper";
 
 function StepVisual({ visualKey }: { visualKey: HelpVisualKey }) {
-  const Component = getVisualComponent(visualKey);
-  if (!Component) return null;
-  return <HelpVisualWrapper Component={Component} />;
+  const entry = getVisualComponent(visualKey);
+  if (!entry) return null;
+  return (
+    <HelpVisualWrapper
+      Component={entry.component}
+      componentProps={entry.props}
+    />
+  );
 }
 
 function renderContent(text: string) {

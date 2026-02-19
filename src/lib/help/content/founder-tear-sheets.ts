@@ -50,7 +50,7 @@ export const founderTearSheetsArticles: HelpArticle[] = [
         title: "Create and edit",
         content:
           "Click \"Create Tear Sheet\" to create the tear sheet in draft status. You will be redirected to the tear sheet editor where you can add content sections, key metrics highlights, milestones, and narrative updates. Fill in as much detail as you want before publishing.",
-        visual: "status-change",
+        visual: "form-fill-tear-sheet",
       },
     ],
   },
@@ -102,7 +102,7 @@ export const founderTearSheetsArticles: HelpArticle[] = [
         content:
           "To share the tear sheet outside of Velvet, enable sharing. This generates a unique share link that anyone with the link can use to view the tear sheet without logging in. Click \"Copy Link\" to copy the URL and send it via email or messaging.",
         tip: "The share link works for anyone, not just Velvet users. This is useful for sharing with LPs or advisors who do not have a Velvet account.",
-        visual: "share-link",
+        visual: "share-link-tear-sheet",
       },
       {
         title: "Manage published tear sheets",

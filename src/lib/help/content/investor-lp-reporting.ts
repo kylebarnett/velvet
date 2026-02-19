@@ -35,7 +35,7 @@ export const investorLpReportingArticles: HelpArticle[] = [
         title: "Create a new fund",
         content:
           'Click "Create Fund" to open the fund creation modal. Enter the fund name (e.g., "Fund I"), vintage year, fund size, and currency (USD, EUR, or GBP). Click Create to save the fund.',
-        visual: "form-fill",
+        visual: "form-fill-fund",
         tip: "Set the vintage year to the year the fund began making investments. This is used in IRR and other time-based calculations.",
       },
       {
@@ -85,7 +85,7 @@ export const investorLpReportingArticles: HelpArticle[] = [
         content:
           'Click "Add Investment" to link a portfolio company to this fund. Select the company from your portfolio, enter the invested amount, current value, realized value, investment date, and optional notes.',
         tip: "If the company is already in your portfolio, selecting it will automatically link the investment to the company record, enabling metric data to flow into LP reports.",
-        visual: "form-fill",
+        visual: "form-fill-investment",
       },
       {
         title: "Record follow-on investments",

@@ -4,7 +4,13 @@ import { useEffect, useState, useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Check } from "lucide-react";
 
-export function CursorClickScene() {
+export function CursorClickScene({
+  buttonText = "Send Request",
+  successText = "Request sent successfully",
+}: {
+  buttonText?: string;
+  successText?: string;
+} = {}) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
   const prefersReducedMotion = useReducedMotion();
@@ -43,7 +49,7 @@ export function CursorClickScene() {
         }
         transition={{ duration: 0.2 }}
       >
-        Send Request
+        {buttonText}
       </motion.div>
 
       {/* Ripple */}
@@ -89,7 +95,7 @@ export function CursorClickScene() {
           transition={{ duration: 0.3 }}
         >
           <Check className="h-3.5 w-3.5" />
-          <span className="font-medium">Request sent successfully</span>
+          <span className="font-medium">{successText}</span>
         </motion.div>
       )}
     </div>

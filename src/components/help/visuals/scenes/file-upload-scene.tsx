@@ -4,7 +4,13 @@ import { useEffect, useState, useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { FileText, CheckCircle2 } from "lucide-react";
 
-export function FileUploadScene() {
+export function FileUploadScene({
+  filename = "Q4_Report.pdf",
+  fileSize = "2.4 MB",
+}: {
+  filename?: string;
+  fileSize?: string;
+} = {}) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
   const prefersReducedMotion = useReducedMotion();
@@ -48,9 +54,9 @@ export function FileUploadScene() {
           <FileText className="h-5 w-5 text-[var(--accent)]" />
           <div className="flex-1">
             <p className="text-xs font-medium text-text-primary">
-              Q4_Report.pdf
+              {filename}
             </p>
-            <p className="text-[10px] text-text-muted">2.4 MB</p>
+            <p className="text-[10px] text-text-muted">{fileSize}</p>
           </div>
           {phase === "complete" && (
             <motion.div

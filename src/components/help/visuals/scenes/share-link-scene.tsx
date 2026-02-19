@@ -4,9 +4,15 @@ import { useEffect, useState, useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Link2, Check } from "lucide-react";
 
-const SHARE_URL = "velvet.app/r/q4-report";
+const DEFAULT_URL = "velvet.app/r/q4-report";
 
-export function ShareLinkScene() {
+export function ShareLinkScene({
+  buttonText = "Share Report",
+  url = DEFAULT_URL,
+}: {
+  buttonText?: string;
+  url?: string;
+} = {}) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true });
   const prefersReducedMotion = useReducedMotion();
@@ -18,7 +24,7 @@ export function ShareLinkScene() {
 
     if (prefersReducedMotion) {
       setPhase("copied");
-      setDisplayedUrl(SHARE_URL);
+      setDisplayedUrl(url);
       return;
     }
 
@@ -31,8 +37,8 @@ export function ShareLinkScene() {
       const interval = setInterval(() => {
         if (cancelled) { clearInterval(interval); return; }
         ci++;
-        setDisplayedUrl(SHARE_URL.slice(0, ci));
-        if (ci >= SHARE_URL.length) {
+        setDisplayedUrl(url.slice(0, ci));
+        if (ci >= url.length) {
           clearInterval(interval);
           const t2 = setTimeout(() => setPhase("copied"), 500);
           timers.push(t2);
@@ -45,7 +51,7 @@ export function ShareLinkScene() {
       cancelled = true;
       timers.forEach(clearTimeout);
     };
-  }, [isInView, prefersReducedMotion]);
+  }, [isInView, prefersReducedMotion, url]);
 
   return (
     <div ref={ref} className="flex flex-col items-center gap-3 p-5">
@@ -56,7 +62,7 @@ export function ShareLinkScene() {
         transition={{ duration: 0.2 }}
       >
         <Link2 className="h-3.5 w-3.5" />
-        Share Report
+        {buttonText}
       </motion.div>
 
       {/* URL field */}
@@ -70,7 +76,7 @@ export function ShareLinkScene() {
           <Link2 className="h-3 w-3 shrink-0 text-text-muted" />
           <span className="flex-1 truncate text-xs text-text-primary">
             {displayedUrl}
-            {phase === "typing" && displayedUrl.length < SHARE_URL.length && (
+            {phase === "typing" && displayedUrl.length < url.length && (
               <span className="inline-block h-3.5 w-px animate-pulse bg-text-primary" />
             )}
           </span>

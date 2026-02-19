@@ -88,7 +88,7 @@ export const investorTearSheetsArticles: HelpArticle[] = [
         content:
           "The editor provides structured sections: Highlights, Key Metrics, Milestones, Challenges, Team Updates, Outlook, and Ask of Investors. Fill in each section with your analysis and notes.",
         tip: "Tear sheets you create are visible to other members of your organization but are not shared with the founder. Use them freely for internal analysis and documentation.",
-        visual: "form-fill",
+        visual: "form-fill-tear-sheet",
       },
       {
         title: "Add key metrics and highlights",

@@ -43,7 +43,7 @@ export const founderGettingStartedArticles: HelpArticle[] = [
         title: "Submit your first metrics",
         content:
           "Open \"Metric Requests\" in the sidebar. You will see a list of metrics your investors have requested, grouped by period. Click \"Submit\" on a period group to open the batch submission form, enter your values, and save. All approved investors will see the same submitted data.",
-        visual: "cursor-click",
+        visual: "cursor-click-submit",
       },
       {
         title: "Upload key documents",
@@ -93,7 +93,7 @@ export const founderGettingStartedArticles: HelpArticle[] = [
         content:
           "Enter your company name, website URL, and a short description. Select your industry from the dropdown (e.g. SaaS, Fintech, Healthcare) and choose your current stage (e.g. Seed, Series A, Series B). Pick your business model if applicable.",
         tip: "The industry and stage fields are used to match your company with relevant benchmarks. Filling them in accurately improves the reports your investors see.",
-        visual: "form-fill",
+        visual: "form-fill-company",
       },
       {
         title: "Upload a company logo",

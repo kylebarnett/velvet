@@ -96,7 +96,7 @@ export const investorPortfolioArticles: HelpArticle[] = [
         title: "Click Add Contact",
         content:
           'Click the "Add Contact" button. A form will appear asking for the contact\'s name, email address, company name, and optionally their role or title.',
-        visual: "form-fill",
+        visual: "form-fill-contact",
       },
       {
         title: "Fill in the contact details",

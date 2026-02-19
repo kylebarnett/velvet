@@ -36,7 +36,7 @@ export const sharedTeamArticles: HelpArticle[] = [
         content:
           "Click the invite button or \"Add Member\" action on the Team page. Enter the email address of the person you want to invite. They will receive an email invitation with a link to join your organization. Once they accept and create an account (or log in if they already have one), they appear in your team list.",
         tip: "Invite team members who need to view or contribute data. Each person gets their own login credentials and can access the platform independently.",
-        visual: "form-fill",
+        visual: "form-fill-team",
       },
       {
         title: "Understand roles",

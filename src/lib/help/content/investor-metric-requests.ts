@@ -96,7 +96,7 @@ export const investorMetricRequestsArticles: HelpArticle[] = [
         content:
           'Click "New Template" and give it a descriptive name (e.g., "Monthly Core Metrics" or "Quarterly Financial Review"). Select the metrics you want to include in this template.',
         tip: "Create separate templates for different reporting frequencies. For example, a monthly template with MRR, Burn Rate, and Headcount, and a quarterly template with Revenue, EBITDA, and Customer Count.",
-        visual: "form-fill",
+        visual: "form-fill-template",
       },
       {
         title: "Save the template",

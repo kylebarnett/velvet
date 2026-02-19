@@ -36,7 +36,7 @@ export const investorDocumentsArticles: HelpArticle[] = [
         content:
           "Documents are listed with the company name, document title, type (e.g., Income Statement, Balance Sheet, Board Deck, Investor Update, Cap Table), upload date, and file size. The most recently uploaded documents appear first by default.",
         tip: "Only documents from companies where you have approved access will appear. If you expect to see a document but it is missing, check that the founder has approved your access on the Companies page.",
-        visual: "table-populate",
+        visual: "table-populate-documents",
       },
       {
         title: "Filter by document type",
