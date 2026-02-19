@@ -153,7 +153,7 @@ export function MetricDrilldownPanel({
                 const dateStr = new Date().toISOString().split("T")[0];
                 const baseName = `${metricName}-breakdown-${dateStr}`;
                 if (format === "excel") {
-                  downloadExcel({ filename: baseName, headers, rows });
+                  void downloadExcel({ filename: baseName, headers, rows });
                 } else {
                   downloadCsv(`${baseName}.csv`, headers, rows);
                 }

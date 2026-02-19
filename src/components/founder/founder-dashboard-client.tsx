@@ -702,7 +702,7 @@ export function FounderDashboardClient({
           }
           return row;
         });
-        downloadExcel({
+        void downloadExcel({
           filename: `${companyName.replace(/[^a-z0-9]/gi, "_")}_metrics`,
           headers,
           rows,

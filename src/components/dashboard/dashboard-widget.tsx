@@ -1,11 +1,13 @@
 "use client";
 
-import { LineChart } from "@/components/charts/line-chart";
-import { BarChart } from "@/components/charts/bar-chart";
-import { AreaChart } from "@/components/charts/area-chart";
-import { PieChart } from "@/components/charts/pie-chart";
+import dynamic from "next/dynamic";
 import { MetricCard } from "./metric-card";
 import { MetricsTable } from "./metrics-table";
+
+const LineChart = dynamic(() => import("@/components/charts/line-chart").then(m => m.LineChart), { ssr: false });
+const BarChart = dynamic(() => import("@/components/charts/bar-chart").then(m => m.BarChart), { ssr: false });
+const AreaChart = dynamic(() => import("@/components/charts/area-chart").then(m => m.AreaChart), { ssr: false });
+const PieChart = dynamic(() => import("@/components/charts/pie-chart").then(m => m.PieChart), { ssr: false });
 import {
   Widget,
   MetricValue,

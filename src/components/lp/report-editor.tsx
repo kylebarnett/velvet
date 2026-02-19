@@ -22,8 +22,10 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+import dynamic from "next/dynamic";
 import { SlidingTabs, type TabItem } from "@/components/ui/sliding-tabs";
-import { RichTextEditor } from "@/components/founder/rich-text-editor";
+
+const RichTextEditor = dynamic(() => import("@/components/founder/rich-text-editor").then(m => m.RichTextEditor), { ssr: false });
 import { ReportPreview } from "./report-preview";
 import { ThemeSelector } from "./theme-selector";
 import { ConfirmModal } from "@/components/ui/confirm-modal";

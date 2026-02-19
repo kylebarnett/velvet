@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { Sliders, ChevronDown, Check, Loader2 } from "lucide-react";
 import { TileMetricConfig } from "./tile-metric-config";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
@@ -18,6 +19,17 @@ type MetricOption = {
   name: string;
   displayName: string;
 };
+
+/** Known acronyms that should stay uppercase */
+const METRIC_ACRONYMS = new Set(["arr", "mrr", "gmv", "arpu", "cac", "ltv", "nps", "dau", "mau", "roi", "yoy", "mom", "qoq", "ai", "ml"]);
+
+/** Convert a lowercase metric name back to title case for display */
+function formatMetricLabel(name: string): string {
+  return name
+    .split(/[\s_]+/)
+    .map((w) => METRIC_ACRONYMS.has(w.toLowerCase()) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
 
 type TileSettingsMenuProps = {
   companies: Company[];
@@ -104,7 +116,7 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-raised px-3 py-2 text-xs font-medium text-text-tertiary hover:border-border-default hover:text-text-secondary transition-colors"
+          className="flex h-9 items-center gap-2 rounded-md border border-border-default bg-bg-input px-3 text-sm text-text-primary transition-colors hover:border-border-default/150"
         >
           <Sliders className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Tile Settings</span>
@@ -135,7 +147,7 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
                   >
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded border border-border-default bg-bg-elevated">
                       {logoUrl ? (
-                        <img src={logoUrl} alt="" className="h-full w-full object-cover" />
+                        <Image src={logoUrl} alt="" width={28} height={28} className="h-full w-full object-cover" />
                       ) : (
                         <span className="text-xs font-medium text-text-tertiary">{initial}</span>
                       )}
@@ -144,8 +156,8 @@ export function TileSettingsMenu({ companies }: TileSettingsMenuProps) {
                       <div className="text-sm text-text-primary truncate">{company.name}</div>
                       {hasCustomSettings && (
                         <div className="text-xs text-text-muted truncate">
-                          {settings?.primary}
-                          {settings?.secondary && `, ${settings.secondary}`}
+                          {formatMetricLabel(settings.primary!)}
+                          {settings?.secondary && `, ${formatMetricLabel(settings.secondary)}`}
                         </div>
                       )}
                     </div>

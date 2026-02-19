@@ -9,9 +9,22 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
+    exclude: ["src/test/e2e/**", "node_modules/**"],
+    testTimeout: 10000,
     coverage: {
-      reporter: ["text", "lcov"],
-      include: ["src/lib/**"],
+      provider: "v8",
+      reporter: ["text", "text-summary", "lcov", "json-summary"],
+      include: [
+        "src/lib/**",
+        "src/hooks/**",
+        "src/components/**",
+        "src/app/api/**",
+      ],
+      exclude: [
+        "src/lib/help/content/**",
+        "**/*.test.{ts,tsx}",
+        "**/*.d.ts",
+      ],
     },
   },
   resolve: {

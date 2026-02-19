@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import { Plus, X, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import { RichTextEditor } from "@/components/founder/rich-text-editor";
+
+const RichTextEditor = dynamic(() => import("@/components/founder/rich-text-editor").then(m => m.RichTextEditor), { ssr: false });
 import { formatValue } from "@/components/charts/types";
 
 type TearSheet = {

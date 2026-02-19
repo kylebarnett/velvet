@@ -1,9 +1,7 @@
 /**
  * Excel export utility — creates .xlsx files from tabular data.
- * Uses the xlsx (SheetJS) package.
+ * Uses the xlsx (SheetJS) package, loaded dynamically to reduce bundle size.
  */
-
-import * as XLSX from "xlsx";
 
 type ExcelExportOptions = {
   /** Output filename (without .xlsx extension) */
@@ -30,12 +28,14 @@ function escapeExcelCell(value: string | number | null): string | number | null 
   return value;
 }
 
-export function downloadExcel({
+export async function downloadExcel({
   filename,
   headers,
   rows,
   sheetName = "Data",
-}: ExcelExportOptions): void {
+}: ExcelExportOptions): Promise<void> {
+  const XLSX = await import("xlsx");
+
   // Escape all cell values
   const safeHeaders = headers.map((h) => escapeExcelCell(h) ?? "");
   const safeRows = rows.map((row) => row.map(escapeExcelCell));

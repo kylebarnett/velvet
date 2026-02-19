@@ -1,10 +1,21 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
+import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   experimental: {
     staleTimes: {
       dynamic: 0,
     },
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/**",
+      },
+    ],
   },
   async redirects() {
     return [
@@ -49,7 +60,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: `default-src 'self'; script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://*.supabase.co; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-src 'self' https://*.supabase.co blob:; frame-ancestors 'none'`,
+            value: `default-src 'self'; script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://*.supabase.co; font-src 'self'; connect-src 'self' https://*.supabase.co https://*.ingest.sentry.io; frame-src 'self' https://*.supabase.co blob:; frame-ancestors 'none'`,
           },
         ],
       },
@@ -57,4 +68,17 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const analyzed = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+})(nextConfig);
+
+export default withSentryConfig(analyzed, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+  disableLogger: true,
+});

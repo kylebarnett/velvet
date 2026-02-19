@@ -193,7 +193,7 @@ export function ReportEditor({
         downloadCsv(`${name}.csv`, headers, rows);
       }
       if (format === "excel") {
-        downloadExcel({
+        void downloadExcel({
           filename: name,
           headers,
           rows: Object.entries(summaryState.aggregates).map(([metric, agg]) => [
