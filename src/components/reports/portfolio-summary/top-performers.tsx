@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { TrendingUp, ChevronRight } from "lucide-react";
 import { INDUSTRY_LABELS, STAGE_LABELS } from "@/lib/constants/industries";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 
 type TopPerformersProps = {
   companies: Array<{
@@ -126,7 +127,7 @@ export function TopPerformers({ companies }: TopPerformersProps) {
                 </span>
                 {company.revenueMetric && (
                   <span className="text-[10px] uppercase tracking-wide text-text-faint">
-                    {company.revenueMetric}
+                    {formatMetricDisplayName(company.revenueMetric)}
                   </span>
                 )}
               </div>

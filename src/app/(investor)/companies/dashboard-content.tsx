@@ -11,6 +11,7 @@ import { CompanyCardMenu } from "@/components/investor/company-card-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
 import { getTagLabel } from "@/lib/company/constants";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 
 type Company = {
   id: string;
@@ -190,7 +191,7 @@ function CompanyListRow({
           <>
             <div className="text-right">
               <div className="text-xs text-text-tertiary">
-                {latestMetric.name}
+                {formatMetricDisplayName(latestMetric.name)}
                 {latestMetric.periodLabel && (
                   <span className="ml-1 text-text-faint">· {latestMetric.periodLabel}</span>
                 )}
@@ -206,7 +207,7 @@ function CompanyListRow({
               <>
                 <div className="text-right border-l border-border-subtle pl-6">
                   <div className="text-xs text-text-tertiary">
-                    {secondaryMetric.name}
+                    {formatMetricDisplayName(secondaryMetric.name)}
                     {secondaryMetric.periodLabel && (
                       <span className="ml-1 text-text-faint">· {secondaryMetric.periodLabel}</span>
                     )}

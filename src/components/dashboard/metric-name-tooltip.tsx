@@ -7,6 +7,7 @@ import {
   resolveMetricDefinition,
   inferMetricValueType,
   getMetricDefinition,
+  formatMetricDisplayName,
   type MetricValueType,
 } from "@/lib/metric-definitions";
 import { getDefaultAggregationType, getAggregationIndicator } from "@/lib/metrics/temporal-aggregation";
@@ -167,7 +168,7 @@ export function MetricNameTooltip({
         <div className="p-3 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-text-primary truncate">
-              Edit: {metricName}
+              Edit: {formatMetricDisplayName(metricName)}
             </span>
             <button
               type="button"
@@ -246,7 +247,7 @@ export function MetricNameTooltip({
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="text-xs font-medium text-text-primary truncate">
-                {metricName}
+                {formatMetricDisplayName(metricName)}
               </span>
               {isCustom && (
                 <span className="shrink-0 rounded bg-[var(--tag-violet-bg)] px-1 py-px text-[9px] font-medium text-[var(--tag-violet-text)]">

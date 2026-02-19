@@ -12,7 +12,7 @@ const MetricDetailPanel = dynamic(
   { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
 );
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
-import { getMetricDefinition, inferMetricValueType } from "@/lib/metric-definitions";
+import { getMetricDefinition, inferMetricValueType, formatMetricDisplayName } from "@/lib/metric-definitions";
 import {
   type RawMetric,
   type ReportCard,
@@ -117,7 +117,7 @@ function MetricInfoTooltip({ metricName }: { metricName: string }) {
       </button>
       {show && (
         <div className="absolute bottom-full left-0 z-50 mb-2 w-64 rounded-lg border border-border-default bg-bg-secondary p-3 shadow-xl">
-          <p className="text-xs font-medium text-text-primary">{metricName}</p>
+          <p className="text-xs font-medium text-text-primary">{formatMetricDisplayName(metricName)}</p>
           <p className="mt-1 text-xs text-text-tertiary">{info.description}</p>
           {info.formula && (
             <div className="mt-2 rounded bg-bg-elevated px-2 py-1.5">

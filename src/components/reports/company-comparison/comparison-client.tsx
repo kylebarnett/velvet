@@ -6,6 +6,7 @@ import { ChevronDown, Check, X, BarChart3, Table2, Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils/cn";
 import { formatPeriod } from "@/components/charts/types";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 import { SlidingIconTabs } from "@/components/ui/sliding-tabs";
 import {
   Select,
@@ -617,7 +618,7 @@ export function ComparisonClient({
 
             return (
               <div key={metric}>
-                <h3 className="mb-2 text-sm font-medium text-text-primary">{metric}</h3>
+                <h3 className="mb-2 text-sm font-medium text-text-primary">{formatMetricDisplayName(metric)}</h3>
                 <ComparisonTable
                   data={data}
                   companies={companyNames}

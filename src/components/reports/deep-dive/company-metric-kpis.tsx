@@ -2,6 +2,7 @@
 
 import { formatValue } from "@/components/charts/types";
 import { formatPeriod } from "@/components/charts/types";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 
 type MetricKPI = {
   name: string;
@@ -31,7 +32,7 @@ export function CompanyMetricKPIs({ metrics }: CompanyMetricKPIsProps) {
           key={metric.name}
           className="rounded-lg border border-border-subtle bg-bg-elevated p-3"
         >
-          <div className="text-xs font-medium text-text-muted">{metric.name}</div>
+          <div className="text-xs font-medium text-text-muted">{formatMetricDisplayName(metric.name)}</div>
           <div className="mt-1 text-lg font-semibold tabular-nums text-text-primary">
             {metric.formattedValue}
           </div>

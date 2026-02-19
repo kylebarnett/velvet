@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SlidingTabs, type TabItem } from "@/components/ui/sliding-tabs";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
-import { METRIC_DEFINITIONS, inferMetricValueType } from "@/lib/metric-definitions";
+import { METRIC_DEFINITIONS, inferMetricValueType, formatMetricDisplayName } from "@/lib/metric-definitions";
 import {
   type Period,
   generateQuarterlyPeriods,
@@ -425,8 +425,8 @@ function SpreadsheetTable({
                 {/* Metric name cell (sticky) */}
                 <td className="sticky left-0 z-10 border-b border-r border-border-default bg-bg-primary px-3 py-1.5">
                   <div className="flex items-center justify-between gap-1">
-                    <span className="truncate text-sm font-medium text-text-primary" title={metric}>
-                      {metric}
+                    <span className="truncate text-sm font-medium text-text-primary" title={formatMetricDisplayName(metric)}>
+                      {formatMetricDisplayName(metric)}
                     </span>
                     <button
                       type="button"

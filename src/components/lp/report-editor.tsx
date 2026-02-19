@@ -182,6 +182,39 @@ function filterMetricsByQuarters(metrics: CompanyMetricValue[], quarters: string
   });
 }
 
+/**
+ * Collapse metrics into quarterly buckets.
+ * If multiple values exist for the same metric+quarter (e.g. 3 monthly entries),
+ * keep the one with the latest period_start (most recent month in that quarter).
+ * All returned entries have period_type = "quarterly" and period_start set to
+ * the quarter start date so the preview renders quarterly columns.
+ */
+function collapseToQuarterly(metrics: CompanyMetricValue[]): CompanyMetricValue[] {
+  // key: "metric_name|Q1 2025" → best entry
+  const best = new Map<string, CompanyMetricValue>();
+  for (const m of metrics) {
+    const d = new Date(m.period_start + "T00:00:00");
+    const q = Math.floor(d.getMonth() / 3) + 1;
+    const qLabel = `Q${q} ${d.getFullYear()}`;
+    const key = `${m.metric_name}|${qLabel}`;
+    const existing = best.get(key);
+    if (!existing || m.period_start > existing.period_start) {
+      // Quarter start date: first month of the quarter
+      const qStartMonth = (q - 1) * 3;
+      const qStart = `${d.getFullYear()}-${String(qStartMonth + 1).padStart(2, "0")}-01`;
+      const qEndDate = new Date(d.getFullYear(), qStartMonth + 3, 0);
+      const qEnd = qEndDate.toISOString().slice(0, 10);
+      best.set(key, {
+        ...m,
+        period_type: "quarterly",
+        period_start: qStart,
+        period_end: qEnd,
+      });
+    }
+  }
+  return [...best.values()];
+}
+
 export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
   const router = useRouter();
   const previewRef = useRef<HTMLDivElement>(null);
@@ -449,7 +482,8 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             const filtered = quarters
               ? filterMetricsByQuarters(companyMetricsCache[id], quarters)
               : companyMetricsCache[id];
-            return [id, filtered];
+            // Collapse monthly metrics into quarterly buckets for the LP report
+            return [id, collapseToQuarterly(filtered)];
           }),
       ),
       metricQuarters,
@@ -625,12 +659,14 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
         const filtered = quarters
           ? filterMetricsByQuarters(allMetrics, quarters)
           : allMetrics;
+        // Collapse monthly metrics into quarterly buckets for the LP report
+        const collapsed = collapseToQuarterly(filtered);
         result[inv.company_id] = {
           companyName: inv.company_name,
           invested: inv.invested_amount,
           current: inv.current_value,
           realized: inv.realized_value,
-          metrics: filtered,
+          metrics: collapsed,
           metricOrder: metricOrder[inv.company_id],
         };
       }

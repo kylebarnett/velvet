@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { createPortal } from "react-dom";
 import { formatValue, formatPeriod } from "@/components/charts/types";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 import { Sparkles, RotateCcw, Info, GripVertical, ArrowUpDown, Plus, Pencil, Layers } from "lucide-react";
 import { InlineAddMetricRow } from "./inline-add-metric-row";
 import {
@@ -352,11 +353,11 @@ function SortableMetricRow({
       >
         <span
           className="inline-flex max-w-full items-center gap-1.5 cursor-default"
-          title={metric.metricName}
+          title={formatMetricDisplayName(metric.metricName)}
           onMouseEnter={handleNameMouseEnter}
           onMouseLeave={onMetricInfoLeave}
         >
-          <span className="truncate font-medium text-text-primary">{metric.metricName}</span>
+          <span className="truncate font-medium text-text-primary">{formatMetricDisplayName(metric.metricName)}</span>
           <span
             ref={infoBtnRef}
             className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 text-text-faint"

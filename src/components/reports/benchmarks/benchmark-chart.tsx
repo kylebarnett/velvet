@@ -14,6 +14,7 @@ import {
 
 import { formatCompactValue } from "@/components/charts/types";
 import { useChartTheme } from "@/hooks/use-chart-theme";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 
 type CompanyBenchmark = {
   id: string;
@@ -121,7 +122,7 @@ export function BenchmarkChart({
     <div className="rounded-xl border border-border-default card-surface p-4">
       <div className="mb-1 flex items-center justify-between">
         <h3 className="text-sm font-medium text-text-primary">
-          {metricName} - Portfolio vs Benchmarks
+          {formatMetricDisplayName(metricName)} - Portfolio vs Benchmarks
         </h3>
         <div className="flex items-center gap-3">
           {(

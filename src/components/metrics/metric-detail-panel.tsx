@@ -16,6 +16,7 @@ import {
   Pencil,
   Calendar,
 } from "lucide-react";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -456,7 +457,7 @@ export function MetricDetailPanel({
             id="metric-detail-title"
             className="mt-3 pr-12 text-[22px] font-semibold leading-tight tracking-tight text-text-primary"
           >
-            {metricName}
+            {formatMetricDisplayName(metricName)}
           </h2>
 
           {values.length > 0 && selectedPeriodLabel && (

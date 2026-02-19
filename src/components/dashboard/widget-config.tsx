@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { X, Trash2 } from "lucide-react";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 import {
   Select,
   SelectContent,
@@ -122,7 +123,7 @@ export function WidgetConfig({
                         }}
                         className="rounded border-border-default"
                       />
-                      {metric}
+                      {formatMetricDisplayName(metric)}
                     </label>
                   ))
                 )}
@@ -168,7 +169,7 @@ export function WidgetConfig({
                   <SelectItem value="__none__">Select a metric...</SelectItem>
                   {availableMetrics.map((metric) => (
                     <SelectItem key={metric} value={metric}>
-                      {metric}
+                      {formatMetricDisplayName(metric)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -220,7 +221,7 @@ export function WidgetConfig({
                           }}
                           className="rounded border-border-default"
                         />
-                        {metric}
+                        {formatMetricDisplayName(metric)}
                       </label>
                     ))
                   )}

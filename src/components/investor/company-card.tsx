@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
 import { getCompanyLogoUrl } from "@/lib/utils/logo";
 import { getTagLabel } from "@/lib/company/constants";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 import { CompanyCardMenu } from "@/components/investor/company-card-menu";
 
 type MetricSnapshot = {
@@ -205,7 +206,7 @@ export function CompanyCard({
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs text-text-tertiary">
-                {latestMetric.name}
+                {formatMetricDisplayName(latestMetric.name)}
                 {latestMetric.periodLabel && (
                   <span className="ml-1 text-text-faint">· {latestMetric.periodLabel}</span>
                 )}
@@ -222,7 +223,7 @@ export function CompanyCard({
             <div className="flex items-center justify-between border-t border-border-subtle pt-2">
               <div>
                 <div className="text-xs text-text-muted">
-                  {secondaryMetric.name}
+                  {formatMetricDisplayName(secondaryMetric.name)}
                   {secondaryMetric.periodLabel && (
                     <span className="ml-1 text-text-faint">· {secondaryMetric.periodLabel}</span>
                   )}

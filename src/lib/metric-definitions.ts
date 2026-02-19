@@ -290,6 +290,44 @@ export const METRIC_DEFINITIONS: Record<string, MetricInfo> = {
   },
 };
 
+/**
+ * Return the properly capitalized display name for a metric.
+ * Looks up canonical casing from METRIC_DEFINITIONS, falling back to smart title-casing.
+ */
+export function formatMetricDisplayName(metricName: string): string {
+  if (!metricName) return metricName;
+
+  // Exact match
+  if (METRIC_DEFINITIONS[metricName]) return metricName;
+
+  // Case-insensitive match against known definitions
+  const lowerName = metricName.toLowerCase().trim();
+  for (const key of Object.keys(METRIC_DEFINITIONS)) {
+    if (key.toLowerCase() === lowerName) return key;
+  }
+
+  // Fallback: smart title-case with known acronyms
+  const ACRONYMS = new Set([
+    "mrr", "arr", "cac", "ltv", "nps", "gmv", "aov", "arpu",
+    "dau", "wau", "mau", "ebitda", "cogs", "opex", "saas", "roi",
+    "grr", "nrr", "api",
+  ]);
+  return metricName
+    .split(/\s+/)
+    .map((word) => {
+      const lower = word.toLowerCase();
+      if (ACRONYMS.has(lower)) return word.toUpperCase();
+      // Handle colon-separated tokens like "LTV:CAC"
+      if (lower.includes(":")) {
+        return lower.split(":").map((part) =>
+          ACRONYMS.has(part) ? part.toUpperCase() : part.charAt(0).toUpperCase() + part.slice(1)
+        ).join(":");
+      }
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+    })
+    .join(" ");
+}
+
 export function getMetricDefinition(metricName: string): MetricInfo | null {
   if (METRIC_DEFINITIONS[metricName]) {
     return METRIC_DEFINITIONS[metricName];

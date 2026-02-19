@@ -13,6 +13,7 @@ import {
 
 import { getChartColor, formatValue, formatCompactValue, formatPeriod } from "@/components/charts/types";
 import { useChartTheme } from "@/hooks/use-chart-theme";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 import type { NormalizationMode } from "./normalization-toggle";
 
 type ComparisonChartProps = {
@@ -93,7 +94,7 @@ export function ComparisonChart({
 
   return (
     <div className="rounded-xl border border-border-default card-surface p-4">
-      <h3 className="mb-3 text-sm font-medium text-text-primary">{metricName}</h3>
+      <h3 className="mb-3 text-sm font-medium text-text-primary">{formatMetricDisplayName(metricName)}</h3>
       <ResponsiveContainer width="100%" height={height}>
         <RechartsLineChart
           data={data}

@@ -12,6 +12,7 @@ import {
 
 import { useChartTheme } from "@/hooks/use-chart-theme";
 import { formatValue, formatCompactValue, formatPeriod } from "@/components/charts/types";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 
 type TimeSeriesPoint = {
   periodStart: string;
@@ -55,7 +56,7 @@ export function CompanyMetricTrends({
             className="rounded-lg border border-border-subtle bg-bg-elevated p-3"
           >
             <h4 className="mb-2 text-xs font-medium text-text-secondary">
-              {metricName}
+              {formatMetricDisplayName(metricName)}
             </h4>
             <ResponsiveContainer width="100%" height={180}>
               <AreaChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>

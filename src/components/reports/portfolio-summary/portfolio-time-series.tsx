@@ -15,6 +15,7 @@ import { Loader2, TrendingUp } from "lucide-react";
 import { useChartTheme } from "@/hooks/use-chart-theme";
 import { formatValue, formatCompactValue } from "@/components/charts/types";
 import { findDefaultMetric } from "@/lib/reports/constants";
+import { formatMetricDisplayName } from "@/lib/metric-definitions";
 import {
   Select,
   SelectContent,
@@ -102,7 +103,7 @@ export function PortfolioTimeSeries({
           <SelectContent>
             {availableMetrics.map((m) => (
               <SelectItem key={m} value={m}>
-                {m}
+                {formatMetricDisplayName(m)}
               </SelectItem>
             ))}
           </SelectContent>
