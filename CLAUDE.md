@@ -184,3 +184,7 @@ CRON_SECRET=
 - [ ] Re-enable email confirmation in Supabase Auth settings
 - [ ] Configure email sending domain (verify in Resend)
 - [ ] Set `NEXT_PUBLIC_APP_URL` to production domain
+- [ ] Set up Upstash Redis for distributed rate limiting (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` in Vercel env vars — [upstash.com](https://upstash.com), free tier)
+- [ ] Set up Codecov for PR coverage reporting (`CODECOV_TOKEN` in GitHub repo secrets — [codecov.io](https://codecov.io), free tier)
+- [ ] Set up Sentry for error monitoring (`NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` — install Sentry Vercel integration)
+- [ ] Add E2E test credentials to GitHub secrets (`E2E_INVESTOR_EMAIL`, `E2E_INVESTOR_PASSWORD`, `E2E_FOUNDER_EMAIL`, `E2E_FOUNDER_PASSWORD`)
