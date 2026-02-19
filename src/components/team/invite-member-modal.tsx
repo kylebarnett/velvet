@@ -90,7 +90,8 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
             <h3 id={titleId} className="text-base font-semibold">Invite Team Member</h3>
             <button
               onClick={onClose}
-              className="rounded-md p-1 text-text-muted hover:bg-bg-elevated hover:text-text-tertiary"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-bg-elevated hover:text-text-tertiary"
+              aria-label="Close"
             >
               <X className="h-4 w-4" />
             </button>
@@ -102,11 +103,12 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
                 Invitation created for {email}
               </div>
               <div>
-                <label className="text-xs text-text-tertiary">
+                <label htmlFor="invite-link" className="text-xs text-text-tertiary">
                   Invite Link (Dev Mode)
                 </label>
                 <div className="mt-1 flex gap-2">
                   <input
+                    id="invite-link"
                     type="text"
                     readOnly
                     value={inviteUrl}
@@ -137,8 +139,9 @@ export function InviteMemberModal({ orgId, open, onClose, onInvited }: Props) {
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-text-tertiary">Email<span className="text-[var(--error-accent)]"> *</span></label>
+                <label htmlFor="invite-email" className="text-xs text-text-tertiary">Email<span className="text-[var(--error-accent)]"> *</span></label>
                 <input
+                  id="invite-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

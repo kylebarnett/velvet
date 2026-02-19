@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
-import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 
@@ -25,7 +24,7 @@ export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   const url = new URL(req.url);
@@ -94,29 +93,29 @@ export async function GET(req: Request) {
     return jsonError("Failed to process request.", 500);
   }
 
-  // Sorting by company name requires in-memory sort because Supabase
-  // referencedTable ordering only sorts the embedded rows, not parent rows.
-  const isCompanySort = sortField === "company" || !["contact", "position", "email", "status"].includes(sortField);
   const ascending = sortDir !== "desc";
 
-  if (!isCompanySort) {
-    // Direct-column sorts can use DB-level ordering + pagination
-    switch (sortField) {
-      case "contact":
-        dataQuery = dataQuery.order("last_name", { ascending }).order("first_name", { ascending });
-        break;
-      case "position":
-        dataQuery = dataQuery.order("position", { ascending, nullsFirst: false });
-        break;
-      case "email":
-        dataQuery = dataQuery.order("email", { ascending });
-        break;
-      case "status":
-        dataQuery = dataQuery.order("status", { ascending });
-        break;
-    }
-    dataQuery = dataQuery.range(offset, offset + limit - 1);
+  switch (sortField) {
+    case "contact":
+      dataQuery = dataQuery.order("last_name", { ascending }).order("first_name", { ascending });
+      break;
+    case "position":
+      dataQuery = dataQuery.order("position", { ascending, nullsFirst: false });
+      break;
+    case "email":
+      dataQuery = dataQuery.order("email", { ascending });
+      break;
+    case "status":
+      dataQuery = dataQuery.order("status", { ascending });
+      break;
+    case "company":
+    default:
+      // Use Supabase foreign table ordering to sort by joined company name at DB level
+      dataQuery = dataQuery.order("name", { referencedTable: "companies", ascending });
+      break;
   }
+
+  dataQuery = dataQuery.range(offset, offset + limit - 1);
 
   const { data, error } = await dataQuery;
 
@@ -125,18 +124,7 @@ export async function GET(req: Request) {
     return jsonError("Failed to process request.", 500);
   }
 
-  let results = (data ?? []) as ContactRow[];
-
-  if (isCompanySort) {
-    // Sort by company name in JS, then paginate in JS
-    const dir = ascending ? 1 : -1;
-    results.sort((a, b) => {
-      const nameA = (unwrapJoin(a.companies) as { name: string } | null)?.name ?? "";
-      const nameB = (unwrapJoin(b.companies) as { name: string } | null)?.name ?? "";
-      return dir * nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
-    });
-    results = results.slice(offset, offset + limit);
-  }
+  const results = (data ?? []) as ContactRow[];
 
   const total = totalCount ?? 0;
   const totalPages = Math.ceil(total / limit);
@@ -164,7 +152,7 @@ export async function PUT(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   const parsed = updateSchema.safeParse(await req.json().catch(() => null));
@@ -202,7 +190,7 @@ export async function DELETE(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   const parsed = deleteSchema.safeParse(await req.json().catch(() => null));
@@ -214,7 +202,7 @@ export async function DELETE(req: Request) {
 
   const { data: invitation, error: fetchError } = await supabase
     .from("portfolio_invitations")
-    .select("company_id, companies(founder_id)")
+    .select("company_id")
     .eq("id", id)
     .eq("investor_id", user.id)
     .single();
@@ -223,28 +211,11 @@ export async function DELETE(req: Request) {
     return jsonError("Contact not found.", 404);
   }
 
+  // Admin client used after ownership verification above
   const adminClient = createSupabaseAdminClient();
 
+  // Only delete the invitation — keep the company and relationship intact
   await adminClient.from("portfolio_invitations").delete().eq("id", id);
-  await adminClient
-    .from("investor_company_relationships")
-    .delete()
-    .eq("company_id", invitation.company_id)
-    .eq("investor_id", user.id);
-
-  // Only delete company if no founder has signed up AND no other investors are linked
-  const companiesRaw = invitation.companies;
-  const company = unwrapJoin(companiesRaw) as { founder_id: string | null } | null;
-  if (!company?.founder_id) {
-    const { count } = await adminClient
-      .from("investor_company_relationships")
-      .select("id", { count: "exact", head: true })
-      .eq("company_id", invitation.company_id);
-
-    if (!count || count === 0) {
-      await adminClient.from("companies").delete().eq("id", invitation.company_id);
-    }
-  }
 
   return NextResponse.json({ ok: true });
 }

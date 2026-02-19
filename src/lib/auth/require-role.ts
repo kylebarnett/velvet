@@ -13,7 +13,7 @@ export async function requireUser() {
 
 export async function requireRole(role: "investor" | "founder") {
   const user = await requireUser();
-  const userRole = (user.user_metadata?.role as string | undefined) ?? null;
+  const userRole = (user.app_metadata?.role as string | undefined) ?? null;
   if (userRole !== role) redirect("/app");
   return user;
 }

@@ -610,7 +610,6 @@ export function AddMetricModal({
                 tabs={periodTypeTabs}
                 value={periodType}
                 onChange={setPeriodType}
-                variant="pill"
                 size="sm"
                 showIcons={false}
               />

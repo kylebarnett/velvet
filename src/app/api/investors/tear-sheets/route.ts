@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
+import { checkRateLimit, getClientIp } from "@/lib/api/rate-limit";
 import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
@@ -13,12 +15,14 @@ const createSchema = z.object({
 });
 
 // GET - List all investor tear sheets across companies
-export async function GET() {
+export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
+
+  const { limit, offset } = parsePagination(new URL(req.url));
 
   // RLS handles filtering: returns investor's own tear sheets (any status)
   // + published founder tear sheets for approved companies
@@ -32,7 +36,8 @@ export async function GET() {
       investor:users!tear_sheets_investor_id_fkey(full_name)
     `)
     .order("year", { ascending: false })
-    .order("quarter", { ascending: false });
+    .order("quarter", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) {
     logger.error("Investor tear sheet list error:", error);
@@ -62,10 +67,18 @@ export async function GET() {
 
 // POST - Create an investor tear sheet
 export async function POST(req: Request) {
+  const ip = getClientIp(req);
+  const { allowed, retryAfter } = checkRateLimit(`investor-tear-sheets-create:${ip}`, 10, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
+
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const parsed = createSchema.safeParse(await req.json().catch(() => null));

@@ -53,7 +53,7 @@ export default async function ScheduleDetailPage({
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
-  if (user.user_metadata?.role !== "investor") redirect("/portal");
+  if (user.app_metadata?.role !== "investor") redirect("/portal");
 
   // Fetch schedule with template and runs
   const { data: schedule, error } = await supabase
@@ -160,7 +160,7 @@ export default async function ScheduleDetailPage({
 
   return (
     <div className="space-y-6">
-      <Breadcrumbs items={[
+      <Breadcrumbs icon="send" items={[
         { label: "Metric Requests", href: "/metric-requests" },
         { label: schedule.name },
       ]} />

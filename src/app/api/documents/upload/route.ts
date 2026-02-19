@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = (user.user_metadata?.role as string | undefined) ?? null;
+  const role = (user.app_metadata?.role as string | undefined) ?? null;
   if (role !== "founder") return jsonError("Forbidden.", 403);
 
   // Rate limit: 10 uploads per minute per user

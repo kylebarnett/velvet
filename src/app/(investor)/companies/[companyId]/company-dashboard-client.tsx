@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Settings, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -16,12 +17,17 @@ import {
   PeriodType,
   DashboardLayout,
   ensureMetricsTable,
+  getWidgetColSpanClass,
 } from "@/components/dashboard";
 import { DateRange } from "@/components/dashboard/date-range-selector";
 import { CompanyDocumentsTab } from "@/components/investor/company-documents-tab";
 import { CompanyTearSheetsTab } from "@/components/investor/company-tear-sheets-tab";
 import { ActivityPanel } from "@/components/investor/activity-panel";
-import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
+
+const MetricDetailPanel = dynamic(
+  () => import("@/components/metrics/metric-detail-panel").then(m => ({ default: m.MetricDetailPanel })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 import { logActivity } from "@/lib/activity/log-activity";
 import { logger } from "@/lib/logger";
@@ -420,19 +426,14 @@ function MetricsTabContent({
       {/* Dashboard grid - stacked on mobile, grid on desktop */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-12">
         {widgets.map((widget) => {
-          // Calculate responsive column span
-          const colSpanClass = widget.w <= 4
-            ? "sm:col-span-4 md:col-span-4 lg:col-span-4"
-            : widget.w <= 6
-              ? "sm:col-span-6 md:col-span-6 lg:col-span-6"
-              : "sm:col-span-12";
+          const colSpanClass = getWidgetColSpanClass(widget.w);
 
           return (
             <div
               key={widget.id}
               className={`rounded-xl border border-border-subtle bg-bg-raised p-3 sm:p-4 ${colSpanClass}`}
               style={{
-                minHeight: `${widget.h * 80}px`,
+                minHeight: `${widget.h * 100}px`,
               } as React.CSSProperties}
             >
               <DashboardWidget

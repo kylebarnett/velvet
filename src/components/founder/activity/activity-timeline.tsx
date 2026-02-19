@@ -110,7 +110,7 @@ export function ActivityTimeline({ selectedActorId }: ActivityTimelineProps) {
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="inline-flex h-8 items-center rounded-md border border-border-default px-3 text-xs text-text-secondary hover:bg-bg-hover disabled:opacity-40"
+            className="inline-flex h-8 items-center rounded-md border border-border-default px-3 text-xs text-text-secondary hover:bg-bg-hover disabled:opacity-60"
           >
             Previous
           </button>
@@ -121,7 +121,7 @@ export function ActivityTimeline({ selectedActorId }: ActivityTimelineProps) {
             type="button"
             onClick={() => setPage((p) => p + 1)}
             disabled={(page + 1) * PAGE_SIZE >= total}
-            className="inline-flex h-8 items-center rounded-md border border-border-default px-3 text-xs text-text-secondary hover:bg-bg-hover disabled:opacity-40"
+            className="inline-flex h-8 items-center rounded-md border border-border-default px-3 text-xs text-text-secondary hover:bg-bg-hover disabled:opacity-60"
           >
             Next
           </button>

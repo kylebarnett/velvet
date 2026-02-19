@@ -53,7 +53,7 @@ export function ReportToolbar({
       <button
         type="button"
         onClick={() => router.push("/reports")}
-        className="rounded-md p-1.5 text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-primary"
+        className="flex h-8 w-8 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-primary"
         aria-label="Back to reports"
       >
         <ArrowLeft className="h-4 w-4" />

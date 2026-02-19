@@ -17,7 +17,7 @@ export async function PATCH(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const { id: companyId } = await params;
@@ -55,7 +55,7 @@ export async function DELETE(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const { id: companyId } = await params;
@@ -95,24 +95,6 @@ export async function DELETE(
     .delete()
     .eq("investor_id", user.id)
     .eq("company_id", companyId);
-
-  // 4. If company has no founder AND no other investors → delete company
-  const { data: company } = await adminClient
-    .from("companies")
-    .select("founder_id")
-    .eq("id", companyId)
-    .single();
-
-  if (company && !company.founder_id) {
-    const { count } = await adminClient
-      .from("investor_company_relationships")
-      .select("id", { count: "exact", head: true })
-      .eq("company_id", companyId);
-
-    if (!count || count === 0) {
-      await adminClient.from("companies").delete().eq("id", companyId);
-    }
-  }
 
   return NextResponse.json({ ok: true });
 }

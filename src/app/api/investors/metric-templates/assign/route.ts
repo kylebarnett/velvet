@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   const parsed = schema.safeParse(await req.json().catch(() => null));

@@ -136,7 +136,7 @@ export default async function ReportEditorPage({
 
   return (
     <div className="space-y-6">
-      <Breadcrumbs items={[
+      <Breadcrumbs icon="landmark" items={[
         { label: "Funds", href: "/funds" },
         { label: fund.name as string, href: `/funds/${fundId}` },
         { label: report.title as string },

@@ -87,7 +87,7 @@ export default async function PortfolioPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Portfolio" }]} />
+          <Breadcrumbs items={[{ label: "Portfolio", href: "/companies" }, { label: "Contacts" }]} icon="briefcase" />
           <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight" data-onboarding="portfolio-title">Contacts</h1>
         </div>
         <div className="flex items-center gap-2">

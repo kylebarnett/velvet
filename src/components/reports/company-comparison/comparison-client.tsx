@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { ChevronDown, Check, X, BarChart3, Table2, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils/cn";
@@ -15,7 +16,11 @@ import {
 } from "@/components/ui/select";
 import { useReportsContext } from "@/components/reports/reports-context";
 import { NormalizationToggle, type NormalizationMode } from "./normalization-toggle";
-import { ComparisonChart } from "./comparison-chart";
+
+const ComparisonChart = dynamic(
+  () => import("./comparison-chart").then(m => ({ default: m.ComparisonChart })),
+  { ssr: false, loading: () => <div className="h-80 animate-pulse rounded-xl bg-white/5" /> }
+);
 import { ComparisonTable } from "./comparison-table";
 
 type CompanyOption = {
@@ -56,6 +61,7 @@ function MultiSelectDropdown({
   maxSelections,
   minSelections,
   renderOption,
+  ariaLabelledBy,
 }: {
   label: string;
   options: { value: string; label: string }[];
@@ -64,6 +70,7 @@ function MultiSelectDropdown({
   maxSelections?: number;
   minSelections?: number;
   renderOption?: (option: { value: string; label: string }, isSelected: boolean) => React.ReactNode;
+  ariaLabelledBy?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -113,6 +120,7 @@ function MultiSelectDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-labelledby={ariaLabelledBy}
         className={cn(
           "flex min-h-11 w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
           isOpen
@@ -492,7 +500,7 @@ export function ComparisonClient({
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Company selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
+            <label id="comparison-companies-label" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Companies (2-8)
             </label>
             <MultiSelectDropdown
@@ -501,12 +509,13 @@ export function ComparisonClient({
               selected={selectedCompanies}
               onChange={setSelectedCompanies}
               maxSelections={8}
+              ariaLabelledBy="comparison-companies-label"
             />
           </div>
 
           {/* Metric selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
+            <label id="comparison-metrics-label" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Metrics
             </label>
             <MultiSelectDropdown
@@ -514,16 +523,17 @@ export function ComparisonClient({
               options={metricOptions}
               selected={selectedMetrics}
               onChange={setSelectedMetrics}
+              ariaLabelledBy="comparison-metrics-label"
             />
           </div>
 
           {/* Period type selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
+            <label id="comparison-period-label" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Period
             </label>
             <Select value={periodType} onValueChange={(v) => setPeriodType(v as PeriodType)}>
-              <SelectTrigger>
+              <SelectTrigger aria-labelledby="comparison-period-label">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

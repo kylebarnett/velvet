@@ -27,7 +27,7 @@ export default async function FounderCompanyPage() {
 
   return (
     <div className="space-y-4">
-      <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Company Profile" }]} />
+      <Breadcrumbs icon="layout-dashboard" items={[{ label: "Dashboard", href: "/portal" }, { label: "Company Profile" }]} />
       <CompanyProfile company={company} />
     </div>
   );

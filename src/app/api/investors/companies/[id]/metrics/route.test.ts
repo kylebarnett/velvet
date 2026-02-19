@@ -97,14 +97,14 @@ describe("GET /api/investors/companies/[id]/metrics", () => {
   });
 
   it("returns 403 for non-investor role", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const res = await GET(makeGetRequest(), makeParams());
     expect(res.status).toBe(403);
     expect((await res.json()).error).toMatch(/investors only/i);
   });
 
   it("returns 403 when company is not in portfolio", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     // Relationship check returns null
     const relChain = createChain(null, null);
@@ -116,7 +116,7 @@ describe("GET /api/investors/companies/[id]/metrics", () => {
   });
 
   it("returns 403 when approval status is pending", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     const relChain = createChain({ id: "rel-1", approval_status: "pending" }, null);
     mockFromFn.mockReturnValue(relChain);
@@ -127,7 +127,7 @@ describe("GET /api/investors/companies/[id]/metrics", () => {
   });
 
   it("returns 403 when approval status is denied", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     const relChain = createChain({ id: "rel-1", approval_status: "denied" }, null);
     mockFromFn.mockReturnValue(relChain);
@@ -138,7 +138,7 @@ describe("GET /api/investors/companies/[id]/metrics", () => {
   });
 
   it("returns 200 with merged metrics (founder + investor gap fill)", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     const founderMetrics = [
       {
@@ -227,7 +227,7 @@ describe("GET /api/investors/companies/[id]/metrics", () => {
   });
 
   it("returns 200 with auto_approved relationship", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     const relChain = createChain({ id: "rel-1", approval_status: "auto_approved" }, null);
     const founderChain = createChain([], null);
@@ -279,14 +279,14 @@ describe("POST /api/investors/companies/[id]/metrics", () => {
   });
 
   it("returns 403 for non-investor role", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const res = await POST(makePostRequest(VALID_BODY), makeParams());
     expect(res.status).toBe(403);
     expect((await res.json()).error).toMatch(/investors only/i);
   });
 
   it("returns 429 when rate limited", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
     vi.mocked(checkRateLimit).mockReturnValue({ allowed: false, retryAfter: 20 });
 
     const res = await POST(makePostRequest(VALID_BODY), makeParams());
@@ -295,7 +295,7 @@ describe("POST /api/investors/companies/[id]/metrics", () => {
   });
 
   it("returns 403 when company is not in portfolio", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     // Relationship check: not found
     const relChain = createChain(null, null);
@@ -307,7 +307,7 @@ describe("POST /api/investors/companies/[id]/metrics", () => {
   });
 
   it("returns 400 for invalid body (empty metrics array)", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     // Relationship check passes
     const relChain = createChain({ id: "rel-1" }, null);
@@ -319,7 +319,7 @@ describe("POST /api/investors/companies/[id]/metrics", () => {
   });
 
   it("returns 400 for invalid body (missing metric_name)", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     const relChain = createChain({ id: "rel-1" }, null);
     mockFromFn.mockReturnValue(relChain);
@@ -334,7 +334,7 @@ describe("POST /api/investors/companies/[id]/metrics", () => {
   });
 
   it("returns 400 for invalid period_start format", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     const relChain = createChain({ id: "rel-1" }, null);
     mockFromFn.mockReturnValue(relChain);
@@ -354,7 +354,7 @@ describe("POST /api/investors/companies/[id]/metrics", () => {
   });
 
   it("returns 200 on successful metric submission", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     const relChain = createChain({ id: "rel-1" }, null);
     const upsertChain = createChain(null, null);
@@ -391,7 +391,7 @@ describe("POST /api/investors/companies/[id]/metrics", () => {
   });
 
   it("computes period_end correctly for quarterly", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     const relChain = createChain({ id: "rel-1" }, null);
     const upsertChain = createChain(null, null);
@@ -421,7 +421,7 @@ describe("POST /api/investors/companies/[id]/metrics", () => {
   });
 
   it("handles multiple metrics in a single request", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
 
     const relChain = createChain({ id: "rel-1" }, null);
     const upsertChain = createChain(null, null);

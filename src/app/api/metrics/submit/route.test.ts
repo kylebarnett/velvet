@@ -102,20 +102,20 @@ describe("POST /api/metrics/submit", () => {
   // --- Validation ---
 
   it("returns 400 for missing required fields", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const res = await POST(makeRequest({ metricName: "Revenue" }));
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/invalid/i);
   });
 
   it("returns 400 for non-numeric value", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const res = await POST(makeRequest({ ...VALID_BODY, value: "not-a-number" }));
     expect(res.status).toBe(400);
   });
 
   it("returns 400 when body is not JSON", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const req = new Request("http://localhost:3001/api/metrics/submit", {
       method: "POST",
       body: "bad",
@@ -134,7 +134,7 @@ describe("POST /api/metrics/submit", () => {
   });
 
   it("returns 403 when user is not a founder", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
     const res = await POST(makeRequest(VALID_BODY));
     expect(res.status).toBe(403);
     expect((await res.json()).error).toMatch(/forbidden/i);
@@ -143,7 +143,7 @@ describe("POST /api/metrics/submit", () => {
   // --- Ownership ---
 
   it("returns 403 when company is not owned by the founder", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
 
     // supabase.from("companies").select().eq().eq().single() → null
     mockSupabaseChain = createChain(null, null);
@@ -156,7 +156,7 @@ describe("POST /api/metrics/submit", () => {
   // --- Successful submission ---
 
   it("returns 200 on successful metric submission (new metric)", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
 
     // Company ownership check: success
     const companyChain = createChain({ id: VALID_BODY.companyId }, null);
@@ -196,7 +196,7 @@ describe("POST /api/metrics/submit", () => {
   });
 
   it("returns 200 and creates history entry when updating an existing metric", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
 
     const companyChain = createChain({ id: VALID_BODY.companyId }, null);
     const upsertChain = createChain({ id: "mv-1" }, null);

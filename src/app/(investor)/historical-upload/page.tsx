@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { UploadPageClient } from "@/components/historical-upload/upload-page-client";
@@ -34,6 +35,7 @@ export default async function HistoricalUploadPage({
   return (
     <div className="space-y-6">
       <Breadcrumbs
+        icon="building2"
         items={[
           { label: "Companies", href: "/companies" },
           ...(preSelectedCompany

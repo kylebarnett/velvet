@@ -38,6 +38,19 @@ export function CompanyProfile({ company }: { company: CompanyData }) {
   const [websiteInput, setWebsiteInput] = React.useState(data.website ?? "");
   const [saving, setSaving] = React.useState(false);
 
+  // --- Dirty state tracking for beforeunload warning ---
+  // The website field is the only inline-edit that requires explicit save
+  const isDirty = editingWebsite && websiteInput !== (data.website ?? "");
+
+  React.useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
   async function saveField(field: string, value: string | number | null) {
     setSaving(true);
     try {

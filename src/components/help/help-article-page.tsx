@@ -30,6 +30,7 @@ export function HelpArticlePage({
     return (
       <div className="space-y-4">
         <Breadcrumbs
+          icon="help-circle"
           items={[
             { label: "Help", href: helpBasePath },
             { label: "Not Found" },
@@ -53,6 +54,7 @@ export function HelpArticlePage({
   return (
     <div className="space-y-4">
       <Breadcrumbs
+        icon="help-circle"
         items={[
           { label: "Help", href: helpBasePath },
           { label: categoryLabel, href: helpBasePath },

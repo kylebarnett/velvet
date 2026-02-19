@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Download } from "lucide-react";
+import { toast } from "sonner";
 import { logActivity } from "@/lib/activity/log-activity";
 import { logger } from "@/lib/logger";
 
@@ -52,6 +53,7 @@ export function ExportButton({
       });
     } catch (err: unknown) {
       logger.error("Export error:", err);
+      toast.error("Export failed");
     } finally {
       setIsExporting(false);
     }

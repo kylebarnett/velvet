@@ -10,6 +10,11 @@ export async function GET(req: NextRequest) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
+  const role = user.app_metadata?.role;
+  if (!role || !["investor", "founder"].includes(role)) {
+    return jsonError("Forbidden.", 403);
+  }
+
   const url = new URL(req.url);
   const companyId = url.searchParams.get("company_id");
   const metricName = url.searchParams.get("metric_name");
@@ -18,6 +23,28 @@ export async function GET(req: NextRequest) {
 
   if (!companyId || !metricName) {
     return jsonError("company_id and metric_name are required.", 400);
+  }
+
+  // Verify user has access to this company (IDOR prevention)
+  if (role === "investor") {
+    const { data: rel } = await supabase
+      .from("investor_company_relationships")
+      .select("id")
+      .eq("investor_id", user.id)
+      .eq("company_id", companyId)
+      .in("approval_status", ["approved", "auto_approved"])
+      .limit(1)
+      .maybeSingle();
+    if (!rel) return jsonError("Forbidden.", 403);
+  } else {
+    // Founder: must own the company
+    const { data: company } = await supabase
+      .from("companies")
+      .select("id")
+      .eq("id", companyId)
+      .eq("founder_id", user.id)
+      .maybeSingle();
+    if (!company) return jsonError("Forbidden.", 403);
   }
 
   const { limit, offset } = parsePagination(url);
@@ -79,7 +106,7 @@ export async function POST(req: NextRequest) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (!role || !["investor", "founder"].includes(role)) {
     return jsonError("Forbidden.", 403);
   }
@@ -89,6 +116,27 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return jsonError("Invalid data.", 400);
 
   const { company_id, metric_name, content, period_start, period_end } = parsed.data;
+
+  // Verify user has access to this company (IDOR prevention)
+  if (role === "investor") {
+    const { data: rel } = await supabase
+      .from("investor_company_relationships")
+      .select("id")
+      .eq("investor_id", user.id)
+      .eq("company_id", company_id)
+      .in("approval_status", ["approved", "auto_approved"])
+      .limit(1)
+      .maybeSingle();
+    if (!rel) return jsonError("Forbidden.", 403);
+  } else {
+    const { data: company } = await supabase
+      .from("companies")
+      .select("id")
+      .eq("id", company_id)
+      .eq("founder_id", user.id)
+      .maybeSingle();
+    if (!company) return jsonError("Forbidden.", 403);
+  }
 
   const { data: comment, error } = await supabase
     .from("metric_comments")

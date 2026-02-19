@@ -3,6 +3,7 @@ import { getApiUser, jsonError } from "@/lib/api/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import { getQuarterDates, getPreviousQuarter } from "@/lib/tear-sheets/quarter-utils";
+import { getNumericValueAsString } from "@/lib/metrics/numeric-value";
 
 type MetricRow = {
   metric_name: string;
@@ -12,21 +13,6 @@ type MetricRow = {
   period_end: string;
 };
 
-function getNumericValue(value: unknown): string | null {
-  if (value == null) return null;
-  if (typeof value === "number") return value.toString();
-  if (typeof value === "string") return value;
-  if (typeof value === "object" && value !== null) {
-    const raw = (value as Record<string, unknown>).raw;
-    if (typeof raw === "string") return raw;
-    if (typeof raw === "number") return raw.toString();
-    const v = (value as Record<string, unknown>).value;
-    if (typeof v === "number") return v.toString();
-    if (typeof v === "string") return v;
-  }
-  return null;
-}
-
 // GET - Get metrics for an investor tear sheet with source control
 export async function GET(
   req: Request,
@@ -35,7 +21,7 @@ export async function GET(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const { id } = await params;
@@ -181,14 +167,14 @@ export async function GET(
   // Build prev map (latest per metric name)
   const prevMap = new Map<string, string>();
   for (const m of prevMetrics) {
-    const val = getNumericValue(m.value);
+    const val = getNumericValueAsString(m.value);
     if (val !== null) {
       prevMap.set(m.metric_name.toLowerCase(), val);
     }
   }
 
   const metrics = currentMetrics.map((m) => {
-    const currentValue = getNumericValue(m.value);
+    const currentValue = getNumericValueAsString(m.value);
     const previousValue = prevMap.get(m.metric_name.toLowerCase()) ?? null;
 
     let trend: "up" | "down" | "flat" = "flat";

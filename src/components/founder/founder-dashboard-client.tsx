@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
   DashboardWidget,
@@ -12,10 +13,15 @@ import {
   MetricValue,
   PeriodType,
   DashboardLayout,
+  getWidgetColSpanClass,
 } from "@/components/dashboard";
 import { DateRange } from "@/components/dashboard/date-range-selector";
 import { Download, Settings, Mail, TrendingDown, TrendingUp, Fuel, ChevronDown, FileSpreadsheet, FileDown, X } from "lucide-react";
-import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
+
+const MetricDetailPanel = dynamic(
+  () => import("@/components/metrics/metric-detail-panel").then(m => ({ default: m.MetricDetailPanel })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
 import { useDashboardPreferences } from "@/hooks/use-dashboard-preferences";
 import { EmailPasteModal } from "@/components/founder/email-paste-modal";
 import { AddMetricModal } from "@/components/founder/add-metric-modal";
@@ -833,18 +839,13 @@ export function FounderDashboardClient({
         {[...widgets]
           .sort((a, b) => a.y - b.y || a.x - b.x)
           .map((widget) => {
-          const colSpanClass =
-            widget.w <= 4
-              ? "sm:col-span-4 md:col-span-4 lg:col-span-4"
-              : widget.w <= 6
-                ? "sm:col-span-6 md:col-span-6 lg:col-span-6"
-                : "sm:col-span-12";
+          const colSpanClass = getWidgetColSpanClass(widget.w);
 
           return (
             <div
               key={widget.id}
               className={`rounded-xl border border-border-default card-surface p-3 sm:p-4 ${colSpanClass}`}
-              style={{ minHeight: `${widget.h * 80}px` } as React.CSSProperties}
+              style={{ minHeight: `${widget.h * 100}px` } as React.CSSProperties}
             >
               <DashboardWidget
                 widget={widget}

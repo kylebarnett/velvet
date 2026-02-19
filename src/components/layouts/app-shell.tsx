@@ -26,7 +26,6 @@ import {
   Eye,
   ChevronDown,
   HelpCircle,
-  BookOpen,
   Settings,
   LogOut,
   Menu,
@@ -138,7 +137,6 @@ export function AppShell({
   role,
   initialTheme,
   children,
-  onOpenHelp,
   onOpenCommandPalette,
   profileLinks,
 }: {
@@ -149,7 +147,6 @@ export function AppShell({
   role?: "investor" | "founder";
   initialTheme?: string;
   children: React.ReactNode;
-  onOpenHelp?: () => void;
   onOpenCommandPalette?: () => void;
   profileLinks?: NavItem[];
 }) {
@@ -333,7 +330,7 @@ export function AppShell({
                 aria-label="Open settings"
               >
                 {user?.avatarUrl ? (
-                  <Image src={user.avatarUrl} alt="" width={32} height={32} className="h-8 w-8 rounded-full object-cover" unoptimized />
+                  <Image src={user.avatarUrl} alt="" width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
                 ) : user ? (
                   getInitials(user.fullName, user.email)
                 ) : (
@@ -383,24 +380,6 @@ export function AppShell({
                 );
               })}
 
-              {onOpenHelp && (
-                <button
-                  onClick={() => {
-                    setSettingsPanelOpen(false);
-                    if (mobile) setMobileMenuOpen(false);
-                    onOpenHelp();
-                  }}
-                  className={cn(
-                    "flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm text-text-tertiary transition-colors hover:bg-bg-raised hover:text-text-primary",
-                    mobile ? "h-11" : "h-9",
-                  )}
-                  type="button"
-                >
-                  <BookOpen className="h-[18px] w-[18px] shrink-0" />
-                  <span>Help guide</span>
-                </button>
-              )}
-
               <button
                 onClick={onLogout}
                 className={cn(
@@ -424,7 +403,7 @@ export function AppShell({
           aria-label="Toggle settings"
         >
           {user?.avatarUrl ? (
-            <Image src={user.avatarUrl} alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded-full object-cover" unoptimized />
+            <Image src={user.avatarUrl} alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded-full object-cover" />
           ) : (
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg-hover text-xs font-medium">
               {user ? getInitials(user.fullName, user.email) : "?"}
@@ -688,24 +667,26 @@ export function AppShell({
         {settingsPanel(true)}
       </aside>
 
-      <div
-        className="hidden md:grid md:min-h-screen transition-[grid-template-columns] duration-200"
-        style={{ gridTemplateColumns: sidebarCollapsed ? "64px 1fr" : "280px 1fr" }}
-      >
-        <aside className="sticky top-0 flex h-screen flex-col border-r border-border-default bg-bg-sidebar overflow-hidden">
-          {brandHeader}
-          <nav aria-label="Main navigation" className={cn("flex-1 overflow-y-auto", sidebarCollapsed ? "px-1.5" : "px-2")}>
-            {renderNavItems(false)}
-          </nav>
-          {settingsPanel(false)}
-        </aside>
+      <div id="main-content">
+        <div
+          className="hidden md:grid md:min-h-screen transition-[grid-template-columns] duration-200"
+          style={{ gridTemplateColumns: sidebarCollapsed ? "64px 1fr" : "280px 1fr" }}
+        >
+          <aside className="sticky top-0 flex h-screen flex-col border-r border-border-default bg-bg-sidebar overflow-hidden">
+            {brandHeader}
+            <nav aria-label="Main navigation" className={cn("flex-1 overflow-y-auto", sidebarCollapsed ? "px-1.5" : "px-2")}>
+              {renderNavItems(false)}
+            </nav>
+            {settingsPanel(false)}
+          </aside>
 
-        <div className="min-w-0">
-          <main id="main-content" className="p-4 md:p-6">{children}</main>
+          <div className="min-w-0">
+            <main className="p-4 md:p-6">{children}</main>
+          </div>
         </div>
-      </div>
 
-      <main id="main-content-mobile" className="p-4 md:hidden">{children}</main>
+        <main className="p-4 md:hidden">{children}</main>
+      </div>
     </div>
   );
 }

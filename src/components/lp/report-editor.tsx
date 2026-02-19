@@ -112,7 +112,8 @@ const EDITOR_TABS: TabItem<EditorTab>[] = [
 ];
 
 function toDateInputValue(dateStr: string): string {
-  const d = new Date(dateStr);
+  // Append T00:00:00 to force local time parsing for date-only strings (avoids UTC midnight shift)
+  const d = new Date(dateStr.includes("T") ? dateStr : dateStr + "T00:00:00");
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
@@ -739,8 +740,9 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-sm text-text-secondary">Title</label>
+                <label htmlFor="lp-report-title" className="mb-1 block text-sm text-text-secondary">Title</label>
                 <input
+                  id="lp-report-title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
@@ -749,8 +751,9 @@ export function ReportEditor({ fund, report, investments }: ReportEditorProps) {
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-sm text-text-secondary">Date</label>
+                  <label htmlFor="lp-report-date" className="mb-1 block text-sm text-text-secondary">Date</label>
                   <input
+                    id="lp-report-date"
                     type="date"
                     value={reportDate}
                     onChange={(e) => setReportDate(e.target.value)}

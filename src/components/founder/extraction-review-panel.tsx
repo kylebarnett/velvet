@@ -280,7 +280,7 @@ export function ExtractionReviewPanel({
                   type="button"
                   onClick={handleRejectAll}
                   disabled={processing}
-                  className="h-7 rounded-md border border-border-default bg-bg-elevated px-2.5 text-xs text-text-tertiary hover:bg-bg-hover disabled:opacity-40"
+                  className="h-7 rounded-md border border-border-default bg-bg-elevated px-2.5 text-xs text-text-tertiary hover:bg-bg-hover disabled:opacity-60"
                 >
                   Reject all
                 </button>
@@ -288,7 +288,7 @@ export function ExtractionReviewPanel({
                   type="button"
                   onClick={handleAcceptAll}
                   disabled={processing}
-                  className="h-7 rounded-md bg-[var(--success-bg-muted)] px-2.5 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-40"
+                  className="h-7 rounded-md bg-[var(--success-bg-muted)] px-2.5 text-xs font-medium text-[var(--status-success-text)] hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-60"
                 >
                   Accept all
                 </button>

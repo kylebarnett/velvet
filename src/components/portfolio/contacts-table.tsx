@@ -790,7 +790,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                   setSearch("");
                   setPagination((prev) => ({ ...prev, page: 1 }));
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-text-muted hover:text-text-secondary"
+                className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-sm text-text-muted hover:text-text-secondary"
                 aria-label="Clear search"
               >
                 <X className="h-3.5 w-3.5" />
@@ -805,7 +805,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
                 setPagination((prev) => ({ ...prev, page: 1 }));
               }}
             >
-              <SelectTrigger className="w-auto min-w-[130px] flex-1 sm:flex-none">
+              <SelectTrigger className="h-9 w-auto min-w-[130px] flex-1 sm:flex-none">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -1065,7 +1065,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
               <button
                 onClick={() => goToPage(pagination.page - 1)}
                 disabled={pagination.page === 1 || fetching}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-60 disabled:cursor-not-allowed"
                 aria-label="Previous page"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -1101,7 +1101,7 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
               <button
                 onClick={() => goToPage(pagination.page + 1)}
                 disabled={pagination.page === pagination.totalPages || fetching}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border-default hover:bg-bg-hover disabled:opacity-60 disabled:cursor-not-allowed"
                 aria-label="Next page"
               >
                 <ChevronRight className="h-4 w-4" />

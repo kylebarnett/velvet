@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit, getClientIp } from "@/lib/api/rate-limit";
 import { logger } from "@/lib/logger";
 
 // Note: SVG intentionally excluded - can contain embedded JavaScript (XSS risk)
@@ -10,10 +11,18 @@ const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 
 // POST - Upload logo for the founder's company
 export async function POST(req: Request) {
+  const ip = getClientIp(req);
+  const { allowed, retryAfter } = checkRateLimit(`founder-logo-upload:${ip}`, 5, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
+
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "founder") return jsonError("Forbidden.", 403);
 
   // Pre-check content-length header before reading into memory
@@ -101,7 +110,7 @@ export async function DELETE() {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "founder") return jsonError("Forbidden.", 403);
 
   // Verify founder owns a company

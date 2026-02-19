@@ -13,7 +13,7 @@ export function RequestsTabs() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Dashboard", href: "/" }, { label: "Metric Requests" }]} />
+          <Breadcrumbs icon="briefcase" items={[{ label: "Dashboard", href: "/" }, { label: "Metric Requests" }]} />
           <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight" data-onboarding="requests-title">
             Metric Requests
           </h1>

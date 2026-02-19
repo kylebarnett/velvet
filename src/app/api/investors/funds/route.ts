@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
 import { checkRateLimit } from "@/lib/api/rate-limit";
 import { logger } from "@/lib/logger";
 
@@ -13,18 +14,21 @@ const createSchema = z.object({
 });
 
 // GET - List all funds for investor
-export async function GET() {
+export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
+
+  const { limit, offset } = parsePagination(new URL(req.url));
 
   const { data: funds, error } = await supabase
     .from("funds")
-    .select("*")
+    .select("id, name, vintage_year, fund_size, currency, created_at")
     .eq("investor_id", user.id)
-    .order("vintage_year", { ascending: false });
+    .order("vintage_year", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) {
     logger.error("Failed to list funds:", error.message);
@@ -39,7 +43,7 @@ export async function POST(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   // Rate limit: 10 fund creations per minute per user

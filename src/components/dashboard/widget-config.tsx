@@ -60,8 +60,9 @@ export function WidgetConfig({
       <div className="space-y-4">
         {/* Title field (common to all) */}
         <div>
-          <label className="block text-xs text-text-tertiary mb-1">Title</label>
+          <label htmlFor="widget-title" className="block text-xs text-text-tertiary mb-1">Title</label>
           <input
+            id="widget-title"
             type="text"
             value={
               isChartConfig(config)

@@ -244,7 +244,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 type="button"
                 onClick={() => setEditMode(true)}
                 disabled={disabled}
-                className="h-6 w-6 inline-flex items-center justify-center rounded-md text-text-muted hover:bg-bg-hover hover:text-text-tertiary disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+                className="h-8 w-8 inline-flex items-center justify-center rounded-md text-text-muted hover:bg-bg-hover hover:text-text-tertiary disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
                 title="Edit metric"
               >
                 <Pencil className="h-3 w-3" />
@@ -264,7 +264,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 setEditPeriodEnd(mapping.extracted_period_end);
               }}
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-border-default text-text-tertiary text-xs hover:bg-bg-hover disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
+              className="h-7 px-2 inline-flex items-center gap-1 rounded-md border border-border-default text-text-tertiary text-xs hover:bg-bg-hover disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--ring-focus)]"
             >
               Cancel
             </button>
@@ -280,7 +280,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 setEditMode(false);
               }}
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)] text-xs font-medium hover:opacity-80 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--tag-violet-bg)]"
+              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)] text-xs font-medium hover:opacity-80 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--tag-violet-bg)]"
             >
               <Check className="h-3.5 w-3.5" />
               Save
@@ -305,7 +305,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
               type="button"
               onClick={() => onReject(mapping.id)}
               disabled={disabled}
-              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-[var(--error-accent)] hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)] disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--error-ring)]"
+              className="h-7 w-7 inline-flex items-center justify-center rounded-md text-[var(--error-accent)] hover:bg-[var(--error-bg-subtle)] hover:text-[var(--status-error-text)] disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--error-ring)]"
               title="Reject"
             >
               <X className="h-4 w-4" />
@@ -326,7 +326,7 @@ export function ExtractedMetricRow({ mapping, onAccept, onReject, onUpdate, disa
                 )
               }
               disabled={disabled}
-              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-[var(--status-success-bg)] text-[var(--status-success-text)] text-xs font-medium hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-[var(--success-ring)]"
+              className="h-7 px-2 inline-flex items-center gap-1 rounded-md bg-[var(--status-success-bg)] text-[var(--status-success-text)] text-xs font-medium hover:bg-[var(--success-bg-muted-hover)] disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--success-ring)]"
               title="Accept"
             >
               <Check className="h-3.5 w-3.5" />

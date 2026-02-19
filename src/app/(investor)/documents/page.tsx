@@ -291,7 +291,7 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <Breadcrumbs items={[{ label: "Companies", href: "/companies" }, { label: "Documents" }]} />
+        <Breadcrumbs items={[{ label: "Companies", href: "/companies" }, { label: "Documents" }]} icon="building2" />
         <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Documents</h1>
       </div>
 

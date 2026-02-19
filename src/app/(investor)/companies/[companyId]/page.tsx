@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { requireRole } from "@/lib/auth/require-role";
 
 export const metadata: Metadata = { title: "Company Dashboard | Velvet" };
@@ -127,7 +128,7 @@ export default async function CompanyDashboardPage({
           <Breadcrumbs items={[
             { label: "Companies", href: "/companies" },
             { label: company.name },
-          ]} />
+          ]} icon="building2" />
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <CompanySwitcher
               currentCompanyId={companyId}

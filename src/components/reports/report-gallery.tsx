@@ -111,7 +111,6 @@ export function ReportGallery({ initialReports, onReportsChange }: ReportGallery
         tabs={TYPE_TABS}
         value={activeTab}
         onChange={setActiveTab}
-        variant="pill"
         size="sm"
         showIcons={false}
       />

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { FileSpreadsheet, PenLine, ArrowRight, X } from "lucide-react";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 type Props = {
   open: boolean;
@@ -23,6 +24,7 @@ export function AddMetricsPromptModal({
 }: Props) {
   const dialogRef = React.useRef<HTMLDivElement>(null);
   const titleId = React.useId();
+  useFocusTrap(dialogRef, open);
 
   React.useEffect(() => {
     if (!open) return;
@@ -32,32 +34,6 @@ export function AddMetricsPromptModal({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
-
-  React.useEffect(() => {
-    if (!open) return;
-    function handleFocusTrap(e: KeyboardEvent) {
-      if (e.key !== "Tab" || !dialogRef.current) return;
-      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    }
-    document.addEventListener("keydown", handleFocusTrap);
-    return () => document.removeEventListener("keydown", handleFocusTrap);
-  }, [open]);
 
   React.useEffect(() => {
     if (open) {
@@ -127,7 +103,7 @@ export function AddMetricsPromptModal({
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-text-primary">Enter manually</p>
-              <p className="text-xs text-text-tertiary">Type in metrics one by one</p>
+              <p className="text-xs text-text-tertiary">Enter metrics in a spreadsheet</p>
             </div>
             <ArrowRight className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
           </button>

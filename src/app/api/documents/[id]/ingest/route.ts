@@ -15,7 +15,7 @@ export async function POST(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role as string | undefined;
+  const role = user.app_metadata?.role as string | undefined;
   if (role !== "founder") return jsonError("Founders only.", 403);
 
   // Rate limit: 5 ingestions per minute per user

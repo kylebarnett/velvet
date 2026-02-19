@@ -13,7 +13,7 @@ export async function GET(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   // Get schedule with template and run history
@@ -168,7 +168,7 @@ export async function PUT(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   const parsed = updateSchema.safeParse(await req.json().catch(() => null));
@@ -257,7 +257,7 @@ export async function DELETE(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   // Verify schedule exists and belongs to user

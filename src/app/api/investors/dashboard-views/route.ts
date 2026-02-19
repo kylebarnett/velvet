@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
 import { parsePagination } from "@/lib/api/pagination";
+import { checkRateLimit, getClientIp } from "@/lib/api/rate-limit";
 import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   const url = new URL(req.url);
@@ -71,10 +72,18 @@ export async function GET(req: Request) {
 
 // POST - Create a new dashboard view
 export async function POST(req: Request) {
+  const ip = getClientIp(req);
+  const { allowed, retryAfter } = checkRateLimit(`dashboard-views-create:${ip}`, 10, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
+
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   const parsed = createSchema.safeParse(await req.json().catch(() => null));

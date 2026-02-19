@@ -1,11 +1,16 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import Link from "next/link";
 import { AlertTriangle, ArrowLeft, CheckCircle2, Info, Layers, Star, TrendingDown } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
-import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
+
+const MetricDetailPanel = dynamic(
+  () => import("@/components/metrics/metric-detail-panel").then(m => ({ default: m.MetricDetailPanel })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
 import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import { getMetricDefinition, inferMetricValueType } from "@/lib/metric-definitions";
 import {

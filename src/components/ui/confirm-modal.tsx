@@ -4,6 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 type Props = {
   open: boolean;
@@ -30,6 +31,8 @@ export function ConfirmModal({
   const dialogRef = React.useRef<HTMLDivElement>(null);
   const titleId = React.useId();
 
+  useFocusTrap(dialogRef, open);
+
   // Focus the cancel button when modal opens
   React.useEffect(() => {
     if (open) {
@@ -47,38 +50,6 @@ export function ConfirmModal({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onCancel]);
-
-  // Trap focus within the modal
-  React.useEffect(() => {
-    if (!open) return;
-
-    function handleFocusTrap(e: KeyboardEvent) {
-      if (e.key !== "Tab" || !dialogRef.current) return;
-
-      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusable.length === 0) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    }
-
-    document.addEventListener("keydown", handleFocusTrap);
-    return () => document.removeEventListener("keydown", handleFocusTrap);
-  }, [open]);
 
   if (!open) return null;
 

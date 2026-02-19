@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
 import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
@@ -19,21 +20,24 @@ export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const url = new URL(req.url);
   const reportType = url.searchParams.get("reportType");
+  const { limit, offset } = parsePagination(url);
 
   let query = supabase
     .from("portfolio_reports")
-    .select("*")
+    .select("id, name, description, report_type, is_default, company_ids, normalize, created_at, updated_at")
     .eq("investor_id", user.id)
     .order("created_at", { ascending: false });
 
   if (reportType) {
     query = query.eq("report_type", reportType);
   }
+
+  query = query.range(offset, offset + limit - 1);
 
   const { data, error } = await query;
   if (error) {
@@ -51,7 +55,7 @@ export async function POST(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const { name, description, reportType, filters, companyIds, normalize, config, isDefault } =

@@ -1,7 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { MetricDetailPanel } from "@/components/metrics/metric-detail-panel";
+import dynamic from "next/dynamic";
+
+const MetricDetailPanel = dynamic(
+  () => import("@/components/metrics/metric-detail-panel").then(m => ({ default: m.MetricDetailPanel })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
 import { SourceBadge } from "@/components/metrics/source-badge";
 import Link from "next/link";
 

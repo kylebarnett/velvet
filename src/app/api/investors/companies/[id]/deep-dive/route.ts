@@ -13,7 +13,7 @@ export async function GET(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const rl = checkRateLimit(`deep-dive:${user.id}`, 10, 60_000);

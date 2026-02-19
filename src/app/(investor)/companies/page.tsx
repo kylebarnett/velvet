@@ -9,6 +9,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { computeRollups } from "@/lib/metrics/rollup";
 import { GettingStartedChecklist } from "@/components/ui/getting-started-checklist";
 import { AddCompanyFlow } from "@/components/investor/add-company-flow";
+import { getNumericValue } from "@/lib/metrics/numeric-value";
 import { DashboardContent } from "./dashboard-content";
 import { DashboardTabs } from "./dashboard-tabs";
 
@@ -52,18 +53,6 @@ const PRIORITY_METRICS = [
   "monthly active learners",
   "monthly active patients",
 ];
-
-function getNumericValue(value: unknown): number | null {
-  if (value == null) return null;
-  if (typeof value === "number") return value;
-  if (typeof value === "object" && value !== null) {
-    const v = (value as Record<string, unknown>).value ?? (value as Record<string, unknown>).raw;
-    if (typeof v === "number") return v;
-    if (typeof v === "string") return parseFloat(v) || null;
-  }
-  if (typeof value === "string") return parseFloat(value) || null;
-  return null;
-}
 
 export default async function InvestorDashboardPage() {
   const user = await requireRole("investor");

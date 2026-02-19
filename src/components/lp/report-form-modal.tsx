@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import {
   Select,
   SelectTrigger,
@@ -64,6 +65,8 @@ export function ReportFormModal({
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const backdropRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
 
   const [title, setTitle] = useState(defaultTitle());
   const [reportDate, setReportDate] = useState(toDateInputValue(new Date()));
@@ -169,6 +172,7 @@ export function ReportFormModal({
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="report-form-title"
@@ -189,8 +193,9 @@ export function ReportFormModal({
         <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">
           {/* Title */}
           <div>
-            <label className="mb-1 block text-sm text-text-secondary">Title</label>
+            <label htmlFor="report-title" className="mb-1 block text-sm text-text-secondary">Title</label>
             <input
+              id="report-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
@@ -200,8 +205,9 @@ export function ReportFormModal({
 
           {/* Report Date */}
           <div>
-            <label className="mb-1 block text-sm text-text-secondary">Report Date</label>
+            <label htmlFor="report-date" className="mb-1 block text-sm text-text-secondary">Report Date</label>
             <input
+              id="report-date"
               type="date"
               value={reportDate}
               onChange={(e) => setReportDate(e.target.value)}

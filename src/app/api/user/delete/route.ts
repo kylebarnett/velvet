@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
   const adminClient = createSupabaseAdminClient();
   const userId = user.id;
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
 
   if (role !== "investor" && role !== "founder") {
     return jsonError("Unknown account role. Please contact support.", 400);

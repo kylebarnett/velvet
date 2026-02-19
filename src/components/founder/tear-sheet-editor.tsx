@@ -283,6 +283,7 @@ export function TearSheetEditor({
                   type="button"
                   onClick={() => removeMilestone(i)}
                   className="shrink-0 rounded-md p-1 text-text-faint hover:bg-bg-elevated hover:text-[var(--status-error-text)]"
+                  aria-label="Remove milestone"
                 >
                   <X className="h-4 w-4" />
                 </button>

@@ -97,6 +97,22 @@ export function AccountSettings({ user, role, currentUserId }: AccountSettingsPr
     null,
   );
 
+  // --- Dirty state tracking for beforeunload warning ---
+  const isDirty =
+    displayName !== (user.fullName ?? "") ||
+    email !== user.email ||
+    newPassword !== "" ||
+    confirmPassword !== "";
+
+  React.useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
   // --- Delete Account state ---
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = React.useState("");
@@ -351,7 +367,6 @@ export function AccountSettings({ user, role, currentUserId }: AccountSettingsPr
                   width={80}
                   height={80}
                   className="h-20 w-20 rounded-full object-cover"
-                  unoptimized
                 />
               ) : (
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-bg-elevated">

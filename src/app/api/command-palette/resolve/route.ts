@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   const { user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const userRole = user.user_metadata?.role as string | undefined;
+  const userRole = user.app_metadata?.role as string | undefined;
   if (userRole !== "investor" && userRole !== "founder") {
     return jsonError("Forbidden.", 403);
   }

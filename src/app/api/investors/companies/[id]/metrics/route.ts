@@ -2,19 +2,20 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
 import { checkRateLimit } from "@/lib/api/rate-limit";
 import { logger } from "@/lib/logger";
 
 // GET - Get all metric values for a company (investor view)
 // Merges founder data (company_metric_values) with investor private data (investor_metric_values)
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   const { id: companyId } = await params;
@@ -32,6 +33,8 @@ export async function GET(
   if (!["auto_approved", "approved"].includes(relationship.approval_status)) {
     return jsonError("Access pending approval.", 403);
   }
+
+  const { limit, offset } = parsePagination(new URL(req.url));
 
   // Fetch founder data and investor private data in parallel
   const [founderResult, investorResult] = await Promise.all([
@@ -51,7 +54,8 @@ export async function GET(
         updated_at
       `)
       .eq("company_id", companyId)
-      .order("period_start", { ascending: false }),
+      .order("period_start", { ascending: false })
+      .range(offset, offset + limit - 1),
     supabase
       .from("investor_metric_values")
       .select(`
@@ -69,7 +73,8 @@ export async function GET(
       `)
       .eq("investor_id", user.id)
       .eq("company_id", companyId)
-      .order("period_start", { ascending: false }),
+      .order("period_start", { ascending: false })
+      .range(offset, offset + limit - 1),
   ]);
 
   if (founderResult.error) {
@@ -123,7 +128,7 @@ const postSchema = z.object({
       }),
     )
     .min(1)
-    .max(5),
+    .max(200),
 });
 
 function computePeriodEnd(periodType: string, periodStart: string): string {
@@ -149,7 +154,7 @@ export async function POST(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   // Rate limit: 20 manual metric submissions per minute
@@ -189,15 +194,20 @@ export async function POST(
     notes: m.notes ?? null,
   }));
 
-  const { error } = await supabase
-    .from("investor_metric_values")
-    .upsert(rows, {
-      onConflict: "investor_id,company_id,metric_name,period_type,period_start,period_end",
-    });
+  // Chunked upsert to avoid payload limits (50 rows per chunk)
+  const CHUNK_SIZE = 50;
+  for (let i = 0; i < rows.length; i += CHUNK_SIZE) {
+    const chunk = rows.slice(i, i + CHUNK_SIZE);
+    const { error } = await supabase
+      .from("investor_metric_values")
+      .upsert(chunk, {
+        onConflict: "investor_id,company_id,metric_name,period_type,period_start,period_end",
+      });
 
-  if (error) {
-    logger.error("Failed to insert manual metrics:", error.message);
-    return jsonError("Failed to save metrics.", 500);
+    if (error) {
+      logger.error("Failed to insert manual metrics:", error.message);
+      return jsonError("Failed to save metrics.", 500);
+    }
   }
 
   return NextResponse.json({ ok: true, count: rows.length });

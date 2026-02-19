@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import {
   Select,
   SelectTrigger,
@@ -30,6 +31,8 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
   const titleId = useId();
   const [saving, setSaving] = useState(false);
   const backdropRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
 
   const [name, setName] = useState(initialValues?.name ?? "");
   const [vintageYear, setVintageYear] = useState(
@@ -126,7 +129,7 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
         if (e.target === backdropRef.current) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div ref={dialogRef} className="w-full max-w-md rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="flex items-center justify-between">
           <h2 id={titleId} className="text-lg font-semibold">
             {mode === "create" ? "Create Fund" : "Edit Fund"}
@@ -144,8 +147,9 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
         <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">
           {/* Name */}
           <div>
-            <label className="mb-1 block text-sm text-text-secondary">Fund Name<span className="text-[var(--error-accent)]"> *</span></label>
+            <label htmlFor="fund-name" className="mb-1 block text-sm text-text-secondary">Fund Name<span className="text-[var(--error-accent)]"> *</span></label>
             <input
+              id="fund-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="h-11 w-full rounded-md border border-border-default bg-bg-input px-3 text-sm focus:border-border-default focus:outline-none"
@@ -155,8 +159,9 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
 
           {/* Vintage Year */}
           <div>
-            <label className="mb-1 block text-sm text-text-secondary">Vintage Year</label>
+            <label htmlFor="fund-vintage-year" className="mb-1 block text-sm text-text-secondary">Vintage Year</label>
             <input
+              id="fund-vintage-year"
               value={vintageYear}
               onChange={(e) => setVintageYear(e.target.value)}
               type="number"
@@ -166,8 +171,9 @@ export function FundFormModal({ open, onClose, onSaved, mode, initialValues }: F
 
           {/* Fund Size */}
           <div>
-            <label className="mb-1 block text-sm text-text-secondary">Fund Size (optional)</label>
+            <label htmlFor="fund-size" className="mb-1 block text-sm text-text-secondary">Fund Size (optional)</label>
             <input
+              id="fund-size"
               value={fundSize}
               onChange={(e) => setFundSize(e.target.value)}
               type="number"

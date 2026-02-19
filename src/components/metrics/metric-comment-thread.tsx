@@ -178,7 +178,7 @@ export function MetricCommentThread({ companyId, metricName, periodStart, period
         <button
           type="submit"
           disabled={!newComment.trim() || posting}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-btn-primary-bg text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-40"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-btn-primary-bg text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-60"
           aria-label="Send comment"
         >
           <Send className="h-3.5 w-3.5" />

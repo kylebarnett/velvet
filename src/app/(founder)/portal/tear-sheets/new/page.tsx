@@ -58,7 +58,7 @@ export default function NewTearSheetPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Tear Sheets", href: "/portal/tear-sheets" }, { label: "New Tear Sheet" }]} />
+        <Breadcrumbs icon="layout-dashboard" items={[{ label: "Dashboard", href: "/portal" }, { label: "Tear Sheets", href: "/portal/tear-sheets" }, { label: "New Tear Sheet" }]} />
         <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">
           New Tear Sheet
         </h1>

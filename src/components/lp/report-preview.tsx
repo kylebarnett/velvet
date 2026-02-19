@@ -74,7 +74,9 @@ function fmtPercent(value: number | null): string {
 }
 
 function fmtDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", {
+  // Append T00:00:00 to force local time parsing for date-only strings (avoids UTC midnight shift)
+  const d = new Date(dateStr.includes("T") ? dateStr : dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",

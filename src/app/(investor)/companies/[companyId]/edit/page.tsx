@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { requireRole } from "@/lib/auth/require-role";
 
@@ -94,7 +95,7 @@ export default async function DashboardEditPage({
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <Breadcrumbs items={[{ label: "Companies", href: "/companies" }, { label: "Edit Dashboard" }]} />
+        <Breadcrumbs items={[{ label: "Companies", href: "/companies" }, { label: "Edit Dashboard" }]} icon="building2" />
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           Edit Dashboard - {company.name}
         </h1>

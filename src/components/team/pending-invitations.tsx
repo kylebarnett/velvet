@@ -100,7 +100,7 @@ export function PendingInvitations({
                   type="button"
                   onClick={() => setCancelModal({ open: true, invitation: inv })}
                   disabled={cancelling === inv.id}
-                  className="rounded-md p-1.5 text-text-faint hover:bg-bg-elevated hover:text-text-tertiary disabled:opacity-40"
+                  className="rounded-md p-1.5 text-text-faint hover:bg-bg-elevated hover:text-text-tertiary disabled:opacity-60"
                   title="Cancel invitation"
                 >
                   <X className="h-4 w-4" />

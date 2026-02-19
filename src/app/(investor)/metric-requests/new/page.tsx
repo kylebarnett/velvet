@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
+
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export const metadata: Metadata = { title: "New Metric Request | Velvet" };
@@ -43,7 +44,7 @@ const UnifiedRequestWizard = dynamic(
 export default function NewRequestPage() {
   return (
     <div className="space-y-4">
-      <Breadcrumbs items={[{ label: "Companies", href: "/companies" }, { label: "Metric Requests", href: "/metric-requests" }, { label: "New Request" }]} />
+      <Breadcrumbs icon="building2" items={[{ label: "Companies", href: "/companies" }, { label: "Metric Requests", href: "/metric-requests" }, { label: "New Request" }]} />
       <UnifiedRequestWizard />
     </div>
   );

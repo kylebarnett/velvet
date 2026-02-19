@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+import { verifyCsrfOrigin } from "@/lib/api/csrf";
+
 const PROTECTED_PATHS = [
   "/companies",
   "/contacts",
@@ -18,6 +20,15 @@ const PROTECTED_PATHS = [
 const AUTH_PATHS = ["/login", "/signup"];
 
 export async function middleware(request: NextRequest) {
+  // CSRF origin verification for all mutating API requests
+  if (
+    request.method !== "GET" &&
+    request.nextUrl.pathname.startsWith("/api/")
+  ) {
+    const csrfError = verifyCsrfOrigin(request);
+    if (csrfError) return csrfError;
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

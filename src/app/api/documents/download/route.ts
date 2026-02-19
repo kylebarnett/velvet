@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     return jsonError("Missing file path.", 400);
   }
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
 
   // Verify user has access to this document
   // Extract company_id from file path (format: {company_id}/{timestamp}-{filename})

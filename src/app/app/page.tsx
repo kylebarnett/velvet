@@ -12,7 +12,7 @@ export default async function AppEntryPage() {
 
   if (!user) redirect("/login");
 
-  const role = (user.user_metadata?.role as string | undefined) ?? "founder";
+  const role = (user.app_metadata?.role as string | undefined) ?? "founder";
 
   if (role === "investor") redirect("/companies");
   redirect("/portal");

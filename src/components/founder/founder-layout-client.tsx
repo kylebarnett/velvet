@@ -3,7 +3,6 @@
 import * as React from "react";
 
 import { OnboardingProvider, useOnboarding } from "@/contexts/onboarding-context";
-import { HelpProvider } from "@/contexts/help-context";
 import { OnboardingOverlay } from "@/components/onboarding/onboarding-provider";
 import { CommandPaletteProvider } from "@/components/command-palette/command-palette-provider";
 import { CommandPalette } from "@/components/command-palette/command-palette";
@@ -20,19 +19,17 @@ export function FounderLayoutClient({
   isOnboardingComplete,
 }: FounderLayoutClientProps) {
   return (
-    <HelpProvider role="founder">
-      <CommandPaletteProvider>
-        <OnboardingProvider
-          initialStep={initialOnboardingStep}
-          isOnboardingComplete={isOnboardingComplete}
-          role="founder"
-        >
-          {children}
-          <OnboardingOverlay />
-          <CommandPalette role="founder" />
-        </OnboardingProvider>
-      </CommandPaletteProvider>
-    </HelpProvider>
+    <CommandPaletteProvider>
+      <OnboardingProvider
+        initialStep={initialOnboardingStep}
+        isOnboardingComplete={isOnboardingComplete}
+        role="founder"
+      >
+        {children}
+        <OnboardingOverlay />
+        <CommandPalette role="founder" />
+      </OnboardingProvider>
+    </CommandPaletteProvider>
   );
 }
 

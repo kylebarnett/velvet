@@ -25,7 +25,7 @@ export async function GET(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const { id: companyId } = await params;
@@ -55,7 +55,7 @@ export async function PUT(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const parsed = updateSchema.safeParse(await req.json().catch(() => null));
@@ -77,12 +77,11 @@ export async function PUT(
     return jsonError("Company not in portfolio.", 403);
   }
 
-  // Update tile metric preferences (lowercase for case-insensitive matching)
   const { error } = await supabase
     .from("investor_company_relationships")
     .update({
-      tile_primary_metric: parsed.data.primaryMetric?.toLowerCase() ?? null,
-      tile_secondary_metric: parsed.data.secondaryMetric?.toLowerCase() ?? null,
+      tile_primary_metric: parsed.data.primaryMetric ?? null,
+      tile_secondary_metric: parsed.data.secondaryMetric ?? null,
     })
     .eq("id", relationship.id);
 

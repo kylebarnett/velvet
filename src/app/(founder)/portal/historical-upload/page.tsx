@@ -13,6 +13,7 @@ export default async function FounderHistoricalUploadPage() {
   return (
     <div className="space-y-6">
       <Breadcrumbs
+        icon="layout-dashboard"
         items={[
           { label: "Dashboard", href: "/portal" },
           { label: "Import Historical Metrics" },

@@ -28,6 +28,7 @@ import {
 import { formatValue, formatPeriod } from "@/components/charts/types";
 import { getNumericValue } from "@/components/dashboard/types";
 import { useChartTheme } from "@/hooks/use-chart-theme";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { computeRollups, monthToQuarterStart, toAnnualStart, type RolledUpValue } from "@/lib/metrics/rollup";
 import { getDefaultAggregationType, getAggregationIndicator } from "@/lib/metrics/temporal-aggregation";
 import { SourceBadge } from "./source-badge";
@@ -183,6 +184,7 @@ export function MetricDetailPanel({
   }, []);
 
   const panelRef = React.useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, true);
 
   // Scroll to the top of the side panel when it opens or metric/period changes.
   // Uses the panel's parent element (the dashboard content area) as the scroll target

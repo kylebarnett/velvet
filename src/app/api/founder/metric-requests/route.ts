@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 
 // GET - Deduplicated metric requests for the founder's company
 // Groups by metric_name + period, shows requesting investor count
-export async function GET() {
+export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "founder") return jsonError("Founders only.", 403);
 
   // Get founder's company
@@ -22,6 +23,8 @@ export async function GET() {
 
   if (!company) return jsonError("No company found.", 404);
 
+  const { limit, offset } = parsePagination(new URL(req.url));
+
   // Fetch metric requests without joining metric_definitions.
   // Founders cannot read metric_definitions via RLS (investor-only policy),
   // so we fetch definitions separately using the admin client after
@@ -32,7 +35,8 @@ export async function GET() {
       "id, period_start, period_end, status, due_date, created_at, investor_id, metric_definition_id",
     )
     .eq("company_id", company.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) {
     logger.error("Metric requests fetch error:", error);

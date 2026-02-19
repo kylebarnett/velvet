@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
+import { checkRateLimit, getClientIp } from "@/lib/api/rate-limit";
 import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
@@ -12,11 +14,11 @@ const createSchema = z.object({
 });
 
 // GET - List tear sheets for founder's company
-export async function GET() {
+export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "founder") return jsonError("Founders only.", 403);
 
   // Get founder's company
@@ -28,12 +30,15 @@ export async function GET() {
 
   if (!company) return jsonError("No company found.", 404);
 
+  const { limit, offset } = parsePagination(new URL(req.url));
+
   const { data: tearSheets, error } = await supabase
     .from("tear_sheets")
-    .select("*")
+    .select("id, title, quarter, year, status, share_enabled, share_token, created_at, updated_at")
     .eq("founder_id", user.id)
     .order("year", { ascending: false })
-    .order("quarter", { ascending: false });
+    .order("quarter", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) {
     logger.error("Tear sheet list error:", error);
@@ -45,10 +50,18 @@ export async function GET() {
 
 // POST - Create a tear sheet
 export async function POST(req: Request) {
+  const ip = getClientIp(req);
+  const { allowed, retryAfter } = checkRateLimit(`founder-tear-sheets-create:${ip}`, 10, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
+
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "founder") return jsonError("Founders only.", 403);
 
   const parsed = createSchema.safeParse(await req.json().catch(() => null));

@@ -79,10 +79,11 @@ export function ValueEditModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs text-text-secondary">
+            <label htmlFor="edit-metric-name" className="mb-1 block text-xs text-text-secondary">
               Metric Name
             </label>
             <input
+              id="edit-metric-name"
               type="text"
               value={metricName}
               onChange={(e) => setMetricName(e.target.value)}
@@ -91,10 +92,11 @@ export function ValueEditModal({
           </div>
 
           <div>
-            <label className="mb-1 block text-xs text-text-secondary">
+            <label htmlFor="edit-metric-value" className="mb-1 block text-xs text-text-secondary">
               Value
             </label>
             <input
+              id="edit-metric-value"
               type="text"
               value={rawValue}
               onChange={(e) => setRawValue(e.target.value)}
@@ -109,10 +111,11 @@ export function ValueEditModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs text-text-secondary">
+              <label htmlFor="edit-period-start" className="mb-1 block text-xs text-text-secondary">
                 Period Start
               </label>
               <input
+                id="edit-period-start"
                 type="date"
                 value={periodStart}
                 onChange={(e) => setPeriodStart(e.target.value)}
@@ -120,10 +123,11 @@ export function ValueEditModal({
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-text-secondary">
+              <label htmlFor="edit-period-end" className="mb-1 block text-xs text-text-secondary">
                 Period End
               </label>
               <input
+                id="edit-period-end"
                 type="date"
                 value={periodEnd}
                 onChange={(e) => setPeriodEnd(e.target.value)}

@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { useReportsContext, type SavedReport } from "./reports-context";
 import { REPORT_TEMPLATES, getDefaultSections, type ReportType } from "@/lib/reports/templates";
@@ -20,18 +22,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Lazy-loaded section components
+// Non-chart section components
 import { KPICards } from "./portfolio-summary/kpi-cards";
 import { DistributionCharts } from "./portfolio-summary/distribution-charts";
 import { TopPerformers } from "./portfolio-summary/top-performers";
 import { DataFreshnessCard } from "./portfolio-summary/data-freshness-card";
-import { PortfolioTimeSeries } from "./portfolio-summary/portfolio-time-series";
 import { ComparisonClient } from "./company-comparison/comparison-client";
 import { BenchmarksClient } from "./benchmarks/benchmarks-client";
 import { CompanyHeader } from "./deep-dive/company-header";
 import { CompanyMetricKPIs } from "./deep-dive/company-metric-kpis";
-import { CompanyMetricTrends } from "./deep-dive/company-metric-trends";
-import { CompanyBenchmarkPosition } from "./deep-dive/company-benchmark-position";
+
+// Dynamically imported chart components (recharts)
+const PortfolioTimeSeries = dynamic(
+  () => import("./portfolio-summary/portfolio-time-series").then(m => ({ default: m.PortfolioTimeSeries })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
+const CompanyMetricTrends = dynamic(
+  () => import("./deep-dive/company-metric-trends").then(m => ({ default: m.CompanyMetricTrends })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
+const CompanyBenchmarkPosition = dynamic(
+  () => import("./deep-dive/company-benchmark-position").then(m => ({ default: m.CompanyBenchmarkPosition })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
 
 type SummaryData = {
   aggregates: Record<string, { sum: number | null; average: number; median: number; count: number; canSum: boolean }>;
@@ -86,6 +99,7 @@ export function ReportEditor({
   const [saving, setSaving] = React.useState(false);
   const [summaryState, setSummaryState] = React.useState<SummaryData | null>(summaryData ?? null);
   const [loadingSummary, setLoadingSummary] = React.useState(false);
+  const [summaryError, setSummaryError] = React.useState<string | null>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   const reportType = report.report_type as ReportType;
@@ -123,15 +137,25 @@ export function ReportEditor({
 
     let cancelled = false;
     setLoadingSummary(true);
+    setSummaryError(null);
 
     async function fetchSummary() {
       try {
         const res = await fetch(`/api/investors/portfolio/summary?${params}`);
-        if (!res.ok) return;
+        if (!res.ok) {
+          if (!cancelled) {
+            setSummaryError("Failed to load portfolio data.");
+            toast.error("Failed to load portfolio data.");
+          }
+          return;
+        }
         const json = await res.json();
         if (!cancelled) setSummaryState(json);
       } catch {
-        // Keep existing data on failure
+        if (!cancelled) {
+          setSummaryError("Failed to load portfolio data.");
+          toast.error("Failed to load portfolio data.");
+        }
       } finally {
         if (!cancelled) setLoadingSummary(false);
       }
@@ -238,6 +262,7 @@ export function ReportEditor({
           <SummaryEditor
             data={summaryState}
             loading={loadingSummary}
+            error={summaryError}
             template={template}
             visibleSections={visibleSections}
             onToggleSection={toggleSection}
@@ -284,6 +309,7 @@ export function ReportEditor({
 function SummaryEditor({
   data,
   loading,
+  error,
   template,
   visibleSections,
   onToggleSection,
@@ -292,12 +318,24 @@ function SummaryEditor({
 }: {
   data: SummaryData | null;
   loading: boolean;
+  error: string | null;
   template: (typeof REPORT_TEMPLATES)["summary"];
   visibleSections: string[];
   onToggleSection: (id: string) => void;
   isSectionVisible: (id: string) => boolean;
   filters: Record<string, unknown>;
 }) {
+  if (error && !data) {
+    return (
+      <div
+        className="rounded-xl border border-[var(--status-error-bg)] bg-[var(--status-error-bg)] p-4 text-sm text-[var(--status-error-text)]"
+        role="alert"
+      >
+        {error}
+      </div>
+    );
+  }
+
   if (loading || !data) {
     return (
       <div className="flex items-center justify-center gap-2 py-12 text-text-muted">
@@ -495,7 +533,7 @@ function DeepDiveEditor({
           }
         }
       } catch {
-        // Silently fail
+        toast.error("Failed to load companies.");
       }
     }
     loadCompanies();
@@ -514,9 +552,11 @@ function DeepDiveEditor({
         if (res.ok) {
           const json = await res.json();
           if (!cancelled) setDeepDiveData(json);
+        } else if (!cancelled) {
+          toast.error("Failed to load company data.");
         }
       } catch {
-        // Silently fail
+        if (!cancelled) toast.error("Failed to load company data.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -532,11 +572,11 @@ function DeepDiveEditor({
       <div className="card-surface rounded-xl border border-border-subtle p-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
+            <label id="deep-dive-company-label" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Company
             </label>
             <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-              <SelectTrigger>
+              <SelectTrigger aria-labelledby="deep-dive-company-label">
                 <SelectValue placeholder="Select a company..." />
               </SelectTrigger>
               <SelectContent>
@@ -547,11 +587,11 @@ function DeepDiveEditor({
             </Select>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
+            <label id="deep-dive-period-label" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Period
             </label>
             <Select value={periodType} onValueChange={(v) => setPeriodType(v as DeepDivePeriodType)}>
-              <SelectTrigger>
+              <SelectTrigger aria-labelledby="deep-dive-period-label">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

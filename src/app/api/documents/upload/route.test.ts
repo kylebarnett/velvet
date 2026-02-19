@@ -153,7 +153,7 @@ describe("POST /api/documents/upload", () => {
   });
 
   it("returns 403 when user is not a founder", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "investor" } };
+    mockUser = { id: "u1", user_metadata: { role: "investor" }, app_metadata: { role: "investor" } };
     const res = await POST(makeUploadRequest());
     expect(res.status).toBe(403);
     expect((await res.json()).error).toMatch(/forbidden/i);
@@ -162,7 +162,7 @@ describe("POST /api/documents/upload", () => {
   // --- Rate limiting ---
 
   it("returns 429 when rate limited", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     vi.mocked(checkRateLimit).mockReturnValue({ allowed: false, retryAfter: 45 });
 
     const res = await POST(makeUploadRequest());
@@ -174,14 +174,14 @@ describe("POST /api/documents/upload", () => {
   // --- Invalid form data ---
 
   it("returns 400 for invalid form data (corrupt body)", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const res = await POST(makeBadFormDataRequest());
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/invalid form data/i);
   });
 
   it("returns 400 when file is missing", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const res = await POST(makeUploadRequest({ omitFile: true }));
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/missing file/i);
@@ -190,7 +190,7 @@ describe("POST /api/documents/upload", () => {
   // --- MIME type validation ---
 
   it("returns 400 for SVG file (unsupported MIME type)", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const svgFile = new File(["<svg></svg>"], "logo.svg", { type: "image/svg+xml" });
     const res = await POST(makeUploadRequest({ file: svgFile }));
     expect(res.status).toBe(400);
@@ -198,7 +198,7 @@ describe("POST /api/documents/upload", () => {
   });
 
   it("returns 400 for unsupported MIME type (text/html)", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const htmlFile = new File(["<html></html>"], "page.html", { type: "text/html" });
     const res = await POST(makeUploadRequest({ file: htmlFile }));
     expect(res.status).toBe(400);
@@ -208,7 +208,7 @@ describe("POST /api/documents/upload", () => {
   // --- File size ---
 
   it("returns 400 when file exceeds 50MB", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     // Create a File stub that reports a large size
     const bigFile = new File(["x"], "big.pdf", { type: "application/pdf" });
     Object.defineProperty(bigFile, "size", { value: 51 * 1024 * 1024 });
@@ -221,14 +221,14 @@ describe("POST /api/documents/upload", () => {
   // --- companyId validation ---
 
   it("returns 400 when companyId is missing", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const res = await POST(makeUploadRequest({ omitCompanyId: true }));
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/missing companyId/i);
   });
 
   it("returns 400 for invalid companyId UUID format", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const res = await POST(makeUploadRequest({ companyId: "not-a-uuid" }));
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/invalid companyId format/i);
@@ -237,14 +237,14 @@ describe("POST /api/documents/upload", () => {
   // --- documentType validation ---
 
   it("returns 400 when documentType is missing", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const res = await POST(makeUploadRequest({ omitDocumentType: true }));
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/missing documentType/i);
   });
 
   it("returns 400 for invalid documentType", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     const res = await POST(makeUploadRequest({ documentType: "invalid_type" }));
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/invalid documentType/i);
@@ -253,7 +253,7 @@ describe("POST /api/documents/upload", () => {
   // --- Ownership ---
 
   it("returns 403 when company is not owned by the founder", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     // Company lookup returns null
     mockCompanyChain = createChain(null, null);
 
@@ -265,7 +265,7 @@ describe("POST /api/documents/upload", () => {
   // --- Successful upload ---
 
   it("returns 200 on successful upload", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
 
     // Company ownership check succeeds
     mockCompanyChain = createChain({ id: VALID_COMPANY_ID }, null);
@@ -298,7 +298,7 @@ describe("POST /api/documents/upload", () => {
   });
 
   it("creates bucket if it does not exist", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     mockCompanyChain = createChain({ id: VALID_COMPANY_ID }, null);
     mockListBuckets.mockResolvedValue({ data: [] }); // No buckets
     mockStorageUpload.mockResolvedValue({ error: null });
@@ -310,7 +310,7 @@ describe("POST /api/documents/upload", () => {
   });
 
   it("sanitizes filename in storage path", async () => {
-    mockUser = { id: "u1", user_metadata: { role: "founder" } };
+    mockUser = { id: "u1", user_metadata: { role: "founder" }, app_metadata: { role: "founder" } };
     mockCompanyChain = createChain({ id: VALID_COMPANY_ID }, null);
     mockListBuckets.mockResolvedValue({ data: [{ name: "documents" }] });
     mockStorageUpload.mockResolvedValue({ error: null });

@@ -173,16 +173,18 @@ export function MetricNameTooltip({
               type="button"
               onClick={() => setIsEditing(false)}
               className="text-text-muted hover:text-text-secondary transition-colors"
+              aria-label="Close"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
 
           <div>
-            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-text-muted">
+            <label htmlFor="metric-def-description" className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-text-muted">
               Description *
             </label>
             <textarea
+              id="metric-def-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -192,10 +194,11 @@ export function MetricNameTooltip({
           </div>
 
           <div>
-            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-text-muted">
+            <label htmlFor="metric-def-formula" className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-text-muted">
               Formula (optional)
             </label>
             <input
+              id="metric-def-formula"
               type="text"
               value={formula}
               onChange={(e) => setFormula(e.target.value)}

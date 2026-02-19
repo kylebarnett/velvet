@@ -26,7 +26,7 @@ export async function GET(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "founder") return jsonError("Founders only.", 403);
 
   const { id } = await params;
@@ -53,7 +53,7 @@ export async function PUT(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "founder") return jsonError("Founders only.", 403);
 
   const { id } = await params;
@@ -124,7 +124,7 @@ export async function DELETE(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "founder") return jsonError("Founders only.", 403);
 
   const { id } = await params;

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { X, Loader2 } from "lucide-react";
@@ -10,16 +11,33 @@ import { KPICards } from "./portfolio-summary/kpi-cards";
 import { DistributionCharts } from "./portfolio-summary/distribution-charts";
 import { TopPerformers } from "./portfolio-summary/top-performers";
 import { DataFreshnessCard } from "./portfolio-summary/data-freshness-card";
-import { PortfolioTimeSeries } from "./portfolio-summary/portfolio-time-series";
-import { ComparisonChart } from "./company-comparison/comparison-chart";
 import { ComparisonTable } from "./company-comparison/comparison-table";
-import { BenchmarkChart } from "./benchmarks/benchmark-chart";
 import { BenchmarkTable } from "./benchmarks/benchmark-table";
 import { BenchmarkPortfolioSummary } from "./benchmarks/benchmark-portfolio-summary";
 import { CompanyHeader } from "./deep-dive/company-header";
 import { CompanyMetricKPIs } from "./deep-dive/company-metric-kpis";
-import { CompanyMetricTrends } from "./deep-dive/company-metric-trends";
-import { CompanyBenchmarkPosition } from "./deep-dive/company-benchmark-position";
+
+// Dynamically imported chart components (recharts)
+const PortfolioTimeSeries = dynamic(
+  () => import("./portfolio-summary/portfolio-time-series").then(m => ({ default: m.PortfolioTimeSeries })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
+const ComparisonChart = dynamic(
+  () => import("./company-comparison/comparison-chart").then(m => ({ default: m.ComparisonChart })),
+  { ssr: false, loading: () => <div className="h-80 animate-pulse rounded-xl bg-white/5" /> }
+);
+const BenchmarkChart = dynamic(
+  () => import("./benchmarks/benchmark-chart").then(m => ({ default: m.BenchmarkChart })),
+  { ssr: false, loading: () => <div className="h-80 animate-pulse rounded-xl bg-white/5" /> }
+);
+const CompanyMetricTrends = dynamic(
+  () => import("./deep-dive/company-metric-trends").then(m => ({ default: m.CompanyMetricTrends })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
+const CompanyBenchmarkPosition = dynamic(
+  () => import("./deep-dive/company-benchmark-position").then(m => ({ default: m.CompanyBenchmarkPosition })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
 
 type SummaryData = {
   aggregates: Record<string, { sum: number | null; average: number; median: number; count: number; canSum: boolean }>;
@@ -168,7 +186,7 @@ export function ReportPreviewPanel({ reportType, onClose, onCreated, triggerRef 
             ref={closeRef}
             type="button"
             onClick={handleClose}
-            className="ml-4 mt-0.5 rounded-md p-1.5 text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-primary"
+            className="ml-4 mt-0.5 flex h-8 w-8 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-primary"
             aria-label="Close preview"
           >
             <X className="h-5 w-5" />

@@ -4,6 +4,7 @@ import * as React from "react";
 import { X } from "lucide-react";
 
 import { TemplateForm } from "@/components/investor/template-form";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 type TemplateItem = {
   metric_name: string;
@@ -34,6 +35,8 @@ export function TemplateFormModal({
   onSaved,
 }: Props) {
   const titleId = React.useId();
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
 
   React.useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -49,7 +52,7 @@ export function TemplateFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-backdrop backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border-default bg-bg-secondary p-6 shadow-xl" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div ref={dialogRef} className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border-default bg-bg-secondary p-6 shadow-xl" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="mb-4 flex items-center justify-between">
           <h2 id={titleId} className="text-lg font-semibold">
             {mode === "create" ? "New template" : "Edit template"}
@@ -58,6 +61,7 @@ export function TemplateFormModal({
             type="button"
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-bg-hover"
+            aria-label="Close"
           >
             <X className="h-4 w-4 text-text-muted" />
           </button>

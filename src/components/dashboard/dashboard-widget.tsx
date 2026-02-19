@@ -2,7 +2,10 @@
 
 import dynamic from "next/dynamic";
 import { MetricCard } from "./metric-card";
-import { MetricsTable } from "./metrics-table";
+const MetricsTable = dynamic(
+  () => import("./metrics-table").then(m => ({ default: m.MetricsTable })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
 
 const LineChart = dynamic(() => import("@/components/charts/line-chart").then(m => m.LineChart), { ssr: false });
 const BarChart = dynamic(() => import("@/components/charts/bar-chart").then(m => m.BarChart), { ssr: false });

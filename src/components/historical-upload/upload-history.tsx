@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import type { HistoricalUpload } from "@/lib/excel/types";
 
 type ResumePayload = {
@@ -268,6 +269,7 @@ function UploadDetailPanel({
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const panelRef = React.useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, true);
 
   // Slide in on mount
   useEffect(() => {

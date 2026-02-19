@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role as "investor" | "founder" | undefined;
+  const role = user.app_metadata?.role as "investor" | "founder" | undefined;
   if (!role || (role !== "investor" && role !== "founder")) {
     return jsonError("Forbidden.", 403);
   }

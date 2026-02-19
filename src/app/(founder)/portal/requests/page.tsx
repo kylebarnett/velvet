@@ -64,7 +64,7 @@ export default function FounderRequestsPage() {
     return (
       <div className="space-y-6">
         <div className="space-y-1">
-          <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Metric Requests" }]} />
+          <Breadcrumbs icon="layout-dashboard" items={[{ label: "Dashboard", href: "/portal" }, { label: "Metric Requests" }]} />
           <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Metric Requests</h1>
           <p className="text-sm text-text-tertiary">
             Submit metrics for the selected period.
@@ -105,7 +105,7 @@ export default function FounderRequestsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1" data-onboarding="requests-title">
-        <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Metric Requests" }]} />
+        <Breadcrumbs icon="layout-dashboard" items={[{ label: "Dashboard", href: "/portal" }, { label: "Metric Requests" }]} />
         <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Metric Requests</h1>
         <p className="text-sm text-text-tertiary">
           Metrics your investors have requested. Submit values here or from your dashboard.

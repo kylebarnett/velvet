@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Download, ExternalLink, FileText, X, Tag } from "lucide-react";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import {
   DOCUMENT_TYPE_LABELS,
   getDocumentTypeColor,
@@ -32,7 +33,9 @@ function formatFileSize(bytes: number): string {
 }
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", {
+  // Append T00:00:00 to force local time parsing for date-only strings (avoids UTC midnight shift)
+  const d = new Date(dateStr.includes("T") ? dateStr : dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -47,6 +50,8 @@ export function DocumentPreviewModal({
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, !!doc);
 
   const isPdf =
     doc?.file_type === "application/pdf" || doc?.file_name.endsWith(".pdf");
@@ -107,6 +112,7 @@ export function DocumentPreviewModal({
 
   return (
     <div
+      ref={dialogRef}
       className="fixed inset-0 z-50 flex items-center justify-center"
       role="dialog"
       aria-modal="true"

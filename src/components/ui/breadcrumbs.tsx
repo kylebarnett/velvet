@@ -1,7 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { MoreHorizontal, type LucideIcon } from "lucide-react";
+import {
+  Briefcase,
+  Building2,
+  HelpCircle,
+  Landmark,
+  LayoutDashboard,
+  MoreHorizontal,
+  Send,
+  type LucideIcon,
+} from "lucide-react";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  briefcase: Briefcase,
+  building2: Building2,
+  "help-circle": HelpCircle,
+  landmark: Landmark,
+  "layout-dashboard": LayoutDashboard,
+  send: Send,
+};
 
 type BreadcrumbItem = {
   label: string;
@@ -25,10 +43,11 @@ function Separator() {
 
 type BreadcrumbsProps = {
   items: BreadcrumbItem[];
-  icon?: LucideIcon;
+  icon?: string;
 };
 
-export function Breadcrumbs({ items, icon: Icon }: BreadcrumbsProps) {
+export function Breadcrumbs({ items, icon }: BreadcrumbsProps) {
+  const Icon = icon ? ICON_MAP[icon] : undefined;
   const truncate = items.length > 3;
 
   if (!truncate) {

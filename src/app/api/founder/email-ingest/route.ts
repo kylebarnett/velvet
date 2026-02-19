@@ -197,7 +197,7 @@ export async function POST(req: Request) {
     const { supabase, user } = await getApiUser();
     if (!user) return jsonError("Unauthorized.", 401);
 
-    const role = user.user_metadata?.role;
+    const role = user.app_metadata?.role;
     if (role !== "founder") return jsonError("Forbidden.", 403);
 
     // Rate limit: 5 email extractions per minute per user

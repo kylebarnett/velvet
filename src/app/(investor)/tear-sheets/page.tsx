@@ -11,6 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SlidingTabs, SlidingIconTabs, TabItem } from "@/components/ui/sliding-tabs";
@@ -348,24 +349,20 @@ export default function InvestorTearSheetsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Companies", href: "/companies" }, { label: "Tear Sheets" }]} />
+          <Breadcrumbs items={[{ label: "Companies", href: "/companies" }, { label: "Tear Sheets" }]} icon="building2" />
           <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Tear Sheets</h1>
           <p className="mt-1 text-sm text-text-tertiary">
             View founder-published tear sheets and create your own investment memos.
           </p>
         </div>
         {tearSheets.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-btn-primary-bg px-3 py-1.5 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
-          >
+          <Button onClick={() => setShowCreateModal(true)}>
             New Tear Sheet
-          </button>
+          </Button>
         )}
       </div>
 
@@ -381,93 +378,94 @@ export default function InvestorTearSheetsPage() {
 
       {/* Filters */}
       {showFilters && (
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <SlidingTabs
-              tabs={SOURCE_TABS}
-              value={filterSource}
-              onChange={setFilterSource}
-              size="sm"
-              showIcons={false}
-            />
-
-            <SlidingTabs
-              tabs={QUARTER_TABS}
-              value={filterQuarter}
-              onChange={setFilterQuarter}
-              size="sm"
-              showIcons={false}
-            />
-
-            {companiesWithSheets.length > 1 && (
-              <Select value={filterCompany} onValueChange={setFilterCompany}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All">All companies</SelectItem>
-                  {companiesWithSheets.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-
-            {availableYears.length > 1 && (
-              <Select value={filterYear} onValueChange={setFilterYear}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All">All years</SelectItem>
-                  {availableYears.map((y) => (
-                    <SelectItem key={y} value={String(y)}>
-                      {y}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-
-            <div className="ml-auto flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => toggleSort("date")}
-                className={`flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
-                  sortField === "date"
-                    ? "border-border-default bg-bg-hover text-text-primary"
-                    : "border-border-default bg-bg-input text-text-muted hover:text-text-secondary"
-                }`}
-              >
-                Date
-                {sortField === "date" && <ArrowUpDown className="h-3 w-3" />}
-              </button>
-              <button
-                type="button"
-                onClick={() => toggleSort("company")}
-                className={`flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
-                  sortField === "company"
-                    ? "border-border-default bg-bg-hover text-text-primary"
-                    : "border-border-default bg-bg-input text-text-muted hover:text-text-secondary"
-                }`}
-              >
-                Company
-                {sortField === "company" && <ArrowUpDown className="h-3 w-3" />}
-              </button>
-
-              <SlidingIconTabs
-                tabs={VIEW_MODE_TABS}
-                value={viewMode}
-                onChange={setViewMode}
-              />
-            </div>
-          </div>
-
-          {/* Count */}
-          <div className="text-sm text-text-tertiary">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-xs text-text-tertiary">
             {displayed.length} tear sheet{displayed.length !== 1 ? "s" : ""}
+          </span>
+
+          <div className="h-4 w-px bg-border-default" />
+
+          <SlidingTabs
+            tabs={SOURCE_TABS}
+            value={filterSource}
+            onChange={setFilterSource}
+            size="sm"
+            showIcons={false}
+          />
+
+          <div className="h-4 w-px bg-border-default" />
+
+          <SlidingTabs
+            tabs={QUARTER_TABS}
+            value={filterQuarter}
+            onChange={setFilterQuarter}
+            size="sm"
+            showIcons={false}
+          />
+
+          {companiesWithSheets.length > 1 && (
+            <Select value={filterCompany} onValueChange={setFilterCompany}>
+              <SelectTrigger className="h-8 w-[200px] rounded-lg text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All companies</SelectItem>
+                {companiesWithSheets.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {availableYears.length > 1 && (
+            <Select value={filterYear} onValueChange={setFilterYear}>
+              <SelectTrigger className="h-8 w-[120px] rounded-lg text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All years</SelectItem>
+                {availableYears.map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => toggleSort("date")}
+              className={`flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors ${
+                sortField === "date"
+                  ? "border-border-default bg-bg-hover text-text-primary"
+                  : "border-border-default bg-bg-input text-text-muted hover:text-text-secondary"
+              }`}
+            >
+              Date
+              {sortField === "date" && <ArrowUpDown className="h-3 w-3" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleSort("company")}
+              className={`flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors ${
+                sortField === "company"
+                  ? "border-border-default bg-bg-hover text-text-primary"
+                  : "border-border-default bg-bg-input text-text-muted hover:text-text-secondary"
+              }`}
+            >
+              Company
+              {sortField === "company" && <ArrowUpDown className="h-3 w-3" />}
+            </button>
+
+            <SlidingIconTabs
+              tabs={VIEW_MODE_TABS}
+              value={viewMode}
+              onChange={setViewMode}
+            />
           </div>
         </div>
       )}
@@ -480,13 +478,9 @@ export default function InvestorTearSheetsPage() {
           title="No tear sheets yet"
           description="View founder-published tear sheets or create your own investment memos. Tear sheets help you track metrics, notes, and action items for each company."
           action={
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-btn-primary-bg px-4 text-sm font-medium text-btn-primary-text hover:bg-btn-primary-hover"
-            >
+            <Button onClick={() => setShowCreateModal(true)}>
               Create Tear Sheet
-            </button>
+            </Button>
           }
         />
       )}

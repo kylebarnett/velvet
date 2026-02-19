@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { getNumericValueAsString } from "@/lib/metrics/numeric-value";
 
 type MetricValue = {
   metric_name: string;
@@ -8,21 +9,6 @@ type MetricValue = {
   period_start: string;
   period_end: string;
 };
-
-function getNumericValue(value: unknown): string | null {
-  if (value == null) return null;
-  if (typeof value === "number") return value.toString();
-  if (typeof value === "string") return value;
-  if (typeof value === "object" && value !== null) {
-    const v = (value as Record<string, unknown>).value;
-    if (typeof v === "number") return v.toString();
-    if (typeof v === "string") return v;
-    // Handle { raw: "..." } format
-    const raw = (value as Record<string, unknown>).raw;
-    if (typeof raw === "string") return raw;
-  }
-  return null;
-}
 
 function getQuarterDates(quarter: string, year: number): { start: string; end: string } {
   const quarterNum = parseInt(quarter.replace("Q", ""), 10);
@@ -53,7 +39,7 @@ export async function GET(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Forbidden.", 403);
 
   const { id: companyId, tearSheetId } = await params;
@@ -127,8 +113,8 @@ export async function GET(
 
   const metrics = Array.from(currentMap.entries()).map(([key, current]) => {
     const prev = prevMap.get(key);
-    const currentValue = getNumericValue(current.value);
-    const previousValue = prev ? getNumericValue(prev.value) : null;
+    const currentValue = getNumericValueAsString(current.value);
+    const previousValue = prev ? getNumericValueAsString(prev.value) : null;
 
     let trend: "up" | "down" | "flat" = "flat";
     if (currentValue != null && previousValue != null) {

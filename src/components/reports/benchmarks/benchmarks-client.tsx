@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils/cn";
@@ -15,7 +16,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useReportsContext } from "@/components/reports/reports-context";
-import { BenchmarkChart } from "./benchmark-chart";
+
+const BenchmarkChart = dynamic(
+  () => import("./benchmark-chart").then(m => ({ default: m.BenchmarkChart })),
+  { ssr: false, loading: () => <div className="h-80 animate-pulse rounded-xl bg-white/5" /> }
+);
 import { BenchmarkTable } from "./benchmark-table";
 import { BenchmarkPortfolioSummary } from "./benchmark-portfolio-summary";
 
@@ -208,7 +213,7 @@ export function BenchmarksClient() {
         <div className="grid gap-4 md:grid-cols-3">
           {/* Metric selector */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
+            <label id="benchmarks-metric-label" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Metric
             </label>
             {isLoadingMetrics ? (
@@ -218,7 +223,7 @@ export function BenchmarksClient() {
                 value={selectedMetric}
                 onValueChange={setSelectedMetric}
               >
-                <SelectTrigger>
+                <SelectTrigger aria-labelledby="benchmarks-metric-label">
                   <SelectValue placeholder="Select a metric..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -234,14 +239,14 @@ export function BenchmarksClient() {
 
           {/* Industry filter */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
+            <label id="benchmarks-industry-label" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Industry
             </label>
             <Select
               value={industry || NONE}
               onValueChange={(v) => setIndustry(v === NONE ? "" : v)}
             >
-              <SelectTrigger>
+              <SelectTrigger aria-labelledby="benchmarks-industry-label">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -256,14 +261,14 @@ export function BenchmarksClient() {
 
           {/* Stage filter */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
+            <label id="benchmarks-stage-label" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-text-muted">
               Stage
             </label>
             <Select
               value={stage || NONE}
               onValueChange={(v) => setStage(v === NONE ? "" : v)}
             >
-              <SelectTrigger>
+              <SelectTrigger aria-labelledby="benchmarks-stage-label">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

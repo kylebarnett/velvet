@@ -2,14 +2,17 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { parsePagination } from "@/lib/api/pagination";
 import { logger } from "@/lib/logger";
 
-export async function GET() {
+export async function GET(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
+
+  const { limit, offset } = parsePagination(new URL(req.url));
 
   const { data, error } = await supabase
     .from("metric_request_schedules")
@@ -43,7 +46,8 @@ export async function GET() {
       )
     `)
     .eq("investor_id", user.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) {
     logger.error("Failed to fetch schedules:", error.message);
@@ -103,7 +107,7 @@ export async function POST(req: Request) {
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   if (role !== "investor") return jsonError("Investors only.", 403);
 
   const parsed = createSchema.safeParse(await req.json().catch(() => null));

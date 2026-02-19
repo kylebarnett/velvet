@@ -89,6 +89,28 @@ export function isTableConfig(config: unknown): config is TableConfig {
   );
 }
 
+// Map widget width (1–12) to the exact Tailwind col-span class.
+// All class names are string literals so Tailwind's content scanner picks them up.
+const GRID_COL_SPANS: Record<number, string> = {
+  1: "sm:col-span-1",
+  2: "sm:col-span-2",
+  3: "sm:col-span-3",
+  4: "sm:col-span-4",
+  5: "sm:col-span-5",
+  6: "sm:col-span-6",
+  7: "sm:col-span-7",
+  8: "sm:col-span-8",
+  9: "sm:col-span-9",
+  10: "sm:col-span-10",
+  11: "sm:col-span-11",
+  12: "sm:col-span-12",
+};
+
+export function getWidgetColSpanClass(w: number): string {
+  const clamped = Math.max(1, Math.min(12, w));
+  return GRID_COL_SPANS[clamped] ?? "sm:col-span-12";
+}
+
 // Metric value from API
 export type MetricValue = {
   id: string;
@@ -147,16 +169,5 @@ export function ensureMetricsTable(widgets: Widget[]): Widget[] {
   ];
 }
 
-// Extract numeric value from metric value
-export function getNumericValue(value: unknown): number | null {
-  if (value == null) return null;
-  if (typeof value === "number") return value;
-  if (typeof value === "object" && value !== null) {
-    // Handle { value: number } or { raw: string } format
-    const v = (value as Record<string, unknown>).value ?? (value as Record<string, unknown>).raw;
-    if (typeof v === "number") return v;
-    if (typeof v === "string") return parseFloat(v) || null;
-  }
-  if (typeof value === "string") return parseFloat(value) || null;
-  return null;
-}
+// Re-export canonical numeric value extraction from shared utility
+export { getNumericValue } from "@/lib/metrics/numeric-value";

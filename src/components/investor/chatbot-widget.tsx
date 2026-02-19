@@ -577,7 +577,7 @@ export function ChatbotWidget() {
               <button
                 onClick={() => handleSubmit()}
                 disabled={!input.trim() || state === "loading"}
-                className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md bg-btn-primary-bg text-btn-primary-text transition-colors hover:bg-btn-primary-hover disabled:opacity-40 disabled:hover:bg-btn-primary-bg"
+                className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md bg-btn-primary-bg text-btn-primary-text transition-colors hover:bg-btn-primary-hover disabled:opacity-60 disabled:hover:bg-btn-primary-bg"
                 type="button"
                 aria-label="Send query"
               >

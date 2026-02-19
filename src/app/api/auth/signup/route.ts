@@ -78,6 +78,18 @@ export async function POST(request: NextRequest) {
     return jsonError("Failed to create account.", 400);
   }
 
+  // Set role in app_metadata (non-editable by end users) for secure RLS checks.
+  // user_metadata is kept for client reads but should never be trusted in RLS.
+  if (data.user) {
+    const { error: appMetaError } = await adminClient.auth.admin.updateUserById(
+      data.user.id,
+      { app_metadata: { role } },
+    );
+    if (appMetaError) {
+      logger.error("Failed to set app_metadata role:", appMetaError.message);
+    }
+  }
+
   // Wait for the trigger to create the public.users row
   // Uses exponential backoff: 50, 100, 200, 400, 800, 1600ms (total ~3.15s max)
   if (data.user) {

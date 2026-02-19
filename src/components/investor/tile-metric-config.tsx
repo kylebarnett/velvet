@@ -156,7 +156,7 @@ export function TileMetricConfig({
               <SelectContent>
                 <SelectItem value="__default__">Use default (auto-select)</SelectItem>
                 {availableMetrics.map((m) => (
-                  <SelectItem key={m.name} value={m.name.toLowerCase()}>
+                  <SelectItem key={m.name} value={m.name}>
                     {m.displayName}
                   </SelectItem>
                 ))}
@@ -184,7 +184,7 @@ export function TileMetricConfig({
               <SelectContent>
                 <SelectItem value="__none__">None</SelectItem>
                 {secondaryOptions.map((m) => (
-                  <SelectItem key={m.name} value={m.name.toLowerCase()}>
+                  <SelectItem key={m.name} value={m.name}>
                     {m.displayName}
                   </SelectItem>
                 ))}

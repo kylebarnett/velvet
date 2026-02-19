@@ -115,15 +115,15 @@ export function DashboardCanvas({
   }
 
   return (
-    <div ref={containerRef} className="min-h-[400px] rounded-xl border border-border-default bg-bg-input p-2">
+    <div ref={containerRef} className="min-h-[400px] rounded-xl border border-border-default bg-bg-input">
       <GridLayout
         className="layout"
         layout={layout}
-        width={containerWidth - 16}
+        width={containerWidth}
         gridConfig={{
           cols: 12,
           rowHeight: 100,
-          margin: [8, 8],
+          margin: [16, 16],
         }}
         dragConfig={{
           handle: ".drag-handle",

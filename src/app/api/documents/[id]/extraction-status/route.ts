@@ -10,7 +10,7 @@ export async function GET(
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role as string | undefined;
+  const role = user.app_metadata?.role as string | undefined;
   if (role !== "founder") return jsonError("Founders only.", 403);
 
   // Verify founder owns the document's company

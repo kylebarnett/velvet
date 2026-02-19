@@ -540,7 +540,7 @@ export function InlineAddMetricRow({
                 type="button"
                 onClick={handleSave}
                 disabled={!selectedMetric || !hasValues || hasInvalid || saving}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--status-success-text)] transition-colors hover:bg-[var(--status-success-bg)] disabled:opacity-40 disabled:hover:bg-transparent"
+                className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--status-success-text)] transition-colors hover:bg-[var(--status-success-bg)] disabled:opacity-60 disabled:hover:bg-transparent"
                 title="Save (Cmd+Enter)"
                 aria-label="Save metric"
               >
@@ -554,7 +554,7 @@ export function InlineAddMetricRow({
                 type="button"
                 onClick={onCancel}
                 disabled={saving}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-secondary disabled:opacity-40"
+                className="flex h-8 w-8 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-secondary disabled:opacity-60"
                 title="Cancel (Esc)"
                 aria-label="Cancel"
               >
@@ -572,7 +572,7 @@ export function InlineAddMetricRow({
                 type="button"
                 onClick={handleSave}
                 disabled={!selectedMetric || !hasValues || hasInvalid || saving}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--status-success-text)] transition-colors hover:bg-[var(--status-success-bg)] disabled:opacity-40 disabled:hover:bg-transparent"
+                className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--status-success-text)] transition-colors hover:bg-[var(--status-success-bg)] disabled:opacity-60 disabled:hover:bg-transparent"
                 title="Save (Cmd+Enter)"
                 aria-label="Save metric"
               >
@@ -586,7 +586,7 @@ export function InlineAddMetricRow({
                 type="button"
                 onClick={onCancel}
                 disabled={saving}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-secondary disabled:opacity-40"
+                className="flex h-8 w-8 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-secondary disabled:opacity-60"
                 title="Cancel (Esc)"
                 aria-label="Cancel"
               >

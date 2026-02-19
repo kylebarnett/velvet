@@ -3,8 +3,6 @@
 import * as React from "react";
 
 import { AppShell, type NavItem, type CompanyInfo, type UserInfo } from "@/components/layouts/app-shell";
-import { useOnboarding } from "@/contexts/onboarding-context";
-import { useHelp } from "@/contexts/help-context";
 import { useCommandPalette } from "@/components/command-palette/command-palette-provider";
 
 type FounderAppShellProps = {
@@ -26,8 +24,6 @@ export function FounderAppShell({
   initialTheme,
   children,
 }: FounderAppShellProps) {
-  const { startTour } = useOnboarding();
-  const { openHelp } = useHelp();
   const { open: openCommandPalette } = useCommandPalette();
 
   return (
@@ -39,9 +35,6 @@ export function FounderAppShell({
       user={user}
       role="founder"
       initialTheme={initialTheme}
-      showTakeTour={true}
-      onTakeTour={startTour}
-      onOpenHelp={openHelp}
       onOpenCommandPalette={openCommandPalette}
     >
       {children}

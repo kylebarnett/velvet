@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
 
 import { getApiUser, jsonError } from "@/lib/api/auth";
+import { checkRateLimit, getClientIp } from "@/lib/api/rate-limit";
 
 // POST - Export all user data (GDPR data portability)
-export async function POST() {
+export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const { allowed, retryAfter } = checkRateLimit(`user-export:${ip}`, 3, 60_000);
+  if (!allowed) {
+    return jsonError("Too many requests. Try again later.", 429, {
+      "Retry-After": String(retryAfter),
+    });
+  }
+
   const { supabase, user } = await getApiUser();
   if (!user) return jsonError("Unauthorized.", 401);
 
-  const role = user.user_metadata?.role;
+  const role = user.app_metadata?.role;
   const userId = user.id;
 
   const exportData: Record<string, unknown> = {

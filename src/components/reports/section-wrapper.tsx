@@ -58,6 +58,7 @@ export function SectionWrapper({
           onClick={() => setCollapsed(!collapsed)}
           className="flex items-center gap-2 text-sm font-medium text-text-primary"
           aria-expanded={!collapsed}
+          aria-label={collapsed ? `Expand ${title}` : `Collapse ${title}`}
         >
           <ChevronDown
             className={cn(
@@ -84,8 +85,9 @@ export function SectionWrapper({
                   onClick={() => {
                     if (sectionRef.current) onExportPng();
                   }}
-                  className="rounded p-1.5 text-text-faint transition-colors hover:bg-bg-elevated hover:text-text-secondary"
+                  className="rounded p-2.5 text-text-faint transition-colors hover:bg-bg-elevated hover:text-text-secondary"
                   title="Export as PNG"
+                  aria-label="Export as PNG"
                 >
                   <Image className="h-3.5 w-3.5" />
                 </button>
@@ -94,8 +96,9 @@ export function SectionWrapper({
                 <button
                   type="button"
                   onClick={onExportCsv}
-                  className="rounded p-1.5 text-text-faint transition-colors hover:bg-bg-elevated hover:text-text-secondary"
+                  className="rounded p-2.5 text-text-faint transition-colors hover:bg-bg-elevated hover:text-text-secondary"
                   title="Export as CSV"
+                  aria-label="Export as CSV"
                 >
                   <Download className="h-3.5 w-3.5" />
                 </button>
@@ -107,8 +110,9 @@ export function SectionWrapper({
           <button
             type="button"
             onClick={onToggle}
-            className="rounded p-1.5 text-text-faint transition-colors hover:bg-bg-elevated hover:text-text-secondary"
+            className="rounded p-2.5 text-text-faint transition-colors hover:bg-bg-elevated hover:text-text-secondary"
             title="Hide section"
+            aria-label="Hide section"
           >
             <Eye className="h-3.5 w-3.5" />
           </button>

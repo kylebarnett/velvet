@@ -174,7 +174,7 @@ export default function FounderInvestorsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1" data-onboarding="investors-title">
-        <Breadcrumbs items={[{ label: "Dashboard", href: "/portal" }, { label: "Investors" }]} />
+        <Breadcrumbs icon="layout-dashboard" items={[{ label: "Dashboard", href: "/portal" }, { label: "Investors" }]} />
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Investors</h1>
           {!loading && investors.length > 0 && (

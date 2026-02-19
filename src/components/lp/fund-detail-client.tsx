@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Pencil, FileText, Calendar, Plus, ChevronRight } from "lucide-react";
 
@@ -8,7 +9,11 @@ import { SlidingTabs, TabItem } from "@/components/ui/sliding-tabs";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { PerformanceSummary } from "./performance-summary";
 import { InvestmentTable, type InvestmentRow } from "./investment-table";
-import { FundPerformanceChart } from "./fund-performance-chart";
+
+const FundPerformanceChart = dynamic(
+  () => import("./fund-performance-chart").then(m => ({ default: m.FundPerformanceChart })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-white/5" /> }
+);
 import { FundFormModal } from "./fund-form-modal";
 import { ReportFormModal } from "./report-form-modal";
 
@@ -145,7 +150,7 @@ export function FundDetailClient({
 
   return (
     <div className="space-y-6">
-      <Breadcrumbs items={[
+      <Breadcrumbs icon="landmark" items={[
         { label: "Funds", href: "/funds" },
         { label: fund.name },
       ]} />

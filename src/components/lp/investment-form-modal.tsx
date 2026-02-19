@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import {
   Select,
   SelectTrigger,
@@ -44,6 +45,8 @@ export function InvestmentFormModal({
   const titleId = useId();
   const [saving, setSaving] = useState(false);
   const backdropRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
 
   const [companyId, setCompanyId] = useState(initialValues?.company_id ?? "");
   const [investedAmount, setInvestedAmount] = useState(
@@ -164,7 +167,7 @@ export function InvestmentFormModal({
         if (e.target === backdropRef.current) onClose();
       }}
     >
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div ref={dialogRef} className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-border-default bg-bg-secondary p-6 modal-dialog-enter" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="flex items-center justify-between">
           <h2 id={titleId} className="text-lg font-semibold">
             {mode === "create" ? "Add Investment" : "Edit Investment"}

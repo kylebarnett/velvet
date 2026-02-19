@@ -4,6 +4,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import {
   Select,
   SelectTrigger,
@@ -51,6 +52,8 @@ export function NewTearSheetModal({
   const [error, setError] = React.useState<string | null>(null);
 
   const titleInputRef = React.useRef<HTMLInputElement>(null);
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
 
   // Reset form when modal opens
   React.useEffect(() => {
@@ -163,7 +166,7 @@ export function NewTearSheetModal({
       aria-label="New Tear Sheet"
       id="new-tear-sheet-dialog"
     >
-      <div className="relative mx-4 w-full max-w-lg rounded-xl border border-border-default bg-bg-secondary p-6 shadow-2xl">
+      <div ref={dialogRef} className="relative mx-4 w-full max-w-lg rounded-xl border border-border-default bg-bg-secondary p-6 shadow-2xl">
         {/* Close button */}
         <button
           type="button"

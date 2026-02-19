@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AddContactModal } from "@/components/portfolio/add-contact-form";
 import { AddMetricsPromptModal } from "./add-metrics-prompt-modal";
-import { ManualMetricEntryModal } from "./manual-metric-entry-modal";
+import { MetricEntryModal } from "./metric-entry-table";
 
 type FlowStep = "idle" | "add-company" | "prompt-metrics" | "manual-entry";
 
@@ -75,7 +75,7 @@ export function AddCompanyFlow() {
       />
 
       {company && (
-        <ManualMetricEntryModal
+        <MetricEntryModal
           open={step === "manual-entry"}
           onClose={handleManualClose}
           companyId={company.id}

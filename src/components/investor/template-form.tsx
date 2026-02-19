@@ -45,6 +45,21 @@ export function TemplateForm({
   const [items, setItems] = React.useState<TemplateItem[]>(initialItems);
   const [saving, setSaving] = React.useState(false);
 
+  // --- Dirty state tracking for beforeunload warning ---
+  const isDirty =
+    name !== initialName ||
+    description !== initialDescription ||
+    JSON.stringify(items) !== JSON.stringify(initialItems);
+
+  React.useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
   function addItem() {
     setItems([
       ...items,
@@ -178,7 +193,7 @@ export function TemplateForm({
                 type="button"
                 onClick={() => removeItem(index)}
                 disabled={items.length <= 1}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-30"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-bg-hover disabled:opacity-60"
                 title="Remove metric"
               >
                 <Trash2 className="h-4 w-4 text-[var(--error-accent)]" />
