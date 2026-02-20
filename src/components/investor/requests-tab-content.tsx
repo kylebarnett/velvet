@@ -588,10 +588,12 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
         ? "border-[var(--error-border)] bg-[var(--status-error-bg)]"
         : "border-border-subtle bg-bg-raised"
     }`}>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={handleToggle}
-        className="flex w-full items-start gap-4 p-4 text-left transition-colors hover:bg-bg-hover/50 sm:p-5"
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleToggle(); } }}
+        className="flex w-full cursor-pointer items-start gap-4 p-4 text-left transition-colors hover:bg-bg-hover/50 sm:p-5"
         aria-expanded={expanded}
       >
         <div className="min-w-0 flex-1 space-y-3">
@@ -692,7 +694,7 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
             />
           </div>
         </div>
-      </button>
+      </div>
 
       {/* Expanded detail */}
       <div

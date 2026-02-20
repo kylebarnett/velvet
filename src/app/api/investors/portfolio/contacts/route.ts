@@ -94,28 +94,30 @@ export async function GET(req: Request) {
   }
 
   const ascending = sortDir !== "desc";
+  const sortByCompany = sortField === "company" || !sortField;
 
-  switch (sortField) {
-    case "contact":
-      dataQuery = dataQuery.order("last_name", { ascending }).order("first_name", { ascending });
-      break;
-    case "position":
-      dataQuery = dataQuery.order("position", { ascending, nullsFirst: false });
-      break;
-    case "email":
-      dataQuery = dataQuery.order("email", { ascending });
-      break;
-    case "status":
-      dataQuery = dataQuery.order("status", { ascending });
-      break;
-    case "company":
-    default:
-      // Use Supabase foreign table ordering to sort by joined company name at DB level
-      dataQuery = dataQuery.order("name", { referencedTable: "companies", ascending });
-      break;
+  // Supabase referencedTable ordering is unreliable for joined columns, so
+  // when sorting by company name we fetch all matching rows, sort in-memory,
+  // then slice to the requested page.
+  if (!sortByCompany) {
+    switch (sortField) {
+      case "contact":
+        dataQuery = dataQuery.order("last_name", { ascending }).order("first_name", { ascending });
+        break;
+      case "position":
+        dataQuery = dataQuery.order("position", { ascending, nullsFirst: false });
+        break;
+      case "email":
+        dataQuery = dataQuery.order("email", { ascending });
+        break;
+      case "status":
+        dataQuery = dataQuery.order("status", { ascending });
+        break;
+    }
+    // Tiebreaker for deterministic pagination
+    dataQuery = dataQuery.order("id", { ascending: true });
+    dataQuery = dataQuery.range(offset, offset + limit - 1);
   }
-
-  dataQuery = dataQuery.range(offset, offset + limit - 1);
 
   const { data, error } = await dataQuery;
 
@@ -124,7 +126,18 @@ export async function GET(req: Request) {
     return jsonError("Failed to process request.", 500);
   }
 
-  const results = (data ?? []) as ContactRow[];
+  let results = (data ?? []) as ContactRow[];
+
+  if (sortByCompany) {
+    const getCompanyName = (row: ContactRow): string =>
+      (Array.isArray(row.companies) ? row.companies[0]?.name : row.companies?.name) ?? "";
+
+    results.sort((a, b) => {
+      const cmp = getCompanyName(a).localeCompare(getCompanyName(b), undefined, { sensitivity: "base" });
+      return ascending ? cmp : -cmp;
+    });
+    results = results.slice(offset, offset + limit);
+  }
 
   const total = totalCount ?? 0;
   const totalPages = Math.ceil(total / limit);
