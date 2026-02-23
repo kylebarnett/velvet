@@ -25,6 +25,15 @@ export default async function InvestorLayout({
   const savedTheme = (userData?.preferences as Record<string, unknown> | null)?.theme as string | undefined;
   const avatarUrl = (userData?.avatar_url as string | null) ?? null;
 
+  // Fetch user's org membership for presence + chat
+  const { data: orgMembership } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", freshUser!.id)
+    .limit(1)
+    .maybeSingle();
+  const orgId = orgMembership?.organization_id ?? null;
+
   const onboardingStep = freshUser?.user_metadata?.onboarding_step ?? null;
   const onboardingComplete =
     freshUser?.user_metadata?.onboarding_complete ?? false;
@@ -44,6 +53,9 @@ export default async function InvestorLayout({
     <InvestorLayoutClient
       initialOnboardingStep={initialStep}
       isOnboardingComplete={onboardingComplete}
+      orgId={orgId}
+      userId={freshUser!.id}
+      userInfo={userInfo}
     >
       <InvestorAppShell
         title="Investor"

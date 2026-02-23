@@ -98,6 +98,13 @@ export const HELP_CATEGORIES: HelpCategory[] = [
 
   // Shared categories
   {
+    slug: "communication",
+    label: "Communication",
+    icon: "message-square",
+    role: "shared",
+    order: 89,
+  },
+  {
     slug: "data-import",
     label: "Data Import",
     icon: "upload",

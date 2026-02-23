@@ -18,6 +18,8 @@ import { sharedTeamArticles } from "./shared-team";
 import { sharedAccountArticles } from "./shared-account";
 import { sharedSettingsArticles } from "./shared-settings";
 import { sharedCommandPaletteArticles } from "./shared-command-palette";
+import { sharedChatArticles } from "./shared-chat";
+import { sharedPresenceArticles } from "./shared-presence";
 
 export const ALL_ARTICLES: HelpArticle[] = [
   ...investorGettingStartedArticles,
@@ -38,6 +40,8 @@ export const ALL_ARTICLES: HelpArticle[] = [
   ...sharedAccountArticles,
   ...sharedSettingsArticles,
   ...sharedCommandPaletteArticles,
+  ...sharedChatArticles,
+  ...sharedPresenceArticles,
 ];
 
 /**

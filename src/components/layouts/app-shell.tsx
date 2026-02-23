@@ -34,6 +34,7 @@ import {
   Search,
   PanelLeftClose,
   PanelLeftOpen,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -48,6 +49,7 @@ export type NavItem = {
   icon?: string;
   divider?: boolean;
   children?: NavItem[];
+  onClick?: () => void;
 };
 
 export type CompanyInfo = {
@@ -84,6 +86,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   "help-circle": HelpCircle,
   search: Search,
   settings: Settings,
+  "message-square": MessageSquare,
 };
 
 function NavIcon({ name, className }: { name?: string; className?: string }) {
@@ -142,6 +145,7 @@ export function AppShell({
   children,
   onOpenCommandPalette,
   profileLinks,
+  headerRight,
 }: {
   title: string;
   nav: NavItem[];
@@ -152,6 +156,7 @@ export function AppShell({
   children: React.ReactNode;
   onOpenCommandPalette?: () => void;
   profileLinks?: NavItem[];
+  headerRight?: React.ReactNode;
 }) {
   const [logoError, setLogoError] = React.useState(false);
   const [expandedSections, setExpandedSections] = React.useState<Set<string>>(new Set());
@@ -541,20 +546,17 @@ export function AppShell({
             );
           }
 
-          const navLink = (
-            <Link
-              className={cn(
-                "relative flex items-center rounded-md transition-colors",
-                collapsed ? "h-9 justify-center" : "h-9 gap-2.5 px-3",
-                mobile && "h-12",
-                "text-text-tertiary hover:bg-bg-raised hover:text-text-primary",
-                active &&
-                  "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-accent",
-              )}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              onClick={mobile ? () => setMobileMenuOpen(false) : collapsed ? () => setSidebarCollapsed(false) : undefined}
-            >
+          const navClasses = cn(
+            "relative flex items-center rounded-md transition-colors",
+            collapsed ? "h-9 justify-center" : "h-9 gap-2.5 px-3",
+            mobile && "h-12",
+            "text-text-tertiary hover:bg-bg-raised hover:text-text-primary",
+            active &&
+              "bg-bg-elevated text-text-primary before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-accent",
+          );
+
+          const navContent = (
+            <>
               <NavIcon name={item.icon} className="h-[18px] w-[18px] shrink-0" />
               {!collapsed && <span className="text-sm">{item.label}</span>}
               {!collapsed && item.badge != null && item.badge > 0 && (
@@ -562,6 +564,31 @@ export function AppShell({
                   {item.badge > 99 ? "99+" : item.badge}
                 </span>
               )}
+              {collapsed && item.badge != null && item.badge > 0 && (
+                <span className="absolute -right-0.5 top-0.5 h-2 w-2 rounded-full bg-accent" />
+              )}
+            </>
+          );
+
+          const navLink = item.onClick ? (
+            <button
+              type="button"
+              className={cn(navClasses, !collapsed && "w-full")}
+              onClick={() => {
+                item.onClick!();
+                if (mobile) setMobileMenuOpen(false);
+              }}
+            >
+              {navContent}
+            </button>
+          ) : (
+            <Link
+              className={navClasses}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              onClick={mobile ? () => setMobileMenuOpen(false) : collapsed ? () => setSidebarCollapsed(false) : undefined}
+            >
+              {navContent}
             </Link>
           );
 
@@ -682,6 +709,11 @@ export function AppShell({
           </aside>
 
           <div className="min-w-0">
+            {headerRight && (
+              <div className="sticky top-0 z-30 flex h-10 items-center justify-end border-b border-border-default bg-bg-primary/95 px-4 backdrop-blur-sm">
+                {headerRight}
+              </div>
+            )}
             <main className="p-4 md:p-6">{children}</main>
           </div>
         </div>
