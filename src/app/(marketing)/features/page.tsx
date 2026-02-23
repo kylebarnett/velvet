@@ -50,7 +50,7 @@ export default function FeaturesPage() {
                 "Company-level drill-downs",
               ],
               mock: (
-                <MockWindow title="Dashboard">
+                <MockWindow title="Companies">
                   <MockDashboard />
                 </MockWindow>
               ),
@@ -60,7 +60,7 @@ export default function FeaturesPage() {
               description:
                 "Create metric request campaigns in minutes. Select metrics, choose companies, and send — founders get a simple portal to submit.",
               bullets: [
-                "One-click campaign creation",
+                "Multi-step request wizard",
                 "Automated follow-up reminders",
                 "Founder-friendly submission portal",
               ],
@@ -86,7 +86,7 @@ export default function FeaturesPage() {
               ),
             },
             {
-              title: "AI-Powered Insights",
+              title: "AI Portfolio Assistant",
               description:
                 "Ask questions about your portfolio in plain English. Get instant answers backed by your actual data.",
               bullets: [
@@ -95,7 +95,7 @@ export default function FeaturesPage() {
                 "Portfolio-wide analysis",
               ],
               mock: (
-                <MockWindow title="Ask AI">
+                <MockWindow title="AI Assistant">
                   <MockChatbot />
                 </MockWindow>
               ),

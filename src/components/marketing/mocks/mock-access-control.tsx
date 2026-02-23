@@ -1,5 +1,6 @@
 "use client";
 
+import { motion, type Variants } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 import { MOCK_INVESTORS } from "./mock-data";
 
@@ -8,18 +9,37 @@ const STATUS_CONFIG = {
     dotClass: "bg-[var(--data-positive)]",
     label: "Approved",
     labelClass: "text-[var(--data-positive)]",
+    avatarBg: "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400",
   },
   pending: {
     dotClass: "bg-[var(--warning-accent)]",
     label: "Pending",
     labelClass: "text-[var(--warning-accent)]",
+    avatarBg: "bg-amber-500/20 text-amber-600 dark:text-amber-400",
   },
   denied: {
     dotClass: "bg-[var(--data-negative)]",
     label: "Denied",
     labelClass: "text-[var(--data-negative)]",
+    avatarBg: "bg-red-500/20 text-red-600 dark:text-red-400",
   },
 } as const;
+
+const containerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.1, delayChildren: 0.15 },
+  },
+};
+
+const rowVariants: Variants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.35, ease: "easeOut" },
+  },
+};
 
 export function MockAccessControl() {
   return (
@@ -36,29 +56,41 @@ export function MockAccessControl() {
       </p>
 
       {/* Investor list */}
-      <div className="flex flex-col divide-y divide-border-subtle">
+      <motion.div
+        className="flex flex-col divide-y divide-border-subtle"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
         {MOCK_INVESTORS.map((investor) => {
           const config = STATUS_CONFIG[investor.status];
 
           return (
-            <div
+            <motion.div
               key={investor.name}
+              variants={rowVariants}
               className="flex items-center justify-between py-3"
             >
               <div className="flex items-center gap-3">
-                <span
-                  className={cn(
-                    "h-2 w-2 rounded-full",
-                    config.dotClass,
-                  )}
-                />
+                <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[9px] font-bold", config.avatarBg)}>
+                  {investor.initials}
+                </div>
                 <div>
                   <p className="text-xs font-medium text-text-primary">
                     {investor.name}
                   </p>
-                  <p className={cn("text-[10px] font-medium", config.labelClass)}>
-                    {config.label}
-                  </p>
+                  <div className="mt-0.5 flex items-center gap-1.5">
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        config.dotClass,
+                      )}
+                    />
+                    <p className={cn("text-[10px] font-medium", config.labelClass)}>
+                      {config.label}
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -100,10 +132,10 @@ export function MockAccessControl() {
                   </button>
                 )}
               </div>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </div>
   );
 }

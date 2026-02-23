@@ -56,7 +56,7 @@ export function MockFundPerformance() {
       </motion.div>
 
       {/* Metric cards */}
-      <motion.div variants={itemVariants} className="mb-5 grid grid-cols-4 gap-3">
+      <motion.div variants={itemVariants} className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {MOCK_FUND_METRICS.map((metric) => {
           const { num, suffix, decimals } = parseMetricValue(metric.value);
 

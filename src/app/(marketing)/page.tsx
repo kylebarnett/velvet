@@ -119,7 +119,7 @@ export default function HomePage() {
               icon: <LayoutDashboard className="h-5 w-5" />,
               title: "Dashboard & KPIs",
               description:
-                "Real-time portfolio overview with customizable KPI cards and trend analysis.",
+                "Real-time portfolio overview with company cards and customizable metric tracking.",
             },
             {
               icon: <Send className="h-5 w-5" />,

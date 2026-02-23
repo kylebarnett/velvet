@@ -23,11 +23,34 @@ function scaleY(v: number) {
 
 const points = MOCK_CHART_DATA.map((d, i) => ({ x: scaleX(i), y: scaleY(d.value) }));
 
-const linePath = points.map((p, i) => (i === 0 ? `M${p.x},${p.y}` : `L${p.x},${p.y}`)).join(" ");
+// Build a smooth cubic bezier curve through all points
+function buildSmoothPath(pts: { x: number; y: number }[]): string {
+  if (pts.length < 2) return "";
+  let d = `M${pts[0].x},${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    // Catmull-Rom to cubic bezier control points (tension = 0.35)
+    const tension = 0.35;
+    const cp1x = p1.x + (p2.x - p0.x) * tension;
+    const cp1y = p1.y + (p2.y - p0.y) * tension;
+    const cp2x = p2.x - (p3.x - p1.x) * tension;
+    const cp2y = p2.y - (p3.y - p1.y) * tension;
+    d += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+  }
+  return d;
+}
+
+const linePath = buildSmoothPath(points);
 
 const areaPath = `${linePath} L${points[points.length - 1].x},${PADDING.top + chartH} L${points[0].x},${PADDING.top + chartH} Z`;
 
 const gridLines = [8, 9, 10, 11, 12, 13];
+
+const lastPoint = points[points.length - 1];
+const lastValue = MOCK_CHART_DATA[MOCK_CHART_DATA.length - 1].value;
 
 export function MockChart() {
   return (
@@ -110,6 +133,37 @@ export function MockChart() {
             transition={{ duration: 0.3, delay: 0.4 + i * 0.1 }}
           />
         ))}
+
+        {/* Value annotation on last data point */}
+        <motion.g
+          initial={{ opacity: 0, y: 4 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: 1.4 }}
+        >
+          <rect
+            x={lastPoint.x - 24}
+            y={lastPoint.y - 22}
+            width={48}
+            height={16}
+            rx={4}
+            fill="var(--accent)"
+          />
+          {/* Tooltip arrow */}
+          <polygon
+            points={`${lastPoint.x - 3},${lastPoint.y - 6} ${lastPoint.x + 3},${lastPoint.y - 6} ${lastPoint.x},${lastPoint.y - 2}`}
+            fill="var(--accent)"
+          />
+          <text
+            x={lastPoint.x}
+            y={lastPoint.y - 11}
+            textAnchor="middle"
+            className="text-[9px] font-semibold"
+            fill="white"
+          >
+            ${lastValue}M
+          </text>
+        </motion.g>
 
         {/* X-axis labels */}
         {MOCK_CHART_DATA.map((d, i) => (

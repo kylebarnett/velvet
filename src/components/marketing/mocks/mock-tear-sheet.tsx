@@ -8,7 +8,7 @@ const COMPANY_METRICS = [
   { label: "Revenue", value: "$2.1M" },
   { label: "ARR", value: "$8.4M" },
   { label: "Headcount", value: "47" },
-  { label: "Founded", value: "2022" },
+  { label: "Burn Rate", value: "$180K" },
 ];
 
 const SHARE_LINK = "velvet.app/s/apex-labs-q4";
@@ -50,11 +50,19 @@ export function MockTearSheet() {
     >
       {/* Company header */}
       <div className="mb-4 flex items-start justify-between">
-        <div>
-          <p className="text-sm font-semibold text-text-primary">Apex Labs</p>
-          <span className="mt-1 inline-block rounded-full bg-[var(--tag-blue-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--tag-blue-text)]">
-            AI/ML
-          </span>
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500 text-xs font-bold text-white">
+            AL
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-text-primary">Apex Labs</p>
+            <div className="mt-0.5 flex items-center gap-1.5">
+              <span className="rounded-full bg-[var(--tag-blue-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--tag-blue-text)]">
+                AI/ML
+              </span>
+              <span className="text-[10px] text-text-faint">Q4 2025</span>
+            </div>
+          </div>
         </div>
         <motion.button
           type="button"

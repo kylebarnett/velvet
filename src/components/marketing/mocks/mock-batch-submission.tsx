@@ -6,22 +6,32 @@ import { motion, useInView, useReducedMotion } from "framer-motion";
 const METRICS = [
   { name: "Revenue", prev: "$1,800,000", current: "$2,100,000" },
   { name: "ARR", prev: "$7,200,000", current: "$8,400,000" },
-  { name: "Burn Rate", prev: "$195,000", current: "" },
+  { name: "Burn Rate", prev: "$195,000", current: "$180,000" },
   { name: "Headcount", prev: "42", current: "47" },
-  { name: "Churn Rate", prev: "2.4%", current: "" },
+  { name: "Churn Rate", prev: "2.4%", current: "2.1%" },
 ];
 
-function TypewriterValue({ text, delay }: { text: string; delay: number }) {
+function TypewriterValue({
+  text,
+  delay,
+}: {
+  text: string;
+  delay: number;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true });
   const prefersReducedMotion = useReducedMotion();
   const [displayed, setDisplayed] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
 
   useEffect(() => {
     if (!isInView || !text) return;
 
     if (prefersReducedMotion) {
-      const t = setTimeout(() => setDisplayed(text), delay);
+      const t = setTimeout(() => {
+        setDisplayed(text);
+        setShowCursor(false);
+      }, delay);
       return () => clearTimeout(t);
     }
 
@@ -30,7 +40,11 @@ function TypewriterValue({ text, delay }: { text: string; delay: number }) {
       const interval = setInterval(() => {
         i++;
         setDisplayed(text.slice(0, i));
-        if (i >= text.length) clearInterval(interval);
+        if (i >= text.length) {
+          clearInterval(interval);
+          // Hide cursor after typing completes
+          setTimeout(() => setShowCursor(false), 600);
+        }
       }, 40);
       return () => clearInterval(interval);
     }, delay);
@@ -38,18 +52,10 @@ function TypewriterValue({ text, delay }: { text: string; delay: number }) {
     return () => clearTimeout(startTimer);
   }, [isInView, text, delay, prefersReducedMotion]);
 
-  if (!text) {
-    return (
-      <span ref={ref} className="inline-flex items-center">
-        <span className="inline-block h-4 w-px animate-pulse bg-text-primary" />
-      </span>
-    );
-  }
-
   return (
     <span ref={ref}>
       {displayed}
-      {displayed.length < text.length && displayed.length > 0 && (
+      {showCursor && (
         <span className="inline-block h-4 w-px animate-pulse bg-text-primary" />
       )}
     </span>
@@ -90,14 +96,10 @@ export function MockBatchSubmission() {
           </span>
           <span className="text-xs text-text-muted">{metric.prev}</span>
           <div className="text-xs font-medium text-text-primary">
-            {metric.current ? (
-              <TypewriterValue
-                text={metric.current}
-                delay={600 + i * 400}
-              />
-            ) : (
-              <TypewriterValue text="" delay={0} />
-            )}
+            <TypewriterValue
+              text={metric.current}
+              delay={600 + i * 400}
+            />
           </div>
         </motion.div>
       ))}

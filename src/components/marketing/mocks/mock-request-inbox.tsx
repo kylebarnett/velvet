@@ -1,13 +1,34 @@
 "use client";
 
+import { motion, type Variants } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 import { MOCK_REQUESTS } from "./mock-data";
 
+const containerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.1, delayChildren: 0.15 },
+  },
+};
+
+const rowVariants: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: "easeOut" },
+  },
+};
+
 export function MockRequestInbox() {
   return (
-    <div
+    <motion.div
       aria-hidden="true"
       className="card-surface overflow-hidden rounded-lg border border-border-default"
+      variants={containerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
     >
       {/* Header row */}
       <div className="grid grid-cols-[1fr_1.2fr_0.7fr_0.6fr_0.5fr] gap-2 border-b border-border-default bg-bg-secondary px-4 py-2.5">
@@ -30,10 +51,11 @@ export function MockRequestInbox() {
 
       {/* Rows */}
       {MOCK_REQUESTS.map((req, i) => (
-        <div
+        <motion.div
           key={req.investor}
+          variants={rowVariants}
           className={cn(
-            "grid grid-cols-[1fr_1.2fr_0.7fr_0.6fr_0.5fr] items-center gap-2 px-4 py-3",
+            "grid grid-cols-[1fr_1.2fr_0.7fr_0.6fr_0.5fr] items-center gap-2 px-4 py-3 transition-colors hover:bg-bg-hover/50",
             i < MOCK_REQUESTS.length - 1 && "border-b border-border-subtle",
           )}
         >
@@ -68,8 +90,8 @@ export function MockRequestInbox() {
               </button>
             )}
           </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

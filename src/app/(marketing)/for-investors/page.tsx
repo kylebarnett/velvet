@@ -45,9 +45,9 @@ const workflowSteps = [
     number: 3,
     title: "See Everything",
     description:
-      "Your dashboard shows real-time KPIs, portfolio-wide trends, and company-level drill-downs. Benchmark against industry percentiles to spot outliers.",
+      "Your portfolio view shows real-time KPIs, portfolio-wide trends, and company-level drill-downs. Benchmark against industry percentiles to spot outliers.",
     mock: (
-      <MockWindow title="Dashboard">
+      <MockWindow title="Companies">
         <MockDashboard />
       </MockWindow>
     ),
@@ -58,7 +58,7 @@ const workflowSteps = [
     description:
       "Ask questions about your portfolio in plain English. 'What's the average burn rate?' 'Which companies grew fastest last quarter?' Get instant, data-backed answers.",
     mock: (
-      <MockWindow title="Ask AI">
+      <MockWindow title="AI Assistant">
         <MockChatbot />
       </MockWindow>
     ),
@@ -85,7 +85,7 @@ export default function ForInvestorsPage() {
         mock={
           <AnimatedSection delay={0.3}>
             <GlowEffect>
-              <MockWindow title="Velvet Dashboard">
+              <MockWindow title="Velvet">
                 <MockDashboard />
               </MockWindow>
             </GlowEffect>
