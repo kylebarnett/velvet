@@ -573,7 +573,7 @@ export function AppShell({
           const navLink = item.onClick ? (
             <button
               type="button"
-              className={cn(navClasses, !collapsed && "w-full")}
+              className={cn(navClasses, "w-full")}
               onClick={() => {
                 item.onClick!();
                 if (mobile) setMobileMenuOpen(false);
