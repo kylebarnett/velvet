@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -117,14 +118,16 @@ function SidebarTooltip({ label, children }: { label: string; children: React.Re
   return (
     <div ref={ref} onMouseEnter={show} onMouseLeave={hide}>
       {children}
-      {pos && (
-        <div
-          className="fixed z-[var(--z-popover)] whitespace-nowrap rounded-md border border-border-default bg-bg-elevated px-2.5 py-1.5 text-xs font-medium text-text-primary shadow-lg"
-          style={{ top: pos.top, left: pos.left, transform: "translateY(-50%)" }}
-        >
-          {label}
-        </div>
-      )}
+      {pos &&
+        createPortal(
+          <div
+            className="fixed z-[var(--z-popover)] whitespace-nowrap rounded-md bg-bg-tooltip px-2.5 py-1.5 text-xs font-medium text-white shadow-lg"
+            style={{ top: pos.top, left: pos.left, transform: "translateY(-50%)" }}
+          >
+            {label}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
@@ -467,9 +470,7 @@ export function AppShell({
                     >
                       <NavIcon name={item.icon} className="h-[18px] w-[18px] shrink-0" />
                       {item.badge != null && item.badge > 0 && (
-                        <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">
-                          {item.badge > 99 ? "99+" : item.badge}
-                        </span>
+                        <span className="absolute -right-0.5 top-0.5 h-2 w-2 rounded-full bg-accent" />
                       )}
                     </Link>
                   </SidebarTooltip>
