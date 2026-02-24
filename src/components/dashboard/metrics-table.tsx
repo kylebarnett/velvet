@@ -185,11 +185,11 @@ function CellTooltip({
         style={showAbove ? { bottom: -12 } : { top: -12 }}
       />
 
-      <div className="space-y-2 text-xs">
-        <div className="flex items-center justify-between">
-          <span className="text-text-tertiary">Source</span>
+      <div className="space-y-2.5 text-xs">
+        <div className="flex items-center justify-between gap-3">
+          <span className="shrink-0 text-text-tertiary">Source</span>
           <span
-            className={`rounded px-1.5 py-0.5 font-medium ${
+            className={`rounded-md px-2 py-0.5 font-medium ${
               isAi
                 ? "bg-[var(--tag-violet-bg)] text-[var(--tag-violet-text)]"
                 : periodData.source === "override"
@@ -204,25 +204,25 @@ function CellTooltip({
         </div>
 
         {isAi && periodData.aiConfidence != null && (
-          <div className="flex items-center justify-between">
-            <span className="text-text-tertiary">Confidence</span>
-            <span className="text-text-secondary">
+          <div className="flex items-center justify-between gap-3">
+            <span className="shrink-0 text-text-tertiary">Confidence</span>
+            <span className="tabular-nums text-text-secondary">
               {Math.round(periodData.aiConfidence * 100)}%
             </span>
           </div>
         )}
 
         {periodData.rollupDetail && (
-          <div className="flex items-center justify-between">
+          <div className="space-y-1">
             <span className="text-text-tertiary">Calculation</span>
-            <span className="text-text-secondary">{periodData.rollupDetail}</span>
+            <p className="text-text-secondary leading-relaxed">{periodData.rollupDetail}</p>
           </div>
         )}
 
         {displayDate && (
-          <div className="flex items-center justify-between">
-            <span className="text-text-tertiary">Last updated</span>
-            <span className="text-text-secondary">{formatDate(displayDate)}</span>
+          <div className="flex items-center justify-between gap-3">
+            <span className="shrink-0 text-text-tertiary">Updated</span>
+            <span className="tabular-nums text-text-secondary">{formatDate(displayDate)}</span>
           </div>
         )}
 
@@ -232,7 +232,7 @@ function CellTooltip({
             e.stopPropagation();
             onViewDetails();
           }}
-          className="mt-1 w-full rounded-md border border-border-default bg-bg-elevated px-2 py-1.5 text-center text-xs font-medium text-text-secondary hover:bg-bg-hover"
+          className="mt-0.5 w-full rounded-md border border-border-default bg-bg-elevated px-2.5 py-2 text-center text-xs font-medium text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
         >
           View details
         </button>

@@ -1,6 +1,9 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import * as dotenv from "dotenv";
 import path from "path";
+import { createRequire } from "node:module";
+const nodeRequire = createRequire(import.meta.url);
+const { jsPDF } = nodeRequire("jspdf/dist/jspdf.node.js");
 
 // Load environment variables from .env.local
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
@@ -316,6 +319,224 @@ async function waitForUserRecord(
   return false;
 }
 
+// Document seeding configuration
+type DocumentPlan = {
+  quarter: string; // e.g. "Q4 2024"
+  periodStart: string;
+  periodEnd: string;
+  documentType: string;
+  filename: string;
+  linkedMetrics: string[];
+};
+
+// The 5 quarterly documents to create per company
+function getDocumentPlans(quarters: ReturnType<typeof generateQuarters>): DocumentPlan[] {
+  // Map quarter labels to quarters array entries
+  const qMap = new Map(quarters.map((q) => [q.label, q]));
+
+  return [
+    {
+      quarter: "Q4 2024",
+      ...qMap.get("Q4 2024")!,
+      documentType: "income_statement",
+      filename: "Q4_2024_Income_Statement.pdf",
+      linkedMetrics: ["Revenue", "Gross Margin", "Operating Expenses", "EBITDA"],
+    },
+    {
+      quarter: "Q1 2025",
+      ...qMap.get("Q1 2025")!,
+      documentType: "income_statement",
+      filename: "Q1_2025_Income_Statement.pdf",
+      linkedMetrics: ["Revenue", "Gross Margin", "Operating Expenses", "EBITDA"],
+    },
+    {
+      quarter: "Q2 2025",
+      ...qMap.get("Q2 2025")!,
+      documentType: "cash_flow_statement",
+      filename: "Q2_2025_Cash_Flow_Statement.pdf",
+      linkedMetrics: ["Burn Rate"],
+    },
+    {
+      quarter: "Q3 2025",
+      ...qMap.get("Q3 2025")!,
+      documentType: "income_statement",
+      filename: "Q3_2025_Income_Statement.pdf",
+      linkedMetrics: ["Revenue", "Gross Margin", "Operating Expenses", "EBITDA"],
+    },
+    {
+      quarter: "Q4 2025",
+      ...qMap.get("Q4 2025")!,
+      documentType: "consolidated_financial_statements",
+      filename: "Q4_2025_Financial_Statements.pdf",
+      linkedMetrics: ["Revenue", "Gross Margin", "Operating Expenses", "EBITDA", "Burn Rate"],
+    },
+  ];
+}
+
+// Format a number for display in the PDF
+function formatPdfValue(value: number, unit: string): string {
+  if (unit === "%") return `${value.toFixed(1)}%`;
+  if (unit === "M") return `$${value.toLocaleString()}M`;
+  return value.toLocaleString();
+}
+
+// Generate a multi-page financial statement PDF
+function generateFinancialStatementPdf(
+  companyName: string,
+  documentType: string,
+  quarter: string,
+  periodStart: string,
+  periodEnd: string,
+  capturedValues: Map<string, Map<string, number>>,
+  companyMetrics: Record<string, { start: number; end: number; unit: string }>,
+): Buffer {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const doc = new (jsPDF as any)({ unit: "pt", format: "letter" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 60;
+
+  // --- Page 1: Cover page ---
+  const typeLabel =
+    documentType === "income_statement"
+      ? "Income Statement"
+      : documentType === "cash_flow_statement"
+        ? "Cash Flow Statement"
+        : "Consolidated Financial Statements";
+
+  doc.setFontSize(28);
+  doc.text(companyName, pageWidth / 2, 200, { align: "center" });
+
+  doc.setFontSize(18);
+  doc.text(typeLabel, pageWidth / 2, 250, { align: "center" });
+
+  doc.setFontSize(14);
+  doc.text(quarter, pageWidth / 2, 290, { align: "center" });
+
+  doc.setFontSize(11);
+  doc.text(
+    `Period: ${periodStart} to ${periodEnd}`,
+    pageWidth / 2,
+    330,
+    { align: "center" },
+  );
+
+  doc.setFontSize(10);
+  doc.setTextColor(150);
+  doc.text("CONFIDENTIAL", pageWidth / 2, pageHeight - 80, { align: "center" });
+  doc.text(
+    `Prepared for internal use — ${new Date().getFullYear()}`,
+    pageWidth / 2,
+    pageHeight - 60,
+    { align: "center" },
+  );
+  doc.setTextColor(0);
+
+  // --- Page 2+: Financial table ---
+  doc.addPage();
+
+  let y = margin + 20;
+
+  doc.setFontSize(14);
+  doc.text(typeLabel, margin, y);
+  y += 10;
+  doc.setFontSize(9);
+  doc.setTextColor(120);
+  doc.text(`${companyName} — ${quarter} (${periodStart} to ${periodEnd})`, margin, y + 12);
+  doc.setTextColor(0);
+  y += 35;
+
+  // Table header
+  const col1 = margin;
+  const col2 = 320;
+  const col3 = 430;
+  const rowHeight = 22;
+
+  doc.setFontSize(9);
+  doc.setTextColor(100);
+  doc.text("Line Item", col1, y);
+  doc.text("Current Quarter", col2, y, { align: "right" });
+  doc.text("Unit", col3, y, { align: "right" });
+  doc.setTextColor(0);
+  y += 8;
+  doc.setDrawColor(200);
+  doc.line(col1, y, col3 + 20, y);
+  y += rowHeight * 0.7;
+
+  // Build line items based on document type
+  type LineItem = { label: string; metricName: string; indent?: boolean };
+  const lineItems: LineItem[] = [];
+
+  if (documentType === "income_statement" || documentType === "consolidated_financial_statements") {
+    lineItems.push(
+      { label: "Revenue", metricName: "Revenue" },
+      { label: "Gross Margin", metricName: "Gross Margin" },
+      { label: "Operating Expenses", metricName: "Operating Expenses" },
+      { label: "EBITDA", metricName: "EBITDA" },
+    );
+  }
+  if (documentType === "cash_flow_statement" || documentType === "consolidated_financial_statements") {
+    if (documentType === "consolidated_financial_statements") {
+      // Add separator
+      lineItems.push({ label: "", metricName: "" });
+      lineItems.push({ label: "Cash Flow Summary", metricName: "" });
+    }
+    lineItems.push({ label: "Monthly Burn Rate", metricName: "Burn Rate" });
+  }
+
+  doc.setFontSize(10);
+  for (const item of lineItems) {
+    if (!item.metricName && !item.label) {
+      // Blank separator
+      y += rowHeight * 0.5;
+      continue;
+    }
+    if (!item.metricName && item.label) {
+      // Section header
+      doc.setFontSize(11);
+      doc.text(item.label, col1, y);
+      doc.setFontSize(10);
+      y += 6;
+      doc.line(col1, y, col3 + 20, y);
+      y += rowHeight * 0.7;
+      continue;
+    }
+
+    // Check if we need a new page
+    if (y > pageHeight - margin - 40) {
+      doc.addPage();
+      y = margin + 20;
+    }
+
+    const metricValues = capturedValues.get(item.metricName);
+    const value = metricValues?.get(periodStart);
+    const unit = companyMetrics[item.metricName]?.unit ?? "";
+
+    doc.text(item.indent ? `  ${item.label}` : item.label, col1, y);
+    if (value != null) {
+      doc.text(formatPdfValue(value, unit), col2, y, { align: "right" });
+      doc.text(unit || "—", col3, y, { align: "right" });
+    } else {
+      doc.text("N/A", col2, y, { align: "right" });
+    }
+    y += rowHeight;
+  }
+
+  // Footer line
+  y += 10;
+  doc.setDrawColor(200);
+  doc.line(col1, y, col3 + 20, y);
+  y += 16;
+  doc.setFontSize(8);
+  doc.setTextColor(150);
+  doc.text("This document was generated for demonstration purposes.", col1, y);
+  doc.setTextColor(0);
+
+  // Return as Buffer
+  const arrayBuf = doc.output("arraybuffer");
+  return Buffer.from(arrayBuf);
+}
+
 async function seedData() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -460,8 +681,11 @@ async function seedData() {
     }
 
     // 5. Insert metric values for each quarter (submitted by founder)
+    // Also capture computed values for PDF generation (Step 1 of plan)
+    const capturedValues = new Map<string, Map<string, number>>();
     const metricValues = [];
     for (const [metricName, config] of Object.entries(company.metrics)) {
+      const metricMap = new Map<string, number>();
       for (const quarter of quarters) {
         const progress = quarter.index / (quarters.length - 1);
         let value = interpolateValue(config.start, config.end, progress);
@@ -480,6 +704,7 @@ async function seedData() {
           value = Math.round(value);
         }
 
+        metricMap.set(quarter.periodStart, value);
         metricValues.push({
           company_id: newCompany.id,
           metric_name: metricName,
@@ -490,6 +715,7 @@ async function seedData() {
           submitted_by: founderId,
         });
       }
+      capturedValues.set(metricName, metricMap);
     }
 
     const { error: metricsError } = await supabase
@@ -504,6 +730,107 @@ async function seedData() {
     } else {
       console.log(`  Inserted ${metricValues.length} metric values`);
     }
+
+    // 6. Generate and seed financial statement documents
+    const docPlans = getDocumentPlans(quarters);
+    let docsCreated = 0;
+    let mappingsCreated = 0;
+
+    for (const plan of docPlans) {
+      // Generate PDF with captured metric values
+      const pdfBuffer = generateFinancialStatementPdf(
+        company.name,
+        plan.documentType,
+        plan.quarter,
+        plan.periodStart,
+        plan.periodEnd,
+        capturedValues,
+        company.metrics as unknown as Record<string, { start: number; end: number; unit: string }>,
+      );
+
+      // Upload to Supabase Storage
+      const storagePath = `${newCompany.id}/${Date.now()}-${plan.filename}`;
+      const { error: uploadError } = await supabase.storage
+        .from("documents")
+        .upload(storagePath, pdfBuffer, {
+          contentType: "application/pdf",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error(`  Error uploading ${plan.filename}:`, uploadError);
+        continue;
+      }
+
+      // Insert document row
+      const { data: docRow, error: docError } = await supabase
+        .from("documents")
+        .insert({
+          company_id: newCompany.id,
+          uploaded_by: founderId,
+          file_name: plan.filename,
+          file_path: storagePath,
+          file_type: "application/pdf",
+          file_size: pdfBuffer.length,
+          document_type: plan.documentType,
+          description: `${plan.quarter} ${plan.documentType.replace(/_/g, " ")} for ${company.name}`,
+          ingestion_status: "completed",
+        })
+        .select("id")
+        .single();
+
+      if (docError || !docRow) {
+        console.error(`  Error inserting document ${plan.filename}:`, docError);
+        continue;
+      }
+
+      docsCreated++;
+
+      // Update matching company_metric_values with source_document_id
+      // and insert document_metric_mappings
+      const availableMetrics = plan.linkedMetrics.filter(
+        (m) => capturedValues.has(m),
+      );
+
+      for (const metricName of availableMetrics) {
+        // Update the metric value row for this quarter
+        const { data: updatedRows } = await supabase
+          .from("company_metric_values")
+          .update({
+            source: "ai_extracted",
+            source_document_id: docRow.id,
+            ai_confidence: 0.95,
+          })
+          .eq("company_id", newCompany.id)
+          .eq("metric_name", metricName)
+          .eq("period_start", plan.periodStart)
+          .select("id, value");
+
+        const metricValueId = updatedRows?.[0]?.id;
+        const metricValue = updatedRows?.[0]?.value;
+
+        // Insert document_metric_mapping
+        if (metricValueId) {
+          const { error: mappingError } = await supabase
+            .from("document_metric_mappings")
+            .insert({
+              document_id: docRow.id,
+              metric_value_id: metricValueId,
+              extracted_metric_name: metricName,
+              extracted_value: metricValue,
+              extracted_period_start: plan.periodStart,
+              extracted_period_end: plan.periodEnd,
+              extracted_period_type: "quarterly",
+              confidence_score: 0.95,
+              status: "accepted",
+            });
+
+          if (!mappingError) mappingsCreated++;
+        }
+      }
+    }
+
+    console.log(`  Created ${docsCreated} documents, ${mappingsCreated} metric mappings`);
   }
 
   console.log("\nDummy data seeding complete!");
@@ -551,6 +878,55 @@ async function cleanupData() {
   companies.forEach((c) => console.log(`  - ${c.name}`));
 
   // Delete in order (cascade should handle most, but being explicit)
+
+  // 0a. Delete document_metric_mappings and storage files for documents
+  const { data: docs } = await supabase
+    .from("documents")
+    .select("id, file_path")
+    .in("company_id", companyIds);
+
+  if (docs && docs.length > 0) {
+    const docIds = docs.map((d) => d.id);
+
+    // Delete document_metric_mappings (FK cascade from documents would handle this,
+    // but being explicit for clean ordering)
+    const { error: mappingsError } = await supabase
+      .from("document_metric_mappings")
+      .delete()
+      .in("document_id", docIds);
+
+    if (mappingsError) {
+      console.error("Error deleting document_metric_mappings:", mappingsError);
+    } else {
+      console.log("\nDeleted document_metric_mappings");
+    }
+
+    // Delete storage files
+    const storagePaths = docs.map((d) => d.file_path).filter(Boolean);
+    if (storagePaths.length > 0) {
+      const { error: storageError } = await supabase.storage
+        .from("documents")
+        .remove(storagePaths);
+
+      if (storageError) {
+        console.error("Error deleting storage files:", storageError);
+      } else {
+        console.log(`Deleted ${storagePaths.length} storage files`);
+      }
+    }
+
+    // 0b. Delete document rows
+    const { error: docsError } = await supabase
+      .from("documents")
+      .delete()
+      .in("id", docIds);
+
+    if (docsError) {
+      console.error("Error deleting documents:", docsError);
+    } else {
+      console.log(`Deleted ${docs.length} documents`);
+    }
+  }
 
   // 1. Delete metric values
   const { error: metricsError } = await supabase
@@ -631,10 +1007,222 @@ async function cleanupData() {
   console.log("\nCleanup complete!");
 }
 
+// Add documents to existing seed companies without touching metrics/settings
+async function addDocuments() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceRoleKey) {
+    console.error(
+      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY",
+    );
+    process.exit(1);
+  }
+
+  const supabase = createClient(url, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+
+  console.log("Adding documents to existing seed companies...\n");
+
+  const companyNames = COMPANIES.map((c) => c.name);
+  const quarters = generateQuarters();
+  const docPlans = getDocumentPlans(quarters);
+
+  // Look up existing companies
+  const { data: companies } = await supabase
+    .from("companies")
+    .select("id, name, founder_id")
+    .in("name", companyNames);
+
+  if (!companies || companies.length === 0) {
+    console.error("No seed companies found. Run the seed script first.");
+    process.exit(1);
+  }
+
+  console.log(`Found ${companies.length} seed companies.`);
+
+  // Clean up any existing documents first (idempotent)
+  const companyIds = companies.map((c) => c.id);
+  const { data: existingDocs } = await supabase
+    .from("documents")
+    .select("id, file_path")
+    .in("company_id", companyIds);
+
+  if (existingDocs && existingDocs.length > 0) {
+    console.log(`Cleaning up ${existingDocs.length} existing documents first...`);
+    const existingDocIds = existingDocs.map((d) => d.id);
+
+    // Clear source_document_id references on metric values before deleting docs
+    await supabase
+      .from("company_metric_values")
+      .update({ source_document_id: null, source: "manual", ai_confidence: null })
+      .in("source_document_id", existingDocIds);
+
+    await supabase
+      .from("document_metric_mappings")
+      .delete()
+      .in("document_id", existingDocIds);
+
+    const storagePaths = existingDocs.map((d) => d.file_path).filter(Boolean);
+    if (storagePaths.length > 0) {
+      await supabase.storage.from("documents").remove(storagePaths);
+    }
+
+    await supabase
+      .from("documents")
+      .delete()
+      .in("id", existingDocIds);
+
+    console.log("  Cleaned up existing documents.\n");
+  }
+
+  for (const dbCompany of companies) {
+    const companyDef = COMPANIES.find((c) => c.name === dbCompany.name);
+    if (!companyDef) continue;
+
+    console.log(`\n${dbCompany.name}:`);
+
+    // Read existing metric values from DB for this company
+    const { data: metricRows } = await supabase
+      .from("company_metric_values")
+      .select("id, metric_name, period_start, period_end, value")
+      .eq("company_id", dbCompany.id);
+
+    if (!metricRows || metricRows.length === 0) {
+      console.log("  No metric values found, skipping.");
+      continue;
+    }
+
+    // Build capturedValues map from existing DB data
+    const capturedValues = new Map<string, Map<string, number>>();
+    for (const row of metricRows) {
+      if (!capturedValues.has(row.metric_name)) {
+        capturedValues.set(row.metric_name, new Map());
+      }
+      // Extract numeric value from DB (stored as number or {raw: "..."})
+      let num: number | null = null;
+      if (typeof row.value === "number") {
+        num = row.value;
+      } else if (row.value && typeof row.value === "object") {
+        const obj = row.value as Record<string, unknown>;
+        const raw = obj.raw ?? obj.value;
+        if (raw != null) num = Number(raw);
+      }
+      if (num != null && !isNaN(num)) {
+        capturedValues.get(row.metric_name)!.set(row.period_start, num);
+      }
+    }
+
+    let docsCreated = 0;
+    let mappingsCreated = 0;
+
+    for (const plan of docPlans) {
+      // Generate PDF with existing metric values
+      const pdfBuffer = generateFinancialStatementPdf(
+        dbCompany.name,
+        plan.documentType,
+        plan.quarter,
+        plan.periodStart,
+        plan.periodEnd,
+        capturedValues,
+        companyDef.metrics as unknown as Record<string, { start: number; end: number; unit: string }>,
+      );
+
+      // Upload to Supabase Storage
+      const storagePath = `${dbCompany.id}/${Date.now()}-${plan.filename}`;
+      const { error: uploadError } = await supabase.storage
+        .from("documents")
+        .upload(storagePath, pdfBuffer, {
+          contentType: "application/pdf",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error(`  Error uploading ${plan.filename}:`, uploadError);
+        continue;
+      }
+
+      // Insert document row
+      const { data: docRow, error: docError } = await supabase
+        .from("documents")
+        .insert({
+          company_id: dbCompany.id,
+          uploaded_by: dbCompany.founder_id,
+          file_name: plan.filename,
+          file_path: storagePath,
+          file_type: "application/pdf",
+          file_size: pdfBuffer.length,
+          document_type: plan.documentType,
+          description: `${plan.quarter} ${plan.documentType.replace(/_/g, " ")} for ${dbCompany.name}`,
+          ingestion_status: "completed",
+        })
+        .select("id")
+        .single();
+
+      if (docError || !docRow) {
+        console.error(`  Error inserting document ${plan.filename}:`, docError);
+        continue;
+      }
+
+      docsCreated++;
+
+      // Link matching metric values
+      const availableMetrics = plan.linkedMetrics.filter(
+        (m) => capturedValues.has(m),
+      );
+
+      for (const metricName of availableMetrics) {
+        const { data: updatedRows } = await supabase
+          .from("company_metric_values")
+          .update({
+            source: "ai_extracted",
+            source_document_id: docRow.id,
+            ai_confidence: 0.95,
+          })
+          .eq("company_id", dbCompany.id)
+          .eq("metric_name", metricName)
+          .eq("period_start", plan.periodStart)
+          .select("id, value");
+
+        const metricValueId = updatedRows?.[0]?.id;
+        const metricValue = updatedRows?.[0]?.value;
+
+        if (metricValueId) {
+          const { error: mappingError } = await supabase
+            .from("document_metric_mappings")
+            .insert({
+              document_id: docRow.id,
+              metric_value_id: metricValueId,
+              extracted_metric_name: metricName,
+              extracted_value: metricValue,
+              extracted_period_start: plan.periodStart,
+              extracted_period_end: plan.periodEnd,
+              extracted_period_type: "quarterly",
+              confidence_score: 0.95,
+              status: "accepted",
+            });
+
+          if (!mappingError) mappingsCreated++;
+        }
+      }
+    }
+
+    console.log(`  Created ${docsCreated} documents, ${mappingsCreated} metric mappings`);
+  }
+
+  console.log("\nDocument seeding complete!");
+}
+
 // Main
 const args = process.argv.slice(2);
 if (args.includes("--cleanup")) {
   cleanupData();
+} else if (args.includes("--add-documents")) {
+  addDocuments();
 } else {
   seedData();
 }

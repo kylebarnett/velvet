@@ -126,11 +126,20 @@ export async function GET(req: Request) {
     .map((v) => v.source_document_id)
     .filter((id): id is string => id != null);
 
-  let documents: Array<{ id: string; file_name: string; document_type: string }> = [];
+  let documents: Array<{
+    id: string;
+    file_name: string;
+    file_path: string;
+    file_type: string | null;
+    file_size: number;
+    document_type: string;
+    description: string | null;
+    uploaded_at: string;
+  }> = [];
   if (docIds.length > 0) {
     const { data: docs } = await supabase
       .from("documents")
-      .select("id, file_name, document_type")
+      .select("id, file_name, file_path, file_type, file_size, document_type, description, uploaded_at")
       .in("id", [...new Set(docIds)]);
     documents = docs ?? [];
   }

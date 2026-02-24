@@ -15,6 +15,7 @@ import {
   Check,
   Pencil,
   Calendar,
+  ExternalLink,
 } from "lucide-react";
 import { formatMetricDisplayName } from "@/lib/metric-definitions";
 import {
@@ -35,6 +36,7 @@ import { getDefaultAggregationType, getAggregationIndicator } from "@/lib/metric
 import { SourceBadge } from "./source-badge";
 import { MetricHistoryTimeline } from "./metric-history-timeline";
 import { MetricCommentThread } from "./metric-comment-thread";
+import { DocumentPreviewModal } from "@/components/investor/document-preview-modal";
 
 type MetricValue = {
   id: string;
@@ -67,7 +69,12 @@ type HistoryEntry = {
 type LinkedDocument = {
   id: string;
   file_name: string;
+  file_path: string;
+  file_type: string | null;
+  file_size: number;
   document_type: string;
+  description: string | null;
+  uploaded_at: string;
 };
 
 /** Extract a string representation of a metric value for editing/display */
@@ -123,6 +130,7 @@ export function MetricDetailPanel({
   const [editValue, setEditValue] = React.useState("");
   const [editReason, setEditReason] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
+  const [previewDoc, setPreviewDoc] = React.useState<LinkedDocument | null>(null);
 
   // Derive filtered values from allValues + periodType.
   // When the requested period type (e.g. quarterly) has no native DB rows,
@@ -204,11 +212,11 @@ export function MetricDetailPanel({
 
   React.useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") handleClose();
+      if (e.key === "Escape" && !previewDoc) handleClose();
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose]);
+  }, [handleClose, previewDoc]);
 
   React.useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -403,6 +411,18 @@ export function MetricDetailPanel({
       totalValue: rollupMeta.value,
     };
   }, [current, rollupMap, allValues]);
+
+  // For rollup values, find source documents from child values
+  const rollupDocuments = React.useMemo(() => {
+    if (!current || current.source !== "rollup" || !rollupBreakdown) return [];
+    const childDocIds = rollupBreakdown.children
+      .map((c) => c.source_document_id)
+      .filter((id): id is string => id != null);
+    const uniqueIds = [...new Set(childDocIds)];
+    return uniqueIds
+      .map((id) => documents.find((d) => d.id === id))
+      .filter((d): d is LinkedDocument => d != null);
+  }, [current, rollupBreakdown, documents]);
 
   const changeBadgeColor =
     percentChange != null && percentChange > 0
@@ -644,33 +664,64 @@ export function MetricDetailPanel({
                     Source
                   </h3>
                   <div className="overflow-hidden rounded-xl border border-border-subtle bg-bg-raised">
-                    <div className="p-4">
+                    <div className="space-y-3 p-4">
                       <div className="flex items-center justify-between">
                         <SourceBadge
                           source={current.source}
                           confidence={current.ai_confidence}
                         />
-                        <span className="text-[11px] tabular-nums text-text-muted">
-                          {new Date(current.submitted_at).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            },
-                          )}
-                        </span>
-                      </div>
-                      {current.source_document_id && (
-                        <div className="mt-3 flex items-center gap-2.5 rounded-lg border border-border-subtle bg-bg-elevated/50 px-3 py-2.5 text-xs text-text-muted transition-colors hover:bg-bg-elevated hover:text-text-secondary">
-                          <FileText className="h-3.5 w-3.5 shrink-0 text-text-faint" />
-                          <span className="truncate">
-                            {documents.find(
-                              (d) => d.id === current.source_document_id,
-                            )?.file_name ?? "Linked document"}
+                        {current.submitted_at && !isNaN(new Date(current.submitted_at).getTime()) && (
+                          <span className="text-[11px] tabular-nums text-text-muted">
+                            {new Date(current.submitted_at).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              },
+                            )}
                           </span>
-                        </div>
+                        )}
+                      </div>
+                      {current.submitted_by_name && (
+                        <p className="text-xs text-text-muted">
+                          Submitted by <span className="font-medium text-text-secondary">{current.submitted_by_name}</span>
+                        </p>
                       )}
+                      {(() => {
+                        // Direct document link
+                        const directDoc = current.source_document_id
+                          ? documents.find((d) => d.id === current.source_document_id)
+                          : null;
+                        // For rollups, show documents from child values
+                        const docsToShow = directDoc ? [directDoc] : rollupDocuments;
+                        if (docsToShow.length === 0) return null;
+
+                        return docsToShow.map((linkedDoc) => (
+                          <button
+                            key={linkedDoc.id}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewDoc(linkedDoc);
+                            }}
+                            className="group flex w-full items-center gap-3 rounded-lg border border-border-subtle bg-bg-elevated/50 px-3.5 py-3 text-left transition-all hover:border-[var(--tag-blue-bg)] hover:bg-[var(--tag-blue-bg)]"
+                          >
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--tag-blue-bg)]">
+                              <FileText className="h-4 w-4 text-[var(--tag-blue-text)]" aria-hidden="true" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-xs font-medium text-text-secondary group-hover:text-text-primary">
+                                {linkedDoc.file_name}
+                              </p>
+                              <p className="mt-0.5 text-[10px] text-text-faint">
+                                Click to preview
+                              </p>
+                            </div>
+                            <ExternalLink className="h-3.5 w-3.5 shrink-0 text-text-faint group-hover:text-text-muted" aria-hidden="true" />
+                          </button>
+                        ));
+                      })()}
                     </div>
                   </div>
                 </section>
@@ -988,6 +1039,19 @@ export function MetricDetailPanel({
           )}
         </div>
       </div>
+
+      {previewDoc && (
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+        <div className="relative z-[60]" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+          <DocumentPreviewModal
+            document={previewDoc}
+            onClose={() => setPreviewDoc(null)}
+            onDownload={() => {
+              // Download handled by DocumentPreviewModal internally
+            }}
+          />
+        </div>
+      )}
     </>,
     document.body,
   );
