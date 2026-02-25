@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Building2, CheckCircle2 } from "lucide-react";
 
 export const metadata: Metadata = { title: "Portfolio | Velvet" };
 
@@ -12,6 +10,7 @@ import { AddCompanyFlow } from "@/components/investor/add-company-flow";
 import { getNumericValue } from "@/lib/metrics/numeric-value";
 import { DashboardContent } from "./dashboard-content";
 import { DashboardTabs } from "./dashboard-tabs";
+import { KpiTiles } from "./kpi-tiles";
 
 export const dynamic = "force-dynamic";
 
@@ -342,26 +341,11 @@ export default async function InvestorDashboardPage() {
         <AddCompanyFlow />
       </div>
 
-      <div className="grid gap-5 md:grid-cols-3">
-        {[
-          { label: "Portfolio companies", subtitle: "Total companies in your portfolio", value: String(companies.filter(c => !c.isHidden).length), href: "/contacts", icon: Building2, gradient: "kpi-gradient-blue" },
-          { label: "Awaiting submission", subtitle: "Companies with pending metric requests", value: String(awaitingCompanies.length), href: "/metric-requests", icon: Building2, gradient: "kpi-gradient-amber" },
-          { label: "Submitted this week", subtitle: "Companies that sent data in the last 7 days", value: String(submittedCompanies.length), href: "/metric-requests", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
-        ].map((card) => (
-          <Link
-            key={card.label}
-            href={card.href}
-            className={`card-hover-lift group rounded-xl ${card.gradient} p-5`}
-          >
-            <div className="flex items-start justify-between">
-              <div className="text-xs font-medium uppercase tracking-wide text-text-muted group-hover:text-text-muted">{card.label}</div>
-              <card.icon className="h-4 w-4 text-text-faint" />
-            </div>
-            <div className="mt-3 text-3xl font-bold tracking-tight">{card.value}</div>
-            <div className="mt-1 text-xs text-text-tertiary">{card.subtitle}</div>
-          </Link>
-        ))}
-      </div>
+      <KpiTiles
+        portfolioCount={companies.filter((c) => !c.isHidden).length}
+        awaitingCompanies={awaitingCompanies}
+        submittedCompanies={submittedCompanies}
+      />
 
       {/* Getting Started Checklist */}
       <GettingStartedChecklist
