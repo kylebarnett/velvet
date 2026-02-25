@@ -304,30 +304,36 @@ export default async function InvestorDashboardPage() {
     }
   }
 
-  // Count distinct companies with pending requests (awaiting submission)
+  // Fetch distinct companies with pending requests (awaiting submission)
   const { data: pendingCompanyRows } = await supabase
     .from("metric_requests")
-    .select("company_id")
+    .select("company_id, companies(id, name)")
     .eq("investor_id", user.id)
     .eq("status", "pending");
 
-  const awaitingCompanyCount = pendingCompanyRows
-    ? new Set(pendingCompanyRows.map((r) => r.company_id)).size
-    : 0;
+  const awaitingCompaniesMap = new Map<string, string>();
+  for (const r of pendingCompanyRows ?? []) {
+    const co = Array.isArray(r.companies) ? r.companies[0] : r.companies;
+    if (co?.id && co?.name) awaitingCompaniesMap.set(co.id, co.name);
+  }
+  const awaitingCompanies = Array.from(awaitingCompaniesMap, ([id, name]) => ({ id, name }));
 
-  // Count distinct companies with submissions this week
+  // Fetch distinct companies with submissions this week
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
   const { data: submittedCompanyRows } = await supabase
     .from("metric_requests")
-    .select("company_id")
+    .select("company_id, companies(id, name)")
     .eq("investor_id", user.id)
     .eq("status", "submitted")
     .gte("updated_at", weekAgo.toISOString());
 
-  const submittedThisWeekCount = submittedCompanyRows
-    ? new Set(submittedCompanyRows.map((r) => r.company_id)).size
-    : 0;
+  const submittedCompaniesMap = new Map<string, string>();
+  for (const r of submittedCompanyRows ?? []) {
+    const co = Array.isArray(r.companies) ? r.companies[0] : r.companies;
+    if (co?.id && co?.name) submittedCompaniesMap.set(co.id, co.name);
+  }
+  const submittedCompanies = Array.from(submittedCompaniesMap, ([id, name]) => ({ id, name }));
 
   return (
     <div className="space-y-8">
@@ -339,8 +345,8 @@ export default async function InvestorDashboardPage() {
       <div className="grid gap-5 md:grid-cols-3">
         {[
           { label: "Portfolio companies", subtitle: "Total companies in your portfolio", value: String(companies.filter(c => !c.isHidden).length), href: "/contacts", icon: Building2, gradient: "kpi-gradient-blue" },
-          { label: "Awaiting submission", subtitle: "Companies with pending metric requests", value: String(awaitingCompanyCount), href: "/metric-requests", icon: Building2, gradient: "kpi-gradient-amber" },
-          { label: "Submitted this week", subtitle: "Companies that sent data in the last 7 days", value: String(submittedThisWeekCount), href: "/metric-requests", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
+          { label: "Awaiting submission", subtitle: "Companies with pending metric requests", value: String(awaitingCompanies.length), href: "/metric-requests", icon: Building2, gradient: "kpi-gradient-amber" },
+          { label: "Submitted this week", subtitle: "Companies that sent data in the last 7 days", value: String(submittedCompanies.length), href: "/metric-requests", icon: CheckCircle2, gradient: "kpi-gradient-emerald" },
         ].map((card) => (
           <Link
             key={card.label}
@@ -380,7 +386,7 @@ export default async function InvestorDashboardPage() {
             label: "Send your first metric request",
             description: "Ask portfolio companies to submit their metrics",
             href: "/metric-requests/new",
-            completed: awaitingCompanyCount > 0 || submittedThisWeekCount > 0,
+            completed: awaitingCompanies.length > 0 || submittedCompanies.length > 0,
           },
           {
             id: "add_metrics",
@@ -394,7 +400,7 @@ export default async function InvestorDashboardPage() {
             label: "View portfolio reports",
             description: "Explore summary analytics, comparisons, and benchmarks",
             href: "/reports",
-            completed: submittedThisWeekCount > 0,
+            completed: submittedCompanies.length > 0,
           },
         ]}
       />
