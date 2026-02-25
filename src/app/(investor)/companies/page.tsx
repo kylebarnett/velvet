@@ -8,6 +8,7 @@ import { computeRollups } from "@/lib/metrics/rollup";
 import { GettingStartedChecklist } from "@/components/ui/getting-started-checklist";
 import { AddCompanyFlow } from "@/components/investor/add-company-flow";
 import { getNumericValue } from "@/lib/metrics/numeric-value";
+import { formatPeriodRange } from "@/lib/utils/format-date";
 import { DashboardContent } from "./dashboard-content";
 import { DashboardTabs } from "./dashboard-tabs";
 import { KpiTiles } from "./kpi-tiles";
@@ -306,33 +307,51 @@ export default async function InvestorDashboardPage() {
   // Fetch distinct companies with pending requests (awaiting submission)
   const { data: pendingCompanyRows } = await supabase
     .from("metric_requests")
-    .select("company_id, companies(id, name)")
+    .select("company_id, period_start, period_end, companies(id, name), metric_definitions(period_type)")
     .eq("investor_id", user.id)
     .eq("status", "pending");
 
-  const awaitingCompaniesMap = new Map<string, string>();
+  const awaitingMap = new Map<string, { name: string; periods: Set<string> }>();
   for (const r of pendingCompanyRows ?? []) {
     const co = Array.isArray(r.companies) ? r.companies[0] : r.companies;
-    if (co?.id && co?.name) awaitingCompaniesMap.set(co.id, co.name);
+    if (!co?.id || !co?.name) continue;
+    if (!awaitingMap.has(co.id)) awaitingMap.set(co.id, { name: co.name, periods: new Set() });
+    const md = Array.isArray(r.metric_definitions) ? r.metric_definitions[0] : r.metric_definitions;
+    const periodType = (md as { period_type?: string } | null)?.period_type;
+    if (r.period_start) {
+      const label = formatPeriodRange(r.period_start, r.period_end ?? r.period_start, periodType);
+      awaitingMap.get(co.id)!.periods.add(label);
+    }
   }
-  const awaitingCompanies = Array.from(awaitingCompaniesMap, ([id, name]) => ({ id, name }));
+  const awaitingCompanies = Array.from(awaitingMap, ([id, { name, periods }]) => ({
+    id, name, periods: Array.from(periods),
+  }));
 
   // Fetch distinct companies with submissions this week
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
   const { data: submittedCompanyRows } = await supabase
     .from("metric_requests")
-    .select("company_id, companies(id, name)")
+    .select("company_id, period_start, period_end, companies(id, name), metric_definitions(period_type)")
     .eq("investor_id", user.id)
     .eq("status", "submitted")
     .gte("updated_at", weekAgo.toISOString());
 
-  const submittedCompaniesMap = new Map<string, string>();
+  const submittedMap = new Map<string, { name: string; periods: Set<string> }>();
   for (const r of submittedCompanyRows ?? []) {
     const co = Array.isArray(r.companies) ? r.companies[0] : r.companies;
-    if (co?.id && co?.name) submittedCompaniesMap.set(co.id, co.name);
+    if (!co?.id || !co?.name) continue;
+    if (!submittedMap.has(co.id)) submittedMap.set(co.id, { name: co.name, periods: new Set() });
+    const md = Array.isArray(r.metric_definitions) ? r.metric_definitions[0] : r.metric_definitions;
+    const periodType = (md as { period_type?: string } | null)?.period_type;
+    if (r.period_start) {
+      const label = formatPeriodRange(r.period_start, r.period_end ?? r.period_start, periodType);
+      submittedMap.get(co.id)!.periods.add(label);
+    }
   }
-  const submittedCompanies = Array.from(submittedCompaniesMap, ([id, name]) => ({ id, name }));
+  const submittedCompanies = Array.from(submittedMap, ([id, { name, periods }]) => ({
+    id, name, periods: Array.from(periods),
+  }));
 
   return (
     <div className="space-y-8">

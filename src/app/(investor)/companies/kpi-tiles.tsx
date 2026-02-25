@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Building2, CheckCircle2, ChevronDown } from "lucide-react";
 
-type CompanySummary = { id: string; name: string };
+type CompanySummary = { id: string; name: string; periods: string[] };
 
 interface KpiTilesProps {
   portfolioCount: number;
@@ -54,7 +54,12 @@ function AccordionPanel({
               <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-bg-elevated text-[10px] font-medium text-text-muted">
                 {c.name.charAt(0).toUpperCase()}
               </div>
-              <span className="truncate">{c.name}</span>
+              <span className="min-w-0 truncate">{c.name}</span>
+              {c.periods.length > 0 && (
+                <span className="ml-auto shrink-0 text-xs text-text-tertiary">
+                  {c.periods.join(", ")}
+                </span>
+              )}
             </Link>
           ))}
           {hasMore && (
