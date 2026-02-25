@@ -54,6 +54,17 @@ const PRIORITY_METRICS = [
   "monthly active patients",
 ];
 
+function inferPeriodType(periodStart: string, periodEnd: string): string {
+  const start = new Date(periodStart);
+  const end = new Date(periodEnd);
+  const days = Math.round(
+    (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+  );
+  if (days >= 360) return "annual";
+  if (days >= 80) return "quarterly";
+  return "monthly";
+}
+
 export default async function InvestorDashboardPage() {
   const user = await requireRole("investor");
   const supabase = await createSupabaseServerClient();
@@ -317,7 +328,8 @@ export default async function InvestorDashboardPage() {
     if (!co?.id || !co?.name) continue;
     if (!awaitingMap.has(co.id)) awaitingMap.set(co.id, { name: co.name, periods: new Set() });
     const md = Array.isArray(r.metric_definitions) ? r.metric_definitions[0] : r.metric_definitions;
-    const periodType = (md as { period_type?: string } | null)?.period_type;
+    const periodType = (md as { period_type?: string } | null)?.period_type
+      || inferPeriodType(r.period_start, r.period_end ?? r.period_start);
     if (r.period_start) {
       const label = formatPeriodRange(r.period_start, r.period_end ?? r.period_start, periodType);
       awaitingMap.get(co.id)!.periods.add(label);
@@ -343,7 +355,8 @@ export default async function InvestorDashboardPage() {
     if (!co?.id || !co?.name) continue;
     if (!submittedMap.has(co.id)) submittedMap.set(co.id, { name: co.name, periods: new Set() });
     const md = Array.isArray(r.metric_definitions) ? r.metric_definitions[0] : r.metric_definitions;
-    const periodType = (md as { period_type?: string } | null)?.period_type;
+    const periodType = (md as { period_type?: string } | null)?.period_type
+      || inferPeriodType(r.period_start, r.period_end ?? r.period_start);
     if (r.period_start) {
       const label = formatPeriodRange(r.period_start, r.period_end ?? r.period_start, periodType);
       submittedMap.get(co.id)!.periods.add(label);
