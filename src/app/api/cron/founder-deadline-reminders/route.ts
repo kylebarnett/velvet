@@ -122,7 +122,7 @@ export async function POST(req: Request) {
     period_key: string;
   }> = [];
 
-  const fromDomain = process.env.RESEND_FROM_DOMAIN ?? "velvet.app";
+  const fromDomain = process.env.RESEND_FROM_DOMAIN ?? "postsig.app";
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001";
 
   for (const company of companies) {
@@ -189,7 +189,7 @@ export async function POST(req: Request) {
           : `in ${threshold.days} days`;
 
       emailsToSend.push({
-        from: `Velvet <reminders@${fromDomain}>`,
+        from: `PostSig <reminders@${fromDomain}>`,
         to: [founder.email],
         subject: `${urgentRequests.length} metric${urgentRequests.length !== 1 ? "s" : ""} due ${dayLabel} for ${escapeHtml(company.name)}`,
         html: `

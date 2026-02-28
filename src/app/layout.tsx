@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Velvet",
+  title: "PostSig",
   description: "Performance metrics for investors and founders.",
 };
 

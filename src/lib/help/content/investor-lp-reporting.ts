@@ -5,7 +5,7 @@ export const investorLpReportingArticles: HelpArticle[] = [
     slug: "creating-lp-funds",
     title: "Creating & Managing LP Funds",
     description:
-      "Set up fund entities in Velvet, configure fund details, and manage the fund lifecycle from setup through close.",
+      "Set up fund entities in PostSig, configure fund details, and manage the fund lifecycle from setup through close.",
     role: "investor",
     category: "lp-reporting",
     icon: "landmark",
@@ -90,7 +90,7 @@ export const investorLpReportingArticles: HelpArticle[] = [
       {
         title: "Record follow-on investments",
         content:
-          "If you make additional investments in the same company from the same fund, add each as a separate entry. Velvet will aggregate the total deployed capital accordingly.",
+          "If you make additional investments in the same company from the same fund, add each as a separate entry. PostSig will aggregate the total deployed capital accordingly.",
       },
       {
         title: "Update valuations",
@@ -149,7 +149,7 @@ export const investorLpReportingArticles: HelpArticle[] = [
       {
         title: "Review calculated metrics",
         content:
-          "Velvet automatically calculates key fund metrics based on your investment data. TVPI (Total Value to Paid-In) shows total value relative to invested capital. DPI (Distributions to Paid-In) shows realized returns. IRR (Internal Rate of Return) measures annualized performance. MOIC (Multiple on Invested Capital) shows the overall multiple.",
+          "PostSig automatically calculates key fund metrics based on your investment data. TVPI (Total Value to Paid-In) shows total value relative to invested capital. DPI (Distributions to Paid-In) shows realized returns. IRR (Internal Rate of Return) measures annualized performance. MOIC (Multiple on Invested Capital) shows the overall multiple.",
         tip: "Make sure all investment valuations are up to date before generating the report. Stale valuations will produce inaccurate fund-level metrics.",
       },
       {
@@ -167,7 +167,7 @@ export const investorLpReportingArticles: HelpArticle[] = [
       {
         title: "Export or share the report",
         content:
-          "Finalized reports can be exported as PDF for distribution to LPs. The exported document includes your fund branding, calculated metrics, charts, and any commentary you added. You can also share a link directly with LP contacts if they have Velvet accounts.",
+          "Finalized reports can be exported as PDF for distribution to LPs. The exported document includes your fund branding, calculated metrics, charts, and any commentary you added. You can also share a link directly with LP contacts if they have PostSig accounts.",
         visual: "share-link",
       },
     ],

@@ -46,7 +46,7 @@ export const founderMetricsArticles: HelpArticle[] = [
       {
         title: "Understand auto-fulfillment",
         content:
-          "When you submit a metric value, Velvet automatically fulfills matching requests from all approved investors. You only need to submit each metric once per period -- the platform handles distributing the data to every investor who requested it.",
+          "When you submit a metric value, PostSig automatically fulfills matching requests from all approved investors. You only need to submit each metric once per period -- the platform handles distributing the data to every investor who requested it.",
       },
       {
         title: "Review completed requests",
@@ -95,7 +95,7 @@ export const founderMetricsArticles: HelpArticle[] = [
       {
         title: "Value formatting",
         content:
-          "Velvet automatically formats metric values based on the metric name. Currency metrics (Revenue, MRR, ARR, Burn Rate, etc.) display with a dollar sign and commas. Percentage metrics (Churn Rate, Gross Margin, etc.) display with a percent symbol. Enter raw numbers without formatting -- the platform handles display formatting for you.",
+          "PostSig automatically formats metric values based on the metric name. Currency metrics (Revenue, MRR, ARR, Burn Rate, etc.) display with a dollar sign and commas. Percentage metrics (Churn Rate, Gross Margin, etc.) display with a percent symbol. Enter raw numbers without formatting -- the platform handles display formatting for you.",
         tip: "Enter values as plain numbers. For example, enter \"150000\" for $150,000 in revenue, or \"5.2\" for a 5.2% churn rate.",
       },
       {

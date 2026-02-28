@@ -117,7 +117,7 @@ export const investorReportsArticles: HelpArticle[] = [
     slug: "benchmark-percentiles",
     title: "Understanding Benchmark Percentiles",
     description:
-      "Learn how Velvet calculates percentile rankings and what they mean for evaluating company performance within your portfolio.",
+      "Learn how PostSig calculates percentile rankings and what they mean for evaluating company performance within your portfolio.",
     role: "investor",
     category: "reports",
     icon: "award",

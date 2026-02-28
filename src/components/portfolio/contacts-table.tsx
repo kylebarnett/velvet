@@ -1143,10 +1143,10 @@ export function ContactsTable({ initialContacts, initialPagination, initialStats
           inviteConfirm?.type === "single"
             ? inviteConfirm.contact.status === "sent"
               ? `Resend the invitation email to ${inviteConfirm.contact.email}? A new email will be sent. Their existing invitation link will still work.`
-              : `Send an invitation email to ${inviteConfirm.contact.email}? They'll receive a link to join Velvet as a founder, where they can submit metrics and share documents with you.`
+              : `Send an invitation email to ${inviteConfirm.contact.email}? They'll receive a link to join PostSig as a founder, where they can submit metrics and share documents with you.`
             : inviteConfirm?.type === "selected"
               ? `Send invitation emails to ${inviteConfirm.ids.length} selected contact${inviteConfirm.ids.length === 1 ? "" : "s"}?`
-              : `Send invitation emails to all ${pendingCount} pending contact${pendingCount === 1 ? "" : "s"}? They'll each receive a link to join Velvet as a founder.`
+              : `Send invitation emails to all ${pendingCount} pending contact${pendingCount === 1 ? "" : "s"}? They'll each receive a link to join PostSig as a founder.`
         }
         confirmLabel={
           inviteConfirm?.type === "single" && inviteConfirm.contact.status === "sent"

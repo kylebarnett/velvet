@@ -5,7 +5,7 @@ export const investorGettingStartedArticles: HelpArticle[] = [
     slug: "welcome-investor",
     title: "Welcome & First Steps",
     description:
-      "An overview of the Velvet investor platform and how to get up and running quickly. Learn how to import companies, request metrics, and generate reports.",
+      "An overview of the PostSig investor platform and how to get up and running quickly. Learn how to import companies, request metrics, and generate reports.",
     role: "investor",
     category: "getting-started",
     icon: "sparkles",
@@ -30,13 +30,13 @@ export const investorGettingStartedArticles: HelpArticle[] = [
       {
         title: "Create your account",
         content:
-          "Sign up at the Velvet login page using your email address. Choose \"Investor\" as your role during registration. You will receive a confirmation email to verify your account before you can log in.",
+          "Sign up at the PostSig login page using your email address. Choose \"Investor\" as your role during registration. You will receive a confirmation email to verify your account before you can log in.",
         tip: "Use your work email so founders recognize your organization when they receive invitations.",
       },
       {
         title: "Import your portfolio companies",
         content:
-          'Head to the Contacts page from the sidebar and click "Import CSV". You can upload a CSV file with columns for Company Name, First Name, Last Name, and Email, or add contacts one at a time. Velvet will automatically deduplicate companies by founder email.',
+          'Head to the Contacts page from the sidebar and click "Import CSV". You can upload a CSV file with columns for Company Name, First Name, Last Name, and Email, or add contacts one at a time. PostSig will automatically deduplicate companies by founder email.',
         tip: "Download the CSV template first to ensure your data is formatted correctly. Column names are flexible (e.g. \"Company Name\", \"company_name\", or \"companyName\" all work).",
         visual: "csv-import",
       },
@@ -81,7 +81,7 @@ export const investorGettingStartedArticles: HelpArticle[] = [
       {
         title: "Navigate to your dashboard",
         content:
-          "Your dashboard is the landing page after login. You can always return to it by clicking the Velvet logo or the home icon in the sidebar. It provides a high-level snapshot of your entire portfolio.",
+          "Your dashboard is the landing page after login. You can always return to it by clicking the PostSig logo or the home icon in the sidebar. It provides a high-level snapshot of your entire portfolio.",
       },
       {
         title: "Understand the KPI cards",
@@ -92,7 +92,7 @@ export const investorGettingStartedArticles: HelpArticle[] = [
       {
         title: "Review the Getting Started checklist",
         content:
-          "If you are new to Velvet, a Getting Started checklist appears on your dashboard. It walks you through key setup steps: importing companies, connecting with a founder, sending your first request, and viewing reports. You can dismiss it once complete.",
+          "If you are new to PostSig, a Getting Started checklist appears on your dashboard. It walks you through key setup steps: importing companies, connecting with a founder, sending your first request, and viewing reports. You can dismiss it once complete.",
       },
       {
         title: "Take action from the dashboard",

@@ -3,7 +3,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DashboardBuilder } from "@/components/dashboard/dashboard-builder";
 
-export const metadata: Metadata = { title: "Edit Dashboard | Velvet" };
+export const metadata: Metadata = { title: "Edit Dashboard | PostSig" };
 export const dynamic = "force-dynamic";
 
 export default async function FounderDashboardEditPage() {

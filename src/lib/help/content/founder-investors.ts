@@ -35,7 +35,7 @@ export const founderInvestorsArticles: HelpArticle[] = [
       {
         title: "Understand the access model",
         content:
-          "Access in Velvet is all-or-nothing. An approved investor can see all metrics you have submitted and all documents you have uploaded. There is no per-metric or per-document access control. The investor who originally invited you to the platform is auto-approved. All other investors start with a \"Pending\" status and must be approved by you.",
+          "Access in PostSig is all-or-nothing. An approved investor can see all metrics you have submitted and all documents you have uploaded. There is no per-metric or per-document access control. The investor who originally invited you to the platform is auto-approved. All other investors start with a \"Pending\" status and must be approved by you.",
         warning:
           "Once you approve an investor, they immediately gain access to all your submitted data. Be sure you want to share before approving.",
       },

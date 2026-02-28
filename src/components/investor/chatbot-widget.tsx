@@ -52,7 +52,7 @@ const SUGGESTED_QUERIES = [
   { text: "Which company has the lowest runway?", icon: AlertCircle },
 ];
 
-const RECENT_KEY = "velvet:recent-queries";
+const RECENT_KEY = "postsig:recent-queries";
 const MAX_RECENT = 10;
 
 function loadRecentQueries(): string[] {

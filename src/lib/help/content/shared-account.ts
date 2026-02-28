@@ -29,7 +29,7 @@ export const sharedAccountArticles: HelpArticle[] = [
       {
         title: "Switch between light and dark mode",
         content:
-          "Velvet supports both light and dark themes. Use the theme toggle in the sidebar settings panel to switch between modes. Your preference is saved to your account (not just your browser), so it follows you across devices. The default theme is dark mode.",
+          "PostSig supports both light and dark themes. Use the theme toggle in the sidebar settings panel to switch between modes. Your preference is saved to your account (not just your browser), so it follows you across devices. The default theme is dark mode.",
         tip: "The theme preference syncs across all devices where you are logged in. Change it once and it applies everywhere.",
       },
       {

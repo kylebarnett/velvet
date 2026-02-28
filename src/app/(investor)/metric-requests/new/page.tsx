@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
-export const metadata: Metadata = { title: "New Metric Request | Velvet" };
+export const metadata: Metadata = { title: "New Metric Request | PostSig" };
 
 const UnifiedRequestWizard = dynamic(
   () =>

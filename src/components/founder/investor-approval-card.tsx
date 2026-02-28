@@ -156,7 +156,7 @@ export function InvestorApprovalCard({
                 {statusLabel}
               </span>
               {status === "auto_approved" && (
-                <HelpTooltip text="This investor invited you to Velvet and was automatically approved. Their access is permanent and cannot be revoked." />
+                <HelpTooltip text="This investor invited you to PostSig and was automatically approved. Their access is permanent and cannot be revoked." />
               )}
               {status === "pending" && (
                 <HelpTooltip text="This investor added your company to their portfolio and is waiting for your approval. They cannot see any of your data until you approve access." />

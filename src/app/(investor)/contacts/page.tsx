@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { requireRole } from "@/lib/auth/require-role";
 
-export const metadata: Metadata = { title: "Contacts | Velvet" };
+export const metadata: Metadata = { title: "Contacts | PostSig" };
 import { unwrapJoin } from "@/lib/api/utils";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ContactsTable } from "@/components/portfolio/contacts-table";

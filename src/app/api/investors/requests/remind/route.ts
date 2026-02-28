@@ -89,8 +89,8 @@ export async function POST(req: Request) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
   const fromDomain = process.env.RESEND_FROM_DOMAIN;
   const fromAddr = fromDomain
-    ? `Velvet <reminders@${fromDomain}>`
-    : "Velvet <onboarding@resend.dev>";
+    ? `PostSig <reminders@${fromDomain}>`
+    : "PostSig <onboarding@resend.dev>";
 
   const emails = Array.from(byFounder.entries()).map(([email, info]) => ({
     from: fromAddr,

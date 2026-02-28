@@ -18,7 +18,7 @@ import { formatDistanceToNow } from "date-fns";
 import { getCadenceDescription } from "@/lib/schedules";
 import type { Schedule } from "@/components/investor/schedule-card";
 
-const STORAGE_KEY = "velvet:schedules-collapsed";
+const STORAGE_KEY = "postsig:schedules-collapsed";
 
 export function CollapsibleSchedules() {
   const [schedules, setSchedules] = React.useState<Schedule[] | null>(null);

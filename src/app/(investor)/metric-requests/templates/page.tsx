@@ -5,7 +5,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { TemplatesTabContent } from "@/components/investor/templates-tab-content";
 
-export const metadata: Metadata = { title: "Request Templates | Velvet" };
+export const metadata: Metadata = { title: "Request Templates | PostSig" };
 export const dynamic = "force-dynamic";
 
 export default async function TemplatesPage() {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { HelpPageContent } from "@/components/help/help-page-content";
 
-export const metadata: Metadata = { title: "Help | Velvet" };
+export const metadata: Metadata = { title: "Help | PostSig" };
 
 export default function FounderHelpPage() {
   return (

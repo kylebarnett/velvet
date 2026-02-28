@@ -137,7 +137,7 @@ export function AuthCard({ mode, inviteToken, companyName, companyId, inviteEmai
           {mode === "login"
             ? "Log in to access your dashboard."
             : inviteToken && companyName
-              ? `Join ${companyName} on Velvet.`
+              ? `Join ${companyName} on PostSig.`
               : "Sign up to start collecting metrics."}
         </p>
       </div>

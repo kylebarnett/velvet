@@ -4,7 +4,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CompanyProfile } from "@/components/founder/company-profile";
 
-export const metadata: Metadata = { title: "Company Profile | Velvet" };
+export const metadata: Metadata = { title: "Company Profile | PostSig" };
 export const dynamic = "force-dynamic";
 
 export default async function FounderCompanyPage() {

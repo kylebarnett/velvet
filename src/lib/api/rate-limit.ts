@@ -34,7 +34,7 @@ function getUpstashLimiter(
     limiter = new Ratelimit({
       redis: r,
       limiter: Ratelimit.slidingWindow(maxAttempts, `${windowMs} ms`),
-      prefix: "velvet:rl",
+      prefix: "postsig:rl",
     });
     upstashLimiters.set(key, limiter);
   }

@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ReportsPageClient } from "@/components/reports/reports-page-client";
 import type { SavedReport } from "@/components/reports/reports-context";
 
-export const metadata: Metadata = { title: "Reports | Velvet" };
+export const metadata: Metadata = { title: "Reports | PostSig" };
 export const dynamic = "force-dynamic";
 
 export default async function ReportsPage() {

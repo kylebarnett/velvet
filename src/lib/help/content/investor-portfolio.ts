@@ -40,12 +40,12 @@ export const investorPortfolioArticles: HelpArticle[] = [
         title: "Download the CSV template",
         content:
           "Before uploading, download the CSV template. The required columns are: Company Name, First Name, Last Name, and Email. Optional columns include Position and Company Website. Fill in one row per contact.",
-        tip: "Column names are flexible (e.g. \"Company Name\", \"company_name\", or \"companyName\" all work). Velvet deduplicates companies by founder email, so if another investor has already added a company with the same founder email, the existing company record will be linked to your portfolio.",
+        tip: "Column names are flexible (e.g. \"Company Name\", \"company_name\", or \"companyName\" all work). PostSig deduplicates companies by founder email, so if another investor has already added a company with the same founder email, the existing company record will be linked to your portfolio.",
       },
       {
         title: "Upload your completed CSV",
         content:
-          "Drag and drop your filled CSV file into the upload area, or click to browse your files. Velvet will validate the data and show a preview of the contacts to be imported along with any errors or warnings.",
+          "Drag and drop your filled CSV file into the upload area, or click to browse your files. PostSig will validate the data and show a preview of the contacts to be imported along with any errors or warnings.",
         warning:
           "Each row must have a valid email address. Rows with missing or invalid emails will be skipped.",
         visual: "csv-import",
@@ -53,7 +53,7 @@ export const investorPortfolioArticles: HelpArticle[] = [
       {
         title: "Confirm and import",
         content:
-          "Review the preview to make sure everything looks correct. Confirm the import to proceed. Velvet will create the company records and send invitation emails to founders who do not yet have Velvet accounts.",
+          "Review the preview to make sure everything looks correct. Confirm the import to proceed. PostSig will create the company records and send invitation emails to founders who do not yet have PostSig accounts.",
       },
       {
         title: "Check import results",
@@ -101,13 +101,13 @@ export const investorPortfolioArticles: HelpArticle[] = [
       {
         title: "Fill in the contact details",
         content:
-          "Enter the founder or contact's full name and email address. If the company does not already exist in your portfolio, Velvet will create it automatically. If the company already exists (matched by founder email), the contact will be linked to the existing record.",
+          "Enter the founder or contact's full name and email address. If the company does not already exist in your portfolio, PostSig will create it automatically. If the company already exists (matched by founder email), the contact will be linked to the existing record.",
         tip: "You can add multiple contacts for the same company. Only the primary founder email is used for deduplication.",
       },
       {
         title: "Send the invitation",
         content:
-          "After saving the contact, Velvet will send an invitation email to the founder if they do not already have a Velvet account. The email explains who you are and invites them to sign up and connect with your organization.",
+          "After saving the contact, PostSig will send an invitation email to the founder if they do not already have a PostSig account. The email explains who you are and invites them to sign up and connect with your organization.",
       },
       {
         title: "Track the contact status",
@@ -145,7 +145,7 @@ export const investorPortfolioArticles: HelpArticle[] = [
       {
         title: "Understand the approval model",
         content:
-          "Velvet uses a founder-controlled access model. When you import a company, the founder must approve your access before you can see their submitted metrics and documents. This ensures founders have full control over who sees their data.",
+          "PostSig uses a founder-controlled access model. When you import a company, the founder must approve your access before you can see their submitted metrics and documents. This ensures founders have full control over who sees their data.",
         tip: "If a founder signed up through your invitation link, your access is automatically approved. Other investors requesting access to the same company start as pending.",
       },
       {

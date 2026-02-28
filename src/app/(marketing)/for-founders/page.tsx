@@ -13,7 +13,7 @@ import { MockTearSheet } from "@/components/marketing/mocks/mock-tear-sheet";
 import { MockDocumentUpload } from "@/components/marketing/mocks/mock-document-upload";
 
 export const metadata = {
-  title: "For Founders | Velvet",
+  title: "For Founders | PostSig",
   description:
     "Submit your metrics once and every approved investor sees the same data. Control who has access, build tear sheets, and let AI handle document extraction.",
 };
@@ -93,7 +93,7 @@ export default function ForFoundersPage() {
         }
       >
         <Link href="/signup">
-          <Button size="lg">Join Velvet</Button>
+          <Button size="lg">Join PostSig</Button>
         </Link>
         <Link href="/features">
           <Button variant="secondary" size="lg">
@@ -104,7 +104,7 @@ export default function ForFoundersPage() {
 
       <section className="mx-auto max-w-6xl px-6 py-20">
         <h2 className="text-center text-3xl font-bold text-text-primary">
-          How founders use Velvet
+          How founders use PostSig
         </h2>
         <p className="mt-3 mb-16 text-center text-text-secondary">
           Five steps to effortless reporting
@@ -113,7 +113,7 @@ export default function ForFoundersPage() {
       </section>
 
       <CtaSection
-        title="Join your investors on Velvet"
+        title="Join your investors on PostSig"
         subtitle="Get started in minutes — your investors are already here."
       />
     </>

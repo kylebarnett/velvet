@@ -1,4 +1,4 @@
-# Velvet
+# PostSig
 
 A portfolio metrics platform connecting investors with their portfolio companies. Investors can request metrics from founders, and founders can submit data through a streamlined portal.
 

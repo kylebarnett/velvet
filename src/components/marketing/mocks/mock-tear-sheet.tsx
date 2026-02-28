@@ -11,7 +11,7 @@ const COMPANY_METRICS = [
   { label: "Burn Rate", value: "$180K" },
 ];
 
-const SHARE_LINK = "velvet.app/s/apex-labs-q4";
+const SHARE_LINK = "postsig.app/s/apex-labs-q4";
 
 export function MockTearSheet() {
   const ref = useRef<HTMLDivElement>(null);

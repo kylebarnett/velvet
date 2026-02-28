@@ -100,8 +100,8 @@ export const founderTearSheetsArticles: HelpArticle[] = [
       {
         title: "Share with a link",
         content:
-          "To share the tear sheet outside of Velvet, enable sharing. This generates a unique share link that anyone with the link can use to view the tear sheet without logging in. Click \"Copy Link\" to copy the URL and send it via email or messaging.",
-        tip: "The share link works for anyone, not just Velvet users. This is useful for sharing with LPs or advisors who do not have a Velvet account.",
+          "To share the tear sheet outside of PostSig, enable sharing. This generates a unique share link that anyone with the link can use to view the tear sheet without logging in. Click \"Copy Link\" to copy the URL and send it via email or messaging.",
+        tip: "The share link works for anyone, not just PostSig users. This is useful for sharing with LPs or advisors who do not have a PostSig account.",
         visual: "share-link-tear-sheet",
       },
       {

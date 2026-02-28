@@ -9,7 +9,7 @@ export default function AuthLayout({
     <div className="min-h-screen bg-bg-primary text-text-primary">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 sm:py-6">
         <Link className="text-base font-bold tracking-tight" href="/">
-          Velvet
+          PostSig
         </Link>
         <div className="flex items-center gap-2 sm:gap-3 text-sm text-text-secondary">
           <Link className="hidden sm:block hover:text-text-primary" href="/signup">

@@ -3,7 +3,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { requireRole } from "@/lib/auth/require-role";
 import { TeamSettings } from "@/components/team/team-settings";
 
-export const metadata: Metadata = { title: "Team | Velvet" };
+export const metadata: Metadata = { title: "Team | PostSig" };
 export const dynamic = "force-dynamic";
 
 export default async function FounderTeamPage() {

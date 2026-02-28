@@ -22,7 +22,7 @@ import { GlowEffect } from "@/components/marketing/ui/glow-effect";
 import { MockDashboard } from "@/components/marketing/mocks/mock-dashboard";
 
 export const metadata: Metadata = {
-  title: "Velvet — Portfolio Metrics, Connected",
+  title: "PostSig — Portfolio Metrics, Connected",
   description:
     "Collect, track, and report on portfolio company metrics. Founder portals, AI insights, dashboards, and LP reporting for venture investors.",
 };
@@ -37,7 +37,7 @@ export default function HomePage() {
         mock={
           <AnimatedSection delay={0.3}>
             <GlowEffect>
-              <MockWindow title="Velvet">
+              <MockWindow title="PostSig">
                 <MockDashboard />
               </MockWindow>
             </GlowEffect>
@@ -166,7 +166,7 @@ export default function HomePage() {
       {/* Final CTA */}
       <CtaSection
         title="Start tracking your portfolio today"
-        subtitle="Join investors and founders already using Velvet to streamline portfolio metrics."
+        subtitle="Join investors and founders already using PostSig to streamline portfolio metrics."
       />
     </>
   );

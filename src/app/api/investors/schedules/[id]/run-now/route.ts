@@ -305,8 +305,8 @@ export async function POST(
   const isDev = process.env.NODE_ENV === "development";
   const fromDomain = process.env.RESEND_FROM_DOMAIN;
   const fromAddr = fromDomain
-    ? `Velvet <notifications@${fromDomain}>`
-    : "Velvet <onboarding@resend.dev>";
+    ? `PostSig <notifications@${fromDomain}>`
+    : "PostSig <onboarding@resend.dev>";
 
   if (apiKey && founderCompanies.size > 0 && requestsCreated > 0) {
     const emailsToSend = Array.from(founderCompanies.values()).map((founder) => {
@@ -348,7 +348,7 @@ export async function POST(
     <a href="${baseUrl}/portal/requests" class="button">Submit Metrics</a>
 
     <div class="footer">
-      <p>Best,<br>The Velvet Team</p>
+      <p>Best,<br>The PostSig Team</p>
     </div>
   </div>
 </body>

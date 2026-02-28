@@ -6,7 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CsvImportForm } from "@/components/portfolio/csv-import-form";
 import { DownloadCsvButton } from "@/components/portfolio/download-csv-button";
 
-export const metadata: Metadata = { title: "Import Contacts | Velvet" };
+export const metadata: Metadata = { title: "Import Contacts | PostSig" };
 export const dynamic = "force-dynamic";
 
 export default async function ImportPage() {

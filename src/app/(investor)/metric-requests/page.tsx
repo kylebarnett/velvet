@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { requireRole } from "@/lib/auth/require-role";
 import { RequestsTabs } from "@/components/investor/requests-tabs";
 
-export const metadata: Metadata = { title: "Metric Requests | Velvet" };
+export const metadata: Metadata = { title: "Metric Requests | PostSig" };
 export const dynamic = "force-dynamic";
 
 export default async function RequestsPage() {

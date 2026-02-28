@@ -262,9 +262,9 @@ export function AppShell({
         <div className="flex items-center justify-between">
           <Link className="flex items-center gap-2.5" href="/app">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-bg-hover text-sm font-bold">
-              V
+              P
             </span>
-            <span className="text-[15px] font-semibold tracking-tight">Velvet</span>
+            <span className="text-[15px] font-semibold tracking-tight">PostSig</span>
           </Link>
           <button
             onClick={() => { setSidebarCollapsed(true); setSettingsPanelOpen(false); }}
@@ -657,9 +657,9 @@ export function AppShell({
             onClick={() => setMobileMenuOpen(false)}
           >
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-bg-hover text-sm font-bold">
-              V
+              P
             </span>
-            <span className="text-[15px] font-semibold tracking-tight">Velvet</span>
+            <span className="text-[15px] font-semibold tracking-tight">PostSig</span>
           </Link>
           <button
             onClick={() => setMobileMenuOpen(false)}

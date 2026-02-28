@@ -169,18 +169,18 @@ export function GettingStartedChecklist({ role, items, dataCompleteness }: Getti
 
   // Check localStorage on mount for dismissal
   React.useEffect(() => {
-    const key = `velvet_checklist_dismissed_${role}`;
+    const key = `postsig_checklist_dismissed_${role}`;
     if (localStorage.getItem(key) === "true") {
       setDismissed(true);
     }
-    const completenessKey = `velvet_completeness_dismissed_${role}`;
+    const completenessKey = `postsig_completeness_dismissed_${role}`;
     if (localStorage.getItem(completenessKey) === "true") {
       setCompletenessCardDismissed(true);
     }
   }, [role]);
 
   function handleDismiss() {
-    const key = `velvet_checklist_dismissed_${role}`;
+    const key = `postsig_checklist_dismissed_${role}`;
     localStorage.setItem(key, "true");
     setDismissed(true);
     // Also persist to user preferences for cross-device
@@ -192,7 +192,7 @@ export function GettingStartedChecklist({ role, items, dataCompleteness }: Getti
   }
 
   function handleCompletenessCardDismiss() {
-    const key = `velvet_completeness_dismissed_${role}`;
+    const key = `postsig_completeness_dismissed_${role}`;
     localStorage.setItem(key, "true");
     setCompletenessCardDismissed(true);
   }

@@ -21,7 +21,7 @@ import { MockChart } from "@/components/marketing/mocks/mock-chart";
 import { MockChatbot } from "@/components/marketing/mocks/mock-chatbot";
 
 export const metadata: Metadata = {
-  title: "Features — Velvet",
+  title: "Features — PostSig",
   description:
     "Dashboards, metric collection, AI insights, LP reporting, benchmarks, and more. Everything you need to manage portfolio metrics.",
 };
@@ -32,7 +32,7 @@ export default function FeaturesPage() {
       {/* Compact Hero */}
       <HeroSection
         title="Everything you need to manage portfolio metrics"
-        subtitle="From data collection to AI-powered insights, Velvet gives investors and founders the tools they need."
+        subtitle="From data collection to AI-powered insights, PostSig gives investors and founders the tools they need."
         compact
       />
 

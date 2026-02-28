@@ -260,7 +260,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
   const [searchQuery, setSearchQuery] = React.useState("");
   const [viewMode, setViewMode] = React.useState<ViewMode>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("velvet_dashboard_view") as ViewMode) || "grid";
+      return (localStorage.getItem("postsig_dashboard_view") as ViewMode) || "grid";
     }
     return "grid";
   });
@@ -269,7 +269,7 @@ export function DashboardContent({ companies, latestMetrics, secondaryMetrics = 
 
   function handleViewModeChange(mode: ViewMode) {
     setViewMode(mode);
-    localStorage.setItem("velvet_dashboard_view", mode);
+    localStorage.setItem("postsig_dashboard_view", mode);
     fetch("/api/user/preferences", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },

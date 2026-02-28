@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AuthCard } from "@/components/auth/auth-card";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-export const metadata: Metadata = { title: "Sign Up | Velvet" };
+export const metadata: Metadata = { title: "Sign Up | PostSig" };
 export const dynamic = "force-dynamic";
 
 type Props = {

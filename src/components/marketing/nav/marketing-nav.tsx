@@ -59,9 +59,9 @@ export function MarketingNav() {
             className="flex items-center gap-2 text-text-primary"
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-btn-primary-bg text-btn-primary-text text-sm font-bold">
-              V
+              P
             </span>
-            <span className="text-lg font-semibold">Velvet</span>
+            <span className="text-lg font-semibold">PostSig</span>
           </Link>
 
           {/* Center nav links — hidden on mobile */}

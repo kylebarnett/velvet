@@ -136,8 +136,8 @@ export async function POST(req: Request) {
           process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
         const fromDomain = process.env.RESEND_FROM_DOMAIN;
         const fromAddr = fromDomain
-          ? `Velvet <notifications@${fromDomain}>`
-          : "Velvet <onboarding@resend.dev>";
+          ? `PostSig <notifications@${fromDomain}>`
+          : "PostSig <onboarding@resend.dev>";
 
         const dueDateLine = dueDate
           ? `<p style="color: rgba(255,255,255,0.7); font-size: 14px; margin: 0 0 16px;">Due date: <strong style="color: #fff;">${escapeHtml(dueDate)}</strong></p>`

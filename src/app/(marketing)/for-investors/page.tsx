@@ -13,7 +13,7 @@ import { MockChatbot } from "@/components/marketing/mocks/mock-chatbot";
 import { MockFundPerformance } from "@/components/marketing/mocks/mock-fund-performance";
 
 export const metadata = {
-  title: "For Investors | Velvet",
+  title: "For Investors | PostSig",
   description:
     "Import your companies, request metrics from founders, and get a real-time view of your entire portfolio with AI insights and LP-ready reports.",
 };
@@ -23,7 +23,7 @@ const workflowSteps = [
     number: 1,
     title: "Import Your Portfolio",
     description:
-      "Add your portfolio companies via CSV upload or manual entry. Velvet deduplicates by founder email, so multiple investors can track the same company.",
+      "Add your portfolio companies via CSV upload or manual entry. PostSig deduplicates by founder email, so multiple investors can track the same company.",
     mock: (
       <MockWindow title="Portfolio">
         <MockCompanyCards />
@@ -85,7 +85,7 @@ export default function ForInvestorsPage() {
         mock={
           <AnimatedSection delay={0.3}>
             <GlowEffect>
-              <MockWindow title="Velvet">
+              <MockWindow title="PostSig">
                 <MockDashboard />
               </MockWindow>
             </GlowEffect>
@@ -104,7 +104,7 @@ export default function ForInvestorsPage() {
 
       <section className="mx-auto max-w-6xl px-6 py-20">
         <h2 className="text-center text-3xl font-bold text-text-primary">
-          How investors use Velvet
+          How investors use PostSig
         </h2>
         <p className="mt-3 mb-16 text-center text-text-secondary">
           Five steps to portfolio clarity

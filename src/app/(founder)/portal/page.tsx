@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Users, Clock, CheckCircle2 } from "lucide-react";
 import { requireRole } from "@/lib/auth/require-role";
 
-export const metadata: Metadata = { title: "Dashboard | Velvet" };
+export const metadata: Metadata = { title: "Dashboard | PostSig" };
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GettingStartedChecklist } from "@/components/ui/getting-started-checklist";

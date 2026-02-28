@@ -12,7 +12,7 @@
 | **Vestberry** | Investee Portal, ILPA/InvestEurope LP reports, deep in-platform analytics. |
 | **Chronograph** | $6T+ monitored. Template-free collection, real-time validation, Chrono AI. |
 
-Velvet shares the same foundational architecture as Standard Metrics (company-level submissions, multi-investor, founder-controlled access). Gaps are in friction reduction, data ingestion breadth, and polish.
+PostSig shares the same foundational architecture as Standard Metrics (company-level submissions, multi-investor, founder-controlled access). Gaps are in friction reduction, data ingestion breadth, and polish.
 
 ---
 
@@ -70,7 +70,7 @@ CREATE TABLE connected_integrations (
   refresh_token_encrypted text,
   token_expires_at timestamptz,
   config jsonb DEFAULT '{}', -- provider-specific: database_id, base_id, spreadsheet_id, etc.
-  field_mapping jsonb DEFAULT '{}', -- maps provider fields to Velvet metrics
+  field_mapping jsonb DEFAULT '{}', -- maps provider fields to PostSig metrics
   sync_schedule text DEFAULT 'manual', -- 'manual', 'daily', 'weekly', 'monthly'
   last_synced_at timestamptz,
   last_sync_error text,
@@ -213,13 +213,13 @@ CREATE TABLE magic_link_submissions (
 
 ### MCP Server (Forward-Looking)
 
-Build an MCP server that lets AI agents (Claude, etc.) query Velvet portfolio data conversationally. Matches Visible.vc and Standard Metrics offerings.
+Build an MCP server that lets AI agents (Claude, etc.) query PostSig portfolio data conversationally. Matches Visible.vc and Standard Metrics offerings.
 
 ---
 
 ## Competitive Feature Matrix
 
-| Feature | Velvet (Current) | Velvet (After Phases 1-4) | Visible | Standard Metrics |
+| Feature | PostSig (Current) | PostSig (After Phases 1-4) | Visible | Standard Metrics |
 |---|---|---|---|---|
 | Report-once architecture | Yes | Yes | No (per-investor) | Yes |
 | Multi-investor access | Yes | Yes | Yes | Yes |

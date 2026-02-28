@@ -369,13 +369,13 @@ function RunwayCard({
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (localStorage.getItem("velvet_runway_hidden") === "true") {
+    if (localStorage.getItem("postsig_runway_hidden") === "true") {
       setHidden(true);
     }
   }, []);
 
   function handleHide() {
-    localStorage.setItem("velvet_runway_hidden", "true");
+    localStorage.setItem("postsig_runway_hidden", "true");
     setHidden(true);
     fetch("/api/user/preferences", {
       method: "PUT",
@@ -385,7 +385,7 @@ function RunwayCard({
   }
 
   function handleShow() {
-    localStorage.removeItem("velvet_runway_hidden");
+    localStorage.removeItem("postsig_runway_hidden");
     setHidden(false);
     fetch("/api/user/preferences", {
       method: "PUT",

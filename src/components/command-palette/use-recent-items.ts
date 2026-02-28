@@ -11,7 +11,7 @@ export type RecentItem = {
   timestamp: number;
 };
 
-const STORAGE_KEY = "velvet:cmd-recent";
+const STORAGE_KEY = "postsig:cmd-recent";
 const MAX_ITEMS = 8;
 
 let listeners: Array<() => void> = [];

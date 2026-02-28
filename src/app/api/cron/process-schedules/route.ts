@@ -460,7 +460,7 @@ export async function POST(req: Request) {
     <a href="${baseUrl}/portal/requests" class="button">Submit Metrics</a>
 
     <div class="footer">
-      <p>Best,<br>The Velvet Team</p>
+      <p>Best,<br>The PostSig Team</p>
     </div>
   </div>
 </body>
@@ -468,7 +468,7 @@ export async function POST(req: Request) {
         `.trim();
 
         return {
-          from: "Velvet <onboarding@resend.dev>",
+          from: "PostSig <onboarding@resend.dev>",
           to: [founder.email],
           subject: `${investorName} requested your metrics`,
           html,

@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Link2, Check } from "lucide-react";
 
-const DEFAULT_URL = "velvet.app/r/q4-report";
+const DEFAULT_URL = "postsig.app/r/q4-report";
 
 export function ShareLinkScene({
   buttonText = "Share Report",

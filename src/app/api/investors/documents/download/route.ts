@@ -149,7 +149,7 @@ export async function GET(req: Request) {
   const zipBuffer = Buffer.concat(chunks);
 
   // Determine filename
-  let zipFilename = "velvet-documents";
+  let zipFilename = "postsig-documents";
   if (companyId && documents.length > 0) {
     const companyRaw = documents[0].companies;
     const company = unwrapJoin(companyRaw) as { name: string } | null;

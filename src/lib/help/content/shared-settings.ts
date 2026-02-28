@@ -62,7 +62,7 @@ export const sharedSettingsArticles: HelpArticle[] = [
         title: "Customize your theme and appearance",
         content:
           "The Appearance section lets you switch between light mode, dark mode, or match your system preference. Select your preferred theme and the change applies immediately. Your preference is saved to your account, so it syncs across all devices where you are logged in.",
-        tip: "The default theme is dark mode. If you select the system option, Velvet will automatically follow your operating system's light or dark setting.",
+        tip: "The default theme is dark mode. If you select the system option, PostSig will automatically follow your operating system's light or dark setting.",
       },
       {
         title: "Delete your account",

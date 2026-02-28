@@ -212,7 +212,7 @@ const registry: Record<HelpVisualKey, VisualEntry> = {
     component: ShareLinkDynamic,
     props: {
       buttonText: "Share Tear Sheet",
-      url: "velvet.app/ts/q4-summary",
+      url: "postsig.app/ts/q4-summary",
     },
   },
   "drag-drop": {

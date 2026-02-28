@@ -139,18 +139,37 @@ export function NewConversationModal({
         } = await supabase.auth.getUser();
         if (!user || cancelled) return;
 
-        // Fetch org members
-        const { data: orgMembers, error: orgError } = await supabase
+        // Fetch org member user_ids
+        const { data: orgRows, error: orgError } = await supabase
           .from("organization_members")
-          .select(
-            "user_id, users!inner(id, full_name, email, avatar_url)",
-          )
+          .select("user_id")
           .eq("organization_id", orgId);
 
         if (orgError) {
           logger.error("Failed to fetch org members:", orgError);
           return;
         }
+
+        const memberUserIds = (orgRows ?? []).map((r) => r.user_id);
+        if (memberUserIds.length === 0) {
+          setMembers([]);
+          return;
+        }
+
+        // Fetch user info from public.users
+        const { data: usersData, error: usersError } = await supabase
+          .from("users")
+          .select("id, full_name, email, avatar_url")
+          .in("id", memberUserIds);
+
+        if (usersError) {
+          logger.error("Failed to fetch user info:", usersError);
+          return;
+        }
+
+        const usersMap = new Map(
+          (usersData ?? []).map((u) => [u.id, u]),
+        );
 
         // Fetch favorites
         const { data: favs } = await supabase
@@ -165,15 +184,15 @@ export function NewConversationModal({
         if (cancelled) return;
 
         // Map to MemberInfo, filtering out current user
-        const mapped: MemberInfo[] = (orgMembers ?? [])
-          .map((m) => {
-            const u = Array.isArray(m.users) ? m.users[0] : m.users;
+        const mapped: MemberInfo[] = memberUserIds
+          .map((uid) => {
+            const u = usersMap.get(uid);
             return {
-              userId: m.user_id,
+              userId: uid,
               fullName: u?.full_name ?? null,
               email: u?.email ?? "",
               avatarUrl: u?.avatar_url ?? null,
-              isFavorite: favoriteIds.has(m.user_id),
+              isFavorite: favoriteIds.has(uid),
             };
           })
           .filter((m) => m.userId !== user.id);
@@ -323,7 +342,7 @@ export function NewConversationModal({
       {/* Modal */}
       <div
         ref={modalRef}
-        className="relative z-[60] w-full max-w-md rounded-xl border border-white/10 bg-zinc-900 p-6"
+        className="relative z-[60] w-full max-w-md rounded-xl border border-border-default bg-bg-primary p-6 shadow-xl"
       >
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
@@ -450,7 +469,7 @@ export function NewConversationModal({
                         )}
                         <span
                           className={cn(
-                            "absolute bottom-0 right-0 h-2 w-2 rounded-full border-[1.5px] border-zinc-900",
+                            "absolute bottom-0 right-0 h-2 w-2 rounded-full border-[1.5px] border-[var(--bg-primary)]",
                             online ? "bg-emerald-400" : "bg-text-muted/40",
                           )}
                           aria-label={online ? "Online" : "Offline"}

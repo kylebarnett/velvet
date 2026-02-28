@@ -61,9 +61,9 @@ export function MockSidebar() {
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-4 py-4">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-xs font-bold text-white">
-          V
+          P
         </div>
-        <span className="text-sm font-semibold text-text-primary">Velvet</span>
+        <span className="text-sm font-semibold text-text-primary">PostSig</span>
       </div>
 
       {/* Navigation */}

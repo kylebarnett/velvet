@@ -125,9 +125,9 @@ export async function POST(req: Request) {
   <div class="container">
     <p>Hi ${escapeHtml(invitation.first_name)},</p>
 
-    <p><strong>${escapeHtml(investorName)}</strong> has added your company <strong>${escapeHtml(companyName)}</strong> to their portfolio on Velvet.</p>
+    <p><strong>${escapeHtml(investorName)}</strong> has added your company <strong>${escapeHtml(companyName)}</strong> to their portfolio on PostSig.</p>
 
-    <p>Velvet is a platform that helps founders share metrics with their investors efficiently.</p>
+    <p>PostSig is a platform that helps founders share metrics with their investors efficiently.</p>
 
     <p>Click below to create your account and get started:</p>
 
@@ -137,7 +137,7 @@ export async function POST(req: Request) {
 
     <div class="footer">
       <p>If you have questions, reply to this email.</p>
-      <p>Best,<br>The Velvet Team</p>
+      <p>Best,<br>The PostSig Team</p>
     </div>
   </div>
 </body>
@@ -162,8 +162,8 @@ export async function POST(req: Request) {
   const successfulIds: string[] = [];
   const fromDomain = process.env.RESEND_FROM_DOMAIN;
   const fromAddr = fromDomain
-    ? `Velvet <notifications@${fromDomain}>`
-    : "Velvet <onboarding@resend.dev>";
+    ? `PostSig <notifications@${fromDomain}>`
+    : "PostSig <onboarding@resend.dev>";
 
   if (!apiKey) {
     // No API key, just log and mark all as sent
@@ -179,7 +179,7 @@ export async function POST(req: Request) {
       const batchPayload = batch.map((email) => ({
         from: fromAddr,
         to: [email.email],
-        subject: `You've been invited to Velvet by ${investorName}`,
+        subject: `You've been invited to PostSig by ${investorName}`,
         html: email.html,
       }));
 

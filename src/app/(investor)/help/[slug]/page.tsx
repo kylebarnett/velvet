@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { HelpArticlePage } from "@/components/help/help-article-page";
 
-export const metadata: Metadata = { title: "Help | Velvet" };
+export const metadata: Metadata = { title: "Help | PostSig" };
 
 export default async function InvestorHelpArticlePage({
   params,

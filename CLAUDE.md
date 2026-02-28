@@ -1,8 +1,8 @@
-# Velvet - Project Conventions
+# PostSig - Project Conventions
 
 ## Overview
 
-Velvet is a portfolio metrics platform connecting investors with founders. Investors import portfolio companies, invite founders, and request metrics. Founders submit metrics and upload documents.
+PostSig is a portfolio metrics platform connecting investors with founders. Investors import portfolio companies, invite founders, and request metrics. Founders submit metrics and upload documents.
 
 ## Tech Stack
 

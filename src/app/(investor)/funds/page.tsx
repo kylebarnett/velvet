@@ -3,7 +3,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { LPReportsClient } from "@/components/lp/lp-reports-client";
 
-export const metadata: Metadata = { title: "LP Reports | Velvet" };
+export const metadata: Metadata = { title: "LP Reports | PostSig" };
 export const dynamic = "force-dynamic";
 
 export default async function LPReportsPage() {

@@ -164,7 +164,7 @@ export const investorMetricRequestsArticles: HelpArticle[] = [
       {
         title: "Create the schedule",
         content:
-          "Review the schedule summary and click \"Create Schedule\" to activate it. Velvet will automatically send metric requests to the selected companies on the configured dates. You will see each generated request appear on the Metric Requests page when it is sent.",
+          "Review the schedule summary and click \"Create Schedule\" to activate it. PostSig will automatically send metric requests to the selected companies on the configured dates. You will see each generated request appear on the Metric Requests page when it is sent.",
         warning:
           "Schedules only send to companies where you have approved access. If a founder denies access after the schedule is created, they will be automatically skipped.",
       },
@@ -214,7 +214,7 @@ export const investorMetricRequestsArticles: HelpArticle[] = [
       {
         title: "Read value formatting",
         content:
-          "Velvet automatically formats metric values based on the metric type. Revenue, MRR, and Burn Rate display as currency (e.g., $1,250,000). Churn Rate and margins display as percentages (e.g., 5.2%). Headcount and other count metrics display as plain numbers.",
+          "PostSig automatically formats metric values based on the metric type. Revenue, MRR, and Burn Rate display as currency (e.g., $1,250,000). Churn Rate and margins display as percentages (e.g., 5.2%). Headcount and other count metrics display as plain numbers.",
         tip: "Burn Rate is always displayed as currency, never as a percentage, even though it contains the word \"rate.\" This is by design.",
       },
       {

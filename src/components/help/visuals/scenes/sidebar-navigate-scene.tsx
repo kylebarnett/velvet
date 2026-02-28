@@ -55,10 +55,10 @@ export function SidebarNavigateScene() {
         {/* Brand */}
         <div className="flex items-center gap-2 border-b border-border-subtle px-3 py-2.5">
           <div className="flex h-5 w-5 items-center justify-center rounded bg-accent text-[8px] font-bold text-white">
-            V
+            P
           </div>
           <span className="text-xs font-semibold text-text-primary">
-            Velvet
+            PostSig
           </span>
         </div>
 

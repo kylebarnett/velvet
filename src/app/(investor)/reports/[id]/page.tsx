@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { requireRole } from "@/lib/auth/require-role";
 
-export const metadata: Metadata = { title: "Report Editor | Velvet" };
+export const metadata: Metadata = { title: "Report Editor | PostSig" };
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ReportEditor } from "@/components/reports/report-editor";
 import type { SavedReport } from "@/components/reports/reports-context";

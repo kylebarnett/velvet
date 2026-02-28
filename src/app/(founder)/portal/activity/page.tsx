@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ActivityClient } from "@/components/founder/activity/activity-client";
 
-export const metadata: Metadata = { title: "Activity Log | Velvet" };
+export const metadata: Metadata = { title: "Activity Log | PostSig" };
 
 export default function ActivityPage() {
   return (

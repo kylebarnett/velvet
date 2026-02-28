@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import dynamic from "next/dynamic";
 
-export const metadata: Metadata = { title: "Schedule Detail | Velvet" };
+export const metadata: Metadata = { title: "Schedule Detail | PostSig" };
 import { ArrowLeft, Play, Pause, Edit, Trash2, Calendar, Clock, Building2, Bell } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 

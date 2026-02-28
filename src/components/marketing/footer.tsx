@@ -20,9 +20,9 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2 text-text-primary">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-btn-primary-bg text-btn-primary-text text-sm font-bold">
-                V
+                P
               </span>
-              <span className="text-lg font-semibold">Velvet</span>
+              <span className="text-lg font-semibold">PostSig</span>
             </div>
             <p className="mt-3 text-sm text-text-secondary">
               Portfolio metrics, connected.
@@ -73,7 +73,7 @@ export function Footer() {
       <div className="border-t border-border-default">
         <div className="mx-auto max-w-6xl px-6 py-6">
           <p className="text-xs text-text-muted">
-            &copy; 2026 Velvet. All rights reserved.
+            &copy; 2026 PostSig. All rights reserved.
           </p>
         </div>
       </div>

@@ -174,14 +174,14 @@ export async function POST(
 <body>
   <div class="container">
     <p>Hi,</p>
-    <p><strong>${escapeHtml(inviterName)}</strong> has invited you to join <strong>${escapeHtml(orgName)}</strong> on Velvet as a <strong>${escapeHtml(role)}</strong>.</p>
-    <p>Velvet is a platform that helps teams manage portfolio metrics efficiently.</p>
+    <p><strong>${escapeHtml(inviterName)}</strong> has invited you to join <strong>${escapeHtml(orgName)}</strong> on PostSig as a <strong>${escapeHtml(role)}</strong>.</p>
+    <p>PostSig is a platform that helps teams manage portfolio metrics efficiently.</p>
     <p>Click below to accept the invitation:</p>
     <a href="${inviteUrl}" class="button">Accept Invitation</a>
     <p>Or copy this link: ${inviteUrl}</p>
     <div class="footer">
       <p>If you have questions, reply to this email.</p>
-      <p>Best,<br>The Velvet Team</p>
+      <p>Best,<br>The PostSig Team</p>
     </div>
   </div>
 </body>
@@ -190,15 +190,15 @@ export async function POST(
   const apiKey = process.env.RESEND_API_KEY;
   const fromDomain = process.env.RESEND_FROM_DOMAIN;
   const fromAddr = fromDomain
-    ? `Velvet <notifications@${fromDomain}>`
-    : "Velvet <onboarding@resend.dev>";
+    ? `PostSig <notifications@${fromDomain}>`
+    : "PostSig <onboarding@resend.dev>";
 
   if (apiKey) {
     await sendEmailBatchWithRetry(apiKey, [
       {
         from: fromAddr,
         to: [email],
-        subject: `You've been invited to join ${orgName} on Velvet`,
+        subject: `You've been invited to join ${orgName} on PostSig`,
         html,
       },
     ]);

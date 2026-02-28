@@ -6,7 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { UploadPageClient } from "@/components/historical-upload/upload-page-client";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
-export const metadata: Metadata = { title: "Import Data | Velvet" };
+export const metadata: Metadata = { title: "Import Data | PostSig" };
 export const dynamic = "force-dynamic";
 
 export default async function HistoricalUploadPage({
